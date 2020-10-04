@@ -1,0 +1,22 @@
+{
+  "name": "The Golden Goose",
+  "description": "Loot and inventory management for Goosefleet.",
+  "image": "heroku/python",
+  "repository": "https://github.com/GROON-Echoes-Dev-Team/goldengoose",
+  "keywords": ["python", "django" ],
+  "addons": [ "heroku-postgresql" ],
+  "env": {
+    "SECRET_KEY": {
+      "description": "The secret key for the Django application.",
+      "generator": "secret"
+    }
+  },
+  "environments": {
+    "test": {
+      "scripts": {
+        "test-setup": "python manage.py collectstatic --noinput",
+        "test": "python manage.py test"
+      }
+    }
+  }
+}
