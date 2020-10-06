@@ -2,4 +2,4 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-gunicorn goosetools.wsgi
+gunicorn -c /opt/goosetools/gunicorn_config.py goosetools.wsgi
