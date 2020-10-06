@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 import environ
@@ -17,7 +17,7 @@ import environ
 env = environ.Env(
     # set casting, default value
     DEBUG=(bool, False),
-    USE_X_FORWARDED_HOST=(bool,False),
+    USE_X_FORWARDED_HOST=(bool, False),
     USE_HTTPS=(bool, False),
 )
 # reading .env file
@@ -52,6 +52,9 @@ if env('USE_HTTPS'):
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
+else:
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 
 # Application definition
 
@@ -62,8 +65,37 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'loottracker'
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'loottracker',
+    'allauth.socialaccount.providers.discord',
+    'bootstrap4'
 ]
+SITE_ID = 2
+SOCIALACCOUNT_PROVIDERS = {
+    'discord': {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        'SCOPE': [
+            'identify'
+        ]
+    }
+}
+ACCOUNT_EMAIL_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = "username"
+SOCIALACCOUNT_AUTO_SIGNUP = True
+ACCOUNT_FORMS = {
+    'add_email': 'goosetools.forms.AddEmailForm',
+    'change_password': 'goosetools.forms.ChangePasswordForm',
+    'set_password': 'goosetools.forms.SetPasswordForm',
+    'reset_password': 'goosetools.forms.ResetPasswordForm',
+}
+ACCOUNT_ADAPTER = "goosetools.adapters.AccountAdapter"
+SOCIALACCOUNT_ADAPTER = "goosetools.adapters.SocialAccountAdapter"
+LOGIN_REDIRECT_URL = 'home'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -80,7 +112,8 @@ ROOT_URLCONF = 'goosetools.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'),
+                 os.path.join(BASE_DIR, 'templates', 'allauth')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -91,6 +124,14 @@ TEMPLATES = [
             ],
         },
     },
+]
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+
+    # `allauth` specific authentication methods, such as login by e-mail
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 WSGI_APPLICATION = 'goosetools.wsgi.application'
@@ -131,4 +172,3 @@ USE_TZ = True
 
 STATIC_ROOT = env('STATIC_ROOT')
 STATIC_URL = '/static/'
-

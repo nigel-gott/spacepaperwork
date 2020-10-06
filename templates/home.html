@@ -1,0 +1,10 @@
+{% load socialaccount %}
+{% load bootstrap4 %}
+
+<h1>Django Allauth Tutorial</h1>
+{% if user.is_authenticated %}
+<p>Welcome {{ user.username }} !!!</p>
+<a href="{% url 'account_logout' %}">Logout</a>
+{% else %}
+<a href="{% provider_login_url 'discord' %}">Login using Discord</a>
+{% endif %}
