@@ -71,7 +71,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'loottracker',
     'allauth.socialaccount.providers.discord',
-    'bootstrap4'
 ]
 SITE_ID = 2
 SOCIALACCOUNT_PROVIDERS = {
