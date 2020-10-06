@@ -17,7 +17,8 @@ import environ
 env = environ.Env(
     # set casting, default value
     DEBUG=(bool, False),
-    USE_X_FORWARDED_HOST=(bool,False)
+    USE_X_FORWARDED_HOST=(bool,False),
+    USE_HTTPS=(bool, False),
 )
 # reading .env file
 environ.Env.read_env()
@@ -44,8 +45,13 @@ DATABASES = {
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-USE_X_FORWARDED_HOST = env('USE_X_FORWARDED_HOST')
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
+if env('USE_HTTPS'):
+    USE_X_FORWARDED_HOST = env('USE_X_FORWARDED_HOST')
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 # Application definition
 
