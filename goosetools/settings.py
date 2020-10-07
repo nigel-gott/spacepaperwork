@@ -11,8 +11,11 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
 from pathlib import Path
+from moneyed.localization import _FORMATTER
+from decimal import ROUND_HALF_EVEN
 
 import environ
+import moneyed
 
 env = environ.Env(
     # set casting, default value
@@ -69,10 +72,12 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'loottracker',
+    'django_extensions',
+    'djmoney',
+    'core',
     'allauth.socialaccount.providers.discord',
 ]
-SITE_ID = 2
+SITE_ID = 3
 SOCIALACCOUNT_PROVIDERS = {
     'discord': {
         # For each OAuth based provider, either add a ``SocialApp``
@@ -171,3 +176,27 @@ USE_TZ = True
 
 STATIC_ROOT = env('STATIC_ROOT')
 STATIC_URL = '/static/'
+
+EEI = moneyed.add_currency(
+    code='EEI',
+    numeric='068',
+    name='Eve Echoes ISK',
+    countries=('CHINA',)
+)
+
+# Currency Formatter will output 2.000,00 Bs.
+_FORMATTER.add_sign_definition(
+    'default',
+    EEI,
+    prefix=u'ISK. '
+)
+
+_FORMATTER.add_formatting_definition(
+    'es_BO',
+    group_size=3, group_separator=",", decimal_point=".",
+    positive_sign="", trailing_positive_sign="",
+    negative_sign="-", trailing_negative_sign="",
+    rounding_method=ROUND_HALF_EVEN
+)
+
+CURRENCIES = ['EEI']
