@@ -1,0 +1,26 @@
+{% load static %}
+{% load socialaccount %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Goosetools</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="{% static 'core/css/materialize.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+<nav>
+    <div class="nav-wrapper blue-grey darken-3">
+        <a href="#" class="brand-logo center">GooseTools</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            {% if user.is_authenticated %}
+            <li><a href="{% url 'account_logout' %}">Logout</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+{% block content %}
+{% endblock %}
+<script type="text/javascript" src="{% static 'core/js/materialize.js' %}"></script>
+</body>
+</html>
