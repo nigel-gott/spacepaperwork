@@ -1,26 +1,38 @@
 {% load static %}
 {% load socialaccount %}
+{% load i18n %}
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Goosetools</title>
+    <title>{% block title %}GooseTools{% endblock %}</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link type="text/css" rel="stylesheet" href="{% static 'core/css/materialize.css' %}">
+    <link type="text/css" rel="stylesheet" href="{% static 'core/css/custom.css' %}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 <body>
 <nav>
     <div class="nav-wrapper blue-grey darken-3">
         <a href="#" class="brand-logo center">GooseTools</a>
-        <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <ul id="nav-mobile" class="left hide-on-med-and-down">
             {% if user.is_authenticated %}
-            <li><a href="{% url 'account_logout' %}">Logout</a></li>
+            <form method="post" action="{% url 'account_logout' %}">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <button class="waves-effect waves-light btn" type="submit">{% trans 'Logout' %}</button>
+            </form>
+            {% else %}
+            <li><a class="waves-effect waves-light btn" href="{% provider_login_url 'discord' %}">Login</a></li>
             {% endif %}
         </ul>
     </div>
 </nav>
-{% block content %}
+<div class="container">
+{% block body %}
 {% endblock %}
+</div>
 <script type="text/javascript" src="{% static 'core/js/materialize.js' %}"></script>
 </body>
 </html>
