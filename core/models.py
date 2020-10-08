@@ -68,8 +68,12 @@ class Fleet(models.Model):
     name = models.TextField()
     fleet_type = models.ForeignKey(FleetType, on_delete=models.CASCADE)
     start = models.DateTimeField()
+    end = models.DateTimeField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     location = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return str(self.name)
 
 
 class FleetMember(models.Model):

@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'django_extensions',
     'djmoney',
+    'materializecssform',
     'core',
     'allauth.socialaccount.providers.discord',
 ]

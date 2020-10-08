@@ -1,0 +1,10 @@
+{% extends "core/base.html" %}
+{% load materializecss %}
+{% block body %}
+
+  <form action="" method="post">
+    {% csrf_token %}
+      {{ form|materializecss }}
+    <input type="submit" value="Submit">
+  </form>
+{% endblock %}

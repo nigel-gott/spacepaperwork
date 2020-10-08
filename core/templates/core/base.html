@@ -11,10 +11,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 <body>
-<nav>
-    <div class="nav-wrapper blue-grey darken-3">
-        <a href="#" class="brand-logo center">GooseTools</a>
-        <ul id="nav-mobile" class="left hide-on-med-and-down">
+<nav class="nav-extended blue-grey darken-3">
+    <div class="nav-wrapper ">
+        <a href="#" class="brand-logo">⚙ GooseTools </a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
             {% if user.is_authenticated %}
             <form method="post" action="{% url 'account_logout' %}">
                 {% csrf_token %}
@@ -28,11 +28,36 @@
             {% endif %}
         </ul>
     </div>
+    <div class="nav-content">
+        <ul class="tabs tabs-transparent">
+            <li class="tab"><a href="#test2">Your Characters</a></li>
+            <li class="tab"><a class="active" href="#test2">Fleets</a></li>
+            <li class="tab disabled"><a href="#test1" class="disabled">Loot Tracker</a></li>
+            <li class="tab disabled"><a href="#test1">Market Place</a></li>
+            <li class="tab disabled"><a href="#test3">Skill Planner</a></li>
+            <li class="tab disabled"><a href="#test4">Inventory Tracker</a></li>
+        </ul>
+    </div>
 </nav>
 <div class="container">
-{% block body %}
-{% endblock %}
+    {% block body %}
+    {% endblock %}
 </div>
 <script type="text/javascript" src="{% static 'core/js/materialize.js' %}"></script>
+
+<script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+
+<script>
+$(document).ready(function(){
+
+  // Initialize materialize data picker
+  $('.datepicker').datepicker({'format': 'yyyy-mm-dd'});
+  $('select').formSelect();
+
+});
+</script>
 </body>
 </html>
