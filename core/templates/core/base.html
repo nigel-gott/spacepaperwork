@@ -28,6 +28,7 @@
             {% endif %}
         </ul>
     </div>
+    {% if user.is_authenticated %}
     <div class="nav-content">
         <ul class="tabs tabs-transparent">
             <li class="tab"><a href="#test2">Your Characters</a></li>
@@ -38,10 +39,13 @@
             <li class="tab disabled"><a href="#test4">Inventory Tracker</a></li>
         </ul>
     </div>
+    {% endif %}
 </nav>
 <div class="container">
-    {% block body %}
-    {% endblock %}
+    {% if user.is_authenticated %}
+        {% block body %}
+        {% endblock %}
+    {% endif %}
 </div>
 <script type="text/javascript" src="{% static 'core/js/materialize.js' %}"></script>
 

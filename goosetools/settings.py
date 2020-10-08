@@ -100,7 +100,7 @@ ACCOUNT_FORMS = {
 }
 ACCOUNT_ADAPTER = "goosetools.adapters.AccountAdapter"
 SOCIALACCOUNT_ADAPTER = "goosetools.adapters.SocialAccountAdapter"
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'fleet'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
