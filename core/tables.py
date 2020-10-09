@@ -5,4 +5,4 @@ from .models import Fleet
 class FleetTable(tables.Table):
     class Meta:
         model = Fleet
-        fields = ("fc", "name", "fleet_type", "start")
+        exclude = ("id", )

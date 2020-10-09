@@ -1,10 +1,10 @@
 from django.urls import path
 
-from .views import fleet, FleetUpdateView, FleetDeleteView, SettingsView, fleet_create, FleetListView
+from .views import fleet, FleetUpdateView, FleetDeleteView, SettingsView, fleet_create
 
 urlpatterns = [
-    path('', FleetListView.as_view(), name='home'),
-    path('fleets/', FleetListView.as_view(), name='fleet'),
+    path('', fleet, name='home'),
+    path('fleets/', fleet, name='fleet'),
     path('settings/', SettingsView.as_view(), name='settings'),
     path('fleet/create/', fleet_create, name='fleet_create'),
     path('fleet/<int:pk>/update/', FleetUpdateView.as_view(), name='fleet_update'),

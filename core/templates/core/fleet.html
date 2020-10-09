@@ -2,9 +2,22 @@
 {% load render_table from django_tables2 %}
 
 {% block body %}
+<h4>Active Fleets</h4>
 <div class="section">
     <a class="waves-effect waves-light btn" href="{% url 'fleet_create' %}">Start New Fleet</a>
-    {% render_table table %}
+    {% render_table active %}
+</div>
+<h4>Future Fleets</h4>
+<div class="section">
+    {% render_table future %}
+</div>
+<h4>Old Fleets</h4>
+<div class="section">
+    {% render_table old %}
+</div>
+<h4>Zombie Fleets</h4>
+<div class="section">
+    {% render_table zombie %}
 </div>
 
 {% endblock %}

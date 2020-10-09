@@ -39,15 +39,17 @@ def fleet(request):
         Q(start__gte=now_minus_24_hours) & Q(start__lte=now) & (Q(end__gt=now) | Q(end__isnull=True))).order_by(
         '-start')
     zombie_fleets = Fleet.objects.filter(
-        Q(start__lt=now_minus_24_hours) & (Q(end__gt=now) | Q(end__isnull=True))).order_by('-start')
-    context = {'active_fleets': active_fleets, 'zombie_fleets': zombie_fleets}
+        Q(start__lte=now_minus_24_hours) & (Q(end__gt=now) | Q(end__isnull=True))).order_by('-start')
+    old_fleets = Fleet.objects.filter(Q(end__lte=now)).order_by('-start')
+    future_fleets = Fleet.objects.filter(
+        Q(start__gt=now))
+    active_table = FleetTable(active_fleets)
+    zombie_table = FleetTable(zombie_fleets)
+    old_table = FleetTable(old_fleets)
+    future_table = FleetTable(future_fleets)
+    context = {'active': active_table, 'zombie': zombie_table, 'old': old_table,
+               'future': future_table}
     return render(request, 'core/fleet.html', context)
-
-
-class FleetListView(SingleTableView):
-    model = Fleet
-    template_name = "core/fleet.html"
-    table_class = FleetTable
 
 
 @login_required(login_url='/accounts/discord/login/')
