@@ -1,9 +1,9 @@
-import pytz
-
-from django.utils import timezone
-
-from django.contrib import auth
 import logging
+import sys
+
+import pytz
+from django.contrib import auth
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -14,9 +14,14 @@ class TimezoneMiddleware:
 
     def __call__(self, request):
         user = auth.get_user(request)
-        tzname = user.timezone
+        if hasattr(user, 'timezone'):
+            tzname = user.timezone
+        else:
+            tzname = pytz.timezone('UTC')
         if tzname:
             timezone.activate(tzname)
         else:
             timezone.deactivate()
+        print(f"timezone = {timezone.now()}", file=sys.stderr)
         return self.get_response(request)
+

@@ -16,7 +16,8 @@ class SignupFormWithTimezone(SignupForm):
 
 
 class FleetForm(forms.Form):
-    name = forms.CharField(widget=forms.TextInput())
+    fc = forms.ModelChoiceField(queryset=GooseUser.objects.all(), initial=0)
+    name = forms.CharField(max_length=100)
     fleet_type = forms.ModelChoiceField(queryset=FleetType.objects.all(), initial=0)
     start_date = forms.DateField(
         widget=forms.DateInput(attrs={
