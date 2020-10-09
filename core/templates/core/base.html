@@ -15,7 +15,7 @@
 <nav class="nav-extended blue-grey darken-3">
     <div class="nav-wrapper ">
         <a href="#" class="brand-logo center">⚙ GooseTools </a>
-        <ul id="nav-mobile" class="left hide-on-med-and-down">
+        <ul id="nav-mobile" class="left">
             {% if user.is_authenticated %}
             <form method="post" action="{% url 'account_logout' %}">
                 {% csrf_token %}
@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var instances = M.Datepicker.init(elems);
     var elems = document.querySelectorAll('.timepicker');
     var instances = M.Timepicker.init(elems);
-      var instance = M.Tabs.init(el);
 });
 
 

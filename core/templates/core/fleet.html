@@ -2,11 +2,13 @@
 {% load socialaccount %}
 
 {% block body %}
+<div class="section">
 <a class="waves-effect waves-light btn" href="{% url 'fleet_create' %}">Start New Fleet</a>
 <ul>
 {% for fleet in active_fleets %}
         <li>{{fleet.name}}</li>
 {% endfor %}
 </ul>
+</div>
 
 {% endblock %}

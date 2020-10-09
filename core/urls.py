@@ -3,6 +3,7 @@ from django.urls import path, include
 from .views import fleet, FleetCreateView, FleetUpdateView, FleetDeleteView, SettingsView
 
 urlpatterns = [
+    path('', fleet, name='index'),
     path('fleets/', fleet, name='fleet'),
     path('settings/', SettingsView.as_view(), name='settings'),
     path('fleet/create/', FleetCreateView.as_view(), name='fleet_create'),

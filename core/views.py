@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -12,11 +13,12 @@ from core.forms import FleetForm, SettingsForm
 from core.models import Fleet, GooseUser
 
 
-class SettingsView(LoginRequiredMixin, UpdateView):
+class SettingsView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     template_name = 'core/settings.html'
     model = GooseUser
     form_class = SettingsForm
     success_url = '.'
+    success_message = 'Settings saved!'
 
     def get_object(self, **kwargs):
         return get_object_or_404(GooseUser, pk=self.request.user.id)

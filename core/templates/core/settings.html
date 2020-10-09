@@ -1,9 +1,20 @@
 {% extends "core/base.html" %}
 
 {% block body %}
-<div class="row">
-    <!-- Display Form -->
-    <form action="" method="post" class="col s12">
+<div class="section">
+    <h5>Change your Settings</h5>
+</div>
+<div class="divider"></div>
+{% if messages %}
+<div class="section">
+    {% for m in messages %}
+    <span class="light-green-text"><b>{{ m }}</b></span>
+    {% endfor %}
+</div>
+<div class="divider"></div>
+{% endif %}
+<div class="section">
+    <form action="" method="post">
         {% csrf_token %}
         {% for field in form %}
         <div class="row">
@@ -18,7 +29,9 @@
         </div>
 
         {% endfor %}
-        <input type="submit" value="Submit">
+        <button type="submit" class="btn waves-effect waves-light" value="Submit">Submit
+            <i class="material-icons right">send</i>
+        </button>
     </form>
 </div>
 
