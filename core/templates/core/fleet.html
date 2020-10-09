@@ -1,14 +1,10 @@
 {% extends "core/base.html" %}
-{% load socialaccount %}
+{% load render_table from django_tables2 %}
 
 {% block body %}
 <div class="section">
-<a class="waves-effect waves-light btn" href="{% url 'fleet_create' %}">Start New Fleet</a>
-<ul>
-{% for fleet in active_fleets %}
-        <li>{{fleet.name}}</li>
-{% endfor %}
-</ul>
+    <a class="waves-effect waves-light btn" href="{% url 'fleet_create' %}">Start New Fleet</a>
+    {% render_table table %}
 </div>
 
 {% endblock %}

@@ -1,37 +1,42 @@
 {% extends "core/base.html" %}
 {% block body %}
-
-{% if form %}
-<!-- Form Errors -->
-{% if form.errors %}
-<ul class="errors">
-    {% for error in form.errors %}
-    <li>{{ error }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-
-<div class="row">
-    <!-- Display Form -->
-    <form action="" method="post" class="col s12">
-        {% csrf_token %}
-        {% for field in form %}
-        <div class="row">
-            <div class="input-field col s12">
-                {{ field.errors }}
-                {{ field }}
-                {{ field.label_tag }}
-                {% if field.help_text %}
-                <p class="help">{{ field.help_text|safe }}</p>
-                {% endif %}
-            </div>
-        </div>
-
+<h4>Start a New Fleet</h4>
+<div class="divider"></div>
+<div class="section">
+    {% if form %}
+    <!-- Form Errors -->
+    {% if form.errors %}
+    <ul class="errors">
+        {% for error in form.errors %}
+        <li>{{ error }}</li>
         {% endfor %}
-        <input type="submit" value="Submit">
-    </form>
+    </ul>
+    {% endif %}
+
+    <div class="row">
+        <!-- Display Form -->
+        <form action="" method="post" class="col s12">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="row">
+                <div class="input-field col s12">
+                    {{ field.errors }}
+                    {{ field }}
+                    {{ field.label_tag }}
+                    {% if field.help_text %}
+                    <p class="help">{{ field.help_text|safe }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% endfor %}
+            <button type="submit" class="btn waves-effect waves-light" value="Submit">Start
+                <i class="material-icons right">send</i>
+            </button>
+        </form>
+    </div>
+    {% endif %}
 </div>
-{% endif %}
 
 
 {% endblock %}

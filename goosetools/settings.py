@@ -83,6 +83,9 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.discord',
     'debug_toolbar',
     'django_activeurl',
+    'django_tables2',
+    'django_filters',
+
 ]
 SITE_ID = 3
 SOCIALACCOUNT_PROVIDERS = {

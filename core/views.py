@@ -9,11 +9,15 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
+from django.views.generic import ListView
 from django.views.generic.edit import FormView, UpdateView, DeleteView
 
 # Create your views here.
+from django_tables2 import SingleTableView
+
 from core.forms import FleetForm, SettingsForm
 from core.models import Fleet, GooseUser
+from core.tables import FleetTable
 
 
 class SettingsView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
@@ -38,6 +42,12 @@ def fleet(request):
         Q(start__lt=now_minus_24_hours) & (Q(end__gt=now) | Q(end__isnull=True))).order_by('-start')
     context = {'active_fleets': active_fleets, 'zombie_fleets': zombie_fleets}
     return render(request, 'core/fleet.html', context)
+
+
+class FleetListView(SingleTableView):
+    model = Fleet
+    template_name = "core/fleet.html"
+    table_class = FleetTable
 
 
 @login_required(login_url='/accounts/discord/login/')
