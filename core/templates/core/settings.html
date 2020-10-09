@@ -1,20 +1,6 @@
 {% extends "core/base.html" %}
+
 {% block body %}
-
-<p> what</p>
-
-{% if form %}
-<!-- Form Errors -->
-{% if form.errors %}
-<ul class="errors">
-    {% for error in form.errors %}
-    <li>{{ error }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-
-It is {% now "jS F Y H:i" %}
-
 <div class="row">
     <!-- Display Form -->
     <form action="" method="post" class="col s12">
@@ -35,7 +21,5 @@ It is {% now "jS F Y H:i" %}
         <input type="submit" value="Submit">
     </form>
 </div>
-{% endif %}
-
 
 {% endblock %}

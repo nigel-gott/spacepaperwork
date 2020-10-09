@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
 from pathlib import Path
+
+import pytz
+import requests
+from django.utils import timezone
 from moneyed.localization import _FORMATTER
 from decimal import ROUND_HALF_EVEN
 
@@ -74,9 +78,11 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'django_extensions',
     'djmoney',
-    'materializecssform',
+    'timezone_field',
     'core',
     'allauth.socialaccount.providers.discord',
+    'debug_toolbar',
+    'django_activeurl',
 ]
 SITE_ID = 3
 SOCIALACCOUNT_PROVIDERS = {
@@ -89,9 +95,11 @@ SOCIALACCOUNT_PROVIDERS = {
         ]
     }
 }
+SOCIALACCOUNT_FORMS = {'signup': 'core.forms.SignupFormWithTimezone'}
+AUTH_USER_MODEL = 'core.GooseUser'
 ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = "username"
-SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_AUTO_SIGNUP = False
 ACCOUNT_FORMS = {
     'add_email': 'goosetools.forms.AddEmailForm',
     'change_password': 'goosetools.forms.ChangePasswordForm',
@@ -110,6 +118,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'core.middleware.TimezoneMiddleware',
+]
+
+
+INTERNAL_IPS = [
+    '127.0.0.1',
 ]
 
 ROOT_URLCONF = 'goosetools.urls'
@@ -201,3 +216,24 @@ _FORMATTER.add_formatting_definition(
 )
 
 CURRENCIES = ['EEI']
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': False,
+        },
+    },
+}

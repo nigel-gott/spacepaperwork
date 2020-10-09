@@ -7,16 +7,12 @@ from django.utils.translation import gettext_lazy as _
 from djmoney.models.fields import MoneyField
 from django.contrib import admin
 
+from django.contrib.auth.models import AbstractUser
+from timezone_field import TimeZoneField
 
-def auto_str(cls):
-    def __str__(self):
-        return '%s(%s)' % (
-            type(self).__name__,
-            ', '.join('%s=%s' % item for item in vars(self).items() if item[0] != '_state')
-        )
 
-    cls.__str__ = __str__
-    return cls
+class GooseUser(AbstractUser):
+    timezone = TimeZoneField(default='Europe/London')
 
 
 class Region(models.Model):
@@ -81,5 +77,3 @@ class FleetMember(models.Model):
     character = models.ForeignKey(Character, on_delete=models.CASCADE)
     joined_at = models.DateTimeField(blank=True, null=True)
     left_at = models.DateTimeField(blank=True, null=True)
-
-
