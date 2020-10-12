@@ -53,38 +53,38 @@ def fleet(request):
 
 
 @login_required(login_url='/accounts/discord/login/')
+def fleet_view(request, pk):
+    fleet = get_object_or_404(Fleet, pk=pk)
+    return render(request, 'core/fleet_view.html', {'fleet': fleet})
+
+
+@login_required(login_url='/accounts/discord/login/')
 def fleet_create(request):
     if request.method == 'POST':
         form = FleetForm(request.POST)
         if form.is_valid():
             combined_start = timezone.make_aware(timezone.datetime.combine(form.cleaned_data['start_date'],
                                                                            form.cleaned_data['start_time']))
+            if form.cleaned_data['end_date']:
+                combined_end = timezone.make_aware(timezone.datetime.combine(form.cleaned_data['end_date'],
+                                                                             form.cleaned_data['end_time']))
+            else:
+                combined_end = None
 
             new_fleet = Fleet(fc=form.cleaned_data['fc'],
                               fleet_type=form.cleaned_data['fleet_type'],
                               name=form.cleaned_data['name'],
-                              start=combined_start)
+                              description=form.cleaned_data['description'],
+                              location=form.cleaned_data['location'],
+                              start=combined_start,
+                              end=combined_end,
+                              )
             new_fleet.full_clean()
             new_fleet.save()
-            return HttpResponseRedirect('/fleets/')
+            return HttpResponseRedirect('/fleet/')
 
     else:
         now = timezone.localtime(timezone.now())
         form = FleetForm(initial={'fc': request.user.id, 'start_date': now.date(), 'start_time': now.time()})
 
     return render(request, 'core/fleet_form.html', {'form': form})
-
-
-class FleetCreateView(LoginRequiredMixin, FormView):
-    template_name = "core/fleet_form.html"
-    form_class = FleetForm
-
-
-class FleetUpdateView(LoginRequiredMixin, UpdateView):
-    model = Fleet
-    fields = '__all__'
-
-
-class FleetDeleteView(LoginRequiredMixin, DeleteView):
-    model = Fleet
-    fields = '__all__'

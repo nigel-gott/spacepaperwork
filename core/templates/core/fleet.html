@@ -4,7 +4,7 @@
 {% block body %}
 <h4>Active Fleets</h4>
 <div class="section">
-    <a class="waves-effect waves-light btn" href="{% url 'fleet_create' %}">Start New Fleet</a>
+    <a class="waves-effect waves-light btn light-green darken-3" href="{% url 'fleet_create' %}"><i class='material-icons right'>add_circle</i>Start New Fleet</a>
     {% render_table active %}
 </div>
 <h4>Future Fleets</h4>

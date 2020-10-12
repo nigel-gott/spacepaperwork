@@ -1,0 +1,8 @@
+{% extends "core/base.html" %}
+{% load render_table from django_tables2 %}
+
+{% block body %}
+<h4>{{fleet.name}}</h4>
+Run by {{fleet.fc}}
+
+{% endblock %}
