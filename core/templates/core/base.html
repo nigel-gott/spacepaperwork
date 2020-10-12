@@ -15,7 +15,14 @@
 <nav class="nav-extended blue-grey darken-3">
     <div class="nav-wrapper ">
         <a href="#" class="brand-logo center">⚙ GooseTools </a>
+        <ul id="nav-mobile" class="right">
+        <li>
+            <a class="waves-effect waves-light btn blue lighten-2" href="https://wiki.goosetools.com"><i
+                    class="material-icons left">cloud</i>Wiki</a>
+        </li>
+        </ul>
         <ul id="nav-mobile" class="left">
+            <li>
             {% if user.is_authenticated %}
             <form method="post" action="{% url 'account_logout' %}">
                 {% csrf_token %}
@@ -24,6 +31,7 @@
                 {% endif %}
                 <button class="waves-effect waves-light btn" type="submit">{% trans 'Logout' %}</button>
             </form>
+            </li>
             {% else %}
             <li><a class="waves-effect waves-light btn" href="{% provider_login_url 'discord' %}">Login</a></li>
             {% endif %}
@@ -55,6 +63,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var elems = document.querySelectorAll('.timepicker');
     var instances = M.Timepicker.init(elems);
 });
+
+
 
 
 
