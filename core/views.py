@@ -34,13 +34,19 @@ class SettingsView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
 
 @login_required(login_url='/accounts/discord/login/')
 def fleet(request):
+    active_fleets = active_fleets_query()
+    context = {'fleets': active_fleets, 'num_active_fleets': len(active_fleets)}
+    return render(request, 'core/fleet.html', context)
+
+
+def active_fleets_query():
     now = timezone.now()
     now_minus_24_hours = now - timezone.timedelta(days=1)
-    active_fleets = Fleet.objects.filter(
-        Q(start__gte=now_minus_24_hours) & Q(start__lte=now) & (Q(end__gt=now) | Q(end__isnull=True))).order_by(
-        '-start')
-    context = {'fleets': active_fleets}
-    return render(request, 'core/fleet.html', context)
+    active_fleets = \
+        Fleet.objects.filter(
+            Q(start__gte=now_minus_24_hours) & Q(start__lte=now) & (Q(end__gt=now) | Q(end__isnull=True))).order_by(
+            '-start')
+    return active_fleets
 
 
 # zombie_fleets = Fleet.objects.filter(

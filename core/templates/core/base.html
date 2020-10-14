@@ -2,6 +2,7 @@
 {% load socialaccount %}
 {% load i18n %}
 {% load activeurl %}
+{% load base_extras %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -42,7 +43,10 @@
         {% activeurl css_class="active" parent_tag="li" %}
         <ul class="tabs tabs-transparent">
             <li class="tab"><a href="/settings/">Settings</a></li>
-            <li class="tab"><a href="/fleet/">Fleets</a></li>
+            <li class="tab"><a href="/fleet/">Active Fleets
+                ({% num_active_fleets %})
+            </a>
+            </li>
         </ul>
         {% endactiveurl %}
     </div>
