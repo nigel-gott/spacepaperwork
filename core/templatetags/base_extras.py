@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.utils import timezone
 
-from core.models import Fleet
+from core.models import Fleet, FleetMember
 from django import template
 
 register = template.Library()
@@ -20,3 +20,8 @@ def active_fleets_query():
 @register.simple_tag
 def num_active_fleets():
     return len(active_fleets_query())
+
+@register.simple_tag
+def num_fleet_members(fleet_id):
+    return len(FleetMember.objects.filter(fleet=fleet_id))
+

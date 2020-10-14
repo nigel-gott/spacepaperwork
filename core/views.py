@@ -72,8 +72,10 @@ def fleet_join(request, pk):
 
     else:
         form = JoinFleetForm()
-    form.fields['character'].queryset = Character.objects.filter(
-        discord_id=request.user.socialaccount_set.only()[0].uid)
+    uid = request.user.socialaccount_set.only()[0].uid
+    existing = FleetMember.objects.filter(fleet=pk).values('character')
+    characters = Character.objects.filter(discord_id=uid).exclude(pk__in=existing)
+    form.fields['character'].queryset = characters
     return render(request, 'core/join_fleet_form.html', {'form': form, 'fleet': f})
 
 

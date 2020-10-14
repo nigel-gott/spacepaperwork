@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
 
+{% load base_extras %}
 {% block body %}
 
 <div class="section">
@@ -17,7 +18,9 @@
             {% endif %}
             <span class="title">
                 <i class="material-icons {{fleet.fleet_type.material_colour}}">{{fleet.fleet_type.material_icon}}</i>
-                <a href="{% url 'fleet_view' fleet.id %}">{{ fleet.name }}</a> run by {{fleet.fc.username}} </span>
+                <a href="{% url 'fleet_view' fleet.id %}">{{ fleet.name }}</a> run by {{fleet.fc.username}}
+                - {% num_fleet_members fleet.id %} Members
+            </span>
             <div class="divider" style="width:50%;"></div>
             <span class="blue-grey-text darken-4">{{fleet.human_readable_started}}
                 {% if fleet.human_readable_ended %}
