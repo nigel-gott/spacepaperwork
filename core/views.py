@@ -1,5 +1,6 @@
 import sys
 
+from allauth.socialaccount.models import SocialAccount
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -38,19 +39,15 @@ def fleet(request):
     active_fleets = Fleet.objects.filter(
         Q(start__gte=now_minus_24_hours) & Q(start__lte=now) & (Q(end__gt=now) | Q(end__isnull=True))).order_by(
         '-start')
-    zombie_fleets = Fleet.objects.filter(
-        Q(start__lte=now_minus_24_hours) & (Q(end__gt=now) | Q(end__isnull=True))).order_by('-start')
-    old_fleets = Fleet.objects.filter(Q(end__lte=now)).order_by('-start')
-    future_fleets = Fleet.objects.filter(
-        Q(start__gt=now))
-    active_table = FleetTable(active_fleets)
-    zombie_table = FleetTable(zombie_fleets)
-    old_table = FleetTable(old_fleets)
-    future_table = FleetTable(future_fleets)
-    context = {'active': active_table, 'zombie': zombie_table, 'old': old_table,
-               'future': future_table}
+    context = {'fleets': active_fleets}
     return render(request, 'core/fleet.html', context)
 
+
+# zombie_fleets = Fleet.objects.filter(
+#     Q(start__lte=now_minus_24_hours) & (Q(end__gt=now) | Q(end__isnull=True))).order_by('-start')
+# old_fleets = Fleet.objects.filter(Q(end__lte=now)).order_by('-start')
+# future_fleets = Fleet.objects.filter(
+#     Q(start__gt=now))
 
 @login_required(login_url='/accounts/discord/login/')
 def fleet_view(request, pk):
@@ -71,7 +68,7 @@ def fleet_create(request):
             else:
                 combined_end = None
 
-            new_fleet = Fleet(fc=form.cleaned_data['fc'],
+            new_fleet = Fleet(fc=request.user,
                               fleet_type=form.cleaned_data['fleet_type'],
                               name=form.cleaned_data['name'],
                               description=form.cleaned_data['description'],
@@ -85,6 +82,6 @@ def fleet_create(request):
 
     else:
         now = timezone.localtime(timezone.now())
-        form = FleetForm(initial={'fc': request.user.id, 'start_date': now.date(), 'start_time': now.time()})
+        form = FleetForm(initial={'start_date': now.date(), 'start_time': now.time()})
 
     return render(request, 'core/fleet_form.html', {'form': form})

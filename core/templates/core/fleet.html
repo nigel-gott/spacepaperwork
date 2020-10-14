@@ -1,23 +1,55 @@
 {% extends "core/base.html" %}
-{% load render_table from django_tables2 %}
 
 {% block body %}
-<h4>Active Fleets</h4>
+
 <div class="section">
-    <a class="waves-effect waves-light btn light-green darken-3" href="{% url 'fleet_create' %}"><i class='material-icons right'>add_circle</i>Start New Fleet</a>
-    {% render_table active %}
+    <a class="waves-effect waves-light btn light-green darken-3" href="{% url 'fleet_create' %}"><i
+            class='material-icons right'>add_circle</i>Start New Fleet</a>
+
+    {% if fleets %}
+    <ul class="collection">
+        {% for fleet in fleets %}
+        <li class="collection-item avatar">
+            {% if fleet.fc.discord_avatar_url %}
+            <img src="{{ fleet.fc.discord_avatar_url }}" alt="" class="circle">
+            {% else %}
+            <i class="circle material-icons">error</i>
+            {% endif %}
+            <span class="title">
+                <i class="material-icons {{fleet.fleet_type.material_colour}}">{{fleet.fleet_type.material_icon}}</i>
+                <b>{{ fleet.name }}</b> run by {{fleet.fc.username}} </span>
+            <div class="divider" style="width:50%;"></div>
+            <span class="blue-grey-text darken-4">{{fleet.human_readable_started}}
+                {% if fleet.human_readable_ended %}
+                - {{fleet.human_readable_ended}}
+                {% else %}
+                    {% if fleet.expected_duration %}
+                        - {{fleet.expected_duration}}
+                    {% endif %}
+                {% endif %}
+                </span>
+
+
+            <br/>
+            {{fleet.description}}<br/>
+            {{fleet.location}}
+            </p>
+            {% if fleet.fc.id == user.id %}
+            <a class="wrapper secondary-content waves-effect waves-light btn orange darken-1"
+               href="{% url 'fleet_create' %}"><i
+                    class='material-icons right'>add_circle</i>Edit Fleet</a>
+            {% else %}
+            <a class="secondary-content waves-effect waves-light btn purple lighten-2"
+               href="{% url 'fleet_create' %}"><i class='material-icons right'>add_circle</i>Join Fleet</a>
+            {% endif %}
+        </li>
+
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p> No fleets. </p>
+    {% endif %}
 </div>
-<h4>Future Fleets</h4>
-<div class="section">
-    {% render_table future %}
-</div>
-<h4>Old Fleets</h4>
-<div class="section">
-    {% render_table old %}
-</div>
-<h4>Zombie Fleets</h4>
-<div class="section">
-    {% render_table zombie %}
-</div>
+
 
 {% endblock %}

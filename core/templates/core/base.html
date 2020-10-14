@@ -48,6 +48,14 @@
     </div>
     {% endif %}
 </nav>
+{% if messages %}
+<div class="section">
+    {% for m in messages %}
+    <span class="light-green-text"><b>{{ m }}</b></span>
+    {% endfor %}
+</div>
+<div class="divider"></div>
+{% endif %}
 <div class="container">
     {% block body %}
     {% endblock %}
