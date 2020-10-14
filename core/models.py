@@ -49,15 +49,12 @@ class Corp(models.Model):
 
 
 class Character(models.Model):
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-    )
+    discord_id = models.TextField()
     ingame_name = models.TextField()
     corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"[{self.corp}]: {self.ingame_name} ({self.user.name})"
+        return f"[{self.corp}] {self.ingame_name}"
 
 
 class FleetType(models.Model):

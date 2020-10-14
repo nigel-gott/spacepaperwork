@@ -61,17 +61,20 @@ def fleet_join(request, pk):
     if request.method == 'POST':
         form = JoinFleetForm(request.POST)
         if form.is_valid():
-            new_fleet = FleetMember(fleet=f,
-                                    joined_at=timezone.now()
-                                    )
+            new_fleet = FleetMember(
+                character=form.cleaned_data['character'],
+                fleet=f,
+                joined_at=timezone.now()
+            )
             new_fleet.full_clean()
             new_fleet.save()
-            return HttpResponseRedirect('/fleet/' + pk)
+            return HttpResponseRedirect('/fleet/' + str(pk))
 
     else:
         form = JoinFleetForm()
-    form.fields['character'].queryset = Character.objects.filter(user=request.user)
-    return render(request, 'core/join_fleet_form.html', {'form': form, 'fleet':f})
+    form.fields['character'].queryset = Character.objects.filter(
+        discord_id=request.user.socialaccount_set.only()[0].uid)
+    return render(request, 'core/join_fleet_form.html', {'form': form, 'fleet': f})
 
 
 @login_required(login_url='/accounts/discord/login/')

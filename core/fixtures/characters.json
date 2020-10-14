@@ -1,0 +1,4025 @@
+[
+    {
+        "model": "core.character",
+        "pk": 1,
+        "fields": {
+            "discord_id": "295401094631391236",
+            "ingame_name": "Belle26 Que",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 2,
+        "fields": {
+            "discord_id": "152118986996187136",
+            "ingame_name": "spaceninja",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 3,
+        "fields": {
+            "discord_id": "352978641455415297",
+            "ingame_name": "IvanLickinpus",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 4,
+        "fields": {
+            "discord_id": "352978641455415297",
+            "ingame_name": "z0r",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 5,
+        "fields": {
+            "discord_id": "352978641455415297",
+            "ingame_name": "Honkmeister",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 6,
+        "fields": {
+            "discord_id": "406890481964810265",
+            "ingame_name": "Catgirl Exports",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 7,
+        "fields": {
+            "discord_id": "406890481964810265",
+            "ingame_name": "Catgirl Imports",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 8,
+        "fields": {
+            "discord_id": "406890481964810265",
+            "ingame_name": "Catgirl Esports",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 9,
+        "fields": {
+            "discord_id": "125780950989799424",
+            "ingame_name": "IndyMadi",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 10,
+        "fields": {
+            "discord_id": "125780950989799424",
+            "ingame_name": "MadMadiSA",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 11,
+        "fields": {
+            "discord_id": "134765096420245504",
+            "ingame_name": "Mahro",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 12,
+        "fields": {
+            "discord_id": "134765096420245504",
+            "ingame_name": "Melleme",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 13,
+        "fields": {
+            "discord_id": "178678198710566912",
+            "ingame_name": "leper khan",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 14,
+        "fields": {
+            "discord_id": "178678198710566912",
+            "ingame_name": "MineMatar",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 15,
+        "fields": {
+            "discord_id": "174732157338517506",
+            "ingame_name": "Houndoom",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 16,
+        "fields": {
+            "discord_id": "174732157338517506",
+            "ingame_name": "\u4e0d\u4f5c\u4e0d\u6b7b",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 17,
+        "fields": {
+            "discord_id": "174732157338517506",
+            "ingame_name": "\u5411\u5929\u6253\u98de\u673a",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 18,
+        "fields": {
+            "discord_id": "158803368112947201",
+            "ingame_name": "Dox023",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 19,
+        "fields": {
+            "discord_id": "154757848453087232",
+            "ingame_name": "Parker Lewis",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 20,
+        "fields": {
+            "discord_id": "150481856670859264",
+            "ingame_name": "Higgs Boson",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 21,
+        "fields": {
+            "discord_id": "150481856670859264",
+            "ingame_name": "Higgs Particle",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 22,
+        "fields": {
+            "discord_id": "150481856670859264",
+            "ingame_name": "Nymn",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 23,
+        "fields": {
+            "discord_id": "150481856670859264",
+            "ingame_name": "Muon Particle",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 24,
+        "fields": {
+            "discord_id": "235946953052127232",
+            "ingame_name": "dancemasterlee",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 25,
+        "fields": {
+            "discord_id": "235946953052127232",
+            "ingame_name": "Fartlover420",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 26,
+        "fields": {
+            "discord_id": "235946953052127232",
+            "ingame_name": "fartmasterlee",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 27,
+        "fields": {
+            "discord_id": "235946953052127232",
+            "ingame_name": "Fartbomber",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 28,
+        "fields": {
+            "discord_id": "173679997171662849",
+            "ingame_name": "John Shootbullet",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 29,
+        "fields": {
+            "discord_id": "173679997171662849",
+            "ingame_name": "Stealy Dan",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 30,
+        "fields": {
+            "discord_id": "92829609778745344",
+            "ingame_name": "Bishop28 Burns",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 31,
+        "fields": {
+            "discord_id": "92829609778745344",
+            "ingame_name": "Ronald Crump",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 32,
+        "fields": {
+            "discord_id": "92829609778745344",
+            "ingame_name": "Sarmhan",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 33,
+        "fields": {
+            "discord_id": "77938798104678400",
+            "ingame_name": "Elroy29 Stephens",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 34,
+        "fields": {
+            "discord_id": "77938798104678400",
+            "ingame_name": "Yang Wen-lei",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 35,
+        "fields": {
+            "discord_id": "77938798104678400",
+            "ingame_name": "Elroy Jetson",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 36,
+        "fields": {
+            "discord_id": "77938798104678400",
+            "ingame_name": "Yang Wen-li",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 37,
+        "fields": {
+            "discord_id": "351582699108040704",
+            "ingame_name": "Audish",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 38,
+        "fields": {
+            "discord_id": "244176493670957056",
+            "ingame_name": "Onipanda",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 39,
+        "fields": {
+            "discord_id": "244176493670957056",
+            "ingame_name": "Rocto",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 40,
+        "fields": {
+            "discord_id": "183976801859534848",
+            "ingame_name": "OldboyKai",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 41,
+        "fields": {
+            "discord_id": "183976801859534848",
+            "ingame_name": "OldboyKai Clone",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 42,
+        "fields": {
+            "discord_id": "183976801859534848",
+            "ingame_name": "Phantom Harlock",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 43,
+        "fields": {
+            "discord_id": "352228730086621185",
+            "ingame_name": "Adam Inspace",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 44,
+        "fields": {
+            "discord_id": "352228730086621185",
+            "ingame_name": "Gently Warming",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 45,
+        "fields": {
+            "discord_id": "417131941272485901",
+            "ingame_name": "Aurelia Scordato",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 46,
+        "fields": {
+            "discord_id": "417131941272485901",
+            "ingame_name": "Sonja Delacroix",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 47,
+        "fields": {
+            "discord_id": "417131941272485901",
+            "ingame_name": "Lucrezia Janvier",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 48,
+        "fields": {
+            "discord_id": "417131941272485901",
+            "ingame_name": "Nebula Solael",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 49,
+        "fields": {
+            "discord_id": "149326426607321088",
+            "ingame_name": "Daala Phage",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 50,
+        "fields": {
+            "discord_id": "149326426607321088",
+            "ingame_name": "Akroma Phage",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 51,
+        "fields": {
+            "discord_id": "149326426607321088",
+            "ingame_name": "Jaya Markov",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 52,
+        "fields": {
+            "discord_id": "149326426607321088",
+            "ingame_name": "Serra Rath",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 53,
+        "fields": {
+            "discord_id": "149326426607321088",
+            "ingame_name": "Avacyn Bolas",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 54,
+        "fields": {
+            "discord_id": "149326426607321088",
+            "ingame_name": "Gisela Blade",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 55,
+        "fields": {
+            "discord_id": "149326426607321088",
+            "ingame_name": "Serra Phage",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 56,
+        "fields": {
+            "discord_id": "177206003501105152",
+            "ingame_name": "Verno",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 57,
+        "fields": {
+            "discord_id": "107517722849476608",
+            "ingame_name": "Jessie81 Ezekiel",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 58,
+        "fields": {
+            "discord_id": "715595496319746098",
+            "ingame_name": "Gray Bishop",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 59,
+        "fields": {
+            "discord_id": "152223961462079489",
+            "ingame_name": "Shallow Gravy",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 60,
+        "fields": {
+            "discord_id": "152223961462079489",
+            "ingame_name": "Henry Killinger",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 61,
+        "fields": {
+            "discord_id": "651817579396071426",
+            "ingame_name": "toe jam",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 62,
+        "fields": {
+            "discord_id": "139772152025972736",
+            "ingame_name": "Logicon",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 63,
+        "fields": {
+            "discord_id": "194003790909800448",
+            "ingame_name": "Felix Kell",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 64,
+        "fields": {
+            "discord_id": "194003790909800448",
+            "ingame_name": "BelugaSnail",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 65,
+        "fields": {
+            "discord_id": "302776452959567872",
+            "ingame_name": "Jill50 Pi",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 66,
+        "fields": {
+            "discord_id": "302776452959567872",
+            "ingame_name": "RC Bandit",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 67,
+        "fields": {
+            "discord_id": "302776452959567872",
+            "ingame_name": "RC Bandita",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 68,
+        "fields": {
+            "discord_id": "201526839670341632",
+            "ingame_name": "LyndaFromHR",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 69,
+        "fields": {
+            "discord_id": "235127692175998976",
+            "ingame_name": "Marius Tullia",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 70,
+        "fields": {
+            "discord_id": "107994331876425728",
+            "ingame_name": "Cubical Sucrose",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 71,
+        "fields": {
+            "discord_id": "107994331876425728",
+            "ingame_name": "FreeIsk TrustMe",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 72,
+        "fields": {
+            "discord_id": "107994331876425728",
+            "ingame_name": "Zalphabet",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 73,
+        "fields": {
+            "discord_id": "107994331876425728",
+            "ingame_name": "Nota Scammer",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 74,
+        "fields": {
+            "discord_id": "107994331876425728",
+            "ingame_name": "Jack7 Situ",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 75,
+        "fields": {
+            "discord_id": "155579555447308289",
+            "ingame_name": "Friday Deimos",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 76,
+        "fields": {
+            "discord_id": "155579555447308289",
+            "ingame_name": "Andon Phobos",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 77,
+        "fields": {
+            "discord_id": "155579555447308289",
+            "ingame_name": "Kina Naraya",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 78,
+        "fields": {
+            "discord_id": "184446291269517312",
+            "ingame_name": "StendecStardust",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 79,
+        "fields": {
+            "discord_id": "671905944153882645",
+            "ingame_name": "Miles Beard",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 80,
+        "fields": {
+            "discord_id": "318626154259152898",
+            "ingame_name": "Envgard",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 81,
+        "fields": {
+            "discord_id": "219445545637380096",
+            "ingame_name": "Quickpull",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 82,
+        "fields": {
+            "discord_id": "219445545637380096",
+            "ingame_name": "Quickpush",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 83,
+        "fields": {
+            "discord_id": "185581459657064448",
+            "ingame_name": "Nargiddley",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 84,
+        "fields": {
+            "discord_id": "326800680910192651",
+            "ingame_name": "Salt Meat",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 85,
+        "fields": {
+            "discord_id": "185592160731660288",
+            "ingame_name": "Kenshin Uesugi",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 86,
+        "fields": {
+            "discord_id": "491735613045997579",
+            "ingame_name": "Akeu Jun",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 87,
+        "fields": {
+            "discord_id": "219321374391402497",
+            "ingame_name": "Temper",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 88,
+        "fields": {
+            "discord_id": "118597210492502021",
+            "ingame_name": "Candi Crush",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 89,
+        "fields": {
+            "discord_id": "118597210492502021",
+            "ingame_name": "Lift Together",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 90,
+        "fields": {
+            "discord_id": "118597210492502021",
+            "ingame_name": "Lifts Together",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 91,
+        "fields": {
+            "discord_id": "118597210492502021",
+            "ingame_name": "Lifted Together",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 92,
+        "fields": {
+            "discord_id": "118597210492502021",
+            "ingame_name": "Lifting Together",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 93,
+        "fields": {
+            "discord_id": "118597210492502021",
+            "ingame_name": "Lifter Together",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 94,
+        "fields": {
+            "discord_id": "118597210492502021",
+            "ingame_name": "Lifters Together",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 95,
+        "fields": {
+            "discord_id": "118597210492502021",
+            "ingame_name": "Goose Alt",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 96,
+        "fields": {
+            "discord_id": "320073751343661056",
+            "ingame_name": "CathyOvDaCowz",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 97,
+        "fields": {
+            "discord_id": "138799192234655744",
+            "ingame_name": "Starkk",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 98,
+        "fields": {
+            "discord_id": "138799192234655744",
+            "ingame_name": "Starkke",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 99,
+        "fields": {
+            "discord_id": "174827033770065921",
+            "ingame_name": "Raged",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 100,
+        "fields": {
+            "discord_id": "260437744159948800",
+            "ingame_name": "Tenbux",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 101,
+        "fields": {
+            "discord_id": "519362811239989269",
+            "ingame_name": "Erik Redmark",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 102,
+        "fields": {
+            "discord_id": "81853395282956288",
+            "ingame_name": "Phi Too",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 103,
+        "fields": {
+            "discord_id": "81853395282956288",
+            "ingame_name": "Em Rakul",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 104,
+        "fields": {
+            "discord_id": "745462881637892120",
+            "ingame_name": "Koiz",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 105,
+        "fields": {
+            "discord_id": "745462881637892120",
+            "ingame_name": "Ziok",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 106,
+        "fields": {
+            "discord_id": "175373887280906240",
+            "ingame_name": "Basarov",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 107,
+        "fields": {
+            "discord_id": "603058533109465101",
+            "ingame_name": "Fralbjabar",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 108,
+        "fields": {
+            "discord_id": "603058533109465101",
+            "ingame_name": "fralbjabalt",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 109,
+        "fields": {
+            "discord_id": "327539015689699328",
+            "ingame_name": "FuryOfADyingMan",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 110,
+        "fields": {
+            "discord_id": "327539015689699328",
+            "ingame_name": "Cardeya",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 111,
+        "fields": {
+            "discord_id": "352264793622577154",
+            "ingame_name": "Sendric'",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 112,
+        "fields": {
+            "discord_id": "373306889620029442",
+            "ingame_name": "Kellemar Dupont",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 113,
+        "fields": {
+            "discord_id": "138765899921489920",
+            "ingame_name": "Ch4ot1cEv17",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 114,
+        "fields": {
+            "discord_id": "733359487414698018",
+            "ingame_name": "Obama Akbar",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 115,
+        "fields": {
+            "discord_id": "733359487414698018",
+            "ingame_name": "Dirk Turgin",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 116,
+        "fields": {
+            "discord_id": "733359487414698018",
+            "ingame_name": "Burt Turkin",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 117,
+        "fields": {
+            "discord_id": "138340570073530368",
+            "ingame_name": "Lucca Deradi",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 118,
+        "fields": {
+            "discord_id": "138340570073530368",
+            "ingame_name": "Liese Blecja",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 119,
+        "fields": {
+            "discord_id": "117291013680136205",
+            "ingame_name": "Tuli Heppi",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 120,
+        "fields": {
+            "discord_id": "619589186659549229",
+            "ingame_name": "inkm0th",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 121,
+        "fields": {
+            "discord_id": "619589186659549229",
+            "ingame_name": "p00ps0ck",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 122,
+        "fields": {
+            "discord_id": "268928213168816130",
+            "ingame_name": "Meld",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 123,
+        "fields": {
+            "discord_id": "200756799509495808",
+            "ingame_name": "MrOblivious",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 124,
+        "fields": {
+            "discord_id": "137629503978602496",
+            "ingame_name": "Tritan God",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 125,
+        "fields": {
+            "discord_id": "137629503978602496",
+            "ingame_name": "Tritan Soul",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 126,
+        "fields": {
+            "discord_id": "137629503978602496",
+            "ingame_name": "Star Entity",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 127,
+        "fields": {
+            "discord_id": "137629503978602496",
+            "ingame_name": "Void Entity",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 128,
+        "fields": {
+            "discord_id": "137629503978602496",
+            "ingame_name": "Puddle Jumper",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 129,
+        "fields": {
+            "discord_id": "281587967880069121",
+            "ingame_name": "Rust Martialis",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 130,
+        "fields": {
+            "discord_id": "112395550829146112",
+            "ingame_name": "thezanke",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 131,
+        "fields": {
+            "discord_id": "147872799602507777",
+            "ingame_name": "Alligator Tower",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 132,
+        "fields": {
+            "discord_id": "147872799602507777",
+            "ingame_name": "Tower Alligator",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 133,
+        "fields": {
+            "discord_id": "514901107051462667",
+            "ingame_name": "Timbro2",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 134,
+        "fields": {
+            "discord_id": "514901107051462667",
+            "ingame_name": "Timbro",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 135,
+        "fields": {
+            "discord_id": "250088612362846208",
+            "ingame_name": "Orphesus XBUX Keanu Reads",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 136,
+        "fields": {
+            "discord_id": "250088612362846208",
+            "ingame_name": "Orphesus",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 137,
+        "fields": {
+            "discord_id": "250088612362846208",
+            "ingame_name": "Keanu Reads",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 138,
+        "fields": {
+            "discord_id": "250088612362846208",
+            "ingame_name": "Penelope Crews",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 139,
+        "fields": {
+            "discord_id": "416322632695283725",
+            "ingame_name": "Tarrif",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 140,
+        "fields": {
+            "discord_id": "416322632695283725",
+            "ingame_name": "Maura Reegan",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 141,
+        "fields": {
+            "discord_id": "637513303706304523",
+            "ingame_name": "Idon Dometh\u00e8",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 142,
+        "fields": {
+            "discord_id": "132482385647370241",
+            "ingame_name": "Dankling",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 143,
+        "fields": {
+            "discord_id": "150961528944852992",
+            "ingame_name": "Zara Gewne",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 144,
+        "fields": {
+            "discord_id": "150961528944852992",
+            "ingame_name": "Claire50 Hart",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 145,
+        "fields": {
+            "discord_id": "150961528944852992",
+            "ingame_name": "Dawn96 Norris",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 146,
+        "fields": {
+            "discord_id": "150961528944852992",
+            "ingame_name": "Marjorie96 Yuchi",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 147,
+        "fields": {
+            "discord_id": "150961528944852992",
+            "ingame_name": "Ula24 Dong",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 148,
+        "fields": {
+            "discord_id": "150961528944852992",
+            "ingame_name": "skrrrt oi",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 149,
+        "fields": {
+            "discord_id": "150961528944852992",
+            "ingame_name": "hey dad",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 150,
+        "fields": {
+            "discord_id": "150961528944852992",
+            "ingame_name": "skrrrt duder",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 151,
+        "fields": {
+            "discord_id": "150961528944852992",
+            "ingame_name": "curious abby",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 152,
+        "fields": {
+            "discord_id": "150961528944852992",
+            "ingame_name": "Big money",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 153,
+        "fields": {
+            "discord_id": "150961528944852992",
+            "ingame_name": "Sara Nope",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 154,
+        "fields": {
+            "discord_id": "208645589989064714",
+            "ingame_name": "Calyxis",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 155,
+        "fields": {
+            "discord_id": "208645589989064714",
+            "ingame_name": "TeaBee",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 156,
+        "fields": {
+            "discord_id": "227516007583842304",
+            "ingame_name": "SwZL",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 157,
+        "fields": {
+            "discord_id": "227516007583842304",
+            "ingame_name": "WerkWerk",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 158,
+        "fields": {
+            "discord_id": "550528946773557259",
+            "ingame_name": "Thor Magnuson",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 159,
+        "fields": {
+            "discord_id": "305819162637500416",
+            "ingame_name": "Shovel Head",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 160,
+        "fields": {
+            "discord_id": "305819162637500416",
+            "ingame_name": "Pan Head",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 161,
+        "fields": {
+            "discord_id": "226044985638780928",
+            "ingame_name": "Skyzm",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 162,
+        "fields": {
+            "discord_id": "226044985638780928",
+            "ingame_name": "Skydadle",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 163,
+        "fields": {
+            "discord_id": "465929376371048468",
+            "ingame_name": "Destiati",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 164,
+        "fields": {
+            "discord_id": "109080679337218048",
+            "ingame_name": "Slippyslappy",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 165,
+        "fields": {
+            "discord_id": "109080679337218048",
+            "ingame_name": "slippytoo",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 166,
+        "fields": {
+            "discord_id": "109080679337218048",
+            "ingame_name": "Mandatory",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 167,
+        "fields": {
+            "discord_id": "746556693692940339",
+            "ingame_name": "Mr Pants",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 168,
+        "fields": {
+            "discord_id": "140905897340698624",
+            "ingame_name": "Soul0dark",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 169,
+        "fields": {
+            "discord_id": "203985337913966593",
+            "ingame_name": "Blundergoose",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 170,
+        "fields": {
+            "discord_id": "108082066180059136",
+            "ingame_name": "Lemma Skye",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 171,
+        "fields": {
+            "discord_id": "412782007236689923",
+            "ingame_name": "MeatMonster",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 172,
+        "fields": {
+            "discord_id": "218124994582937602",
+            "ingame_name": "extremecake",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 173,
+        "fields": {
+            "discord_id": "182331659083841547",
+            "ingame_name": "Revane",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 174,
+        "fields": {
+            "discord_id": "114497926725763080",
+            "ingame_name": "dnkles",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 175,
+        "fields": {
+            "discord_id": "114497926725763080",
+            "ingame_name": "Bernie82 Hill",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 176,
+        "fields": {
+            "discord_id": "114497926725763080",
+            "ingame_name": "Lowskill Idiot",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 177,
+        "fields": {
+            "discord_id": "748650394392985693",
+            "ingame_name": "Garra",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 178,
+        "fields": {
+            "discord_id": "123850910949572610",
+            "ingame_name": "Ultra Karen",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 179,
+        "fields": {
+            "discord_id": "123850910949572610",
+            "ingame_name": "The Wiggler",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 180,
+        "fields": {
+            "discord_id": "184456027893268480",
+            "ingame_name": "Hoodrow Trillson",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 181,
+        "fields": {
+            "discord_id": "184456027893268480",
+            "ingame_name": "Tom Honks",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 182,
+        "fields": {
+            "discord_id": "144645692089040896",
+            "ingame_name": "Rezmet",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 183,
+        "fields": {
+            "discord_id": "137910778379501568",
+            "ingame_name": "Rakett Loff",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 184,
+        "fields": {
+            "discord_id": "121851284172177411",
+            "ingame_name": "Blessed Blake",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 185,
+        "fields": {
+            "discord_id": "121851284172177411",
+            "ingame_name": "Stefan Amarris",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 186,
+        "fields": {
+            "discord_id": "120172939181031424",
+            "ingame_name": "Bad Parenting",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 187,
+        "fields": {
+            "discord_id": "120172939181031424",
+            "ingame_name": "Leeeloo",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 188,
+        "fields": {
+            "discord_id": "468553293103366145",
+            "ingame_name": "Yvonne76 Huo",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 189,
+        "fields": {
+            "discord_id": "468553293103366145",
+            "ingame_name": "BIG DRYWALL MAN",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 190,
+        "fields": {
+            "discord_id": "118180912746725380",
+            "ingame_name": "Arjung",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 191,
+        "fields": {
+            "discord_id": "123274758119882754",
+            "ingame_name": "Thorin Greenwood",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 192,
+        "fields": {
+            "discord_id": "241581713870815232",
+            "ingame_name": "Paddy47 Wheatley",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 193,
+        "fields": {
+            "discord_id": "184702807234838529",
+            "ingame_name": "Kaysette",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 194,
+        "fields": {
+            "discord_id": "184702807234838529",
+            "ingame_name": "Regan86 Ronald",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 195,
+        "fields": {
+            "discord_id": "184702807234838529",
+            "ingame_name": "Rocc Succ",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 196,
+        "fields": {
+            "discord_id": "155730101734998016",
+            "ingame_name": "RocketRobot",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 197,
+        "fields": {
+            "discord_id": "132534798395637761",
+            "ingame_name": "illBilliam",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 198,
+        "fields": {
+            "discord_id": "146135989482422273",
+            "ingame_name": "Crell",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 199,
+        "fields": {
+            "discord_id": "146135989482422273",
+            "ingame_name": "Kuulline",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 200,
+        "fields": {
+            "discord_id": "146135989482422273",
+            "ingame_name": "Infused Reality",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 201,
+        "fields": {
+            "discord_id": "85510535260418048",
+            "ingame_name": "Octavia0 Shu",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 202,
+        "fields": {
+            "discord_id": "85510535260418048",
+            "ingame_name": "Elusip",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 203,
+        "fields": {
+            "discord_id": "85510535260418048",
+            "ingame_name": "Elusif",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 204,
+        "fields": {
+            "discord_id": "195186284027707399",
+            "ingame_name": "Dr Benway",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 205,
+        "fields": {
+            "discord_id": "415225914008535042",
+            "ingame_name": "Roid",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 206,
+        "fields": {
+            "discord_id": "172350882439102464",
+            "ingame_name": "Belleza",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 207,
+        "fields": {
+            "discord_id": "260228589763428353",
+            "ingame_name": "Susie0 Zhu",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 208,
+        "fields": {
+            "discord_id": "179930051586818048",
+            "ingame_name": "Cetan",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 209,
+        "fields": {
+            "discord_id": "179930051586818048",
+            "ingame_name": "Tempo Cielo",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 210,
+        "fields": {
+            "discord_id": "179930051586818048",
+            "ingame_name": "Kasheem",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 211,
+        "fields": {
+            "discord_id": "202467794795757568",
+            "ingame_name": "Barnaby Jones",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 212,
+        "fields": {
+            "discord_id": "130511861081702400",
+            "ingame_name": "Duck Molester",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 213,
+        "fields": {
+            "discord_id": "192406643017908224",
+            "ingame_name": "w00tmonger",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 214,
+        "fields": {
+            "discord_id": "414612275207471125",
+            "ingame_name": "ThreeDumbGoats",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 215,
+        "fields": {
+            "discord_id": "414612275207471125",
+            "ingame_name": "NineDumbGoats",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 216,
+        "fields": {
+            "discord_id": "414612275207471125",
+            "ingame_name": "Nine Dumb Goats",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 217,
+        "fields": {
+            "discord_id": "170754262253568001",
+            "ingame_name": "Dorian Kartel",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 218,
+        "fields": {
+            "discord_id": "159905212616671232",
+            "ingame_name": "Burger Time",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 219,
+        "fields": {
+            "discord_id": "159905212616671232",
+            "ingame_name": "Hogan",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 220,
+        "fields": {
+            "discord_id": "159905212616671232",
+            "ingame_name": "Honk Hogan",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 221,
+        "fields": {
+            "discord_id": "611897313576615937",
+            "ingame_name": "Stay Clousey",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 222,
+        "fields": {
+            "discord_id": "219207580067561493",
+            "ingame_name": "Lovesync",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 223,
+        "fields": {
+            "discord_id": "446158779223113733",
+            "ingame_name": "Cayleu",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 224,
+        "fields": {
+            "discord_id": "173871652315201536",
+            "ingame_name": "Nter",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 225,
+        "fields": {
+            "discord_id": "173871652315201536",
+            "ingame_name": "dockup",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 226,
+        "fields": {
+            "discord_id": "173871652315201536",
+            "ingame_name": "disegngage",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 227,
+        "fields": {
+            "discord_id": "173871652315201536",
+            "ingame_name": "disengage",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 228,
+        "fields": {
+            "discord_id": "173871652315201536",
+            "ingame_name": "nter",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 229,
+        "fields": {
+            "discord_id": "134858328416190475",
+            "ingame_name": "Variable",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 230,
+        "fields": {
+            "discord_id": "300752762885373952",
+            "ingame_name": "Setanja",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 231,
+        "fields": {
+            "discord_id": "300752762885373952",
+            "ingame_name": "Setset",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 232,
+        "fields": {
+            "discord_id": "209960160821641216",
+            "ingame_name": "WanderingBishop",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 233,
+        "fields": {
+            "discord_id": "209960160821641216",
+            "ingame_name": "Wandering Bishop",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 234,
+        "fields": {
+            "discord_id": "209960160821641216",
+            "ingame_name": "Theotokos",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 235,
+        "fields": {
+            "discord_id": "51501368904515584",
+            "ingame_name": "Rylsa",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 236,
+        "fields": {
+            "discord_id": "168902035607912449",
+            "ingame_name": "Jokine",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 237,
+        "fields": {
+            "discord_id": "210263827747569665",
+            "ingame_name": "Rudepaul",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 238,
+        "fields": {
+            "discord_id": "210263827747569665",
+            "ingame_name": "JanTangje",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 239,
+        "fields": {
+            "discord_id": "140155643435679744",
+            "ingame_name": "Cancelvania",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 240,
+        "fields": {
+            "discord_id": "140155643435679744",
+            "ingame_name": "Ella75 Tumen",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 241,
+        "fields": {
+            "discord_id": "140155643435679744",
+            "ingame_name": "Gloria67 Gallup",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 242,
+        "fields": {
+            "discord_id": "102863262109937664",
+            "ingame_name": "Cyks",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 243,
+        "fields": {
+            "discord_id": "191281056798867456",
+            "ingame_name": "Don pineApple",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 244,
+        "fields": {
+            "discord_id": "173948346636042240",
+            "ingame_name": "BCP38",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 245,
+        "fields": {
+            "discord_id": "173948346636042240",
+            "ingame_name": "showerboat",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 246,
+        "fields": {
+            "discord_id": "173948346636042240",
+            "ingame_name": "quietpart",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 247,
+        "fields": {
+            "discord_id": "173948346636042240",
+            "ingame_name": "Demidity",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 248,
+        "fields": {
+            "discord_id": "173948346636042240",
+            "ingame_name": "Bruce7 Cowper",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 249,
+        "fields": {
+            "discord_id": "80427261085364224",
+            "ingame_name": "Kapten Zoom",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 250,
+        "fields": {
+            "discord_id": "80427261085364224",
+            "ingame_name": "Vernon Aptes",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 251,
+        "fields": {
+            "discord_id": "333001756973989888",
+            "ingame_name": "Grumpy Bear",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 252,
+        "fields": {
+            "discord_id": "333001756973989888",
+            "ingame_name": "Duck Dodgers",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 253,
+        "fields": {
+            "discord_id": "333001756973989888",
+            "ingame_name": "KMART",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 254,
+        "fields": {
+            "discord_id": "194022252914671616",
+            "ingame_name": "Bald Tim",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 255,
+        "fields": {
+            "discord_id": "105423574747070464",
+            "ingame_name": "Apteryx",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 256,
+        "fields": {
+            "discord_id": "244766405260476417",
+            "ingame_name": "dishwasher",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 257,
+        "fields": {
+            "discord_id": "244766405260476417",
+            "ingame_name": "thejanitor",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 258,
+        "fields": {
+            "discord_id": "244766405260476417",
+            "ingame_name": "Parysatis",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 259,
+        "fields": {
+            "discord_id": "244766405260476417",
+            "ingame_name": "washingmachine",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 260,
+        "fields": {
+            "discord_id": "177964158292197377",
+            "ingame_name": "nakieon",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 261,
+        "fields": {
+            "discord_id": "177964158292197377",
+            "ingame_name": "Little Timmy",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 262,
+        "fields": {
+            "discord_id": "177964158292197377",
+            "ingame_name": "roflmao",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 263,
+        "fields": {
+            "discord_id": "177964158292197377",
+            "ingame_name": "Miner Alt 3",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 264,
+        "fields": {
+            "discord_id": "180856922038075393",
+            "ingame_name": "MaliciousOnion",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 265,
+        "fields": {
+            "discord_id": "214517731792257024",
+            "ingame_name": "Andre9 Fox",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 266,
+        "fields": {
+            "discord_id": "177895213535068160",
+            "ingame_name": "Never Mind",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 267,
+        "fields": {
+            "discord_id": "177895213535068160",
+            "ingame_name": "Get Out",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 268,
+        "fields": {
+            "discord_id": "177895213535068160",
+            "ingame_name": "Alright",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 269,
+        "fields": {
+            "discord_id": "236367026598313984",
+            "ingame_name": "DiplomaticState",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 270,
+        "fields": {
+            "discord_id": "584525240110153757",
+            "ingame_name": "Bea245",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 271,
+        "fields": {
+            "discord_id": "584525240110153757",
+            "ingame_name": "Panano",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 272,
+        "fields": {
+            "discord_id": "264842602648567808",
+            "ingame_name": "Harpalaos",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 273,
+        "fields": {
+            "discord_id": "264842602648567808",
+            "ingame_name": "Satoris",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 274,
+        "fields": {
+            "discord_id": "174149340732981248",
+            "ingame_name": "kingcom",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 275,
+        "fields": {
+            "discord_id": "273912355413557249",
+            "ingame_name": "Botch",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 276,
+        "fields": {
+            "discord_id": "228499299321905155",
+            "ingame_name": "Lauren40 Clapham",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 277,
+        "fields": {
+            "discord_id": "250171921692360705",
+            "ingame_name": "Hello Sailor",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 278,
+        "fields": {
+            "discord_id": "250171921692360705",
+            "ingame_name": "Gooseface Killah",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 279,
+        "fields": {
+            "discord_id": "239478923631656960",
+            "ingame_name": "Boxinglemur",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 280,
+        "fields": {
+            "discord_id": "729840730750713887",
+            "ingame_name": "D\u00efck Overthrust",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 281,
+        "fields": {
+            "discord_id": "160194496016023552",
+            "ingame_name": "PathAsc",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 282,
+        "fields": {
+            "discord_id": "366032041160081408",
+            "ingame_name": "SlimyTadpole",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 283,
+        "fields": {
+            "discord_id": "366032041160081408",
+            "ingame_name": "CreepySteve",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 284,
+        "fields": {
+            "discord_id": "84129094333104128",
+            "ingame_name": "Captain Zuff",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 285,
+        "fields": {
+            "discord_id": "353597700916117505",
+            "ingame_name": "GTB",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 286,
+        "fields": {
+            "discord_id": "353597700916117505",
+            "ingame_name": "Digital Prophet",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 287,
+        "fields": {
+            "discord_id": "192811745729970178",
+            "ingame_name": "Keldir",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 288,
+        "fields": {
+            "discord_id": "192811745729970178",
+            "ingame_name": "Solvarn",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 289,
+        "fields": {
+            "discord_id": "148248720595484672",
+            "ingame_name": "Archibald Trillo",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 290,
+        "fields": {
+            "discord_id": "123239930704035840",
+            "ingame_name": "clay merrill",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 291,
+        "fields": {
+            "discord_id": "123239930704035840",
+            "ingame_name": "Clay Merrill",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 292,
+        "fields": {
+            "discord_id": "123239930704035840",
+            "ingame_name": "Ama Merrill",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 293,
+        "fields": {
+            "discord_id": "258095262692540416",
+            "ingame_name": "Danada",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 294,
+        "fields": {
+            "discord_id": "431920618867523584",
+            "ingame_name": "Nyia Brooke",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 295,
+        "fields": {
+            "discord_id": "200298327198138368",
+            "ingame_name": "Riley Blakestone",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 296,
+        "fields": {
+            "discord_id": "709005589262368828",
+            "ingame_name": "Vistario",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 297,
+        "fields": {
+            "discord_id": "275846013451894785",
+            "ingame_name": "Okay Boomer",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 298,
+        "fields": {
+            "discord_id": "152236880115662848",
+            "ingame_name": "nullscan",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 299,
+        "fields": {
+            "discord_id": "152236880115662848",
+            "ingame_name": "nullkon",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 300,
+        "fields": {
+            "discord_id": "467826399307366402",
+            "ingame_name": "Tabitha75 Ru",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 301,
+        "fields": {
+            "discord_id": "467826399307366402",
+            "ingame_name": "Geesy Street",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 302,
+        "fields": {
+            "discord_id": "554206983331381249",
+            "ingame_name": "Latinum",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 303,
+        "fields": {
+            "discord_id": "554206983331381249",
+            "ingame_name": "Gooncore",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 304,
+        "fields": {
+            "discord_id": "554206983331381249",
+            "ingame_name": "Nerys",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 305,
+        "fields": {
+            "discord_id": "554206983331381249",
+            "ingame_name": "Max",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 306,
+        "fields": {
+            "discord_id": "554206983331381249",
+            "ingame_name": "Xaesar",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 307,
+        "fields": {
+            "discord_id": "168066387472941057",
+            "ingame_name": "Captain Yuzkoff",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 308,
+        "fields": {
+            "discord_id": "646509474307244065",
+            "ingame_name": "Menarus",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 309,
+        "fields": {
+            "discord_id": "599475934906679306",
+            "ingame_name": "Pink_Mingo",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 310,
+        "fields": {
+            "discord_id": "206633305561497601",
+            "ingame_name": "dogter danjeroos",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 311,
+        "fields": {
+            "discord_id": "251056484954144771",
+            "ingame_name": "F\u00e9anor Zephyran",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 312,
+        "fields": {
+            "discord_id": "182625176427560960",
+            "ingame_name": "MarcusSA",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 313,
+        "fields": {
+            "discord_id": "182625176427560960",
+            "ingame_name": "Catherine Smith",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 314,
+        "fields": {
+            "discord_id": "190865719112499201",
+            "ingame_name": "Alpha Wave",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 315,
+        "fields": {
+            "discord_id": "190865719112499201",
+            "ingame_name": "Jaxic",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 316,
+        "fields": {
+            "discord_id": "121019815866531841",
+            "ingame_name": "MrYenko",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 317,
+        "fields": {
+            "discord_id": "119264325616533504",
+            "ingame_name": "Zulric",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 318,
+        "fields": {
+            "discord_id": "119264325616533504",
+            "ingame_name": "Kelly Mi",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 319,
+        "fields": {
+            "discord_id": "119264325616533504",
+            "ingame_name": "Vincent Trevane",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 320,
+        "fields": {
+            "discord_id": "119264325616533504",
+            "ingame_name": "Hylora Trevane",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 321,
+        "fields": {
+            "discord_id": "165947034724073472",
+            "ingame_name": "Nosferatusoon",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 322,
+        "fields": {
+            "discord_id": "165947034724073472",
+            "ingame_name": "I NEED $$$",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 323,
+        "fields": {
+            "discord_id": "404305080565760011",
+            "ingame_name": "Akiosan",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 324,
+        "fields": {
+            "discord_id": "272710219065327616",
+            "ingame_name": "OvertBlue",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 325,
+        "fields": {
+            "discord_id": "184129270447079425",
+            "ingame_name": "ZiggysDuck",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 326,
+        "fields": {
+            "discord_id": "184129270447079425",
+            "ingame_name": "Ziggy Starduck",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 327,
+        "fields": {
+            "discord_id": "184474835286491137",
+            "ingame_name": "DDH Poncho",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 328,
+        "fields": {
+            "discord_id": "184474835286491137",
+            "ingame_name": "Choncho",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 329,
+        "fields": {
+            "discord_id": "179739630042742784",
+            "ingame_name": "Lutha",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 330,
+        "fields": {
+            "discord_id": "468078409675702293",
+            "ingame_name": "Big McHuge",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 331,
+        "fields": {
+            "discord_id": "301720090284392449",
+            "ingame_name": "Hoxha",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 332,
+        "fields": {
+            "discord_id": "327341896118566912",
+            "ingame_name": "IronChefRamen",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 333,
+        "fields": {
+            "discord_id": "205011469752860681",
+            "ingame_name": "Gobshyte",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 334,
+        "fields": {
+            "discord_id": "179824365402062848",
+            "ingame_name": "Tepperr",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 335,
+        "fields": {
+            "discord_id": "655637346217099273",
+            "ingame_name": "Rynder",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 336,
+        "fields": {
+            "discord_id": "159493549048594432",
+            "ingame_name": " Nova Cygni",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 337,
+        "fields": {
+            "discord_id": "315858900631158786",
+            "ingame_name": "Splash Damage",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 338,
+        "fields": {
+            "discord_id": "125786468101783552",
+            "ingame_name": "Hamon Speedwagon",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 339,
+        "fields": {
+            "discord_id": "178918191039381505",
+            "ingame_name": "Esi 04A Xien",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 340,
+        "fields": {
+            "discord_id": "178918191039381505",
+            "ingame_name": "Esi 04A",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 341,
+        "fields": {
+            "discord_id": "203287425387069440",
+            "ingame_name": "Beef Meatslab",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 342,
+        "fields": {
+            "discord_id": "203287425387069440",
+            "ingame_name": "Durt Cobain",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 343,
+        "fields": {
+            "discord_id": "203287425387069440",
+            "ingame_name": "Garf EEL-D",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 344,
+        "fields": {
+            "discord_id": "247841384885649409",
+            "ingame_name": "Aramoro",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 345,
+        "fields": {
+            "discord_id": "292364180906967041",
+            "ingame_name": "Spooge McGee",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 346,
+        "fields": {
+            "discord_id": "224606330273529859",
+            "ingame_name": "SirPhobos",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 347,
+        "fields": {
+            "discord_id": "332652708706123784",
+            "ingame_name": "Jason Shroud",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 348,
+        "fields": {
+            "discord_id": "230465655487332352",
+            "ingame_name": "Kirtar",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 349,
+        "fields": {
+            "discord_id": "430788338497355786",
+            "ingame_name": "Judge Price",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 350,
+        "fields": {
+            "discord_id": "430788338497355786",
+            "ingame_name": "Kyle Traegon",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 351,
+        "fields": {
+            "discord_id": "430788338497355786",
+            "ingame_name": "MasieMalone",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 352,
+        "fields": {
+            "discord_id": "430788338497355786",
+            "ingame_name": "Kylie Traegon",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 353,
+        "fields": {
+            "discord_id": "119164684052987908",
+            "ingame_name": "Gemma Housman",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 354,
+        "fields": {
+            "discord_id": "331624645440569346",
+            "ingame_name": "Endotherma",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 355,
+        "fields": {
+            "discord_id": "597924379216576515",
+            "ingame_name": "Ascetic Virtues",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 356,
+        "fields": {
+            "discord_id": "334913176187437074",
+            "ingame_name": "Oddh Skworll",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 357,
+        "fields": {
+            "discord_id": "132908277888450562",
+            "ingame_name": "jizzlane maxwell",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 358,
+        "fields": {
+            "discord_id": "212343715514023936",
+            "ingame_name": "Keegers",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 359,
+        "fields": {
+            "discord_id": "570055657135538186",
+            "ingame_name": "Sezen",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 360,
+        "fields": {
+            "discord_id": "332308906724294656",
+            "ingame_name": "Crab Ophile",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 361,
+        "fields": {
+            "discord_id": "332308906724294656",
+            "ingame_name": "2goose 1lake",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 362,
+        "fields": {
+            "discord_id": "404401034967121920",
+            "ingame_name": "n0manarmy",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 363,
+        "fields": {
+            "discord_id": "67119430563278848",
+            "ingame_name": "Quentin35 Beard",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 364,
+        "fields": {
+            "discord_id": "164507693787250688",
+            "ingame_name": "Richard Rears",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 365,
+        "fields": {
+            "discord_id": "283517619854639104",
+            "ingame_name": "Tyrista Slaire",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 366,
+        "fields": {
+            "discord_id": "206488701629497344",
+            "ingame_name": "scootferg",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 367,
+        "fields": {
+            "discord_id": "201245097508077569",
+            "ingame_name": "<Ennui DeBlase>",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 368,
+        "fields": {
+            "discord_id": "201245097508077569",
+            "ingame_name": "Ennui DeBlase",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 369,
+        "fields": {
+            "discord_id": "314215464685404182",
+            "ingame_name": "Vermeul",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 370,
+        "fields": {
+            "discord_id": "314215464685404182",
+            "ingame_name": "Vermz",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 371,
+        "fields": {
+            "discord_id": "314215464685404182",
+            "ingame_name": "Vermington",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 372,
+        "fields": {
+            "discord_id": "104791031479820288",
+            "ingame_name": "Tupper_",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 373,
+        "fields": {
+            "discord_id": "692906177448640533",
+            "ingame_name": "Mend1cant",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 374,
+        "fields": {
+            "discord_id": "194205083502772225",
+            "ingame_name": "Chad Whitaker",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 375,
+        "fields": {
+            "discord_id": "300381695008440320",
+            "ingame_name": "Jark Vohaul",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 376,
+        "fields": {
+            "discord_id": "309496732541255691",
+            "ingame_name": "GamerPassion",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 377,
+        "fields": {
+            "discord_id": "136591201355694081",
+            "ingame_name": "Nikolai Albrecht",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 378,
+        "fields": {
+            "discord_id": "346411401084010497",
+            "ingame_name": "Gumblepays",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 379,
+        "fields": {
+            "discord_id": "201958151732330496",
+            "ingame_name": "CHOP Refugee",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 380,
+        "fields": {
+            "discord_id": "521840247810686978",
+            "ingame_name": "Mino O",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 381,
+        "fields": {
+            "discord_id": "714224580738154516",
+            "ingame_name": "Fanonist",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 382,
+        "fields": {
+            "discord_id": "714224580738154516",
+            "ingame_name": "Frida Marx",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 383,
+        "fields": {
+            "discord_id": "202150057598910475",
+            "ingame_name": "Snowmank",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 384,
+        "fields": {
+            "discord_id": "185509145246564354",
+            "ingame_name": "Sourne",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 385,
+        "fields": {
+            "discord_id": "528202129064853534",
+            "ingame_name": "brown widow",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 386,
+        "fields": {
+            "discord_id": "528202129064853534",
+            "ingame_name": "house centipede",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 387,
+        "fields": {
+            "discord_id": "528202129064853534",
+            "ingame_name": "black fly",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 388,
+        "fields": {
+            "discord_id": "440643013728010262",
+            "ingame_name": "SheGuevara",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 389,
+        "fields": {
+            "discord_id": "559870418287329283",
+            "ingame_name": "KrisWolfe",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 390,
+        "fields": {
+            "discord_id": "559870418287329283",
+            "ingame_name": "Jack7 Situ",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 391,
+        "fields": {
+            "discord_id": "559870418287329283",
+            "ingame_name": "Irma48 Brooke",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 392,
+        "fields": {
+            "discord_id": "95634261922553856",
+            "ingame_name": "Adonis61 Zou",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 393,
+        "fields": {
+            "discord_id": "149312933938069514",
+            "ingame_name": "Rob Rockley",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 394,
+        "fields": {
+            "discord_id": "132391763167019009",
+            "ingame_name": "Alehkhs",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 395,
+        "fields": {
+            "discord_id": "201147268286382081",
+            "ingame_name": "Good Citizen",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 396,
+        "fields": {
+            "discord_id": "649340976581836823",
+            "ingame_name": "Byron75 Yue",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 397,
+        "fields": {
+            "discord_id": "649340976581836823",
+            "ingame_name": "Wunnadem",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 398,
+        "fields": {
+            "discord_id": "652630043780055044",
+            "ingame_name": "Kolodny",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 399,
+        "fields": {
+            "discord_id": "197970154611539968",
+            "ingame_name": "Alf",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 400,
+        "fields": {
+            "discord_id": "748632231110639666",
+            "ingame_name": "ReindeerFlotilla",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 401,
+        "fields": {
+            "discord_id": "137003190024404992",
+            "ingame_name": "Hezzy",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 402,
+        "fields": {
+            "discord_id": "114581892266852356",
+            "ingame_name": "Hazdoc",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 403,
+        "fields": {
+            "discord_id": "167587023035695104",
+            "ingame_name": "Less Wrecks",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 404,
+        "fields": {
+            "discord_id": "338496737423392769",
+            "ingame_name": "Khasai",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 405,
+        "fields": {
+            "discord_id": "179177347084189696",
+            "ingame_name": "trunkh",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 406,
+        "fields": {
+            "discord_id": "722220032620232805",
+            "ingame_name": "Doc Spaceman",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 407,
+        "fields": {
+            "discord_id": "127644528969515009",
+            "ingame_name": "Cake Donut",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 408,
+        "fields": {
+            "discord_id": "760369166057472020",
+            "ingame_name": "Marlon92 Dongf",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 409,
+        "fields": {
+            "discord_id": "760369166057472020",
+            "ingame_name": "Wiki Slayer",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 410,
+        "fields": {
+            "discord_id": "277535352984436736",
+            "ingame_name": "Donal Graeme",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 411,
+        "fields": {
+            "discord_id": "632720586619224064",
+            "ingame_name": "xXxSTR8~EDGExXx",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 412,
+        "fields": {
+            "discord_id": "696951499598856202",
+            "ingame_name": "ElCato",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 413,
+        "fields": {
+            "discord_id": "151976163307290624",
+            "ingame_name": "Zynak Xyr",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 414,
+        "fields": {
+            "discord_id": "449504091400437760",
+            "ingame_name": "Lancaster.dodd",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 415,
+        "fields": {
+            "discord_id": "234400090494730241",
+            "ingame_name": "Behotti",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 416,
+        "fields": {
+            "discord_id": "264044077811630080",
+            "ingame_name": "HoldOntoYerButts",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 417,
+        "fields": {
+            "discord_id": "357003112940306432",
+            "ingame_name": "Nivro",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 418,
+        "fields": {
+            "discord_id": "132177393589813249",
+            "ingame_name": "Bonghitz Jr",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 419,
+        "fields": {
+            "discord_id": "165996196740071424",
+            "ingame_name": "Zell Shadowcast",
+            "corp": "HONK"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 420,
+        "fields": {
+            "discord_id": "142846487582212096",
+            "ingame_name": "Airbus A380-800",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 421,
+        "fields": {
+            "discord_id": "159974003451232256",
+            "ingame_name": "w00tles",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 422,
+        "fields": {
+            "discord_id": "573073914582925316",
+            "ingame_name": "The Brutalizer",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 423,
+        "fields": {
+            "discord_id": "168113076204208128",
+            "ingame_name": "Scoot Tatum",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 424,
+        "fields": {
+            "discord_id": "285611042942222337",
+            "ingame_name": "TruAvatar",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 425,
+        "fields": {
+            "discord_id": "283708674357198853",
+            "ingame_name": "Kelmantis",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 426,
+        "fields": {
+            "discord_id": "95784650613456896",
+            "ingame_name": "Rhoruni",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 427,
+        "fields": {
+            "discord_id": "95784650613456896",
+            "ingame_name": "Rhorunissa",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 428,
+        "fields": {
+            "discord_id": "137364227202482176",
+            "ingame_name": "Dirty Ape",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 429,
+        "fields": {
+            "discord_id": "132641340868526080",
+            "ingame_name": "Jp Morphite",
+            "corp": "MEAN"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 430,
+        "fields": {
+            "discord_id": "184557597595140096",
+            "ingame_name": "Arcee PG",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 431,
+        "fields": {
+            "discord_id": "168092964017537034",
+            "ingame_name": "Wilhelm Jackson",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 432,
+        "fields": {
+            "discord_id": "329019936431144970",
+            "ingame_name": "Dewey Cheetham",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 433,
+        "fields": {
+            "discord_id": "329019936431144970",
+            "ingame_name": "Eddie Van Honkin",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 434,
+        "fields": {
+            "discord_id": "279934728608677888",
+            "ingame_name": "SpaceGeneral",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 435,
+        "fields": {
+            "discord_id": "207575414191685633",
+            "ingame_name": "Atomic Bongo",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 436,
+        "fields": {
+            "discord_id": "147550578174722049",
+            "ingame_name": "Duke4 Duanmu",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 437,
+        "fields": {
+            "discord_id": "122246463869681664",
+            "ingame_name": "Bird Mang",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 438,
+        "fields": {
+            "discord_id": "122246463869681664",
+            "ingame_name": "Bird Mane",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 439,
+        "fields": {
+            "discord_id": "168402042673561601",
+            "ingame_name": "Chester Cheeto",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 440,
+        "fields": {
+            "discord_id": "174286813198942208",
+            "ingame_name": "Sihne",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 441,
+        "fields": {
+            "discord_id": "170980955727593472",
+            "ingame_name": "Foghorn Leghorn",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 442,
+        "fields": {
+            "discord_id": "194634621986668545",
+            "ingame_name": "Rick Flairida",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 443,
+        "fields": {
+            "discord_id": "247493674659741706",
+            "ingame_name": "Seliska",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 444,
+        "fields": {
+            "discord_id": "200625542087573504",
+            "ingame_name": "Ligma Bchads",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 445,
+        "fields": {
+            "discord_id": "411778864621289473",
+            "ingame_name": "Sacromus",
+            "corp": "HAUS"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 446,
+        "fields": {
+            "discord_id": "214566355662405633",
+            "ingame_name": "Metal Merchant",
+            "corp": "XBUX"
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 447,
+        "fields": {
+            "discord_id": "130506339800711168",
+            "ingame_name": "Marowak",
+            "corp": "HAUS"
+        }
+    }
+]
