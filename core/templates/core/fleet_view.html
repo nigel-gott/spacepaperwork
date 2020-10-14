@@ -4,5 +4,10 @@
 {% block body %}
 <h4>{{fleet.name}}</h4>
 Run by {{fleet.fc}}
+<ul>
+{% for fleet_member in fleet_members %}
+<li>{{fleet_member.character.name}}</li>
+{% endfor %}
+</ul>
 
 {% endblock %}

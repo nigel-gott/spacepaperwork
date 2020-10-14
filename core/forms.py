@@ -16,6 +16,10 @@ class SignupFormWithTimezone(SignupForm):
         return user
 
 
+class JoinFleetForm(forms.Form):
+    character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0)
+
+
 class FleetForm(forms.Form):
     name = forms.CharField(max_length=100)
     fleet_type = forms.ModelChoiceField(queryset=FleetType.objects.all(), initial=0)
