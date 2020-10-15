@@ -4,14 +4,16 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
+from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
 
 from core.forms import FleetForm, SettingsForm, JoinFleetForm
 from core.models import Fleet, GooseUser, FleetMember, Character
 
-
 # Create your views here.
+
+login_url = reverse_lazy('discord_login')
 
 
 class SettingsView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
@@ -25,7 +27,7 @@ class SettingsView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
         return get_object_or_404(GooseUser, pk=self.request.user.id)
 
 
-@login_required(login_url='/accounts/discord/login/')
+@login_required(login_url=login_url)
 def fleet(request):
     active_fleets = active_fleets_query()
     context = {'fleets': active_fleets, 'num_active_fleets': len(active_fleets)}
@@ -48,14 +50,14 @@ def active_fleets_query():
 # future_fleets = Fleet.objects.filter(
 #     Q(start__gt=now))
 
-@login_required(login_url='/accounts/discord/login/')
+@login_required(login_url=login_url)
 def fleet_view(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     fleet_members = f.fleetmember_set.all()
     return render(request, 'core/fleet_view.html', {'fleet': f, 'fleet_members': fleet_members})
 
 
-@login_required(login_url='/accounts/discord/login/')
+@login_required(login_url=login_url)
 def fleet_join(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     if request.method == 'POST':
@@ -68,7 +70,7 @@ def fleet_join(request, pk):
             )
             new_fleet.full_clean()
             new_fleet.save()
-            return HttpResponseRedirect('/fleet/' + str(pk))
+            return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
 
     else:
         form = JoinFleetForm()
@@ -79,7 +81,7 @@ def fleet_join(request, pk):
     return render(request, 'core/join_fleet_form.html', {'form': form, 'fleet': f})
 
 
-@login_required(login_url='/accounts/discord/login/')
+@login_required(login_url=login_url)
 def fleet_create(request):
     if request.method == 'POST':
         form = FleetForm(request.POST)
@@ -102,7 +104,7 @@ def fleet_create(request):
                               )
             new_fleet.full_clean()
             new_fleet.save()
-            return HttpResponseRedirect('/fleet/')
+            return HttpResponseRedirect(reverse('fleet'))
 
     else:
         now = timezone.localtime(timezone.now())

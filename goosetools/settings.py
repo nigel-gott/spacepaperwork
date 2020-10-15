@@ -26,6 +26,7 @@ env = environ.Env(
     DEBUG=(bool, False),
     USE_X_FORWARDED_HOST=(bool, False),
     USE_HTTPS=(bool, False),
+    SITE_ID=(int, 3),
 )
 # reading .env file
 environ.Env.read_env()
@@ -87,7 +88,7 @@ INSTALLED_APPS = [
     'django_filters',
 
 ]
-SITE_ID = 3
+SITE_ID = env('SITE_ID')
 SOCIALACCOUNT_PROVIDERS = {
     'discord': {
         # For each OAuth based provider, either add a ``SocialApp``
