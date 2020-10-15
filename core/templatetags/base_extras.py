@@ -21,7 +21,12 @@ def active_fleets_query():
 def num_active_fleets():
     return len(active_fleets_query())
 
+
 @register.simple_tag
 def num_fleet_members(fleet_id):
     return len(FleetMember.objects.filter(fleet=fleet_id))
 
+
+@register.simple_tag
+def has_fleet_member(fleet, user):
+    return fleet.has_member(user)

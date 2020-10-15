@@ -10,6 +10,9 @@ from dateutil.relativedelta import relativedelta
 class GooseUser(AbstractUser):
     timezone = TimeZoneField(default='Europe/London')
 
+    def discord_uid(self):
+        return self.socialaccount_set.only()[0].uid
+
     def discord_avatar_url(self):
         """
         :return: Returns the users discord avatar image link or false if they do not have one or an error occurs.
@@ -85,6 +88,11 @@ class Fleet(models.Model):
     description = models.TextField(blank=True, null=True)
     location = models.TextField(blank=True, null=True)
     expected_duration = models.TextField(blank=True, null=True)
+
+    def has_member(self, user):
+        uid = user.discord_uid()
+        num_characters_in_fleet = len(FleetMember.objects.filter(fleet=self, character__discord_id=uid))
+        return num_characters_in_fleet > 0
 
     def human_readable_started(self):
         now = timezone.now()
