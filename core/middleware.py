@@ -22,6 +22,5 @@ class TimezoneMiddleware:
             timezone.activate(tzname)
         else:
             timezone.deactivate()
-        print(f"timezone = {timezone.now()}", file=sys.stderr)
         return self.get_response(request)
 
