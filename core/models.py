@@ -13,6 +13,9 @@ class GooseUser(AbstractUser):
     def discord_uid(self):
         return self.socialaccount_set.only()[0].uid
 
+    def characters(self):
+        return Character.objects.filter(discord_id=self.discord_uid())
+
     def discord_avatar_url(self):
         """
         :return: Returns the users discord avatar image link or false if they do not have one or an error occurs.

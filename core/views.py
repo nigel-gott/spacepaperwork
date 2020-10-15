@@ -74,11 +74,16 @@ def fleet_join(request, pk):
 
     else:
         form = JoinFleetForm()
-    uid = request.user.socialaccount_set.only()[0].uid
-    existing = FleetMember.objects.filter(fleet=pk).values('character')
-    characters = Character.objects.filter(discord_id=uid).exclude(pk__in=existing)
+    characters = non_member_chars(pk, request.user)
     form.fields['character'].queryset = characters
     return render(request, 'core/join_fleet_form.html', {'form': form, 'fleet': f})
+
+
+def non_member_chars(fleet_id, user):
+    uid = user.socialaccount_set.only()[0].uid
+    existing = FleetMember.objects.filter(fleet=fleet_id).values('character')
+    characters = Character.objects.filter(discord_id=uid).exclude(pk__in=existing)
+    return characters
 
 
 @login_required(login_url=login_url)
@@ -104,10 +109,19 @@ def fleet_create(request):
                               )
             new_fleet.full_clean()
             new_fleet.save()
+
+            fc_member = FleetMember(
+                character=form.cleaned_data['fc_character'],
+                fleet=new_fleet,
+                joined_at=timezone.now()
+            )
+            fc_member.full_clean()
+            fc_member.save()
             return HttpResponseRedirect(reverse('fleet'))
 
     else:
         now = timezone.localtime(timezone.now())
         form = FleetForm(initial={'start_date': now.date(), 'start_time': now.time()})
+        form.fields['fc_character'].queryset = request.user.characters()
 
     return render(request, 'core/fleet_form.html', {'form': form})

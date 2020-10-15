@@ -21,6 +21,7 @@ class JoinFleetForm(forms.Form):
 
 
 class FleetForm(forms.Form):
+    fc_character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0)
     name = forms.CharField(max_length=100)
     fleet_type = forms.ModelChoiceField(queryset=FleetType.objects.all(), initial=0)
     description = forms.CharField(required=False)

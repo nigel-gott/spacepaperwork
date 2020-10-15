@@ -11,15 +11,21 @@
     <ul class="collection">
         {% for fleet in fleets %}
         <li class="collection-item avatar">
+            {% has_fleet_member fleet user as is_member %}
             {% if fleet.fc.discord_avatar_url %}
             <img src="{{ fleet.fc.discord_avatar_url }}" alt="" class="circle">
             {% else %}
             <i class="circle material-icons">error</i>
             {% endif %}
             <span class="title">
-                <i class="material-icons {{fleet.fleet_type.material_colour}}">{{fleet.fleet_type.material_icon}}</i>
-                <a href="{% url 'fleet_view' fleet.id %}">{{ fleet.name }}</a> run by {{fleet.fc.username}}
-                - {% num_fleet_members fleet.id %} Members
+                <a href="{% url 'fleet_view' fleet.id %}"><i
+                        class="material-icons {{fleet.fleet_type.material_colour}}">{{fleet.fleet_type.material_icon}}</i>
+                    {{ fleet.name }} run by {{fleet.fc.username}}
+                    - {% num_fleet_members fleet.id %} Members
+                    {% if is_member %}
+                    (including you!)
+                    {% endif %}
+                <i class='material-icons tiny'>info</i></a>
             </span>
             <div class="divider" style="width:50%;"></div>
             <span class="blue-grey-text darken-4">{{fleet.human_readable_started}}
@@ -34,26 +40,17 @@
 
 
             <p>
-            <br/>
-            {{fleet.description}}<br/>
-            {{fleet.location}}
+                <br/>
+                {{fleet.description}}<br/>
+                {{fleet.location}}
             </p>
-            {% if fleet.fc.id == user.id %}
-            <a class="secondary-content wrapper waves-effect waves-light btn orange darken-1"
-               href="{% url 'fleet_edit' fleet.id %}"><i
-                    class='material-icons right'>edit</i>Edit Fleet</a>
-            {% else %}
-            {% has_fleet_member fleet user as is_member %}
             {% if is_member %}
-            <a class="secondary-content waves-effect waves-light btn green"
-               href="{% url 'fleet_view' fleet.id %}"><i class='material-icons right'>info</i>Fleet Info</a>
+            <a class="secondary-content waves-effect waves-light btn blue"
+               href="{% url 'fleet_view' fleet.id %}"><i class='material-icons right'>info</i>Loot Tracker</a>
             {% else %}
             <a class="secondary-content waves-effect waves-light btn purple lighten-2"
                href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Join Fleet</a>
             {% endif %}
-
-            {% endif %}
-
 
             {% endfor %}
     </ul>
