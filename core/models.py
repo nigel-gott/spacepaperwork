@@ -15,7 +15,10 @@ class GooseUser(AbstractUser):
     timezone = TimeZoneField(default='Europe/London')
 
     def discord_uid(self):
-        return self.socialaccount_set.only()[0].uid
+        if len(self.socialaccount_set.all()) == 0:
+            return 0
+        else:
+            return self.socialaccount_set.only()[0].uid
 
     def discord_username(self):
         social_account = self.socialaccount_set.only()[0].extra_data
