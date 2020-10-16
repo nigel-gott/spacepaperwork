@@ -101,6 +101,7 @@ class Fleet(models.Model):
     )
     name = models.TextField()
     fleet_type = models.ForeignKey(FleetType, on_delete=models.CASCADE)
+    gives_shares_to_alts = models.BooleanField(default=False)
     start = models.DateTimeField()
     end = models.DateTimeField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)

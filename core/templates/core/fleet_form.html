@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load materializecss %}
 {% block body %}
 <h4>Start a New Fleet</h4>
 <div class="divider"></div>
@@ -22,30 +23,39 @@
     </div>
     {% endif %}
 
-    <div class="row">
-        <!-- Display Form -->
-        <form action="" method="post" class="col s12">
-            {% csrf_token %}
-            {% for field in form %}
-            <div class="row">
-                <div class="input-field col s12">
-                    {{ field.errors }}
-                    {{ field }}
-                    {{ field.label_tag }}
-                    {% if field.help_text %}
-                    <span class="helper-text" data-error="wrong" data-success="right">
-                        {{ field.help_text|safe }}
-                    </span>
-                    {% endif %}
-                </div>
-            </div>
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="row">
+            {{ form.name|materializecss:'s6 m6, icon=label'}}
+            {{ form.fc_character|materializecss:'s6 m6, icon=person'}}
+        </div>
+        <div class="row">
+            {{ form.location|materializecss:'s12 m12, icon=add_location'}}
+        </div>
+        <div class="row">
+            {{ form.description|materializecss:'s12 m12, icon=description'}}
+        </div>
+        <div class="row">
+            {{ form.fleet_type|materializecss:'s6 m6, icon=directions_boat'}}
+            {{ form.give_shares_to_alts|materializecss:'s6 m6, icon=group_add'}}
+        </div>
+        <div class="row">
+            {{ form.start_date|materializecss:'s6 m6, icon=date_range'}}
+            {{ form.start_time|materializecss:'s6 m6, icon=access_time'}}
+        </div>
+        <div class="row">
+            {{ form.expected_duration|materializecss:'s12 m12, icon=timelapse'}}
+        </div>
+        <div class="row">
+            {{ form.end_date|materializecss:'s6 m6, icon=date_range'}}
+            {{ form.end_time|materializecss:'s6 m6, icon=access_time'}}
+        </div>
+        <button type="submit" class="btn waves-effect waves-light" value="Submit">Start
+            <i class="material-icons right">send</i>
+        </button>
 
-            {% endfor %}
-            <button type="submit" class="btn waves-effect waves-light" value="Submit">Start
-                <i class="material-icons right">send</i>
-            </button>
-        </form>
-    </div>
+    </form>
+
     {% endif %}
 </div>
 

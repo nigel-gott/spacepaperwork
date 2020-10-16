@@ -25,14 +25,22 @@
                     {% endif %}
                 </b>
                 <p>
+                    <i>
+                    {% if fleet.give_shares_to_alts %}
+                    This fleet gives loot shares to alts.
+                    {% else %}
+                    In this fleet alts are not given loot shares.
+                    {% endif %}
+                    </i>
+                        <br/>
                     {{ fleet.description }}<br/>
-                    {{ fleet.location }}
+                    {{ fleet.location }}<br/>
                 </p>
             </div>
             <div class="card-action">
 
                 {% if is_member %}
-                {% if can_join_alts %}
+                {% if can_join_alts and fleet.give_share_to_alts %}
                 <a class="waves-effect waves-light btn purple lighten-2"
                    href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Add Another Alt</a>
                 {% endif %}

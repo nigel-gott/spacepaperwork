@@ -10,16 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
-from pathlib import Path
-
-import pytz
-import requests
-from django.utils import timezone
-from moneyed.localization import _FORMATTER
 from decimal import ROUND_HALF_EVEN
+from pathlib import Path
 
 import environ
 import moneyed
+from moneyed.localization import _FORMATTER
 
 env = environ.Env(
     # set casting, default value
@@ -84,8 +80,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.discord',
     'debug_toolbar',
     'django_activeurl',
-    'django_tables2',
-    'django_filters',
+    'materializecssform',
 
 ]
 SITE_ID = env('SITE_ID')

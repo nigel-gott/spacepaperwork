@@ -3,5 +3,5 @@
   padding-left: 20px;
 }
 
-:required { background: #e0f7fa !important; }
 .errorlist { color: #b71c1c !important; }
+.help-block { color: #b71c1c !important; }

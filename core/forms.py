@@ -24,6 +24,9 @@ class FleetForm(forms.Form):
     fc_character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0)
     name = forms.CharField(max_length=100)
     fleet_type = forms.ModelChoiceField(queryset=FleetType.objects.all(), initial=0)
+    give_shares_to_alts = forms.BooleanField(initial=False, widget=forms.CheckboxInput(attrs={
+
+    }))
     description = forms.CharField(required=False)
     location = forms.CharField(required=False)
     start_date = forms.DateField(
@@ -32,7 +35,7 @@ class FleetForm(forms.Form):
         },
             format='%b %d, %Y'
         ),
-        input_formats=['%b %d, %Y'],
+        input_formats=['%b. %d, %Y'],
     )
     start_time = forms.TimeField(
         widget=forms.TimeInput(attrs={
@@ -52,7 +55,7 @@ class FleetForm(forms.Form):
         },
             format='%b %d, %Y'
         ),
-        input_formats=['%b %d, %Y'],
+        input_formats=['%b. %d, %Y'],
     )
     end_time = forms.TimeField(
         required=False,
