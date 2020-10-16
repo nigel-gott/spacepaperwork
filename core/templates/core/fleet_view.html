@@ -3,6 +3,7 @@
 
 {% block body %}
 {% has_fleet_member fleet user as is_member %}
+{% has_admin fleet user as admin %}
 {% still_can_join_alts fleet user as can_join_alts %}
 <div class="row">
     <div class="col s12 m12">
@@ -26,13 +27,13 @@
                 </b>
                 <p>
                     <i>
-                    {% if fleet.gives_shares_to_alts %}
-                    This fleet gives loot shares to alts.
-                    {% else %}
-                    In this fleet alts are not given loot shares.
-                    {% endif %}
+                        {% if fleet.gives_shares_to_alts %}
+                        This fleet gives loot shares to alts.
+                        {% else %}
+                        In this fleet alts are not given loot shares.
+                        {% endif %}
                     </i>
-                        <br/>
+                    <br/>
                     {{ fleet.description }}<br/>
                     {{ fleet.location }}<br/>
                 </p>
@@ -49,7 +50,7 @@
                    href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Join Fleet</a>
                 {% endif %}
                 {% endif %}
-                {% if fleet.fc == user %}
+                {% if admin %}
                 <a class="waves-effect waves-light btn orange darken-2"
                    href="{% url 'fleet_edit' fleet.id %}"><i class='material-icons right'>edit</i>Edit Fleet</a>
                 <a class="waves-effect waves-light btn red darken-2"
@@ -80,11 +81,29 @@
                 </td>
                 {% endif %}
                 <td>{{member.character}}</td>
-                <td>{% if member.character.discord_id == user.discord_uid or user == fleet.fc %}
+                <td>
 
-                    <a title="Leave Fleet" class="red darken-3 small" href="{% url 'fleet_leave' member.id %}"><i
-                            class='material-icons right red-text'>cancel</i></a>
-                    {% endif %}
+                        {% if member.character.discord_id == user.discord_uid or admin %}
+
+                            {% if admin %}
+                            <a class="red-text text-darken-3"
+                               href="{% url 'fleet_leave' member.id %}">Remove From Fleet</a>
+                            {% else %}
+                            <a class="red-text text-darken-3"
+                               href="{% url 'fleet_leave' member.id %}">Leave</a>
+                            {% endif %}
+                        {% endif %}
+                    <br/>
+                        {% if admin %}
+
+                            {% if member.admin_permissions %}
+                            <a class="orange-text text-darken-2" title="Remove Admin"
+                               href="{% url 'fleet_remove_admin' member.id %}">Remove Admin</a>
+                            {% else %}
+                            <a class="orange-text text-darken-2"
+                               href="{% url 'fleet_make_admin' member.id %}">Give Admin</a>
+                            {% endif %}
+                        {% endif %}
                 </td>
             </tr>
             {% endfor %}

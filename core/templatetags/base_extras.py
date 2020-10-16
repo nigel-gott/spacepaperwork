@@ -36,6 +36,12 @@ def has_fleet_member(fleet, user):
 def still_can_join_alts(fleet, user):
     return fleet.still_can_join_alts(user)
 
+
 @register.simple_tag
 def can_join(fleet, user):
     return fleet.can_join(user)
+
+
+@register.simple_tag
+def has_admin(fleet, user):
+    return fleet.has_admin(user)

@@ -141,6 +141,16 @@ class Fleet(models.Model):
     location = models.TextField(blank=True, null=True)
     expected_duration = models.TextField(blank=True, null=True)
 
+    def has_admin(self, user):
+        uid = user.discord_uid()
+        members = FleetMember.objects.filter(fleet=self, character__discord_id=uid)
+        if user.is_staff:
+            return True
+        for member in members:
+            if member.admin_permissions:
+                return True
+        return self.fc == user
+
     def has_member(self, user):
         uid = user.discord_uid()
         num_characters_in_fleet = len(FleetMember.objects.filter(fleet=self, character__discord_id=uid))
@@ -151,7 +161,7 @@ class Fleet(models.Model):
         num_chars = len(Character.objects.filter(discord_id=user.discord_uid()))
         num_characters_in_fleet = len(FleetMember.objects.filter(fleet=self, character__discord_id=uid))
         return not self.in_the_past() and self.gives_shares_to_alts and num_characters_in_fleet > 0 and (
-                    num_chars - num_characters_in_fleet) > 0
+                num_chars - num_characters_in_fleet) > 0
 
     def in_the_past(self):
         now = timezone.now()
@@ -215,3 +225,4 @@ class FleetMember(models.Model):
     character = models.ForeignKey(Character, on_delete=models.CASCADE)
     joined_at = models.DateTimeField(blank=True, null=True)
     left_at = models.DateTimeField(blank=True, null=True)
+    admin_permissions = models.BooleanField(default=False)

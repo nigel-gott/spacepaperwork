@@ -38,14 +38,14 @@ def fleet(request):
 @login_required(login_url=login_url)
 def fleet_past(request):
     past_fleets = past_fleets_query()
-    context = {'fleets': past_fleets, 'header':'Past Fleets'}
+    context = {'fleets': past_fleets, 'header': 'Past Fleets'}
     return render(request, 'core/fleet.html', context)
 
 
 @login_required(login_url=login_url)
 def fleet_future(request):
     future_fleets = future_fleets_query()
-    context = {'fleets': future_fleets, 'header':'Future Fleets'}
+    context = {'fleets': future_fleets, 'header': 'Future Fleets'}
     return render(request, 'core/fleet.html', context)
 
 
@@ -79,7 +79,7 @@ def fleet_view(request, pk):
 @login_required(login_url=login_url)
 def fleet_end(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
-    if f.fc == request.user:
+    if f.has_admin(request.user):
         f.end = timezone.now()
         f.full_clean()
         f.save()
@@ -87,6 +87,29 @@ def fleet_end(request, pk):
         return HttpResponseForbidden()
     return HttpResponseRedirect(reverse('fleet'))
 
+
+@login_required(login_url=login_url)
+def fleet_make_admin(request, pk):
+    f = get_object_or_404(FleetMember, pk=pk)
+    if f.fleet.has_admin(request.user):
+        f.admin_permissions = True
+        f.full_clean()
+        f.save()
+    else:
+        return HttpResponseForbidden()
+    return HttpResponseRedirect(reverse('fleet_view', args=[f.fleet.pk]))
+
+
+@login_required(login_url=login_url)
+def fleet_remove_admin(request, pk):
+    f = get_object_or_404(FleetMember, pk=pk)
+    if f.fleet.has_admin(request.user):
+        f.admin_permissions = False
+        f.full_clean()
+        f.save()
+    else:
+        return HttpResponseForbidden()
+    return HttpResponseRedirect(reverse('fleet_view', args=[f.fleet.pk]))
 
 @login_required(login_url=login_url)
 def fleet_join(request, pk):
@@ -149,7 +172,8 @@ def fleet_create(request):
             fc_member = FleetMember(
                 character=form.cleaned_data['fc_character'],
                 fleet=new_fleet,
-                joined_at=timezone.now()
+                joined_at=timezone.now(),
+                admin_permissions=True
             )
             fc_member.full_clean()
             fc_member.save()
@@ -166,6 +190,8 @@ def fleet_create(request):
 @login_required(login_url=login_url)
 def fleet_edit(request, pk):
     existing_fleet = Fleet.objects.get(pk=pk)
+    if not existing_fleet.has_admin(request.user):
+        return HttpResponseForbidden()
     if request.method == 'POST':
         form = FleetForm(request.POST)
         if form.is_valid():
