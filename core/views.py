@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
@@ -49,6 +49,15 @@ def active_fleets_query():
 # old_fleets = Fleet.objects.filter(Q(end__lte=now)).order_by('-start')
 # future_fleets = Fleet.objects.filter(
 #     Q(start__gt=now))
+@login_required(login_url=login_url)
+def fleet_leave(request, pk):
+    member = get_object_or_404(FleetMember, pk=pk)
+    if member.character.discord_id == request.user.discord_uid() or request.user == member.fleet.fc:
+        member.delete()
+        return HttpResponseRedirect(reverse('fleet_view', args=[member.fleet.pk]))
+    else:
+        return HttpResponseForbidden()
+
 
 @login_required(login_url=login_url)
 def fleet_view(request, pk):

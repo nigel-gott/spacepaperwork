@@ -30,3 +30,8 @@ def num_fleet_members(fleet_id):
 @register.simple_tag
 def has_fleet_member(fleet, user):
     return fleet.has_member(user)
+
+
+@register.simple_tag
+def still_can_join_alts(fleet, user):
+    return fleet.still_can_join_alts(user)

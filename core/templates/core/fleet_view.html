@@ -2,6 +2,8 @@
 {% load base_extras %}
 
 {% block body %}
+{% has_fleet_member fleet user as is_member %}
+{% still_can_join_alts fleet user as can_join_alts %}
 <div class="row">
     <div class="col s12 m12">
         <div class="card blue-grey darken-1">
@@ -28,37 +30,54 @@
                 </p>
             </div>
             <div class="card-action">
-                <a href="#">This is a link</a>
-                <a href="#">This is a link</a>
+
+                {% if is_member %}
+                {% if can_join_alts %}
+                <a class="waves-effect waves-light btn purple lighten-2"
+                   href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Add Another Alt</a>
+                {% endif %}
+                {% else %}
+                <a class="waves-effect waves-light btn purple lighten-2"
+                   href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Join Fleet</a>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 <div class="row">
     <div class="col s6 m6">
-        <ul class="collection with-header">
-            <li class="collection-header">
-                <h6>Fleet Members</h6>
-            </li>
+        <h5>Fleet Members</h5>
+        <table>
+            <thead>
+            <th>Discord User</th>
+            <th>Ingame Character</th>
+            <th>Actions</th>
+            </thead>
+            <tbody>
             {% for discord_id, members in fleet_members_by_id.items %}
-            {% with first_char=members.0.character%}
-            <li class="collection-item avatar">
-                <img src="{{ first_char.discord_avatar_url }}" alt="" class="circle">
-                <span class="Title">{{first_char.discord_username}}</span>
-                <p>Characters:
-                <ul>
-                    {% for member in members %}
-                    <li>{{member.character.ingame_name}}</li>
-                    {% endfor %}
-                </ul>
-                </p>
-            </li>
-            {% endwith %}
+            {% for member in members %}
+            <tr>
+                {% if forloop.first %}
+                <td rowspan="{{members|length}}"><img src="{{ member.character.discord_avatar_url }}?size=32" alt=""
+                                                      class="circle">
+                    {{member.character.discord_username}}
+                </td>
+                {% endif %}
+                <td>{{member.character}}</td>
+                <td>{% if member.character.discord_id == user.discord_uid or user == fleet.fc %}
+
+                    <a title="Leave Fleet" class="red darken-3 small" href="{% url 'fleet_leave' member.id %}"><i
+                            class='material-icons right red-text'>cancel</i></a>
+                    {% endif %}
+                </td>
+            </tr>
             {% endfor %}
-        </ul>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
     <div class="col s6 m6">
-        Other stuff goes here
+        <h5>Loot Groups</h5>
     </div>
 
 </div>

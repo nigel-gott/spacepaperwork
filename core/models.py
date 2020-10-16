@@ -112,6 +112,12 @@ class Fleet(models.Model):
         num_characters_in_fleet = len(FleetMember.objects.filter(fleet=self, character__discord_id=uid))
         return num_characters_in_fleet > 0
 
+    def still_can_join_alts(self, user):
+        uid = user.discord_uid()
+        num_chars = len(Character.objects.filter(discord_id=user.discord_uid()))
+        num_characters_in_fleet = len(FleetMember.objects.filter(fleet=self, character__discord_id=uid))
+        return num_chars - num_characters_in_fleet > 0
+
     def human_readable_started(self):
         now = timezone.now()
         difference = self.start - now
