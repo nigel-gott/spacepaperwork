@@ -54,7 +54,12 @@ def active_fleets_query():
 def fleet_view(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     fleet_members = f.fleetmember_set.all()
-    return render(request, 'core/fleet_view.html', {'fleet': f, 'fleet_members': fleet_members})
+    by_discord_id = {}
+    for member in fleet_members:
+        if member.character.discord_id not in by_discord_id:
+            by_discord_id[member.character.discord_id] = []
+        by_discord_id[member.character.discord_id].append(member)
+    return render(request, 'core/fleet_view.html', {'fleet': f, 'fleet_members_by_id': by_discord_id})
 
 
 @login_required(login_url=login_url)

@@ -1,13 +1,67 @@
 {% extends "core/base.html" %}
-{% load render_table from django_tables2 %}
+{% load base_extras %}
 
 {% block body %}
-<h4>{{fleet.name}}</h4>
-Run by {{fleet.fc}}
-<ul>
-{% for fleet_member in fleet_members %}
-<li>{{fleet_member.character}}</li>
-{% endfor %}
-</ul>
+<div class="row">
+    <div class="col s12 m12">
+        <div class="card blue-grey darken-1">
+            <div class="card-content white-text">
+          <span class="card-title">
+            {% if fleet.fc.discord_avatar_url %}
+            <img src="{{ fleet.fc.discord_avatar_url }}?size=64" alt="" class="circle">
+            {% else %}
+            <i class="circle material-icons">error</i>
+            {% endif %}
+            {{fleet.name}} run by {{fleet.fc.username}}</span>
+                <b>{{fleet.human_readable_started}}
+                    {% if fleet.human_readable_ended %}
+                    - {{fleet.human_readable_ended}}
+                    {% else %}
+                    {% if fleet.expected_duration %}
+                    - {{fleet.expected_duration}}
+                    {% endif %}
+                    {% endif %}
+                </b>
+                <p>
+                    {{ fleet.description }}<br/>
+                    {{ fleet.location }}
+                </p>
+            </div>
+            <div class="card-action">
+                <a href="#">This is a link</a>
+                <a href="#">This is a link</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col s6 m6">
+        <ul class="collection with-header">
+            <li class="collection-header">
+                <h6>Fleet Members</h6>
+            </li>
+            {% for discord_id, members in fleet_members_by_id.items %}
+            {% with first_char=members.0.character%}
+            <li class="collection-item avatar">
+                <img src="{{ first_char.discord_avatar_url }}" alt="" class="circle">
+                <span class="Title">{{first_char.discord_username}}</span>
+                <p>Characters:
+                <ul>
+                    {% for member in members %}
+                    <li>{{member.character.ingame_name}}</li>
+                    {% endfor %}
+                </ul>
+                </p>
+            </li>
+            {% endwith %}
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col s6 m6">
+        Other stuff goes here
+    </div>
+
+</div>
+
 
 {% endblock %}

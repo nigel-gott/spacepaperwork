@@ -3,12 +3,17 @@ import jsonpickle
 
 
 def main():
-    with open("chat.json", "r") as json_chat_file:
+    with open("misc_data/chat.json", "r") as json_chat_file:
         chat = json.load(json_chat_file)
         discord_id_to_characters = {}
         unknown_removes = []
+        author_info = {}
         for message in chat['messages']:
             author_id = message['author']['id']
+            author_info[author_id] = {
+                "discord_name": f"{message['author']['name']}#{message['author']['discriminator']}",
+                "avatar_url": message['author']['avatarUrl']
+            }
             content = message['content']
             if valid_command(content):
                 words = content.split(" ")
@@ -28,12 +33,12 @@ def main():
                         unknown_removes.append(f"{author_id}, {message['id']}, {character}")
                     else:
                         discord_id_to_characters[author_id].pop(character, None)
-        with open("discord_id_to_char.json", "w") as out_file:
+        with open("misc_data/discord_id_to_char.json", "w") as out_file:
             out_file.write(jsonpickle.encode(discord_id_to_characters, indent=4))
 
         character_models = []
         next_pk = 1
-        with open("characters.json", "w") as out_file:
+        with open("misc_data/characters.json", "w") as out_file:
             for discord_id, character_to_corp in discord_id_to_characters.items():
 
                 for character, corp in character_to_corp.items():
@@ -43,6 +48,8 @@ def main():
                         "fields": {
                             "discord_id": discord_id,
                             "ingame_name": character,
+                            "discord_username": author_info[discord_id]['discord_name'],
+                            "discord_avatar_url": author_info[discord_id]['avatar_url'],
                             "corp": corp.upper()
                         }
                     })

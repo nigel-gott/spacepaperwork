@@ -1,6 +1,9 @@
+import sys
+
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.utils import timezone
 from timezone_field import TimeZoneField
@@ -12,6 +15,10 @@ class GooseUser(AbstractUser):
 
     def discord_uid(self):
         return self.socialaccount_set.only()[0].uid
+
+    def discord_username(self):
+        social_account = self.socialaccount_set.only()[0].extra_data
+        return f"@{social_account['username']}#{social_account['discriminator']}"
 
     def characters(self):
         return Character.objects.filter(discord_id=self.discord_uid())
@@ -57,7 +64,15 @@ class Corp(models.Model):
 class Character(models.Model):
     discord_id = models.TextField()
     ingame_name = models.TextField()
+    discord_avatar_url = models.TextField()
+    discord_username = models.TextField()
     corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
+
+    def user_or_false(self):
+        try:
+            return SocialAccount.objects.get(uid=self.discord_id).user
+        except ObjectDoesNotExist:
+            return False
 
     def __str__(self):
         return f"[{self.corp}] {self.ingame_name}"
