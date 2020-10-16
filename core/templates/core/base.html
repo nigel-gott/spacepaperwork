@@ -70,6 +70,7 @@
     {% block body %}
     {% endblock %}
 </div>
+{% block footer %}
 <script type="text/javascript" src="{% static 'core/js/materialize.js' %}"></script>
 
 <script>
@@ -81,11 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var elems = document.querySelectorAll('.timepicker');
     var instances = M.Timepicker.init(elems);
 });
-
-
-
-
-
 </script>
+{% endblock %}
 </body>
 </html>

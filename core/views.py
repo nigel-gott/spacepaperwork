@@ -8,7 +8,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
 
-from core.forms import FleetForm, SettingsForm, JoinFleetForm
+from core.forms import FleetForm, SettingsForm, JoinFleetForm, FleetAddMemberForm
 from core.models import Fleet, GooseUser, FleetMember, Character, active_fleets_query, future_fleets_query, \
     past_fleets_query
 
@@ -110,6 +110,28 @@ def fleet_remove_admin(request, pk):
     else:
         return HttpResponseForbidden()
     return HttpResponseRedirect(reverse('fleet_view', args=[f.fleet.pk]))
+
+
+@login_required(login_url=login_url)
+def fleet_add(request, pk):
+    f = get_object_or_404(Fleet, pk=pk)
+    if not f.has_admin(request.user):
+        return HttpResponseForbidden()
+    if request.method == 'POST':
+        form = FleetAddMemberForm(request.POST)
+        if form.is_valid():
+            new_fleet = FleetMember(
+                character=form.cleaned_data['character'],
+                fleet=f,
+                joined_at=timezone.now()
+            )
+            new_fleet.full_clean()
+            new_fleet.save()
+            return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
+    else:
+        form = FleetAddMemberForm()
+    return render(request, 'core/add_fleet_form.html', {'form': form, 'fleet': f})
+
 
 @login_required(login_url=login_url)
 def fleet_join(request, pk):

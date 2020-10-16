@@ -1,4 +1,5 @@
 from allauth.socialaccount.forms import SignupForm
+from dal import autocomplete
 from django import forms
 from django.core.exceptions import ValidationError
 
@@ -18,6 +19,23 @@ class SignupFormWithTimezone(SignupForm):
 
 class JoinFleetForm(forms.Form):
     character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0)
+
+
+def get_discord_names():
+    return Character.objects.values_list('discord_username', flat=True).distinct()
+
+
+class FleetAddMemberForm(forms.Form):
+    discord_username = autocomplete.Select2ListCreateChoiceField(choice_list=get_discord_names,
+                                                                 required=False,
+                                                                 widget=autocomplete.ListSelect2(
+                                                                     url='discord-username-autocomplete'))
+    character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0
+                                       , widget=autocomplete.ModelSelect2(url='character-autocomplete',
+                                                                          forward=('discord_username',)))
+
+    class Meta:
+        exclude = ('discord_username',)
 
 
 class FleetForm(forms.Form):

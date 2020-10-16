@@ -1,7 +1,7 @@
 from django.urls import path
 
-from .views import fleet, SettingsView, fleet_create, fleet_view, fleet_join, fleet_leave, fleet_edit, fleet_end, \
-    fleet_past, fleet_future, fleet_make_admin, fleet_remove_admin
+from .autocomplete import *
+from .views import *
 
 urlpatterns = [
     path('', fleet, name='home'),
@@ -12,9 +12,20 @@ urlpatterns = [
     path('fleet/create/', fleet_create, name='fleet_create'),
     path('fleet/<int:pk>/', fleet_view, name='fleet_view'),
     path('fleet/join/<int:pk>/', fleet_join, name='fleet_join'),
+    path('fleet/add/<int:pk>/', fleet_add, name='fleet_add'),
     path('fleet/make_admin/<int:pk>/', fleet_make_admin, name='fleet_make_admin'),
     path('fleet/remove_admin/<int:pk>/', fleet_remove_admin, name='fleet_remove_admin'),
     path('fleet/leave/<int:pk>/', fleet_leave, name='fleet_leave'),
     path('fleet/end/<int:pk>/', fleet_end, name='fleet_end'),
     path('fleet/edit/<int:pk>/', fleet_edit, name='fleet_edit'),
+    path(
+        r'character-autocomplete/',
+        CharacterAutocomplete.as_view(),
+        name='character-autocomplete',
+    ),
+    path(
+        r'discord-username-autocomplete/',
+        DiscordUsernameAutocomplete.as_view(),
+        name='discord-username-autocomplete',
+    ),
 ]
