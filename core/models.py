@@ -117,38 +117,51 @@ class Fleet(models.Model):
         uid = user.discord_uid()
         num_chars = len(Character.objects.filter(discord_id=user.discord_uid()))
         num_characters_in_fleet = len(FleetMember.objects.filter(fleet=self, character__discord_id=uid))
+        return self.gives_shares_to_alts and (num_chars - num_characters_in_fleet) > 0
+
+
+def can_join(self, user):
+    uid = user.discord_uid()
+    num_chars = len(Character.objects.filter(discord_id=user.discord_uid()))
+    num_characters_in_fleet = len(FleetMember.objects.filter(fleet=self, character__discord_id=uid))
+    if self.gives_shares_to_alts:
         return num_chars - num_characters_in_fleet > 0
+    else:
+        return num_chars == 0
 
-    def human_readable_started(self):
-        now = timezone.now()
-        difference = self.start - now
-        seconds = difference.total_seconds()
-        pos_delta = relativedelta(seconds=abs(seconds))
-        human_delta = human_readable_relativedelta(pos_delta)
-        if abs(seconds) <= 60:
-            return "Starts Now"
-        elif seconds > 0:
-            return f"Starts in {human_delta}"
-        else:
-            return f"Started {human_delta} ago"
 
-    def human_readable_ended(self):
-        now = timezone.now()
-        if not self.end:
-            return False
-        difference = self.end - now
-        seconds = difference.total_seconds()
-        pos_delta = relativedelta(seconds=abs(seconds))
-        human_delta = human_readable_relativedelta(pos_delta)
-        if abs(seconds) <= 60:
-            return "Ends Now"
-        elif seconds <= 0:
-            return f"Ended {human_delta} ago"
-        else:
-            return f"Ends in {human_delta}"
+def human_readable_started(self):
+    now = timezone.now()
+    difference = self.start - now
+    seconds = difference.total_seconds()
+    pos_delta = relativedelta(seconds=abs(seconds))
+    human_delta = human_readable_relativedelta(pos_delta)
+    if abs(seconds) <= 60:
+        return "Starts Now"
+    elif seconds > 0:
+        return f"Starts in {human_delta}"
+    else:
+        return f"Started {human_delta} ago"
 
-    def __str__(self):
-        return str(self.name)
+
+def human_readable_ended(self):
+    now = timezone.now()
+    if not self.end:
+        return False
+    difference = self.end - now
+    seconds = difference.total_seconds()
+    pos_delta = relativedelta(seconds=abs(seconds))
+    human_delta = human_readable_relativedelta(pos_delta)
+    if abs(seconds) <= 60:
+        return "Ends Now"
+    elif seconds <= 0:
+        return f"Ended {human_delta} ago"
+    else:
+        return f"Ends in {human_delta}"
+
+
+def __str__(self):
+    return str(self.name)
 
 
 class FleetMember(models.Model):

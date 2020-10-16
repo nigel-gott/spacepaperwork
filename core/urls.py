@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import fleet, SettingsView, fleet_create, fleet_view, fleet_join, fleet_leave
+from .views import fleet, SettingsView, fleet_create, fleet_view, fleet_join, fleet_leave, fleet_edit, fleet_end
 
 urlpatterns = [
     path('', fleet, name='home'),
@@ -10,6 +10,6 @@ urlpatterns = [
     path('fleet/<int:pk>/', fleet_view, name='fleet_view'),
     path('fleet/join/<int:pk>/', fleet_join, name='fleet_join'),
     path('fleet/leave/<int:pk>/', fleet_leave, name='fleet_leave'),
-    path('fleet/end/<int:pk>/', fleet_view, name='fleet_end'),
-    path('fleet/edit/<int:pk>/', fleet_view, name='fleet_edit'),
+    path('fleet/end/<int:pk>/', fleet_end, name='fleet_end'),
+    path('fleet/edit/<int:pk>/', fleet_edit, name='fleet_edit'),
 ]

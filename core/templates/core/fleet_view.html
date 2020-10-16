@@ -26,7 +26,7 @@
                 </b>
                 <p>
                     <i>
-                    {% if fleet.give_shares_to_alts %}
+                    {% if fleet.gives_shares_to_alts %}
                     This fleet gives loot shares to alts.
                     {% else %}
                     In this fleet alts are not given loot shares.
@@ -40,13 +40,20 @@
             <div class="card-action">
 
                 {% if is_member %}
-                {% if can_join_alts and fleet.give_share_to_alts %}
+                {% if can_join_alts and fleet.gives_shares_to_alts %}
                 <a class="waves-effect waves-light btn purple lighten-2"
                    href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Add Another Alt</a>
                 {% endif %}
                 {% else %}
                 <a class="waves-effect waves-light btn purple lighten-2"
                    href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Join Fleet</a>
+                {% endif %}
+                {% if fleet.fc == user %}
+                <a class="waves-effect waves-light btn orange darken-2"
+                   href="{% url 'fleet_edit' fleet.id %}"><i class='material-icons right'>edit</i>Edit Fleet</a>
+                <a class="waves-effect waves-light btn red darken-2"
+                   href="{% url 'fleet_end' fleet.id %}"><i class='material-icons right'>close</i>End Fleet</a>
+
                 {% endif %}
             </div>
         </div>

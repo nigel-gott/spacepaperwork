@@ -1,7 +1,7 @@
 {% extends "core/base.html" %}
 {% load materializecss %}
 {% block body %}
-<h4>Start a New Fleet</h4>
+<h4>{{title}}</h4>
 <div class="divider"></div>
 <div class="section">
     {% if form %}
@@ -37,7 +37,7 @@
         </div>
         <div class="row">
             {{ form.fleet_type|materializecss:'s6 m6, icon=directions_boat'}}
-            {{ form.give_shares_to_alts|materializecss:'s6 m6, icon=group_add'}}
+            {{ form.gives_shares_to_alts|materializecss:'s6 m6, icon=group_add'}}
         </div>
         <div class="row">
             {{ form.start_date|materializecss:'s6 m6, icon=date_range'}}
@@ -50,7 +50,7 @@
             {{ form.end_date|materializecss:'s6 m6, icon=date_range'}}
             {{ form.end_time|materializecss:'s6 m6, icon=access_time'}}
         </div>
-        <button type="submit" class="btn waves-effect waves-light" value="Submit">Start
+        <button type="submit" class="btn waves-effect waves-light" value="Submit">{{title}}
             <i class="material-icons right">send</i>
         </button>
 

@@ -72,20 +72,34 @@ def fleet_view(request, pk):
 
 
 @login_required(login_url=login_url)
+def fleet_end(request, pk):
+    f = get_object_or_404(Fleet, pk=pk)
+    if f.fc == request.user:
+        f.end = timezone.now()
+        f.full_clean()
+        f.save()
+    else:
+        return HttpResponseForbidden()
+    return HttpResponseRedirect(reverse('fleet'))
+
+
+@login_required(login_url=login_url)
 def fleet_join(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     if request.method == 'POST':
         form = JoinFleetForm(request.POST)
         if form.is_valid():
-            new_fleet = FleetMember(
-                character=form.cleaned_data['character'],
-                fleet=f,
-                joined_at=timezone.now()
-            )
-            new_fleet.full_clean()
-            new_fleet.save()
-            return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
-
+            if f.can_join(request.user):
+                new_fleet = FleetMember(
+                    character=form.cleaned_data['character'],
+                    fleet=f,
+                    joined_at=timezone.now()
+                )
+                new_fleet.full_clean()
+                new_fleet.save()
+                return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
+            else:
+                return HttpResponseForbidden()
     else:
         form = JoinFleetForm()
     characters = non_member_chars(pk, request.user)
@@ -113,14 +127,17 @@ def fleet_create(request):
             else:
                 combined_end = None
 
-            new_fleet = Fleet(fc=request.user,
-                              fleet_type=form.cleaned_data['fleet_type'],
-                              name=form.cleaned_data['name'],
-                              description=form.cleaned_data['description'],
-                              location=form.cleaned_data['location'],
-                              start=combined_start,
-                              end=combined_end,
-                              )
+            new_fleet = Fleet(
+                fc=request.user,
+                fleet_type=form.cleaned_data['fleet_type'],
+                name=form.cleaned_data['name'],
+                description=form.cleaned_data['description'],
+                location=form.cleaned_data['location'],
+                expected_duration=form.cleaned_data['expected_duration'],
+                gives_shares_to_alts=form.cleaned_data['gives_shares_to_alts'],
+                start=combined_start,
+                end=combined_end,
+            )
             new_fleet.full_clean()
             new_fleet.save()
 
@@ -138,4 +155,49 @@ def fleet_create(request):
         form = FleetForm(initial={'start_date': now.date(), 'start_time': now.time()})
         form.fields['fc_character'].queryset = request.user.characters()
 
-    return render(request, 'core/fleet_form.html', {'form': form})
+    return render(request, 'core/fleet_form.html', {'form': form, 'title': 'Create Fleet'})
+
+
+@login_required(login_url=login_url)
+def fleet_edit(request, pk):
+    existing_fleet = Fleet.objects.get(pk=pk)
+    if request.method == 'POST':
+        form = FleetForm(request.POST)
+        if form.is_valid():
+            combined_start = timezone.make_aware(timezone.datetime.combine(form.cleaned_data['start_date'],
+                                                                           form.cleaned_data['start_time']))
+            if form.cleaned_data['end_date']:
+                combined_end = timezone.make_aware(timezone.datetime.combine(form.cleaned_data['end_date'],
+                                                                             form.cleaned_data['end_time']))
+            else:
+                combined_end = None
+
+            existing_fleet.fc = request.user
+            existing_fleet.fleet_type = form.cleaned_data['fleet_type']
+            existing_fleet.name = form.cleaned_data['name']
+            existing_fleet.description = form.cleaned_data['description']
+            existing_fleet.location = form.cleaned_data['location']
+            existing_fleet.start = combined_start
+            existing_fleet.end = combined_end
+            existing_fleet.expected_duration = form.cleaned_data['expected_duration']
+            existing_fleet.gives_shares_to_alts = form.cleaned_data['gives_shares_to_alts']
+            existing_fleet.full_clean()
+            existing_fleet.save()
+            return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
+
+    else:
+        form = FleetForm(initial={
+            'start_date': existing_fleet.start.date(),
+            'start_time': existing_fleet.start.time(),
+            'end_date': existing_fleet.end and existing_fleet.end.date(),
+            'end_time': existing_fleet.end and existing_fleet.end.time(),
+            'fleet_type': existing_fleet.fleet_type,
+            'name': existing_fleet.name,
+            'description': existing_fleet.description,
+            'location': existing_fleet.location,
+            'expected_duration': existing_fleet.expected_duration,
+            'gives_shares_to_alts': existing_fleet.gives_shares_to_alts,
+        })
+        form.fields['fc_character'].queryset = request.user.characters()
+
+    return render(request, 'core/fleet_form.html', {'form': form, 'title': 'Edit Fleet'})

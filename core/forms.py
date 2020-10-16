@@ -24,7 +24,7 @@ class FleetForm(forms.Form):
     fc_character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0)
     name = forms.CharField(max_length=100)
     fleet_type = forms.ModelChoiceField(queryset=FleetType.objects.all(), initial=0)
-    give_shares_to_alts = forms.BooleanField(initial=False, widget=forms.CheckboxInput(attrs={
+    gives_shares_to_alts = forms.BooleanField(required=False,initial=False, widget=forms.CheckboxInput(attrs={
 
     }))
     description = forms.CharField(required=False)
