@@ -39,14 +39,15 @@
             </div>
             <div class="card-action">
 
-                {% if is_member %}
-                {% if can_join_alts and fleet.gives_shares_to_alts %}
+                {% can_join fleet user as can_join_fleet %}
+                {% if can_join_fleet %}
+                {% if can_join_alts %}
                 <a class="waves-effect waves-light btn purple lighten-2"
                    href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Add Another Alt</a>
-                {% endif %}
                 {% else %}
                 <a class="waves-effect waves-light btn purple lighten-2"
                    href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Join Fleet</a>
+                {% endif %}
                 {% endif %}
                 {% if fleet.fc == user %}
                 <a class="waves-effect waves-light btn orange darken-2"

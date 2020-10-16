@@ -9,7 +9,8 @@ from django.utils import timezone
 from django.views.generic.edit import UpdateView
 
 from core.forms import FleetForm, SettingsForm, JoinFleetForm
-from core.models import Fleet, GooseUser, FleetMember, Character
+from core.models import Fleet, GooseUser, FleetMember, Character, active_fleets_query, future_fleets_query, \
+    past_fleets_query
 
 # Create your views here.
 
@@ -30,18 +31,22 @@ class SettingsView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
 @login_required(login_url=login_url)
 def fleet(request):
     active_fleets = active_fleets_query()
-    context = {'fleets': active_fleets, 'num_active_fleets': len(active_fleets)}
+    context = {'fleets': active_fleets, 'header': 'Active Fleets'}
     return render(request, 'core/fleet.html', context)
 
 
-def active_fleets_query():
-    now = timezone.now()
-    now_minus_24_hours = now - timezone.timedelta(days=1)
-    active_fleets = \
-        Fleet.objects.filter(
-            Q(start__gte=now_minus_24_hours) & Q(start__lte=now) & (Q(end__gt=now) | Q(end__isnull=True))).order_by(
-            '-start')
-    return active_fleets
+@login_required(login_url=login_url)
+def fleet_past(request):
+    past_fleets = past_fleets_query()
+    context = {'fleets': past_fleets, 'header':'Past Fleets'}
+    return render(request, 'core/fleet.html', context)
+
+
+@login_required(login_url=login_url)
+def fleet_future(request):
+    future_fleets = future_fleets_query()
+    context = {'fleets': future_fleets, 'header':'Future Fleets'}
+    return render(request, 'core/fleet.html', context)
 
 
 # zombie_fleets = Fleet.objects.filter(

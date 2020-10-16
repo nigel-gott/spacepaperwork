@@ -1,10 +1,13 @@
 from django.urls import path
 
-from .views import fleet, SettingsView, fleet_create, fleet_view, fleet_join, fleet_leave, fleet_edit, fleet_end
+from .views import fleet, SettingsView, fleet_create, fleet_view, fleet_join, fleet_leave, fleet_edit, fleet_end, \
+    fleet_past, fleet_future
 
 urlpatterns = [
     path('', fleet, name='home'),
     path('fleet/', fleet, name='fleet'),
+    path('fleet/past', fleet_past, name='fleet_past'),
+    path('fleet/future', fleet_future, name='fleet_future'),
     path('settings/', SettingsView.as_view(), name='settings'),
     path('fleet/create/', fleet_create, name='fleet_create'),
     path('fleet/<int:pk>/', fleet_view, name='fleet_view'),

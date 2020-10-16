@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 from timezone_field import TimeZoneField
 from dateutil.relativedelta import relativedelta
@@ -94,6 +95,35 @@ def human_readable_relativedelta(delta):
          getattr(delta, attr)])
 
 
+def active_fleets_query():
+    now = timezone.now()
+    now_minus_24_hours = now - timezone.timedelta(days=1)
+    active_fleets = \
+        Fleet.objects.filter(
+            (Q(end__isnull=True) & Q(start__gte=now_minus_24_hours) & Q(start__lt=now)) | (Q(start__lte=now) &
+                        Q(end__gt=now))).order_by(
+            '-start')
+    return active_fleets
+
+
+def past_fleets_query():
+    now = timezone.now()
+    now_minus_24_hours = now - timezone.timedelta(days=1)
+    past_fleets = \
+        Fleet.objects.filter(
+            (Q(end__isnull=False) & Q(end__lte=now)) | (
+                    Q(end__isnull=True) & Q(start__lte=now_minus_24_hours))).order_by('-start')
+    return past_fleets
+
+
+def future_fleets_query():
+    now = timezone.now()
+    future_fleets = \
+        Fleet.objects.filter(
+            Q(start__gt=now)).order_by('-start')
+    return future_fleets
+
+
 class Fleet(models.Model):
     fc = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -117,51 +147,63 @@ class Fleet(models.Model):
         uid = user.discord_uid()
         num_chars = len(Character.objects.filter(discord_id=user.discord_uid()))
         num_characters_in_fleet = len(FleetMember.objects.filter(fleet=self, character__discord_id=uid))
-        return self.gives_shares_to_alts and (num_chars - num_characters_in_fleet) > 0
+        return not self.in_the_past() and self.gives_shares_to_alts and (num_chars - num_characters_in_fleet) > 0
 
+    def in_the_past(self):
+        now = timezone.now()
+        now_minus_24_hours = now - timezone.timedelta(days=1)
 
-def can_join(self, user):
-    uid = user.discord_uid()
-    num_chars = len(Character.objects.filter(discord_id=user.discord_uid()))
-    num_characters_in_fleet = len(FleetMember.objects.filter(fleet=self, character__discord_id=uid))
-    if self.gives_shares_to_alts:
-        return num_chars - num_characters_in_fleet > 0
-    else:
-        return num_chars == 0
+        return (self.end and self.end < now) or (not self.end and self.start < now_minus_24_hours)
 
+    def can_join(self, user):
+        if self.in_the_past():
+            print("Past")
+            return False
 
-def human_readable_started(self):
-    now = timezone.now()
-    difference = self.start - now
-    seconds = difference.total_seconds()
-    pos_delta = relativedelta(seconds=abs(seconds))
-    human_delta = human_readable_relativedelta(pos_delta)
-    if abs(seconds) <= 60:
-        return "Starts Now"
-    elif seconds > 0:
-        return f"Starts in {human_delta}"
-    else:
-        return f"Started {human_delta} ago"
+        uid = user.discord_uid()
+        num_chars = len(Character.objects.filter(discord_id=user.discord_uid()))
+        num_characters_in_fleet = len(FleetMember.objects.filter(fleet=self, character__discord_id=uid))
 
+        if self.gives_shares_to_alts:
+            return (num_chars - num_characters_in_fleet) > 0
+        else:
+            return num_characters_in_fleet == 0
 
-def human_readable_ended(self):
-    now = timezone.now()
-    if not self.end:
-        return False
-    difference = self.end - now
-    seconds = difference.total_seconds()
-    pos_delta = relativedelta(seconds=abs(seconds))
-    human_delta = human_readable_relativedelta(pos_delta)
-    if abs(seconds) <= 60:
-        return "Ends Now"
-    elif seconds <= 0:
-        return f"Ended {human_delta} ago"
-    else:
-        return f"Ends in {human_delta}"
+    def human_readable_started(self):
+        now = timezone.now()
+        difference = self.start - now
+        seconds = difference.total_seconds()
+        pos_delta = relativedelta(seconds=abs(seconds))
+        human_delta = human_readable_relativedelta(pos_delta)
+        if abs(seconds) <= 60:
+            return "Starts Now"
+        elif seconds > 0:
+            return f"Starts in {human_delta}"
+        else:
+            return f"Started {human_delta} ago"
 
+    def human_readable_ended(self):
+        now = timezone.now()
+        if not self.end:
+            now_minus_24_hours = now - timezone.timedelta(days=1)
+            if self.start < now_minus_24_hours:
+                return "Automatically expired after 24 hours"
+            else:
+                return False
 
-def __str__(self):
-    return str(self.name)
+        difference = self.end - now
+        seconds = difference.total_seconds()
+        pos_delta = relativedelta(seconds=abs(seconds))
+        human_delta = human_readable_relativedelta(pos_delta)
+        if abs(seconds) <= 60:
+            return "Ends Now"
+        elif seconds <= 0:
+            return f"Ended {human_delta} ago"
+        else:
+            return f"Ends in {human_delta}"
+
+    def __str__(self):
+        return str(self.name)
 
 
 class FleetMember(models.Model):

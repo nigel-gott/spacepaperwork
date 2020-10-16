@@ -1,25 +1,25 @@
 from django.db.models import Q
 from django.utils import timezone
 
-from core.models import Fleet, FleetMember
+from core.models import Fleet, FleetMember, active_fleets_query, future_fleets_query, past_fleets_query
 from django import template
 
 register = template.Library()
 
 
-def active_fleets_query():
-    now = timezone.now()
-    now_minus_24_hours = now - timezone.timedelta(days=1)
-    active_fleets = \
-        Fleet.objects.filter(
-            Q(start__gte=now_minus_24_hours) & Q(start__lte=now) & (Q(end__gt=now) | Q(end__isnull=True))).order_by(
-            '-start')
-    return active_fleets
-
-
 @register.simple_tag
 def num_active_fleets():
     return len(active_fleets_query())
+
+
+@register.simple_tag
+def num_past_fleets():
+    return len(past_fleets_query())
+
+
+@register.simple_tag
+def num_future_fleets():
+    return len(future_fleets_query())
 
 
 @register.simple_tag
@@ -35,3 +35,7 @@ def has_fleet_member(fleet, user):
 @register.simple_tag
 def still_can_join_alts(fleet, user):
     return fleet.still_can_join_alts(user)
+
+@register.simple_tag
+def can_join(fleet, user):
+    return fleet.can_join(user)
