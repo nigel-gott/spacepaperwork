@@ -101,7 +101,7 @@ def active_fleets_query():
     active_fleets = \
         Fleet.objects.filter(
             (Q(end__isnull=True) & Q(start__gte=now_minus_24_hours) & Q(start__lt=now)) | (Q(start__lte=now) &
-                        Q(end__gt=now))).order_by(
+                                                                                           Q(end__gt=now))).order_by(
             '-start')
     return active_fleets
 
@@ -147,7 +147,8 @@ class Fleet(models.Model):
         uid = user.discord_uid()
         num_chars = len(Character.objects.filter(discord_id=user.discord_uid()))
         num_characters_in_fleet = len(FleetMember.objects.filter(fleet=self, character__discord_id=uid))
-        return not self.in_the_past() and self.gives_shares_to_alts and (num_chars - num_characters_in_fleet) > 0
+        return not self.in_the_past() and self.gives_shares_to_alts and num_characters_in_fleet > 0 and (
+                    num_chars - num_characters_in_fleet) > 0
 
     def in_the_past(self):
         now = timezone.now()
