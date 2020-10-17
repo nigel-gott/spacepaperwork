@@ -18,6 +18,7 @@ urlpatterns = [
     path('fleet/leave/<int:pk>/', fleet_leave, name='fleet_leave'),
     path('fleet/end/<int:pk>/', fleet_end, name='fleet_end'),
     path('fleet/edit/<int:pk>/', fleet_edit, name='fleet_edit'),
+    path('fleet/<int:pk>/loot_group/create/', loot_group_create, name='loot_group_create'),
     path(
         r'character-autocomplete/',
         CharacterAutocomplete.as_view(),
@@ -27,5 +28,10 @@ urlpatterns = [
         r'discord-username-autocomplete/',
         DiscordUsernameAutocomplete.as_view(),
         name='discord-username-autocomplete',
+    ),
+    path(
+        r'system-autocomplete/',
+        SystemAutocomplete.as_view(),
+        name='system-autocomplete',
     ),
 ]

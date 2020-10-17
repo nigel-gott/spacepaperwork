@@ -4,7 +4,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from .fields import TimeZoneFormField
-from .models import *
+from .models import Character, FleetType, GooseUser, AnomType, System
 
 
 class SignupFormWithTimezone(SignupForm):
@@ -102,3 +102,33 @@ class SettingsForm(forms.ModelForm):
     class Meta:
         model = GooseUser
         fields = ["timezone"]
+
+
+class LootGroupForm(forms.Form):
+    OTHER_LOOT_GROUP = 'Other'
+    KILL_MAIL_LOOT_GROUP = 'Killmail'
+    ANOM_LOOT_GROUP = 'Anom'
+    loot_source = forms.ChoiceField(choices=[
+        (ANOM_LOOT_GROUP, ANOM_LOOT_GROUP),
+        # (KILL_MAIL_LOOT_GROUP, KILL_MAIL_LOOT_GROUP),
+        # (OTHER_LOOT_GROUP, OTHER_LOOT_GROUP)
+    ])
+
+    anom_level = forms.ChoiceField(choices=[
+        (1,1),
+        (2, 2),
+        (3, 3),
+        (4, 4),
+        (5, 5),
+        (6, 6),
+        (7, 7),
+        (8, 8),
+        (9, 9),
+        (10, 10),
+    ], required=False)
+    anom_type = forms.ChoiceField(choices=AnomType.CHOICES, required=False)
+    anom_system = forms.ModelChoiceField(queryset=System.objects.all(), initial=0
+                                       , widget=autocomplete.ModelSelect2(url='system-autocomplete'))
+    looter = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0
+                                       , widget=autocomplete.ModelSelect2(url='character-autocomplete'))
+

@@ -83,43 +83,79 @@
                 <td>{{member.character}}</td>
                 <td>
 
-                        {% if member.character.discord_id == user.discord_uid or admin %}
+                    {% if member.character.discord_id == user.discord_uid or admin %}
 
-                            {% if admin %}
-                            <a class="red-text text-darken-3"
-                               href="{% url 'fleet_leave' member.id %}">Remove From Fleet</a>
-                            {% else %}
-                            <a class="red-text text-darken-3"
-                               href="{% url 'fleet_leave' member.id %}">Leave</a>
-                            {% endif %}
-                        {% endif %}
+                    {% if admin %}
+                    <a class="red-text text-darken-3"
+                       href="{% url 'fleet_leave' member.id %}">Remove From Fleet</a>
+                    {% else %}
+                    <a class="red-text text-darken-3"
+                       href="{% url 'fleet_leave' member.id %}">Leave</a>
+                    {% endif %}
+                    {% endif %}
                     <br/>
-                        {% if admin %}
+                    {% if admin %}
 
-                            {% if member.admin_permissions %}
-                            <a class="orange-text text-darken-2" title="Remove Admin"
-                               href="{% url 'fleet_remove_admin' member.id %}">Remove Admin</a>
-                            {% else %}
-                            <a class="orange-text text-darken-2"
-                               href="{% url 'fleet_make_admin' member.id %}">Give Admin</a>
-                            {% endif %}
-                        {% endif %}
+                    {% if member.admin_permissions %}
+                    <a class="orange-text text-darken-2" title="Remove Admin"
+                       href="{% url 'fleet_remove_admin' member.id %}">Remove Admin</a>
+                    {% else %}
+                    <a class="orange-text text-darken-2"
+                       href="{% url 'fleet_make_admin' member.id %}">Give Admin</a>
+                    {% endif %}
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
             {% endfor %}
             {% if admin %}
-            <tr><td colspan="3">
-                <a class="waves-effect waves-light btn green darken-2"
-                   href="{% url 'fleet_add' fleet.id %}"><i class='material-icons right'>edit</i>Add Member</a>
+            <tr>
+                <td colspan="3">
+                    <a class="waves-effect waves-light btn green darken-2"
+                       href="{% url 'fleet_add' fleet.id %}"><i class='material-icons right'>edit</i>Add Member</a>
 
-            </td> </tr>
+                </td>
+            </tr>
             {% endif %}
             </tbody>
         </table>
     </div>
     <div class="col s6 m6">
-        <h5>Loot Groups</h5>
+        <h5>Loot Buckets</h5>
+        <table>
+            <thead>
+            <th>Bucket Id</th>
+            <th>Anom</th>
+            <th>Actions</th>
+            </thead>
+            <tbody>
+            {% for bucket in loot_buckets %}
+            {% for lootgroup in bucket.lootgroup_set.all %}
+            <tr>
+
+                {% if forloop.first %}
+                <td rowspan="{{bucket.lootgroup_set.all|length}}">
+                    Bucket Number {{bucket.id}}
+                </td>
+                {% endif %}
+                <td>{{lootgroup.fleet_anom.anom_type}} - {{lootgroup.fleet_anom.system}}
+                </td>
+                <td>
+                    Other
+                </td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+            <tr>
+                <td colspan="3">
+                    <a class="waves-effect waves-light btn deep-orange lighten-2"
+                       href="{% url 'loot_group_create' fleet.id %}"><i class='material-icons right'>add_circle</i>New
+                        Loot
+                        Bucket</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </div>
 
 </div>

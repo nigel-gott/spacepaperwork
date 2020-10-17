@@ -11678,7 +11678,9 @@ $jscomp.polyfill = function (e, r, p, m) {
           el.addEventListener('click', _this69._handleOptionClickBound);
         });
         this.el.addEventListener('change', this._handleSelectChangeBound);
+        if(this.input){
         this.input.addEventListener('click', this._handleInputClickBound);
+        }
       }
 
       /**
@@ -11779,6 +11781,9 @@ $jscomp.polyfill = function (e, r, p, m) {
           this.wrapper.classList.add('disabled');
         }
 
+        if($(this.el).attr('data-autocomplete-light-url')){
+            return;
+        }
         // Create dropdown
         this.$selectOptions = this.$el.children('option, optgroup');
         this.dropdownOptions = document.createElement('ul');

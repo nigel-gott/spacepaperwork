@@ -1,7 +1,8 @@
 {% extends "core/base.html" %}
+{% load materializecss %}
 {% load static %}
 {% block body %}
-<h4>Join fleet: {{fleet.name}}</h4>
+<h4>{{title}}</h4>
 <div class="divider"></div>
 <div class="section">
     {% if form %}
@@ -23,47 +24,36 @@
     </div>
     {% endif %}
 
-    <div class="row">
-        <!-- Display Form -->
-        <form action="" method="post" class="col s12">
-            {% csrf_token %}
-            {% for field in form %}
-            <div class="row">
-                <div class="input-field col s12">
-                    <label>
-                        {{ field.label}}
-                        {{ field }}
-                    </label>
-                    {% if field.help_text %}
-                    <span class="helper-text" data-error="wrong" data-success="right">
-                        {{ field.help_text|safe }}
-                    </span>
-                    {% endif %}
-                    <br/>
-                    <p>
-                        {{ field.errors }}
-                    </p>
-                </div>
-            </div>
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="row">
+            {{ form.loot_source|materializecss:'s12 m12, icon=directions_boat'}}
+        </div>
+        <div class="row">
+            {{ form.anom_level|materializecss:'s6 m6, icon=format_list_numbered'}}
+            {{ form.anom_type|materializecss:'s6 m6, icon=casino'}}
+        </div>
+        <div class="row">
+            {{ form.looter|materializecss:'s6 m6, icon=person'}}
+            {{ form.anom_system|materializecss:'s6 m6, icon=add_location'}}
+        </div>
+        <button type="submit" class="btn waves-effect waves-light" value="Submit">{{title}}
+            <i class="material-icons right">send</i>
+        </button>
 
-            {% endfor %}
-            <br/>
-            <button type="submit" class="btn waves-effect waves-light green" value="Submit">Add
-                <i class="material-icons right">send</i>
-            </button>
-        </form>
-    </div>
+    </form>
+
     {% endif %}
 </div>
 
 
 {% endblock %}
 
-{% block footer %}
+{% block extrafooter %}
+
 <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
 
 {{ form.media }}
-
 <script>
 (function($) {
     $('#add-form').click(function() {
@@ -94,5 +84,5 @@
 
 })($)
 </script>
-{% endblock %}
 
+{% endblock %}

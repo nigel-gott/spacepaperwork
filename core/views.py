@@ -8,9 +8,9 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
 
-from core.forms import FleetForm, SettingsForm, JoinFleetForm, FleetAddMemberForm
+from core.forms import FleetForm, SettingsForm, JoinFleetForm, FleetAddMemberForm, LootGroupForm
 from core.models import Fleet, GooseUser, FleetMember, Character, active_fleets_query, future_fleets_query, \
-    past_fleets_query
+    past_fleets_query, LootGroup, LootBucket, FleetAnom, AnomType
 
 # Create your views here.
 
@@ -73,7 +73,9 @@ def fleet_view(request, pk):
         if member.character.discord_id not in by_discord_id:
             by_discord_id[member.character.discord_id] = []
         by_discord_id[member.character.discord_id].append(member)
-    return render(request, 'core/fleet_view.html', {'fleet': f, 'fleet_members_by_id': by_discord_id})
+    loot_buckets = f.lootbucket_set.prefetch_related('lootgroup_set').all()
+    return render(request, 'core/fleet_view.html',
+                  {'fleet': f, 'fleet_members_by_id': by_discord_id, 'loot_buckets': loot_buckets})
 
 
 @login_required(login_url=login_url)
@@ -164,6 +166,54 @@ def non_member_chars(fleet_id, user):
     return characters
 
 
+# Two types needed - one without bucket which makes it, one which adds group to existing bucket
+# Buckets group up all shares in underlying groups and split all items in underlying groups by total shares
+@login_required(login_url=login_url)
+def loot_group_create(request, pk):
+    f = get_object_or_404(Fleet, pk=pk)
+    if request.method == 'POST':
+        form = LootGroupForm(request.POST)
+        if form.is_valid():
+            # Form will let you specify anom/km/other
+            # depending on mode, a anom/km/other info will be created
+            # also can come with participation filled in and items filled in all on one form
+            spawned = timezone.now()
+
+            if form.cleaned_data['loot_source'] == LootGroupForm.ANOM_LOOT_GROUP:
+                anom_type = AnomType.objects.get_or_create(
+                    level=form.cleaned_data['anom_level'],
+                    type=form.cleaned_data['anom_type']
+                )[0]
+                anom_type.full_clean()
+                anom_type.save()
+                fleet_anom = FleetAnom(
+                    fleet=f,
+                    anom_type=anom_type,
+                    time=spawned,
+                    system=form.cleaned_data['anom_system'],
+                    looter=form.cleaned_data['looter'],
+                )
+                fleet_anom.full_clean()
+                fleet_anom.save()
+
+                new_bucket = LootBucket(fleet=f)
+                new_bucket.save()
+
+                new_group = LootGroup(
+                    bucket=new_bucket,
+                    fleet_anom=fleet_anom
+                )
+                new_group.full_clean()
+                new_group.save()
+
+            return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
+
+    else:
+        form = LootGroupForm()
+
+    return render(request, 'core/loot_group_form.html', {'form': form, 'title': 'Start New Loot Group'})
+
+
 @login_required(login_url=login_url)
 def fleet_create(request):
     if request.method == 'POST':
@@ -225,7 +275,7 @@ def fleet_edit(request, pk):
             else:
                 combined_end = None
 
-            existing_fleet.fc = request.user
+            existing_fleet.fc = existing_fleet.fc
             existing_fleet.fleet_type = form.cleaned_data['fleet_type']
             existing_fleet.name = form.cleaned_data['name']
             existing_fleet.description = form.cleaned_data['description']
@@ -251,6 +301,6 @@ def fleet_edit(request, pk):
             'expected_duration': existing_fleet.expected_duration,
             'gives_shares_to_alts': existing_fleet.gives_shares_to_alts,
         })
-        form.fields['fc_character'].queryset = request.user.characters()
+        form.fields['fc_character'].queryset = existing_fleet.fc.characters()
 
     return render(request, 'core/fleet_form.html', {'form': form, 'title': 'Edit Fleet'})

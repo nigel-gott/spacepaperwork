@@ -1,12 +1,13 @@
-import sys
+from django.utils.translation import gettext_lazy as _
 
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
+from djmoney.models.fields import MoneyField
 from timezone_field import TimeZoneField
 from dateutil.relativedelta import relativedelta
 
@@ -53,9 +54,11 @@ class Region(models.Model):
 class System(models.Model):
     name = models.TextField(primary_key=True)
     region = models.ForeignKey(Region, on_delete=models.CASCADE)
+    jumps_to_jita = models.PositiveIntegerField(null=True,blank=True)
+    security = models.TextField()
 
     def __str__(self):
-        return str(self.name)
+        return f"{self.name} ({self.region} , {self.security})"
 
 
 class Corp(models.Model):
@@ -226,3 +229,129 @@ class FleetMember(models.Model):
     joined_at = models.DateTimeField(blank=True, null=True)
     left_at = models.DateTimeField(blank=True, null=True)
     admin_permissions = models.BooleanField(default=False)
+
+
+class ItemType(models.Model):
+    name = models.TextField()
+
+    def __str__(self):
+        return str(self.name)
+
+
+class ItemSubType(models.Model):
+    item_type = models.ForeignKey(ItemType, on_delete=models.CASCADE)
+    name = models.TextField()
+
+    def __str__(self):
+        return f"{self.item_type} -> {str(self.name)}"
+
+
+class ItemSubSubType(models.Model):
+    item_sub_type = models.ForeignKey(ItemSubType, on_delete=models.CASCADE)
+    name = models.TextField()
+
+    def __str__(self):
+        return f"{self.item_sub_type} -> {str(self.name)}"
+
+
+class Item(models.Model):
+    item_type = models.ForeignKey(ItemSubSubType, on_delete=models.CASCADE)
+    name = models.TextField(primary_key=True)
+
+    def __str__(self):
+        return f"{str(self.name)}"
+
+
+class Station(models.Model):
+    system = models.ForeignKey(System, on_delete=models.CASCADE)
+    name = models.TextField(primary_key=True)
+
+
+class CorpHanger(models.Model):
+    corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
+    station = models.ForeignKey(Station, on_delete=models.CASCADE)
+    hanger = models.CharField(max_length=1, choices=[
+        ('1', 'Hanger 1'),
+        ('2', 'Hanger 2'),
+        ('3', 'Hanger 3'),
+        ('4', 'Hanger 4'),
+    ])
+
+
+class CharacterLocation(models.Model):
+    character = models.ForeignKey(Character, on_delete=models.CASCADE)
+    station = models.ForeignKey(Station, on_delete=models.CASCADE, blank=True, null=True)
+
+
+class ItemLocation(models.Model):
+    character_location = models.ForeignKey(CharacterLocation, on_delete=models.CASCADE, blank=True, null=True)
+    corp_hanger = models.ForeignKey(CorpHanger, on_delete=models.CASCADE, blank=True, null=True)
+
+    def clean(self):
+        if self.character_location and self.corp_hanger:
+            raise ValidationError(_('An item cannot be located both on a character and in a corp hanger.'))
+        if not self.character_location and not self.corp_hanger:
+            raise ValidationError(_('An item must be either on a character or in a corp hanger.'))
+
+
+class AnomType(models.Model):
+    CHOICES = [
+        ('Deadspace', 'Deadspace'),
+        ('Scout', 'Scout'),
+        ('Inquisitor', 'Inquisitor'),
+        ('Condensed Belt', 'Condensed Belt'),
+    ]
+    level = models.PositiveIntegerField()
+    type = models.TextField(choices=CHOICES)
+    def __str__(self):
+        return f"{self.type} Level {self.level}"
+
+
+class FleetAnom(models.Model):
+    fleet = models.ForeignKey(Fleet, on_delete=models.CASCADE)
+    anom_type = models.ForeignKey(AnomType, on_delete=models.CASCADE)
+    time = models.DateTimeField()
+    system = models.ForeignKey(System, on_delete=models.CASCADE)
+    looter = models.ForeignKey(
+        Character,
+        on_delete=models.CASCADE,
+    )
+
+
+class KillMail(models.Model):
+    fleet = models.ForeignKey(Fleet, on_delete=models.CASCADE)
+    killed_ship = models.TextField()
+    description = models.TextField()
+    looter = models.ForeignKey(
+        Character,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
+
+
+class LootBucket(models.Model):
+    fleet = models.ForeignKey(Fleet, on_delete=models.CASCADE)
+
+
+class LootGroup(models.Model):
+    fleet_anom = models.ForeignKey(FleetAnom, on_delete=models.CASCADE, null=True, blank=True)
+    killmail = models.ForeignKey(KillMail, on_delete=models.CASCADE, null=True, blank=True)
+    bucket = models.ForeignKey(LootBucket, on_delete=models.CASCADE)
+    manual = models.BooleanField(default=False)
+
+
+class InventoryItem(models.Model):
+    location = models.ForeignKey(ItemLocation, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    quantity = models.PositiveBigIntegerField()
+    listed_at_price = MoneyField(max_digits=14, decimal_places=2, default_currency='EEI')
+    net_sold_at_price = MoneyField(max_digits=14, decimal_places=2, default_currency='EEI')
+    loot_group = models.ForeignKey(LootGroup, on_delete=models.CASCADE)
+
+
+class LootShare(models.Model):
+    character = models.ForeignKey(Character, on_delete=models.CASCADE)
+    loot_group = models.ForeignKey(LootGroup, on_delete=models.CASCADE)
+    share_quantity = models.PositiveIntegerField(null=True, blank=True)
+    flat_percent_cut = models.PositiveIntegerField(null=True, blank=True)
