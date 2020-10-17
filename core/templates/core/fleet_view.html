@@ -134,7 +134,7 @@
             <tr>
 
                 {% if forloop.first %}
-                <td rowspan="{{bucket.lootgroup_set.all|length}}">
+                <td rowspan="{{bucket.lootgroup_set.all|length|add:"1"}}">
                     Bucket Number {{bucket.id}}
                 </td>
                 {% endif %}
@@ -145,6 +145,11 @@
                 </td>
             </tr>
             {% endfor %}
+            <tr><td colspan="2">
+                    <a class="waves-effect waves-light btn yellow darken-2"
+                       href="{% url 'loot_group_add' fleet.id bucket.id %}"><i class='material-icons right'>add_circle</i>
+                        Add Anom To This Bucket</a>
+                        </td></tr>
             {% endfor %}
             <tr>
                 <td colspan="3">

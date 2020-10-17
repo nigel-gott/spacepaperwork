@@ -19,6 +19,7 @@ urlpatterns = [
     path('fleet/end/<int:pk>/', fleet_end, name='fleet_end'),
     path('fleet/edit/<int:pk>/', fleet_edit, name='fleet_edit'),
     path('fleet/<int:pk>/loot_group/create/', loot_group_create, name='loot_group_create'),
+    path('fleet/<int:fleet_pk>/loot_group/<int:loot_bucket_pk>/create/', loot_group_add, name='loot_group_add'),
     path('loot_group/<int:pk>', loot_group_view, name='loot_group_view'),
     path(
         r'character-autocomplete/',

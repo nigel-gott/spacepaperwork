@@ -239,3 +239,5 @@ LOGGING = {
         },
     },
 }
+
+ACCOUNT_LOGOUT_REDIRECT_URL='/goosetools/'
