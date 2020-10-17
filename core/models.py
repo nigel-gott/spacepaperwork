@@ -313,17 +313,27 @@ class ItemLocation(models.Model):
 
 
 class AnomType(models.Model):
-    CHOICES = [
+    TYPE_CHOICES = [
         ('Deadspace', 'Deadspace'),
         ('Scout', 'Scout'),
         ('Inquisitor', 'Inquisitor'),
         ('Condensed Belt', 'Condensed Belt'),
+        ('Condensed Cluster', 'Condensed Cluster'),
+    ]
+    FACTIONS = [
+        ('Guristas', 'Guritas'),
+        ('Angel','Angel'),
+        ('Blood', 'Blood'),
+        ('Sansha', 'Sansha'),
+        ('Serpentis', 'Serpentis'),
+        ('Asteroids', 'Asteroids')
     ]
     level = models.PositiveIntegerField()
-    type = models.TextField(choices=CHOICES)
+    type = models.TextField(choices=TYPE_CHOICES)
+    faction = models.TextField(choices=FACTIONS)
 
     def __str__(self):
-        return f"{self.type} Level {self.level}"
+        return f"{self.faction} {self.type} Level {self.level}"
 
 
 class FleetAnom(models.Model):

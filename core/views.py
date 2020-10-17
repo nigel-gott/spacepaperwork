@@ -171,47 +171,9 @@ def non_member_chars(fleet_id, user):
 @login_required(login_url=login_url)
 def loot_group_create(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
-    if request.method == 'POST':
-        form = LootGroupForm(request.POST)
-        if form.is_valid():
-            # Form will let you specify anom/km/other
-            # depending on mode, a anom/km/other info will be created
-            # also can come with participation filled in and items filled in all on one form
-            spawned = timezone.now()
-
-            if form.cleaned_data['loot_source'] == LootGroupForm.ANOM_LOOT_GROUP:
-                anom_type = AnomType.objects.get_or_create(
-                    level=form.cleaned_data['anom_level'],
-                    type=form.cleaned_data['anom_type']
-                )[0]
-                anom_type.full_clean()
-                anom_type.save()
-                fleet_anom = FleetAnom(
-                    fleet=f,
-                    anom_type=anom_type,
-                    time=spawned,
-                    system=form.cleaned_data['anom_system'],
-                )
-                fleet_anom.full_clean()
-                fleet_anom.save()
-
-                new_bucket = LootBucket(fleet=f)
-                new_bucket.save()
-
-                new_group = LootGroup(
-                    bucket=new_bucket,
-                    fleet_anom=fleet_anom
-                )
-                new_group.full_clean()
-                new_group.save()
-
-            return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
-
-    else:
-        form = LootGroupForm()
-
-    return render(request, 'core/loot_group_form.html', {'form': form, 'title': 'Start New Loot Group'})
-
+    new_bucket = LootBucket(fleet=f)
+    new_bucket.save()
+    return loot_group_add(request, pk, new_bucket.pk)
 
 @login_required(login_url=login_url)
 def loot_group_add(request, fleet_pk, loot_bucket_pk):
@@ -228,7 +190,8 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
             if form.cleaned_data['loot_source'] == LootGroupForm.ANOM_LOOT_GROUP:
                 anom_type = AnomType.objects.get_or_create(
                     level=form.cleaned_data['anom_level'],
-                    type=form.cleaned_data['anom_type']
+                    type=form.cleaned_data['anom_type'],
+                    faction=form.cleaned_data['anom_faction']
                 )[0]
                 anom_type.full_clean()
                 anom_type.save()

@@ -27,12 +27,13 @@
     <form action="" method="post">
         {% csrf_token %}
         <div class="row">
-            {{ form.loot_source|materializecss:'s6 m6, icon=directions_boat'}}
-            {{ form.anom_system|materializecss:'s6 m6, icon=add_location'}}
+            {{ form.loot_source|materializecss:'s12 m6, icon=directions_boat'}}
+            {{ form.anom_system|materializecss:'s12 m6, icon=add_location'}}
         </div>
         <div class="row">
-            {{ form.anom_level|materializecss:'s6 m6, icon=format_list_numbered'}}
-            {{ form.anom_type|materializecss:'s6 m6, icon=casino'}}
+            {{ form.anom_level|materializecss:'s12 m4, icon=format_list_numbered'}}
+            {{ form.anom_faction|materializecss:'s12 m4, icon=face'}}
+            {{ form.anom_type|materializecss:'s12 m4, icon=casino'}}
         </div>
         <button type="submit" class="btn waves-effect waves-light" value="Submit">{{title}}
             <i class="material-icons right">send</i>
