@@ -54,7 +54,7 @@ class Region(models.Model):
 class System(models.Model):
     name = models.TextField(primary_key=True)
     region = models.ForeignKey(Region, on_delete=models.CASCADE)
-    jumps_to_jita = models.PositiveIntegerField(null=True,blank=True)
+    jumps_to_jita = models.PositiveIntegerField(null=True, blank=True)
     security = models.TextField()
 
     def __str__(self):
@@ -277,10 +277,19 @@ class CorpHanger(models.Model):
         ('4', 'Hanger 4'),
     ])
 
+    def __str__(self):
+        return f"In [{self.corp.name}] Corp {self.hanger} at {self.station} ({self.character.discord_username}"
+
 
 class CharacterLocation(models.Model):
     character = models.ForeignKey(Character, on_delete=models.CASCADE)
     station = models.ForeignKey(Station, on_delete=models.CASCADE, blank=True, null=True)
+
+    def __str__(self):
+        if not self.station:
+            return f"In Space on {self.character.ingame_name}({self.character.discord_username})"
+        else:
+            return f"In {self.character.ingame_name}'s personal hanger at {self.station} ({self.character.discord_username}"
 
 
 class ItemLocation(models.Model):
@@ -293,6 +302,15 @@ class ItemLocation(models.Model):
         if not self.character_location and not self.corp_hanger:
             raise ValidationError(_('An item must be either on a character or in a corp hanger.'))
 
+    def in_station(self):
+        return (not self.character_location) or self.character_location.station
+
+    def __str__(self):
+        if self.character_location:
+            return str(self.character_location)
+        else:
+            return str(self.corp_hanger)
+
 
 class AnomType(models.Model):
     CHOICES = [
@@ -303,6 +321,7 @@ class AnomType(models.Model):
     ]
     level = models.PositiveIntegerField()
     type = models.TextField(choices=CHOICES)
+
     def __str__(self):
         return f"{self.type} Level {self.level}"
 
@@ -312,10 +331,9 @@ class FleetAnom(models.Model):
     anom_type = models.ForeignKey(AnomType, on_delete=models.CASCADE)
     time = models.DateTimeField()
     system = models.ForeignKey(System, on_delete=models.CASCADE)
-    looter = models.ForeignKey(
-        Character,
-        on_delete=models.CASCADE,
-    )
+
+    def __str__(self):
+        return f"{self.anom_type} @ {self.time} in {self.system}"
 
 
 class KillMail(models.Model):
@@ -345,9 +363,31 @@ class InventoryItem(models.Model):
     location = models.ForeignKey(ItemLocation, on_delete=models.CASCADE)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.PositiveBigIntegerField()
-    listed_at_price = MoneyField(max_digits=14, decimal_places=2, default_currency='EEI')
-    net_sold_at_price = MoneyField(max_digits=14, decimal_places=2, default_currency='EEI')
+    remaining_quantity = models.PositiveIntegerField()
+    listed_at_price = MoneyField(max_digits=14, decimal_places=2, default_currency='EEI', null=True, blank=True)
+    total_profit = MoneyField(max_digits=14, decimal_places=2, default_currency='EEI', null=True, blank=True)
     loot_group = models.ForeignKey(LootGroup, on_delete=models.CASCADE)
+
+    def status(self):
+        if self.quantity > self.remaining_quantity:
+            if self.listed_at_price:
+                return "Listed"
+            elif self.location.in_station():
+                return "Waiting"
+            else:
+                return "Transit"
+        else:
+            return "All Sold"
+
+
+    def __str__(self):
+        if self.status() == "All Sold":
+            extra = f" - sold for total profit of {self.total_profit}"
+        elif self.listed_at_price:
+            extra = f" - listed @ {self.listed_at_price} for total {self.listed_at_price * self.quantity}"
+        else:
+            extra = ""
+        return f"{self.item} x {self.quantity} @ {self.location} {extra}"
 
 
 class LootShare(models.Model):
@@ -355,3 +395,11 @@ class LootShare(models.Model):
     loot_group = models.ForeignKey(LootGroup, on_delete=models.CASCADE)
     share_quantity = models.PositiveIntegerField(null=True, blank=True)
     flat_percent_cut = models.PositiveIntegerField(null=True, blank=True)
+
+    def __str__(self):
+        if self.flat_percent_cut:
+            extra = f" and a {self.flat_percent_cut}% cut off the top"
+        else:
+            extra = ""
+
+        return f"{self.character.discord_username} has {self.share_quantity} shares {extra}"

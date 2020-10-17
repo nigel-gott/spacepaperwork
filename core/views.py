@@ -191,7 +191,6 @@ def loot_group_create(request, pk):
                     anom_type=anom_type,
                     time=spawned,
                     system=form.cleaned_data['anom_system'],
-                    looter=form.cleaned_data['looter'],
                 )
                 fleet_anom.full_clean()
                 fleet_anom.save()
@@ -304,3 +303,10 @@ def fleet_edit(request, pk):
         form.fields['fc_character'].queryset = existing_fleet.fc.characters()
 
     return render(request, 'core/fleet_form.html', {'form': form, 'title': 'Edit Fleet'})
+
+
+@login_required(login_url=login_url)
+def loot_group_view(request, pk):
+    loot_group = get_object_or_404(LootGroup, pk=pk)
+    return render(request, 'core/loot_group_view.html',
+                  {'loot_group': loot_group})

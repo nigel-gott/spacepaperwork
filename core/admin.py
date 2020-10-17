@@ -20,6 +20,10 @@ admin.site.register(LootGroup)
 admin.site.register(LootBucket)
 admin.site.register(InventoryItem)
 admin.site.register(LootShare)
+admin.site.register(CharacterLocation)
+admin.site.register(ItemLocation)
+admin.site.register(CorpHanger)
+admin.site.register(Station)
 
 
 class CustomUserAdmin(UserAdmin):

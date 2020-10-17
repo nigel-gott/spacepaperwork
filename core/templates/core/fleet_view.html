@@ -141,7 +141,7 @@
                 <td>{{lootgroup.fleet_anom.anom_type}} - {{lootgroup.fleet_anom.system}}
                 </td>
                 <td>
-                    Other
+                    <a href="{% url 'loot_group_view' lootgroup.id %}"><i class='material-icons right'>info</i>View Loot</a>
                 </td>
             </tr>
             {% endfor %}

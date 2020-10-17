@@ -129,6 +129,4 @@ class LootGroupForm(forms.Form):
     anom_type = forms.ChoiceField(choices=AnomType.CHOICES, required=False)
     anom_system = forms.ModelChoiceField(queryset=System.objects.all(), initial=0
                                        , widget=autocomplete.ModelSelect2(url='system-autocomplete'))
-    looter = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0
-                                       , widget=autocomplete.ModelSelect2(url='character-autocomplete'))
 
