@@ -368,6 +368,9 @@ class LootGroup(models.Model):
     bucket = models.ForeignKey(LootBucket, on_delete=models.CASCADE)
     manual = models.BooleanField(default=False)
 
+    def fleet(self):
+        return self.fleet_anom.fleet
+
 
 class InventoryItem(models.Model):
     location = models.ForeignKey(ItemLocation, on_delete=models.CASCADE)
@@ -403,8 +406,11 @@ class InventoryItem(models.Model):
 class LootShare(models.Model):
     character = models.ForeignKey(Character, on_delete=models.CASCADE)
     loot_group = models.ForeignKey(LootGroup, on_delete=models.CASCADE)
-    share_quantity = models.PositiveIntegerField(null=True, blank=True)
-    flat_percent_cut = models.PositiveIntegerField(null=True, blank=True)
+    share_quantity = models.PositiveIntegerField(default=0)
+    flat_percent_cut = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        unique_together = (('character', 'loot_group'),)
 
     def __str__(self):
         if self.flat_percent_cut:

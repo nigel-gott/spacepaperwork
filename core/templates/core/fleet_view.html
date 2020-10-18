@@ -145,12 +145,15 @@
                 </td>
             </tr>
             {% endfor %}
+            {% if admin %}
             <tr><td colspan="2">
                     <a class="waves-effect waves-light btn yellow darken-2"
                        href="{% url 'loot_group_add' fleet.id bucket.id %}"><i class='material-icons right'>add_circle</i>
                         Add Anom To This Bucket</a>
                         </td></tr>
+            {% endif %}
             {% endfor %}
+            {% if admin %}
             <tr>
                 <td colspan="3">
                     <a class="waves-effect waves-light btn deep-orange lighten-2"
@@ -159,6 +162,7 @@
                         Bucket</a>
                 </td>
             </tr>
+            {% endif %}
             </tbody>
         </table>
     </div>

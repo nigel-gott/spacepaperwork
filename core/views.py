@@ -2,15 +2,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db.models import Q
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
 
-from core.forms import FleetForm, SettingsForm, JoinFleetForm, FleetAddMemberForm, LootGroupForm
-from core.models import Fleet, GooseUser, FleetMember, Character, active_fleets_query, future_fleets_query, \
-    past_fleets_query, LootGroup, LootBucket, FleetAnom, AnomType
+from core.forms import FleetAddMemberForm, FleetForm, JoinFleetForm, LootGroupForm, LootShareForm, SettingsForm
+from core.models import AnomType, Character, Fleet, FleetAnom, FleetMember, GooseUser, LootBucket, LootGroup, LootShare, active_fleets_query, future_fleets_query, past_fleets_query
 
 # Create your views here.
 
@@ -162,7 +161,8 @@ def fleet_join(request, pk):
 def non_member_chars(fleet_id, user):
     uid = user.socialaccount_set.only()[0].uid
     existing = FleetMember.objects.filter(fleet=fleet_id).values('character')
-    characters = Character.objects.filter(discord_id=uid).exclude(pk__in=existing)
+    characters = Character.objects.filter(
+        discord_id=uid).exclude(pk__in=existing)
     return characters
 
 
@@ -171,9 +171,82 @@ def non_member_chars(fleet_id, user):
 @login_required(login_url=login_url)
 def loot_group_create(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
+    if not f.has_admin(request.user):
+        return HttpResponseForbidden()
     new_bucket = LootBucket(fleet=f)
     new_bucket.save()
     return loot_group_add(request, pk, new_bucket.pk)
+
+
+@login_required(login_url=login_url)
+def loot_share_add(request, pk):
+    loot_group = get_object_or_404(LootGroup, pk=pk)
+    if not loot_group.fleet.has_admin(request.user):
+        return HttpResponseForbidden()
+    if request.method == 'POST':
+        form = LootShareForm(request.POST)
+        if form.is_valid():
+            ls = LootShare(
+                character=form.cleaned_data['character'],
+                loot_group=loot_group,
+                share_quantity=form.cleaned_data['share_quantity'],
+                flat_percent_cut=form.cleaned_data['flat_percent_cut']
+            )
+            ls.full_clean()
+            ls.save()
+            return HttpResponseRedirect(reverse('loot_group_view', args=[pk]))
+    else:
+        form = LootShareForm(
+            initial={'share_quantity': 1, 'flat_percent_cut': 0})
+    return render(request, 'core/loot_share_form.html', {'form': form, 'title': 'Add New Loot Share'})
+
+
+@login_required(login_url=login_url)
+def loot_share_delete(request, pk):
+    loot_share = get_object_or_404(LootShare, pk=pk)
+    if not loot_share.loot_group.fleet().has_admin(request.user):
+        return HttpResponseForbidden()
+    if request.method == 'POST':
+        group_pk = loot_share.loot_group.pk
+        loot_share.delete()
+        return HttpResponseRedirect(reverse('loot_group_view', args=[group_pk]))
+    else:
+        return HttpResponseNotAllowed() 
+
+
+@login_required(login_url=login_url)
+def loot_share_edit(request, pk):
+    loot_share = get_object_or_404(LootShare, pk=pk)
+    if not loot_share.loot_group.fleet().has_admin(request.user):
+        return HttpResponseForbidden()
+    if request.method == 'POST':
+        form = LootShareForm(request.POST)
+        if form.is_valid():
+            loot_share.character = form.cleaned_data['character']
+            print(form.cleaned_data['share_quantity'])
+            loot_share.share_quantity = form.cleaned_data['share_quantity']
+            loot_share.flat_percent_cut = form.cleaned_data['flat_percent_cut']
+            loot_share.full_clean()
+            loot_share.save()
+            return HttpResponseRedirect(reverse('loot_group_view', args=[loot_share.loot_group.pk]))
+    else:
+        form = LootShareForm(
+            initial={'share_quantity': loot_share.share_quantity, 'flat_percent_cut': loot_share.flat_percent_cut, 'character': loot_share.character})
+    return render(request, 'core/loot_share_form.html', {'form': form, 'title': 'Edit Loot Share'})
+
+
+@login_required(login_url=login_url)
+def loot_share_add_fleet_members(request, pk):
+    loot_group = get_object_or_404(LootGroup, pk=pk)
+    if request.method == 'POST':
+        for fleet_member in loot_group.fleet_anom.fleet.fleetmember_set.all():
+            LootShare.objects.get_or_create(
+                character=fleet_member.character,
+                loot_group=loot_group,
+                defaults={'share_quantity': 1, 'flat_percent_cut': 0}
+            )
+    return HttpResponseRedirect(reverse('loot_group_view', args=[pk]))
+
 
 @login_required(login_url=login_url)
 def loot_group_add(request, fleet_pk, loot_bucket_pk):
@@ -258,7 +331,8 @@ def fleet_create(request):
 
     else:
         now = timezone.localtime(timezone.now())
-        form = FleetForm(initial={'start_date': now.date(), 'start_time': now.time()})
+        form = FleetForm(
+            initial={'start_date': now.date(), 'start_time': now.time()})
         form.fields['fc_character'].queryset = request.user.characters()
 
     return render(request, 'core/fleet_form.html', {'form': form, 'title': 'Create Fleet'})
@@ -314,5 +388,11 @@ def fleet_edit(request, pk):
 @login_required(login_url=login_url)
 def loot_group_view(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
+    by_discord_id = {}
+    for loot_share in loot_group.lootshare_set.all():
+        id = loot_share.character.discord_id
+        if id not in by_discord_id:
+            by_discord_id[id] = []
+        by_discord_id[id].append(loot_share)
     return render(request, 'core/loot_group_view.html',
-                  {'loot_group': loot_group})
+                  {'loot_group': loot_group, 'loot_shares_by_discord_id': by_discord_id})

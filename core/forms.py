@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 
 from .fields import TimeZoneFormField
 from .models import Character, FleetType, GooseUser, AnomType, System
+from core.models import LootShare
 
 
 class SignupFormWithTimezone(SignupForm):
@@ -130,4 +131,12 @@ class LootGroupForm(forms.Form):
     anom_faction = forms.ChoiceField(choices=AnomType.FACTIONS, required=False)
     anom_system = forms.ModelChoiceField(queryset=System.objects.all(), initial=0
                                        , widget=autocomplete.ModelSelect2(url='system-autocomplete'))
+
+
+class LootShareForm(forms.Form):
+    character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0
+                                       , widget=autocomplete.ModelSelect2(url='character-autocomplete',
+                                                                          forward=('discord_username',)))
+    share_quantity = forms.IntegerField(min_value=0)
+    flat_percent_cut = forms.IntegerField(min_value=0, max_value=100)
 

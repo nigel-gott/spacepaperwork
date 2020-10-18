@@ -1,4 +1,5 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
+{% has_admin loot_group.fleet user as admin %}
 <div class="row">
   <div class="col s12 m12">
     <div class="card blue-grey darken-1">
@@ -15,7 +16,7 @@
       </div>
     </div>
   </div>
-  <div class="col s6 m6">
+  <div class="col s12 m6">
     <h5>Loot</h5>
     <table>
       <thead>
@@ -32,27 +33,65 @@
           <td>{{item.location}}</td>
           <td>{{item.status}}</td>
         </tr>
+        {% endfor %}
       </tbody>
     </table>
-    <br />
-    {% endfor %}
   </div>
-  <div class="col s6 m6">
+  <div class="col s12 m6">
     <h5>Participation</h5>
     <table>
       <thead>
-        <th>Player</th>
+        <th>Discord User</th>
+        <th>InGame Character</th>
         <th>Number of Shares</th>
         <th>Flat Percent Cut</th>
+        <th>Actions</th>
       </thead>
       <tbody>
-        {% for share in loot_group.lootshare_set.all %}
+        {% for loot_shares in loot_shares_by_discord_id.values %}
+        {% for share in loot_shares %}
         <tr>
+                {% if forloop.first %}
+                <td rowspan="{{loot_shares|length}}"><img src="{{ share.character.discord_avatar_url }}?size=32" alt=""
+                                                      class="circle">
+                    {{share.character.discord_username}}
+                </td>
+                {% endif %}
           <td>{{share.character}}</td>
           <td>{{share.share_quantity}}</td>
           <td>{{share.flat_percent_cut}}%</td>
+          <td>
+          {% if admin %}
+        <a 
+          href="{% url 'loot_share_edit' share.id %}">Edit</a>
+            <form method="post" action="{% url 'loot_share_delete' share.id %}">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <button style="background:none; border-width:0px; color:red; text-decoration:underline;" type="submit">Delete</button>
+            </form>
+
+          {% endif %}
+          
+          </td>
         </tr>
         {% endfor %}
+        {% endfor %}
+        {% if admin %}
+        <tr>
+        <td colspan="4">
+        <a class="waves-effect waves-light btn green darken-2"
+          href="{% url 'loot_share_add' loot_group.id %}"><i class="material-icons right">add_circle</i>Add Participant</a>
+            <form method="post" action="{% url 'loot_share_add_fleet_members' loot_group.id %}">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <button class="waves-effect waves-light btn" type="submit">Give All Fleet Members 1 Share</button>
+            </form>
+        </tr>
+        {% endif %}
       </tbody>
     </table>
   </div>

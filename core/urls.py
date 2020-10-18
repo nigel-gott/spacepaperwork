@@ -21,6 +21,11 @@ urlpatterns = [
     path('fleet/<int:pk>/loot_group/create/', loot_group_create, name='loot_group_create'),
     path('fleet/<int:fleet_pk>/loot_group/<int:loot_bucket_pk>/create/', loot_group_add, name='loot_group_add'),
     path('loot_group/<int:pk>', loot_group_view, name='loot_group_view'),
+    path('loot_group/<int:pk>/add_share/', loot_share_add, name='loot_share_add'),
+    path('loot_group/<int:pk>/add_share_fleet_members/', loot_share_add_fleet_members, name='loot_share_add_fleet_members'),
+    path('loot_share/<int:pk>/edit', loot_share_edit, name='loot_share_edit'),
+    path('loot_share/<int:pk>/delete', loot_share_delete, name='loot_share_delete'),
+
     path(
         r'character-autocomplete/',
         CharacterAutocomplete.as_view(),
