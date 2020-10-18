@@ -8,8 +8,8 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
 
-from core.forms import FleetAddMemberForm, FleetForm, JoinFleetForm, LootGroupForm, LootShareForm, SettingsForm
-from core.models import AnomType, Character, Fleet, FleetAnom, FleetMember, GooseUser, LootBucket, LootGroup, LootShare, active_fleets_query, future_fleets_query, past_fleets_query
+from core.forms import FleetAddMemberForm, FleetForm, InventoryItemForm, JoinFleetForm, LootGroupForm, LootShareForm, SettingsForm
+from core.models import AnomType, Character, CharacterLocation, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, ItemLocation, LootBucket, LootGroup, LootShare, active_fleets_query, future_fleets_query, past_fleets_query
 
 # Create your views here.
 
@@ -211,7 +211,7 @@ def loot_share_delete(request, pk):
         loot_share.delete()
         return HttpResponseRedirect(reverse('loot_group_view', args=[group_pk]))
     else:
-        return HttpResponseNotAllowed() 
+        return HttpResponseNotAllowed()
 
 
 @login_required(login_url=login_url)
@@ -396,3 +396,80 @@ def loot_group_view(request, pk):
         by_discord_id[id].append(loot_share)
     return render(request, 'core/loot_group_view.html',
                   {'loot_group': loot_group, 'loot_shares_by_discord_id': by_discord_id})
+
+
+@login_required(login_url=login_url)
+def item_add(request, pk):
+    loot_group = get_object_or_404(LootGroup, pk=pk)
+    if not loot_group.fleet().has_admin(request.user):
+        return HttpResponseForbidden()
+    if request.method == 'POST':
+        form = InventoryItemForm(request.POST)
+        if form.is_valid():
+            char_loc = CharacterLocation.objects.get_or_create(
+                character=form.cleaned_data['character'],
+                station=None
+            )
+            loc = ItemLocation.objects.get_or_create(
+                character_location=char_loc[0],
+                corp_hanger=None
+            )
+            item = InventoryItem(
+                location=loc[0],
+                loot_group=loot_group,
+                item=form.cleaned_data['item'],
+                quantity=form.cleaned_data['quantity'],
+                remaining_quantity=form.cleaned_data['quantity']
+            )
+            item.full_clean()
+            item.save()
+            return HttpResponseRedirect(reverse('loot_group_view', args=[pk]))
+    else:
+        form = InventoryItemForm()
+    return render(request, 'core/loot_item_form.html', {'form': form, 'title': 'Add New Item'})
+
+
+@login_required(login_url=login_url)
+def item_edit(request, pk):
+    item = get_object_or_404(InventoryItem, pk=pk)
+    if not item.has_admin(request.user):
+        return HttpResponseForbidden()
+    if request.method == 'POST':
+        form = InventoryItemForm(request.POST)
+        if form.is_valid():
+            char_loc = CharacterLocation.objects.get_or_create(
+                character=form.cleaned_data['character'],
+                station=None
+            )[0]
+            loc = ItemLocation.objects.get_or_create(
+                character_location=char_loc,
+                corp_hanger=None
+            )
+
+            item.location = loc[0]
+            item.item = form.cleaned_data['item']
+            item.quantity = form.cleaned_data['quantity']
+            item.full_clean()
+            item.save()
+            return HttpResponseRedirect(reverse('loot_group_view', args=[item.loot_group.pk]))
+    else:
+        form = InventoryItemForm(
+            initial={
+                'item':item.item,
+                'quantity':item.quantity,
+                'character':item.location.character_location.character
+            }
+        )
+    return render(request, 'core/loot_item_form.html', {'form': form, 'title': 'Edit Item'})
+
+@login_required(login_url=login_url)
+def item_delete(request, pk):
+    item = get_object_or_404(InventoryItem, pk=pk)
+    if not item.has_admin(request.user):
+        return HttpResponseForbidden()
+    if request.method == 'POST':
+        group_pk = item.loot_group.pk
+        item.delete()
+        return HttpResponseRedirect(reverse('loot_group_view', args=[group_pk]))
+    else:
+        return HttpResponseNotAllowed()

@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 
 from .fields import TimeZoneFormField
 from .models import Character, FleetType, GooseUser, AnomType, System
-from core.models import LootShare
+from core.models import Item, ItemSubSubType, ItemSubType, ItemType, LootShare
 
 
 class SignupFormWithTimezone(SignupForm):
@@ -135,8 +135,23 @@ class LootGroupForm(forms.Form):
 
 class LootShareForm(forms.Form):
     character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0
-                                       , widget=autocomplete.ModelSelect2(url='character-autocomplete',
-                                                                          forward=('discord_username',)))
+                                       , widget=autocomplete.ModelSelect2(url='character-autocomplete'))
     share_quantity = forms.IntegerField(min_value=0)
     flat_percent_cut = forms.IntegerField(min_value=0, max_value=100)
+
+
+class InventoryItemForm(forms.Form):
+    character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0
+                                       , widget=autocomplete.ModelSelect2(url='character-autocomplete'))
+    # item_type = forms.ModelChoiceField(queryset=ItemType.objects.all(), initial=0
+    #                                    , widget=autocomplete.ModelSelect2(url='item-type-autocomplete'))
+    # item_sub_type = forms.ModelChoiceField(queryset=ItemSubType.objects.all(), initial=0
+    #                                    , widget=autocomplete.ModelSelect2(url='item-sub-type-autocomplete', forward=('item_type',)))
+    # item_sub_sub_type = forms.ModelChoiceField(queryset=ItemSubSubType.objects.all(), initial=0
+    #                                    , widget=autocomplete.ModelSelect2(url='item-sub-sub-type-autocomplete', forward=('item_type','item_sub_type',)))
+    item = forms.ModelChoiceField(queryset=Item.objects.all(), initial=0
+                                       , widget=autocomplete.ModelSelect2(url='item-autocomplete'))
+                                    #    forward=('item_type','item_sub_type','item_sub_sub_type',)))
+    quantity = forms.IntegerField(min_value=0)
+    
 

@@ -24,6 +24,7 @@
         <th>Quantity</th>
         <th>Location</th>
         <th>Status</th>
+        <th>Actions</th>
       </thead>
       <tbody>
         {% for item in loot_group.inventoryitem_set.all %}
@@ -32,8 +33,29 @@
           <td>{{item.quantity}}</td>
           <td>{{item.location}}</td>
           <td>{{item.status}}</td>
+        <td>
+        {% has_item_admin item user as item_admin %}
+        {% if item_admin %}
+        <a 
+          href="{% url 'item_edit' item.id %}">Edit</a>
+            <form method="post" action="{% url 'item_delete' item.id %}">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <button style="background:none; border-width:0px; color:red; text-decoration:underline;" type="submit">Delete</button>
+            </form>
+        {% endif %}
+        </td>
         </tr>
         {% endfor %}
+        {% if admin %}
+        <tr>
+        <td colspan="4">
+        <a class="waves-effect waves-light btn green darken-2"
+          href="{% url 'item_add' loot_group.id %}"><i class="material-icons right">add_circle</i>Add Item</a>
+        </tr>
+        {% endif %}
       </tbody>
     </table>
   </div>

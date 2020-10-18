@@ -25,6 +25,9 @@ urlpatterns = [
     path('loot_group/<int:pk>/add_share_fleet_members/', loot_share_add_fleet_members, name='loot_share_add_fleet_members'),
     path('loot_share/<int:pk>/edit', loot_share_edit, name='loot_share_edit'),
     path('loot_share/<int:pk>/delete', loot_share_delete, name='loot_share_delete'),
+    path('loot_group/<int:pk>/item/create', item_add, name='item_add'),
+    path('item/<int:pk>/edit', item_edit, name='item_edit'),
+    path('item/<int:pk>/delete', item_delete, name='item_delete'),
 
     path(
         r'character-autocomplete/',
@@ -40,5 +43,25 @@ urlpatterns = [
         r'system-autocomplete/',
         SystemAutocomplete.as_view(),
         name='system-autocomplete',
+    ),
+    path(
+        r'item-autocomplete/',
+        ItemAutocomplete.as_view(),
+        name='item-autocomplete',
+    ),
+    path(
+        r'item-type-autocomplete/',
+        ItemTypeAutocomplete.as_view(),
+        name='item-type-autocomplete',
+    ),
+    path(
+        r'item-sub-type-autocomplete/',
+        ItemSubTypeAutocomplete.as_view(),
+        name='item-sub-type-autocomplete',
+    ),
+    path(
+        r'item-sub-sub-type-autocomplete/',
+        ItemSubSubTypeAutocomplete.as_view(),
+        name='item-sub-sub-type-autocomplete',
     ),
 ]

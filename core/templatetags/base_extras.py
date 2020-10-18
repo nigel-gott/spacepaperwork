@@ -45,3 +45,7 @@ def can_join(fleet, user):
 @register.simple_tag
 def has_admin(fleet, user):
     return fleet.has_admin(user)
+
+@register.simple_tag
+def has_item_admin(item, user):
+    return item.has_admin(user)

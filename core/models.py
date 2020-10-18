@@ -243,7 +243,7 @@ class ItemSubType(models.Model):
     name = models.TextField()
 
     def __str__(self):
-        return f"{self.item_type} -> {str(self.name)}"
+        return str(self.name)
 
 
 class ItemSubSubType(models.Model):
@@ -251,7 +251,7 @@ class ItemSubSubType(models.Model):
     name = models.TextField()
 
     def __str__(self):
-        return f"{self.item_sub_type} -> {str(self.name)}"
+        return str(self.name)
 
 
 class Item(models.Model):
@@ -381,8 +381,15 @@ class InventoryItem(models.Model):
     total_profit = MoneyField(max_digits=14, decimal_places=2, default_currency='EEI', null=True, blank=True)
     loot_group = models.ForeignKey(LootGroup, on_delete=models.CASCADE)
 
+    def has_admin(self, user):
+        for char in user.characters():
+            if self.location.character_location and self.location.character_location.character == char:
+                return True
+        return False
+
+
     def status(self):
-        if self.quantity > self.remaining_quantity:
+        if self.quantity >= self.remaining_quantity:
             if self.listed_at_price:
                 return "Listed"
             elif self.location.in_station():

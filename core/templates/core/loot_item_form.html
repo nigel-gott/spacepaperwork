@@ -1,0 +1,105 @@
+{% extends "core/base.html" %}
+{% load materializecss %}
+{% load static %}
+{% block body %}
+<h4>{{title}}</h4>
+<div class="divider"></div>
+<div class="section">
+    {% if form %}
+    <!-- Form Errors -->
+    {% if form.non_field_errors %}
+    <div class="row">
+        <div class="col s12 m5">
+            <div class="card-panel red darken-1">
+                <span class="white-text">
+                    <b>Errors with form:</b>
+                <ul class="errors">
+                    {% for error in form.non_field_errors%}
+                    <li>{{ error|escape }}</li>
+                    {% endfor %}
+                </ul>
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="row">
+            {{ form.character|materializecss:'s12 m12, icon=directions_boat'}}
+        </div>
+        <div class="row">
+            {{ form.item|materializecss:'s12 m6, icon=directions_boat'}}
+            {{ form.quantity|materializecss:'s12 m6, icon=directions_boat'}}
+        </div>
+        <button type="submit" class="btn waves-effect waves-light" value="Submit">{{title}}
+            <i class="material-icons right">send</i>
+        </button>
+
+    </form>
+
+    {% endif %}
+</div>
+
+
+{% endblock %}
+
+{% block extrafooter %}
+
+<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+
+{{ form.media }}
+
+<script>
+(function($) {
+    $('#add-form').click(function() {
+        var index = $('#id_inline_test_models-TOTAL_FORMS').val()
+        var newTable = $('#id_inline_test_models-__prefix__-DELETE').parents('table').clone()
+        newTable.find(':input').each(function() {
+            for (attr of ['name', 'id'])
+                $(this).attr(
+                    attr,
+                    $(this).attr(attr).replace('__prefix__', index)
+                )
+        })
+        newTable.insertBefore($(this))
+        $('#id_inline_test_models-TOTAL_FORMS').val(
+            parseInt($('#id_inline_test_models-TOTAL_FORMS').val()) + 1
+        )
+        newTable.slideDown()
+    })
+
+    // Bind on continent field change
+    $(':input[name$=item_type]').on('change', function() {
+        // Get the field prefix, ie. if this comes from a formset form
+        var prefix = $(this).getFormPrefix() || '';
+
+        // Clear the autocomplete with the same prefix
+       $(':input[name=' + prefix + 'item_sub_type]').val(null).trigger('change');
+       $(':input[name=' + prefix + 'item_sub_sub_type]').val(null).trigger('change');
+       $(':input[name=' + prefix + 'item]').val(null).trigger('change');
+});
+    // Bind on continent field change
+    $(':input[name$=item_sub_type]').on('change', function() {
+        // Get the field prefix, ie. if this comes from a formset form
+        var prefix = $(this).getFormPrefix() || '';
+
+        // Clear the autocomplete with the same prefix
+        $subsub = $(':input[name=' + prefix + 'item_sub_sub_type]')
+        $subsub.val(null);
+        $subsub.trigger('change');
+       $(':input[name=' + prefix + 'item]').val(null).trigger('change');
+});
+    $(':input[name$=item_sub_sub_type]').on('change', function() {
+        // Get the field prefix, ie. if this comes from a formset form
+        var prefix = $(this).getFormPrefix() || '';
+
+        // Clear the autocomplete with the same prefix
+       $(':input[name=' + prefix + 'item]').val(null).trigger('change');
+});
+
+})($)
+</script>
+
+{% endblock %}
