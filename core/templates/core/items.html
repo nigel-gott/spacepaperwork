@@ -1,0 +1,92 @@
+{% extends "core/base.html" %} {% load base_extras %} {% block body %}
+{% load materializecss %}
+<div class="row">
+  <div class="col s12 m12">
+    <h5>Items To Sell</h5>
+    <form method="post">
+    {{ forms.management_form }}
+        {% csrf_token %}
+    <table>
+      <thead>
+        <th>Location</th>
+        <th>Loot Group</th>
+        <th>Item</th>
+        <th>Original Quantity</th>
+        <th>Quantity Remaining</th>
+        <th>Price</th>
+        <th>Fees</th>
+        <th>Profit Before Fees</th>
+        <th>Profit After Fees</th>
+        <th>Status</th>
+      </thead>
+      <tbody>
+        <tr>
+        <td colspan="9"> 
+        <button type="submit" class="btn waves-effect waves-light" value="Submit">Update Items
+            <i class="material-icons right">send</i>
+        </button>
+        </td>
+        </tr>
+        {% for first, item in items %} 
+            {% with form=forms|index:forloop.counter0 %}
+        <tr>
+          {% if first %}
+          <td rowspan="{{first}}">{{item.location}}</td>
+          {% endif %}
+          <td>
+            <a href="{% url 'loot_group_view' item.loot_group.id %}"
+              >{{item.loot_group.id}}</a
+            >
+          </td>
+          <td>{{item.item}}</td>
+          <td>{{item.quantity}}</td>
+          <td>
+          {% if item.remaining_quantity != 0 and item.listed_at_price %}
+                {{ form.remaining_quantity|materializecss }}
+
+            {% else %}
+                {{ item.remaining_quantity }}
+          {% endif %}
+          </td>
+          <td>
+          {% if not item.listed_at_price %}
+                {{ form.listed_at_price|materializecss }}
+                {{ form.broker_fee|materializecss }}
+                {{ form.transaction_tax|materializecss }}
+
+            {% else %}
+            {{ item.listed_at_price }}
+            {% if item.remaining_quantity > 0 %}
+                {{ form.unlist_item|materializecss }}
+                {% endif %}
+            {% endif %}
+          
+          </td>
+          <td>{{item.total_fees}}</td>
+          <td>{{item.total_profit}}</td>
+          <td>{{item.net_profit}}</td>
+          <td>{{item.status}}</td>
+        </tr>
+    {% if form.errors %}
+    <tr>
+        <td colspan="9">
+                <span class="red-text">
+                    <b>Errors with form:</b>
+                <ul class="errors">
+                    {% for error in form.errors %}
+                    <li>{{ error|escape }}</li>
+                    {% endfor %}
+                </ul>
+                </span>
+        </td>
+    </tr>
+    {% endif %}
+            {% endwith %}
+        {% endfor %}
+      </tbody>
+    </table>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

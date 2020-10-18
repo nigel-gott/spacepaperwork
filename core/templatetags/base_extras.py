@@ -49,3 +49,9 @@ def has_admin(fleet, user):
 @register.simple_tag
 def has_item_admin(item, user):
     return item.has_admin(user)
+
+
+@register.filter
+def index(sequence, position):
+    print(position)
+    return sequence[position]

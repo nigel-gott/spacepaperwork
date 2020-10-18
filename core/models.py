@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
-from django.db.models import Q
+from django.db.models import DecimalField, Q
 from django.utils import timezone
 from djmoney.models.fields import MoneyField
 from timezone_field import TimeZoneField
@@ -14,6 +14,8 @@ from dateutil.relativedelta import relativedelta
 
 class GooseUser(AbstractUser):
     timezone = TimeZoneField(default='Europe/London')
+    broker_fee = models.DecimalField(verbose_name="Your Broker Fee in %", max_digits=7, decimal_places=4, default=8.0)
+    transaction_tax = models.DecimalField(verbose_name="Your Transaction Tax in %", max_digits=7, decimal_places=4, default=15.0)
 
     def discord_uid(self):
         if len(self.socialaccount_set.all()) == 0:
@@ -118,7 +120,7 @@ def past_fleets_query():
     past_fleets = \
         Fleet.objects.filter(
             (Q(end__isnull=False) & Q(end__lte=now)) | (
-                    Q(end__isnull=True) & Q(start__lte=now_minus_24_hours))).order_by('-start')
+                Q(end__isnull=True) & Q(start__lte=now_minus_24_hours))).order_by('-start')
     return past_fleets
 
 
@@ -146,7 +148,8 @@ class Fleet(models.Model):
 
     def has_admin(self, user):
         uid = user.discord_uid()
-        members = FleetMember.objects.filter(fleet=self, character__discord_id=uid)
+        members = FleetMember.objects.filter(
+            fleet=self, character__discord_id=uid)
         if user.is_staff:
             return True
         for member in members:
@@ -156,15 +159,18 @@ class Fleet(models.Model):
 
     def has_member(self, user):
         uid = user.discord_uid()
-        num_characters_in_fleet = len(FleetMember.objects.filter(fleet=self, character__discord_id=uid))
+        num_characters_in_fleet = len(FleetMember.objects.filter(
+            fleet=self, character__discord_id=uid))
         return num_characters_in_fleet > 0
 
     def still_can_join_alts(self, user):
         uid = user.discord_uid()
-        num_chars = len(Character.objects.filter(discord_id=user.discord_uid()))
-        num_characters_in_fleet = len(FleetMember.objects.filter(fleet=self, character__discord_id=uid))
+        num_chars = len(Character.objects.filter(
+            discord_id=user.discord_uid()))
+        num_characters_in_fleet = len(FleetMember.objects.filter(
+            fleet=self, character__discord_id=uid))
         return not self.in_the_past() and self.gives_shares_to_alts and num_characters_in_fleet > 0 and (
-                num_chars - num_characters_in_fleet) > 0
+            num_chars - num_characters_in_fleet) > 0
 
     def in_the_past(self):
         now = timezone.now()
@@ -174,12 +180,13 @@ class Fleet(models.Model):
 
     def can_join(self, user):
         if self.in_the_past():
-            print("Past")
             return False
 
         uid = user.discord_uid()
-        num_chars = len(Character.objects.filter(discord_id=user.discord_uid()))
-        num_characters_in_fleet = len(FleetMember.objects.filter(fleet=self, character__discord_id=uid))
+        num_chars = len(Character.objects.filter(
+            discord_id=user.discord_uid()))
+        num_characters_in_fleet = len(FleetMember.objects.filter(
+            fleet=self, character__discord_id=uid))
 
         if self.gives_shares_to_alts:
             return (num_chars - num_characters_in_fleet) > 0
@@ -283,7 +290,8 @@ class CorpHanger(models.Model):
 
 class CharacterLocation(models.Model):
     character = models.ForeignKey(Character, on_delete=models.CASCADE)
-    station = models.ForeignKey(Station, on_delete=models.CASCADE, blank=True, null=True)
+    station = models.ForeignKey(
+        Station, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         if not self.station:
@@ -293,14 +301,18 @@ class CharacterLocation(models.Model):
 
 
 class ItemLocation(models.Model):
-    character_location = models.ForeignKey(CharacterLocation, on_delete=models.CASCADE, blank=True, null=True)
-    corp_hanger = models.ForeignKey(CorpHanger, on_delete=models.CASCADE, blank=True, null=True)
+    character_location = models.ForeignKey(
+        CharacterLocation, on_delete=models.CASCADE, blank=True, null=True)
+    corp_hanger = models.ForeignKey(
+        CorpHanger, on_delete=models.CASCADE, blank=True, null=True)
 
     def clean(self):
         if self.character_location and self.corp_hanger:
-            raise ValidationError(_('An item cannot be located both on a character and in a corp hanger.'))
+            raise ValidationError(
+                _('An item cannot be located both on a character and in a corp hanger.'))
         if not self.character_location and not self.corp_hanger:
-            raise ValidationError(_('An item must be either on a character or in a corp hanger.'))
+            raise ValidationError(
+                _('An item must be either on a character or in a corp hanger.'))
 
     def in_station(self):
         return (not self.character_location) or self.character_location.station
@@ -322,7 +334,7 @@ class AnomType(models.Model):
     ]
     FACTIONS = [
         ('Guristas', 'Guritas'),
-        ('Angel','Angel'),
+        ('Angel', 'Angel'),
         ('Blood', 'Blood'),
         ('Sansha', 'Sansha'),
         ('Serpentis', 'Serpentis'),
@@ -363,8 +375,10 @@ class LootBucket(models.Model):
 
 
 class LootGroup(models.Model):
-    fleet_anom = models.ForeignKey(FleetAnom, on_delete=models.CASCADE, null=True, blank=True)
-    killmail = models.ForeignKey(KillMail, on_delete=models.CASCADE, null=True, blank=True)
+    fleet_anom = models.ForeignKey(
+        FleetAnom, on_delete=models.CASCADE, null=True, blank=True)
+    killmail = models.ForeignKey(
+        KillMail, on_delete=models.CASCADE, null=True, blank=True)
     bucket = models.ForeignKey(LootBucket, on_delete=models.CASCADE)
     manual = models.BooleanField(default=False)
 
@@ -377,9 +391,18 @@ class InventoryItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.PositiveBigIntegerField()
     remaining_quantity = models.PositiveIntegerField()
-    listed_at_price = MoneyField(max_digits=14, decimal_places=2, default_currency='EEI', null=True, blank=True)
-    total_profit = MoneyField(max_digits=14, decimal_places=2, default_currency='EEI', null=True, blank=True)
+    listed_at_price = MoneyField(
+        max_digits=14, decimal_places=2, default_currency='EEI', null=True, blank=True)
+    transaction_tax = DecimalField(
+        max_digits=7, decimal_places=4, null=True, blank=True)
+    total_profit = MoneyField(
+        max_digits=14, decimal_places=2, default_currency='EEI', default=0)
+    total_fees = MoneyField(
+        max_digits=14, decimal_places=2, default_currency='EEI', default=0)
     loot_group = models.ForeignKey(LootGroup, on_delete=models.CASCADE)
+
+    def net_profit(self):
+        return self.total_profit - self.total_fees
 
     def has_admin(self, user):
         for char in user.characters():
@@ -387,9 +410,8 @@ class InventoryItem(models.Model):
                 return True
         return False
 
-
     def status(self):
-        if self.quantity >= self.remaining_quantity:
+        if self.remaining_quantity != 0:
             if self.listed_at_price:
                 return "Listed"
             elif self.location.in_station():
@@ -398,7 +420,6 @@ class InventoryItem(models.Model):
                 return "Transit"
         else:
             return "All Sold"
-
 
     def __str__(self):
         if self.status() == "All Sold":

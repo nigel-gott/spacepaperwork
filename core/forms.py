@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from .fields import TimeZoneFormField
 from .models import Character, FleetType, GooseUser, AnomType, System
 from core.models import Item, ItemSubSubType, ItemSubType, ItemType, LootShare
+from djmoney.forms.fields import MoneyField
 
 
 class SignupFormWithTimezone(SignupForm):
@@ -102,7 +103,7 @@ class SettingsForm(forms.ModelForm):
 
     class Meta:
         model = GooseUser
-        fields = ["timezone"]
+        fields = ["timezone", "broker_fee", "transaction_tax"]
 
 
 class LootGroupForm(forms.Form):
@@ -155,3 +156,10 @@ class InventoryItemForm(forms.Form):
     quantity = forms.IntegerField(min_value=0)
     
 
+class InventoryItemSellingForm(forms.Form):
+    unlist_item = forms.BooleanField(initial=False, required=False)
+    transaction_tax = forms.DecimalField(max_digits=7, decimal_places=4, label="Transaction Tax %", required=False)
+    broker_fee = forms.DecimalField(max_digits=7, decimal_places=4, label="Broker Fee %", required=False)
+    remaining_quantity = forms.IntegerField(min_value=0, required=False)
+    listed_at_price = forms.DecimalField(max_digits=14, decimal_places=2, required=False)
+ 

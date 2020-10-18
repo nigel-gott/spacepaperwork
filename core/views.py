@@ -8,8 +8,12 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
 
-from core.forms import FleetAddMemberForm, FleetForm, InventoryItemForm, JoinFleetForm, LootGroupForm, LootShareForm, SettingsForm
+from core.forms import FleetAddMemberForm, FleetForm, InventoryItemForm, InventoryItemSellingForm, JoinFleetForm, LootGroupForm, LootShareForm, SettingsForm
 from core.models import AnomType, Character, CharacterLocation, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, ItemLocation, LootBucket, LootGroup, LootShare, active_fleets_query, future_fleets_query, past_fleets_query
+from django.forms.formsets import formset_factory
+from djmoney.money import Money
+from decimal import Decimal
+from _pydecimal import ROUND_UP
 
 # Create your views here.
 
@@ -223,7 +227,6 @@ def loot_share_edit(request, pk):
         form = LootShareForm(request.POST)
         if form.is_valid():
             loot_share.character = form.cleaned_data['character']
-            print(form.cleaned_data['share_quantity'])
             loot_share.share_quantity = form.cleaned_data['share_quantity']
             loot_share.flat_percent_cut = form.cleaned_data['flat_percent_cut']
             loot_share.full_clean()
@@ -427,6 +430,69 @@ def item_add(request, pk):
     else:
         form = InventoryItemForm()
     return render(request, 'core/loot_item_form.html', {'form': form, 'title': 'Add New Item'})
+
+
+@login_required(login_url=login_url)
+def items(request):
+    characters = request.user.characters()
+    all_items = []
+    all_items_size = 0
+    initial = []
+    for char in characters:
+        char_locs = CharacterLocation.objects.filter(character=char)
+        for char_loc in char_locs:
+            loc = ItemLocation.objects.get(character_location=char_loc, corp_hanger=None)
+            items = InventoryItem.objects.filter(location=loc)
+            first = len(items)
+            for item in items:
+                all_items.append((first,item))
+                first = False
+                initial.append({
+                    'remaining_quantity' : item.remaining_quantity,
+                    'listed_at_price': item.listed_at_price,
+                    'transaction_tax': request.user.transaction_tax,
+                    'broker_fee': request.user.broker_fee
+                })
+
+    SellingForms = formset_factory(InventoryItemSellingForm, extra=all_items_size)
+    if request.method == 'POST':
+        forms = SellingForms(request.POST,initial=initial) 
+        i = 0
+        if forms.is_valid(): 
+            for form in forms:
+                if form.has_changed():
+                    item = all_items[i][1]
+                    price = form.cleaned_data['listed_at_price']
+                    broker_fee = form.cleaned_data['broker_fee']
+                    transaction_tax = form.cleaned_data['transaction_tax']
+                    remaining = form.cleaned_data['remaining_quantity']
+                    if not item.listed_at_price and price and broker_fee is not None and transaction_tax is not None:
+                        item.listed_at_price = price 
+                        item.total_fees = item.total_fees + Money(amount="%.2f" % round(item.remaining_quantity * price * (broker_fee / 100),2), currency='EEI')
+                        item.transaction_tax = transaction_tax
+                        item.full_clean()
+                        item.save()
+                    elif remaining is not None:
+                        if item.remaining_quantity > remaining:
+                            diff = item.remaining_quantity - remaining
+                            fee = (100-item.transaction_tax)/100
+                            result = item.listed_at_price.amount * Decimal("%.2f" % round(diff*fee, 2))
+                            item.total_profit  = item.total_profit + Money(
+                                amount=result.quantize(Decimal('0.01'), rounding=ROUND_UP)
+                            , currency='EEI')
+                            item.remaining_quantity = remaining
+                            item.full_clean()
+                            item.save()
+                        elif form.cleaned_data['unlist_item']:
+                            item.listed_at_price = None
+                            item.full_clean()
+                            item.save()
+
+                i = i + 1
+        return render(request, 'core/items.html', {'items':all_items, 'forms':forms})
+    else:
+        forms = SellingForms(initial=initial)
+        return render(request, 'core/items.html', {'items':all_items, 'forms':forms})
 
 
 @login_required(login_url=login_url)

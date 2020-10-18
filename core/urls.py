@@ -28,6 +28,7 @@ urlpatterns = [
     path('loot_group/<int:pk>/item/create', item_add, name='item_add'),
     path('item/<int:pk>/edit', item_edit, name='item_edit'),
     path('item/<int:pk>/delete', item_delete, name='item_delete'),
+    path('item/', items, name='items'),
 
     path(
         r'character-autocomplete/',
