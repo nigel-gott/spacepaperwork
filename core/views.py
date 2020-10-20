@@ -203,7 +203,7 @@ def loot_group_create(request, pk):
 @login_required(login_url=login_url)
 def loot_share_add(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
-    if not loot_group.fleet.has_admin(request.user):
+    if not loot_group.has_admin(request.user):
         return HttpResponseForbidden()
     if request.method == 'POST':
         form = LootShareForm(request.POST)

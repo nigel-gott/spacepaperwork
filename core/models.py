@@ -386,6 +386,9 @@ class LootGroup(models.Model):
     def fleet(self):
         return self.fleet_anom.fleet
 
+    def has_admin(self,user):
+        return self.fleet().has_admin(user)
+
 
 class InventoryItem(models.Model):
     location = models.ForeignKey(ItemLocation, on_delete=models.CASCADE)
