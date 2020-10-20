@@ -428,7 +428,7 @@ def item_add(request, pk):
             item.save()
             return HttpResponseRedirect(reverse('loot_group_view', args=[pk]))
     else:
-        form = InventoryItemForm()
+        form = InventoryItemForm(initial={'quantity':1})
     return render(request, 'core/loot_item_form.html', {'form': form, 'title': 'Add New Item'})
 
 
