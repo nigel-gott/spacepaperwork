@@ -14,6 +14,7 @@ from django.forms.formsets import formset_factory
 from djmoney.money import Money
 from decimal import Decimal
 from _pydecimal import ROUND_UP
+import sys
 
 # Create your views here.
 
@@ -172,9 +173,12 @@ def fleet_join(request, pk):
             else:
                 return HttpResponseForbidden()
     else:
-        form = JoinFleetForm()
+        form = JoinFleetForm(initial={
+            'character': request.user.default_character
+        })
     characters = non_member_chars(pk, request.user)
     form.fields['character'].queryset = characters
+
     return render(request, 'core/join_fleet_form.html', {'form': form, 'fleet': f})
 
 
@@ -193,9 +197,7 @@ def loot_group_create(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     if not f.has_admin(request.user):
         return HttpResponseForbidden()
-    new_bucket = LootBucket(fleet=f)
-    new_bucket.save()
-    return loot_group_add(request, pk, new_bucket.pk)
+    return loot_group_add(request, pk, False)
 
 
 @login_required(login_url=login_url)
@@ -270,7 +272,8 @@ def loot_share_add_fleet_members(request, pk):
 @login_required(login_url=login_url)
 def loot_group_add(request, fleet_pk, loot_bucket_pk):
     f = get_object_or_404(Fleet, pk=fleet_pk)
-    loot_bucket = get_object_or_404(LootBucket, pk=loot_bucket_pk)
+    if loot_bucket_pk:
+        loot_bucket = get_object_or_404(LootBucket, pk=loot_bucket_pk)
     if request.method == 'POST':
         form = LootGroupForm(request.POST)
         if form.is_valid():
@@ -295,6 +298,12 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
                 )
                 fleet_anom.full_clean()
                 fleet_anom.save()
+
+                if not loot_bucket_pk:
+                    loot_bucket = LootBucket(
+                        fleet=f
+                    )
+                    loot_bucket.save()
 
                 new_group = LootGroup(
                     bucket=loot_bucket,
@@ -351,7 +360,11 @@ def fleet_create(request):
     else:
         now = timezone.localtime(timezone.now())
         form = FleetForm(
-            initial={'start_date': now.date(), 'start_time': now.time()})
+            initial={
+                'start_date': now.date(),
+                'start_time': now.time(),
+                'fc_character': request.user.default_character})
+
         form.fields['fc_character'].queryset = request.user.characters()
 
     return render(request, 'core/fleet_form.html', {'form': form, 'title': 'Create Fleet'})
@@ -444,7 +457,9 @@ def item_add(request, pk):
             item.save()
             return HttpResponseRedirect(reverse('loot_group_view', args=[pk]))
     else:
-        form = InventoryItemForm(initial={'quantity': 1})
+        form = InventoryItemForm(
+            initial={'quantity': 1, 'character': request.user.default_character})
+        form.fields['character'].queryset = request.user.characters()
     return render(request, 'core/loot_item_form.html', {'form': form, 'title': 'Add New Item'})
 
 

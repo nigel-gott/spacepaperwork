@@ -48,7 +48,7 @@
                 {{fleet.description}}<br/>
                 {{fleet.location}}
             </p>
-            {% if can_join_fleet %}
+            {% if not is_member and can_join_fleet %}
             <a class="secondary-content waves-effect waves-light btn purple lighten-2"
                href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Join Fleet</a>
             {% else %}
