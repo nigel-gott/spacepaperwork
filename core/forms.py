@@ -11,16 +11,23 @@ from djmoney.forms.fields import MoneyField
 
 class SignupFormWithTimezone(SignupForm):
     timezone = TimeZoneFormField(display_GMT_offset=True)
+    transaction_tax = forms.DecimalField(
+        max_digits=7, decimal_places=4, label="Transaction Tax %", required=False, initial=15)
+    broker_fee = forms.DecimalField(
+        max_digits=7, decimal_places=4, label="Broker Fee %", required=False, initial=8)
+    default_character = forms.ModelChoiceField(
+        queryset=Character.objects.all(), initial=0)
 
-    def save(self, request):
-        user = super(SignupFormWithTimezone, self).save(request)
-        user.timezone = self.cleaned_data['timezone']
-        user.save()
-        return user
+    def __init__(self, *args, **kwargs):
+        sociallogin = kwargs.get('sociallogin')
+        super(SignupFormWithTimezone, self).__init__(*args, **kwargs)
+        self.fields['default_character'].queryset = Character.objects.filter(
+            discord_id=sociallogin.account.uid)
 
 
 class JoinFleetForm(forms.Form):
-    character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0)
+    character = forms.ModelChoiceField(
+        queryset=Character.objects.all(), initial=0)
 
 
 def get_discord_names():
@@ -32,18 +39,19 @@ class FleetAddMemberForm(forms.Form):
                                                                  required=False,
                                                                  widget=autocomplete.ListSelect2(
                                                                      url='discord-username-autocomplete'))
-    character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0
-                                       , widget=autocomplete.ModelSelect2(url='character-autocomplete',
-                                                                          forward=('discord_username',)))
+    character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0, widget=autocomplete.ModelSelect2(url='character-autocomplete',
+                                                                                                                     forward=('discord_username',)))
 
     class Meta:
         exclude = ('discord_username',)
 
 
 class FleetForm(forms.Form):
-    fc_character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0)
+    fc_character = forms.ModelChoiceField(
+        queryset=Character.objects.all(), initial=0)
     name = forms.CharField(max_length=100)
-    fleet_type = forms.ModelChoiceField(queryset=FleetType.objects.all(), initial=0)
+    fleet_type = forms.ModelChoiceField(
+        queryset=FleetType.objects.all(), initial=0)
     gives_shares_to_alts = forms.BooleanField(required=False, initial=False, widget=forms.CheckboxInput(attrs={
 
     }))
@@ -103,7 +111,8 @@ class SettingsForm(forms.ModelForm):
 
     class Meta:
         model = GooseUser
-        fields = ["timezone", "broker_fee", "transaction_tax"]
+        fields = ["timezone", "broker_fee",
+                  "transaction_tax", "default_character"]
 
 
 class LootGroupForm(forms.Form):
@@ -117,7 +126,7 @@ class LootGroupForm(forms.Form):
     ])
 
     anom_level = forms.ChoiceField(choices=[
-        (1,1),
+        (1, 1),
         (2, 2),
         (3, 3),
         (4, 4),
@@ -128,38 +137,41 @@ class LootGroupForm(forms.Form):
         (9, 9),
         (10, 10),
     ], required=False)
-    anom_type = forms.ChoiceField(choices=AnomType.TYPE_CHOICES, required=False)
+    anom_type = forms.ChoiceField(
+        choices=AnomType.TYPE_CHOICES, required=False)
     anom_faction = forms.ChoiceField(choices=AnomType.FACTIONS, required=False)
-    anom_system = forms.ModelChoiceField(queryset=System.objects.all(), initial=0
-                                       , widget=autocomplete.ModelSelect2(url='system-autocomplete'))
+    anom_system = forms.ModelChoiceField(queryset=System.objects.all(
+    ), initial=0, widget=autocomplete.ModelSelect2(url='system-autocomplete'))
 
 
 class LootShareForm(forms.Form):
-    character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0
-                                       , widget=autocomplete.ModelSelect2(url='character-autocomplete'))
+    character = forms.ModelChoiceField(queryset=Character.objects.all(
+    ), initial=0, widget=autocomplete.ModelSelect2(url='character-autocomplete'))
     share_quantity = forms.IntegerField(min_value=0)
     flat_percent_cut = forms.IntegerField(min_value=0, max_value=100)
 
 
 class InventoryItemForm(forms.Form):
-    character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0
-                                       , widget=autocomplete.ModelSelect2(url='character-autocomplete'))
+    character = forms.ModelChoiceField(queryset=Character.objects.all(
+    ), initial=0, widget=autocomplete.ModelSelect2(url='character-autocomplete'))
     # item_type = forms.ModelChoiceField(queryset=ItemType.objects.all(), initial=0
     #                                    , widget=autocomplete.ModelSelect2(url='item-type-autocomplete'))
     # item_sub_type = forms.ModelChoiceField(queryset=ItemSubType.objects.all(), initial=0
     #                                    , widget=autocomplete.ModelSelect2(url='item-sub-type-autocomplete', forward=('item_type',)))
     # item_sub_sub_type = forms.ModelChoiceField(queryset=ItemSubSubType.objects.all(), initial=0
     #                                    , widget=autocomplete.ModelSelect2(url='item-sub-sub-type-autocomplete', forward=('item_type','item_sub_type',)))
-    item = forms.ModelChoiceField(queryset=Item.objects.all(), initial=0
-                                       , widget=autocomplete.ModelSelect2(url='item-autocomplete'))
-                                    #    forward=('item_type','item_sub_type','item_sub_sub_type',)))
+    item = forms.ModelChoiceField(queryset=Item.objects.all(
+    ), initial=0, widget=autocomplete.ModelSelect2(url='item-autocomplete'))
+    #    forward=('item_type','item_sub_type','item_sub_sub_type',)))
     quantity = forms.IntegerField(min_value=0)
-    
+
 
 class InventoryItemSellingForm(forms.Form):
     unlist_item = forms.BooleanField(initial=False, required=False)
-    transaction_tax = forms.DecimalField(max_digits=7, decimal_places=4, label="Transaction Tax %", required=False)
-    broker_fee = forms.DecimalField(max_digits=7, decimal_places=4, label="Broker Fee %", required=False)
+    transaction_tax = forms.DecimalField(
+        max_digits=7, decimal_places=4, label="Transaction Tax %", required=False)
+    broker_fee = forms.DecimalField(
+        max_digits=7, decimal_places=4, label="Broker Fee %", required=False)
     remaining_quantity = forms.IntegerField(min_value=0, required=False)
-    listed_at_price = forms.DecimalField(max_digits=14, decimal_places=2, required=False)
- 
+    listed_at_price = forms.DecimalField(
+        max_digits=14, decimal_places=2, required=False)

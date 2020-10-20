@@ -20,15 +20,31 @@ from _pydecimal import ROUND_UP
 login_url = reverse_lazy('discord_login')
 
 
-class SettingsView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
-    template_name = 'core/settings.html'
-    model = GooseUser
-    form_class = SettingsForm
-    success_url = '.'
-    success_message = 'Settings saved!'
+@login_required(login_url=login_url)
+def settings_view(request):
+    goose_user = request.user
+    if request.method == 'POST':
+        form = SettingsForm(request.POST)
+        if form.is_valid():
+            goose_user.default_character = form.cleaned_data['default_character']
+            goose_user.timezone = form.cleaned_data['timezone']
+            goose_user.broker_fee = form.cleaned_data['broker_fee']
+            goose_user.transaction_tax = form.cleaned_data['transaction_tax']
+            goose_user.full_clean()
+            goose_user.save()
+            return HttpResponseRedirect(reverse('settings'))
+    else:
+        form = SettingsForm(
+            initial={
+                'default_character': goose_user.default_character,
+                'timezone': goose_user.timezone,
+                'broker_fee': goose_user.broker_fee,
+                'transaction_tax': goose_user.transaction_tax,
+            })
 
-    def get_object(self, **kwargs):
-        return get_object_or_404(GooseUser, pk=self.request.user.id)
+    form.fields['default_character'].queryset = Character.objects.filter(
+        discord_id=goose_user.discord_uid())
+    return render(request, 'core/settings.html', {'form': form})
 
 
 @login_required(login_url=login_url)
@@ -428,7 +444,7 @@ def item_add(request, pk):
             item.save()
             return HttpResponseRedirect(reverse('loot_group_view', args=[pk]))
     else:
-        form = InventoryItemForm(initial={'quantity':1})
+        form = InventoryItemForm(initial={'quantity': 1})
     return render(request, 'core/loot_item_form.html', {'form': form, 'title': 'Add New Item'})
 
 
@@ -441,24 +457,26 @@ def items(request):
     for char in characters:
         char_locs = CharacterLocation.objects.filter(character=char)
         for char_loc in char_locs:
-            loc = ItemLocation.objects.get(character_location=char_loc, corp_hanger=None)
+            loc = ItemLocation.objects.get(
+                character_location=char_loc, corp_hanger=None)
             items = InventoryItem.objects.filter(location=loc)
             first = len(items)
             for item in items:
-                all_items.append((first,item))
+                all_items.append((first, item))
                 first = False
                 initial.append({
-                    'remaining_quantity' : item.remaining_quantity,
+                    'remaining_quantity': item.remaining_quantity,
                     'listed_at_price': item.listed_at_price,
                     'transaction_tax': request.user.transaction_tax,
                     'broker_fee': request.user.broker_fee
                 })
 
-    SellingForms = formset_factory(InventoryItemSellingForm, extra=all_items_size)
+    SellingForms = formset_factory(
+        InventoryItemSellingForm, extra=all_items_size)
     if request.method == 'POST':
-        forms = SellingForms(request.POST,initial=initial) 
+        forms = SellingForms(request.POST, initial=initial)
         i = 0
-        if forms.is_valid(): 
+        if forms.is_valid():
             for form in forms:
                 if form.has_changed():
                     item = all_items[i][1]
@@ -467,8 +485,9 @@ def items(request):
                     transaction_tax = form.cleaned_data['transaction_tax']
                     remaining = form.cleaned_data['remaining_quantity']
                     if not item.listed_at_price and price and broker_fee is not None and transaction_tax is not None:
-                        item.listed_at_price = price 
-                        item.total_fees = item.total_fees + Money(amount="%.2f" % round(item.remaining_quantity * price * (broker_fee / 100),2), currency='EEI')
+                        item.listed_at_price = price
+                        item.total_fees = item.total_fees + Money(amount="%.2f" % round(
+                            item.remaining_quantity * price * (broker_fee / 100), 2), currency='EEI')
                         item.transaction_tax = transaction_tax
                         item.full_clean()
                         item.save()
@@ -476,10 +495,10 @@ def items(request):
                         if item.remaining_quantity > remaining:
                             diff = item.remaining_quantity - remaining
                             fee = (100-item.transaction_tax)/100
-                            result = item.listed_at_price.amount * Decimal("%.2f" % round(diff*fee, 2))
-                            item.total_profit  = item.total_profit + Money(
-                                amount=result.quantize(Decimal('0.01'), rounding=ROUND_UP)
-                            , currency='EEI')
+                            result = item.listed_at_price.amount * \
+                                Decimal("%.2f" % round(diff*fee, 2))
+                            item.total_profit = item.total_profit + Money(
+                                amount=result.quantize(Decimal('0.01'), rounding=ROUND_UP), currency='EEI')
                             item.remaining_quantity = remaining
                             item.full_clean()
                             item.save()
@@ -489,10 +508,10 @@ def items(request):
                             item.save()
 
                 i = i + 1
-        return render(request, 'core/items.html', {'items':all_items, 'forms':forms})
+        return render(request, 'core/items.html', {'items': all_items, 'forms': forms})
     else:
         forms = SellingForms(initial=initial)
-        return render(request, 'core/items.html', {'items':all_items, 'forms':forms})
+        return render(request, 'core/items.html', {'items': all_items, 'forms': forms})
 
 
 @login_required(login_url=login_url)
@@ -521,12 +540,13 @@ def item_edit(request, pk):
     else:
         form = InventoryItemForm(
             initial={
-                'item':item.item,
-                'quantity':item.quantity,
-                'character':item.location.character_location.character
+                'item': item.item,
+                'quantity': item.quantity,
+                'character': item.location.character_location.character
             }
         )
     return render(request, 'core/loot_item_form.html', {'form': form, 'title': 'Edit Item'})
+
 
 @login_required(login_url=login_url)
 def item_delete(request, pk):

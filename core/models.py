@@ -12,10 +12,34 @@ from timezone_field import TimeZoneField
 from dateutil.relativedelta import relativedelta
 
 
+class Corp(models.Model):
+    name = models.TextField(primary_key=True)
+
+    def __str__(self):
+        return str(self.name)
+
+
+class Character(models.Model):
+    discord_id = models.TextField()
+    ingame_name = models.TextField()
+    discord_avatar_url = models.TextField()
+    discord_username = models.TextField()
+    corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
+
+    def user_or_false(self):
+        try:
+            return SocialAccount.objects.get(uid=self.discord_id).user
+        except ObjectDoesNotExist:
+            return False
+
+    def __str__(self):
+        return f"[{self.corp}] {self.ingame_name}"
+
 class GooseUser(AbstractUser):
     timezone = TimeZoneField(default='Europe/London')
     broker_fee = models.DecimalField(verbose_name="Your Broker Fee in %", max_digits=7, decimal_places=4, default=8.0)
     transaction_tax = models.DecimalField(verbose_name="Your Transaction Tax in %", max_digits=7, decimal_places=4, default=15.0)
+    default_character = models.ForeignKey(Character, on_delete=models.CASCADE)
 
     def discord_uid(self):
         if len(self.socialaccount_set.all()) == 0:
@@ -62,29 +86,6 @@ class System(models.Model):
     def __str__(self):
         return f"{self.name} ({self.region} , {self.security})"
 
-
-class Corp(models.Model):
-    name = models.TextField(primary_key=True)
-
-    def __str__(self):
-        return str(self.name)
-
-
-class Character(models.Model):
-    discord_id = models.TextField()
-    ingame_name = models.TextField()
-    discord_avatar_url = models.TextField()
-    discord_username = models.TextField()
-    corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
-
-    def user_or_false(self):
-        try:
-            return SocialAccount.objects.get(uid=self.discord_id).user
-        except ObjectDoesNotExist:
-            return False
-
-    def __str__(self):
-        return f"[{self.corp}] {self.ingame_name}"
 
 
 class FleetType(models.Model):
