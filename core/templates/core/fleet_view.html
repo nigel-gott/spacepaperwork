@@ -75,12 +75,18 @@
             {% for member in members %}
             <tr>
                 {% if forloop.first %}
-                <td rowspan="{{members|length}}"><img src="{{ member.character.discord_avatar_url }}?size=32" alt=""
+                <td rowspan="{{members|length}}">
+                {% if member.has_admin %}
+                    <b>Fleet Admin</b><br/> 
+                {% endif %}
+                <img src="{{ member.character.discord_avatar_url }}?size=32" alt=""
                                                       class="circle">
                     {{member.character.discord_username}}
                 </td>
                 {% endif %}
-                <td>{{member.character}}</td>
+                <td>
+                {{member.character}}
+                </td>
                 <td>
 
                     {% if member.character.discord_id == user.discord_uid or admin %}

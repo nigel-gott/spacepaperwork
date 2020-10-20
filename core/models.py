@@ -238,6 +238,16 @@ class FleetMember(models.Model):
     left_at = models.DateTimeField(blank=True, null=True)
     admin_permissions = models.BooleanField(default=False)
 
+    def user_or_false(self):
+        return self.character.user_or_false()
+
+    def has_admin(self):
+        user = self.user_or_false()
+        if user:
+            return self.fleet.has_admin(user)
+        else:
+            return self.admin_permissions
+
 
 class ItemType(models.Model):
     name = models.TextField()
