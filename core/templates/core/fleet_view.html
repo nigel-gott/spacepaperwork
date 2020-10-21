@@ -62,6 +62,24 @@
     </div>
 </div>
 <div class="row">
+    <div class="col m12 s12">
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header"><i class="material-icons">add</i>Shareable Fleet Invite Link</div>
+                <div class="collapsible-body">
+                    <div class="input-field">
+                        <i class="material-icons prefix">share</i>
+                        <input type="text" id="shareurl" value="{{request.build_absolute_uri}}join"> 
+                        <label for="shareurl">Shareable Fleet Invite Link</label>
+                    </div>
+                    <button data-clipboard-target="#shareurl" class="waves-effect waves-light btn" id="share_button">Copy Invite Link</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="divider"></div>
+<div class="row">
     <div class="col s6 m6">
         <h5>Fleet Members</h5>
         <table>
@@ -128,9 +146,10 @@
     </div>
     <div class="col s6 m6">
         <h5>Loot Buckets</h5>
+        <p><i>Loot and Participation between Anoms in the same Loot Bucket are shared.</i></p>
         <table>
             <thead>
-            <th>Bucket Id</th>
+            <th>Bucket</th>
             <th>Anom</th>
             <th>Actions</th>
             </thead>
@@ -141,7 +160,7 @@
 
                 {% if forloop.first %}
                 <td rowspan="{{bucket.lootgroup_set.all|length|add:"1"}}">
-                    Bucket Number {{bucket.id}}
+                    {{bucket.id}}
                 </td>
                 {% endif %}
                 <td>{{lootgroup.fleet_anom.anom_type}} - {{lootgroup.fleet_anom.system}}
@@ -174,6 +193,29 @@
     </div>
 
 </div>
+
+
+{% endblock %}
+
+{% block extrafooter %}
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
+
+
+
+
+<script>
+var clipboard = new ClipboardJS('.btn');
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.collapsible');
+    var instances = M.Collapsible.init(elems);
+  });
+
+</script>
+
+
+
 
 
 {% endblock %}

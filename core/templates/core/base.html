@@ -65,7 +65,12 @@
 {% if messages %}
 <div class="section">
     {% for m in messages %}
+    {% if m.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+    <span class="red-text"><b>{{ m }}</b></span>
+
+    {% else %}
     <span class="light-green-text"><b>{{ m }}</b></span>
+    {% endif %}
     {% endfor %}
 </div>
 <div class="divider"></div>

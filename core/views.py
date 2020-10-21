@@ -8,7 +8,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
 
-from core.forms import FleetAddMemberForm, FleetForm, InventoryItemForm, InventoryItemSellingForm, JoinFleetForm, LootGroupForm, LootShareForm, SettingsForm
+from core.forms import FleetAddMemberForm, FleetForm, InventoryItemForm, InventoryItemSellingForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SettingsForm
 from core.models import AnomType, Character, CharacterLocation, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, ItemLocation, LootBucket, LootGroup, LootShare, active_fleets_query, future_fleets_query, past_fleets_query
 from django.forms.formsets import formset_factory
 from djmoney.money import Money
@@ -82,7 +82,7 @@ def fleet_leave(request, pk):
         member.delete()
         return HttpResponseRedirect(reverse('fleet_view', args=[member.fleet.pk]))
     else:
-        return HttpResponseForbidden()
+        return forbidden(request)
 
 
 @login_required(login_url=login_url)
@@ -107,7 +107,7 @@ def fleet_end(request, pk):
         f.full_clean()
         f.save()
     else:
-        return HttpResponseForbidden()
+        return forbidden(request)
     return HttpResponseRedirect(reverse('fleet'))
 
 
@@ -119,7 +119,7 @@ def fleet_make_admin(request, pk):
         f.full_clean()
         f.save()
     else:
-        return HttpResponseForbidden()
+        return forbidden(request)
     return HttpResponseRedirect(reverse('fleet_view', args=[f.fleet.pk]))
 
 
@@ -131,7 +131,7 @@ def fleet_remove_admin(request, pk):
         f.full_clean()
         f.save()
     else:
-        return HttpResponseForbidden()
+        return forbidden(request)
     return HttpResponseRedirect(reverse('fleet_view', args=[f.fleet.pk]))
 
 
@@ -139,7 +139,7 @@ def fleet_remove_admin(request, pk):
 def fleet_add(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     if not f.has_admin(request.user):
-        return HttpResponseForbidden()
+        return forbidden(request)
     if request.method == 'POST':
         form = FleetAddMemberForm(request.POST)
         if form.is_valid():
@@ -172,7 +172,7 @@ def fleet_join(request, pk):
                 new_fleet.save()
                 return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
             else:
-                return HttpResponseForbidden()
+                return forbidden(request)
     else:
         form = JoinFleetForm(initial={
             'character': request.user.default_character
@@ -184,7 +184,7 @@ def fleet_join(request, pk):
 
 
 def non_member_chars(fleet_id, user):
-    uid = user.socialaccount_set.only()[0].uid
+    uid = user.discord_uid()
     existing = FleetMember.objects.filter(fleet=fleet_id).values('character')
     characters = Character.objects.filter(
         discord_id=uid).exclude(pk__in=existing)
@@ -197,15 +197,66 @@ def non_member_chars(fleet_id, user):
 def loot_group_create(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     if not f.has_admin(request.user):
-        return HttpResponseForbidden()
+        return forbidden(request)
     return loot_group_add(request, pk, False)
+
+
+def non_participation_chars(loot_group, user):
+    uid = user.discord_uid()
+    existing = LootShare.objects.filter(loot_group=loot_group, character__discord_id=uid).values('character')
+    characters = Character.objects.filter(
+        discord_id=uid).exclude(pk__in=existing)
+    return characters
+
+def forbidden(request):
+    return HttpResponseForbidden(render(request, 'core/403.html'))
+
+@login_required(login_url=login_url)
+def loot_share_join(request, pk):
+    loot_group = get_object_or_404(LootGroup, pk=pk)
+    if request.method == 'POST':
+        form = LootJoinForm(request.POST)
+        if form.is_valid():
+            selected_character = form.cleaned_data['character']
+            if selected_character not in request.user.characters():
+                messages.error(request, f"{selected_character} is not your Character, you cannot join the loot group with it.")
+                return forbidden(request)
+
+            if not loot_group.can_join(selected_character):
+                messages.error(request, f"{selected_character} is not allowed to join this group.")
+                return forbidden(request)
+
+            ls = LootShare(
+                character=selected_character,
+                loot_group=loot_group,
+                share_quantity=1,
+                flat_percent_cut=0
+            )
+            ls.full_clean()
+            ls.save()
+            return HttpResponseRedirect(reverse('loot_group_view', args=[pk]))
+    else:
+        can_still_join = non_participation_chars(loot_group, request.user) 
+        if len(can_still_join) == 0: 
+            messages.error(request, f"You have no more characters that can join this loot group.")
+            return forbidden(request) 
+        if loot_group.has_share(request.user) and not loot_group.still_can_join_alts(request.user):
+            messages.error(request, f"You cannot join with more characters as the fleet doesn't allow alts to have shares.")
+            return forbidden(request) 
+        default_char = request.user.default_character
+        if default_char not in can_still_join:
+            default_char = can_still_join[0]
+        form = LootJoinForm(
+            initial={'character':default_char})
+        form.fields['character'].queryset = can_still_join
+    return render(request, 'core/loot_join_form.html', {'form': form, 'title': 'Add Your Participation', 'loot_group':loot_group})
 
 
 @login_required(login_url=login_url)
 def loot_share_add(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
     if not loot_group.has_admin(request.user):
-        return HttpResponseForbidden()
+        return forbidden(request)
     if request.method == 'POST':
         form = LootShareForm(request.POST)
         if form.is_valid():
@@ -228,7 +279,7 @@ def loot_share_add(request, pk):
 def loot_share_delete(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
     if not loot_share.loot_group.fleet().has_admin(request.user):
-        return HttpResponseForbidden()
+        return forbidden(request)
     if request.method == 'POST':
         group_pk = loot_share.loot_group.pk
         loot_share.delete()
@@ -241,7 +292,7 @@ def loot_share_delete(request, pk):
 def loot_share_edit(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
     if not loot_share.loot_group.fleet().has_admin(request.user):
-        return HttpResponseForbidden()
+        return forbidden(request)
     if request.method == 'POST':
         form = LootShareForm(request.POST)
         if form.is_valid():
@@ -375,7 +426,7 @@ def fleet_create(request):
 def fleet_edit(request, pk):
     existing_fleet = Fleet.objects.get(pk=pk)
     if not existing_fleet.has_admin(request.user):
-        return HttpResponseForbidden()
+        return forbidden(request)
     if request.method == 'POST':
         form = FleetForm(request.POST)
         if form.is_valid():
@@ -435,7 +486,7 @@ def loot_group_view(request, pk):
 def item_add(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
     if not loot_group.fleet().has_admin(request.user):
-        return HttpResponseForbidden()
+        return forbidden(request)
     if request.method == 'POST':
         form = InventoryItemForm(request.POST)
         if form.is_valid():
@@ -534,7 +585,7 @@ def items(request):
 def item_edit(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     if not item.has_admin(request.user):
-        return HttpResponseForbidden()
+        return forbidden(request)
     if request.method == 'POST':
         form = InventoryItemForm(request.POST)
         if form.is_valid():
@@ -568,7 +619,7 @@ def item_edit(request, pk):
 def item_delete(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     if not item.has_admin(request.user):
-        return HttpResponseForbidden()
+        return forbidden(request)
     if request.method == 'POST':
         group_pk = item.loot_group.pk
         item.delete()

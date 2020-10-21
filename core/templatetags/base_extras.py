@@ -36,6 +36,10 @@ def has_fleet_member(fleet, user):
 def still_can_join_alts(fleet, user):
     return fleet.still_can_join_alts(user)
 
+@register.simple_tag
+def loot_group_still_can_join_alts(loot_group, user):
+    return loot_group.still_can_join_alts(user)
+
 
 @register.simple_tag
 def can_join(fleet, user):
@@ -50,6 +54,9 @@ def has_admin(fleet, user):
 def has_item_admin(item, user):
     return item.has_admin(user)
 
+@register.simple_tag
+def has_share(loot_group, user):
+    return loot_group.has_share(user)
 
 @register.filter
 def index(sequence, position):

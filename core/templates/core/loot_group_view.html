@@ -12,10 +12,29 @@
       </div>
       <div class="card-action">
         <a class="waves-effect waves-light btn green lighten-2"
-          href="{% url 'fleet_view' loot_group.fleet_anom.fleet.id %}"><i class="material-icons right">info</i>Back to Fleet</a>
+        href="{% url 'fleet_view' loot_group.fleet_anom.fleet.id %}"><i class="material-icons right">info</i>Back to Fleet</a>
       </div>
     </div>
   </div>
+</div>
+<div class="row">
+    <div class="col m12 s12">
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header"><i class="material-icons">add</i>Shareable Participation Invite Link</div>
+                <div class="collapsible-body">
+                    <div class="input-field">
+                        <i class="material-icons prefix">share</i>
+                        <input type="text" id="shareurl" value="{{request.build_absolute_uri}}/join"> 
+                        <label for="shareurl">Shareable Fleet Invite Link</label>
+                    </div>
+                    <button data-clipboard-target="#shareurl" class="waves-effect waves-light btn" id="share_button">Copy Invite Link</button>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="row">
   <div class="col s12 m12">
     <h5>Loot</h5>
     <table class="responsive-table striped">
@@ -59,6 +78,7 @@
       </tbody>
     </table>
   </div>
+  <div class="row">
   <div class="col s12 m12">
     <h5>Participation</h5>
     <table class="responsive-table striped">
@@ -100,9 +120,18 @@
         </tr>
         {% endfor %}
         {% endfor %}
-        {% if admin %}
         <tr>
-        <td colspan="4">
+        <td colspan="5">
+        {% has_share loot_group user as has_share_already %}
+        {% loot_group_still_can_join_alts loot_group user as user_can_still_join_alts %}
+        {% if not has_share_already %}
+        <a class="waves-effect waves-light btn green darken-2"
+          href="{% url 'loot_share_join' loot_group.id %}"><i class="material-icons right">add_circle</i>Join As Participant</a>
+        {% elif user_can_still_join_alts %}
+        <a class="waves-effect waves-light btn purple darken-2"
+          href="{% url 'loot_share_join' loot_group.id %}"><i class="material-icons right">add_circle</i>Join Another Alt As Participant</a>
+        {% endif %}
+        {% if admin %}
         <a class="waves-effect waves-light btn green darken-2"
           href="{% url 'loot_share_add' loot_group.id %}"><i class="material-icons right">add_circle</i>Add Participant</a>
             <form method="post" action="{% url 'loot_share_add_fleet_members' loot_group.id %}">
@@ -112,12 +141,36 @@
                 {% endif %}
                 <button class="waves-effect waves-light btn" type="submit">Give All Fleet Members 1 Share</button>
             </form>
-        </tr>
         {% endif %}
+            </td>
+        </tr>
       </tbody>
     </table>
   </div>
-  <div class="col s6 m6"></div>
 </div>
+
+{% endblock %}
+
+
+{% block extrafooter %}
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
+
+
+
+
+<script>
+var clipboard = new ClipboardJS('.btn');
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.collapsible');
+    var instances = M.Collapsible.init(elems);
+  });
+
+</script>
+
+
+
+
 
 {% endblock %}

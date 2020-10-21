@@ -143,6 +143,8 @@ class LootGroupForm(forms.Form):
     anom_system = forms.ModelChoiceField(queryset=System.objects.all(
     ), initial=0, widget=autocomplete.ModelSelect2(url='system-autocomplete'))
 
+class LootJoinForm(forms.Form):
+    character = forms.ModelChoiceField(queryset=Character.objects.all())
 
 class LootShareForm(forms.Form):
     character = forms.ModelChoiceField(queryset=Character.objects.all(

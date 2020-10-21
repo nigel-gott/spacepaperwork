@@ -398,6 +398,39 @@ class LootGroup(models.Model):
 
     def has_admin(self,user):
         return self.fleet().has_admin(user)
+    
+    def has_share(self,user):
+        return len(LootShare.objects.filter(
+            loot_group=self,
+            character__in=user.characters()
+        )) > 0
+    
+    def alts_allowed(self):
+        return self.fleet_anom.fleet.gives_shares_to_alts
+    
+
+    def can_join(self, character):
+        return self.still_open() and (self.alts_allowed() or len(LootShare.objects.filter(
+                loot_group=self,
+                character__discord_id=character.discord_id
+            )) == 0)
+    
+    def still_open(self):
+        return not self.fleet().in_the_past()
+
+    def still_can_join_alts(self, user):
+        uid = user.discord_uid()
+        num_chars = len(Character.objects.filter(
+            discord_id=user.discord_uid()))
+        num_characters_in_group = len(LootShare.objects.filter(
+            loot_group=self, character__discord_id=uid))
+        return self.still_open() and self.alts_allowed() and num_characters_in_group > 0 and (
+            num_chars - num_characters_in_group) > 0
+            
+    
+    def __str__(self):
+        return str(self.fleet_anom)
+    
 
 
 class InventoryItem(models.Model):
