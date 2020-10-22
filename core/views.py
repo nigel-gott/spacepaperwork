@@ -8,7 +8,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
 
-from core.forms import FleetAddMemberForm, FleetForm, InventoryItemForm, InventoryItemSellingForm, JoinFleetForm, LootGroupForm,  LootJoinForm, LootShareForm, SettingsForm
+from core.forms import DeleteItemForm, FleetAddMemberForm, FleetForm, InventoryItemForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SellItemForm, SettingsForm
 from core.models import AnomType, Character, CharacterLocation, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, active_fleets_query, future_fleets_query, past_fleets_query
 from django.forms.formsets import formset_factory
 from djmoney.money import Money
@@ -629,13 +629,48 @@ def item_edit(request, pk):
 
 
 @login_required(login_url=login_url)
+def item_sell(request, pk):
+    item = get_object_or_404(InventoryItem, pk=pk)
+    if not item.has_admin(request.user):
+        return forbidden(request)
+    
+    if item.quantity == 0:
+        messages.error(request, f"Cannot sell an item with 0 quantity.")
+        return forbidden(request)
+
+    if request.method == 'POST':
+        form = SellItemForm(request.POST)
+        if form.is_valid():
+            messages.info(request, f"Worked.")
+            
+    else:
+        form = SellItemForm(initial={
+            'broker_fee':request.user.broker_fee,
+            'transaction_tax':request.user.transaction_tax,
+        })
+
+    return render(request, 'core/sell_item.html', {'form': form, 'title': 'Sell Item', 'item':item})
+
+@login_required(login_url=login_url)
 def item_delete(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     if not item.has_admin(request.user):
         return forbidden(request)
     if request.method == 'POST':
-        group_pk = item.loot_group.pk
-        item.delete()
-        return HttpResponseRedirect(reverse('loot_group_view', args=[group_pk]))
+        form = DeleteItemForm(request.POST)
+        if form.is_valid():
+            if form.cleaned_data['are_you_sure']:
+                group_pk = item.loot_group and item.loot_group.pk
+                item.delete()
+                if group_pk:
+                    return HttpResponseRedirect(reverse('loot_group_view', args=[group_pk]))
+                else:
+                    return HttpResponseRedirect(reverse('items')) 
+            else:
+                messages.error(request, "Don't delete the item if you are not sure!")
+                return HttpResponseRedirect(reverse('item_view', args=[item.pk]))
+
     else:
-        return HttpResponseNotAllowed()
+        form = DeleteItemForm()
+
+    return render(request, 'core/item_delete.html', {'form': form, 'title': 'Delete Item', 'item':item})

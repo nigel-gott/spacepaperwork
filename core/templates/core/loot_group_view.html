@@ -61,13 +61,8 @@
         {% if item_admin %}
         <a 
           href="{% url 'item_edit' item.id %}">Edit</a>
-            <form method="post" action="{% url 'item_delete' item.id %}">
-                {% csrf_token %}
-                {% if redirect_field_value %}
-                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
-                {% endif %}
-                <button style="background:none; border-width:0px; color:red; text-decoration:underline;" type="submit">Delete</button>
-            </form>
+        <a class="red-text" 
+          href="{% url 'item_delete' item.id %}">Delete</a>
         {% endif %}
         </td>
         </tr>

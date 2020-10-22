@@ -27,6 +27,23 @@
     {% endif %}
     </td>
     </tr>
+        {% has_item_admin item user as item_admin %}
+        {% if item_admin %}
+    <tr>
+    <td colspan="2">
+      <a class="waves-btn btn orange" href="{% url 'item_edit' item.id %}">Edit Item</a>
+      <a class="waves-btn btn green" href="{% url 'item_sell' item.id %}">Sell Item</a>
+
+            <form method="post" action="{% url 'item_delete' item.id %}">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <button class="waves-btn btn red" type="submit">Delete Item</button>
+            </form>
+    </td>
+    </tr>
+    {% endif %}
     <tbody>
     </tbody>
     </table>

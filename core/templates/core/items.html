@@ -35,7 +35,13 @@
                 <td>
                   {{item.quantity}}
                 </td>
-                <td></td>
+                <td>
+      <a class="waves-btn btn orange" href="{% url 'item_edit' item.id %}">Edit Item</a>
+      <br/>
+      <a class="waves-btn btn green" href="{% url 'item_sell' item.id %}">Sell Item</a>
+      <br/>
+      <a class="waves-btn btn red" href="{% url 'item_delete' item.id %}">Delete Item</a>
+                </td>
             </tr>
           {% endfor %}
         {% endfor %}

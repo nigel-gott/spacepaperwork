@@ -167,13 +167,13 @@ class InventoryItemForm(forms.Form):
     #    forward=('item_type','item_sub_type','item_sub_sub_type',)))
     quantity = forms.IntegerField(min_value=0)
 
+class DeleteItemForm(forms.Form):
+    are_you_sure = forms.BooleanField(initial=False)
 
-class InventoryItemSellingForm(forms.Form):
-    unlist_item = forms.BooleanField(initial=False, required=False)
+
+class SellItemForm(forms.Form):
     transaction_tax = forms.DecimalField(
-        max_digits=7, decimal_places=4, label="Transaction Tax %", required=False)
+        max_digits=7, decimal_places=4, label="Transaction Tax %")
     broker_fee = forms.DecimalField(
-        max_digits=7, decimal_places=4, label="Broker Fee %", required=False)
-    remaining_quantity = forms.IntegerField(min_value=0, required=False)
-    listed_at_price = forms.DecimalField(
-        max_digits=14, decimal_places=2, required=False)
+        max_digits=7, decimal_places=4, label="Broker Fee %")
+    listed_at_price = forms.DecimalField(max_digits=14, decimal_places=2)
