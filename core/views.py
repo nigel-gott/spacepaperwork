@@ -8,7 +8,7 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
 
-from core.forms import DeleteItemForm, FleetAddMemberForm, FleetForm, InventoryItemForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SellItemForm, SettingsForm
+from core.forms import DeleteItemForm, FleetAddMemberForm, FleetForm, InventoryItemForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SellItemForm, SettingsForm, SoldItemForm
 from core.models import AnomType, Character, CharacterLocation, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, active_fleets_query, future_fleets_query, past_fleets_query
 from django.db import transaction
 from django.forms.formsets import formset_factory
@@ -631,6 +631,67 @@ def item_edit(request, pk):
 
 @login_required(login_url=login_url)
 @transaction.atomic
+def order_sold(request, pk):
+    order = get_object_or_404(MarketOrder, pk=pk)
+    if not order.has_admin(request.user):
+        return forbidden(request)
+
+    if request.method == 'POST':
+        form = SoldItemForm(request.POST)
+        if form.is_valid():
+            quantity_remaining = form.cleaned_data['quantity_remaining']
+            quantity_sold = order.quantity - quantity_remaining
+            transaction_tax_percent = order.transaction_tax/100
+            gross_profit = order.listed_at_price * quantity_sold 
+            transaction_tax = Money(amount=round((gross_profit * transaction_tax_percent).amount,2), currency="EEI")
+            print(f"{transaction_tax_percent} * {order.listed_at_price} * {quantity_sold} = {transaction_tax}")
+            item = order.item
+            transaction_tax_line = IskTransaction(
+                item = item,
+                time = timezone.now(),
+                isk = -transaction_tax,
+                quantity = quantity_sold,
+                transaction_type = "transaction_tax",
+            )
+            print(transaction_tax_line)
+            transaction_tax_line.full_clean()
+            transaction_tax_line.save()
+            profit_line = IskTransaction(
+                item = item,
+                time = timezone.now(),
+                isk = gross_profit,
+                quantity = quantity_sold,
+                transaction_type = "external_market_gross_profit",
+            )
+            profit_line.full_clean()
+            profit_line.save()
+            sold_item, sold_item_created = SoldItem.objects.get_or_create(
+                item=item,
+                defaults = {
+                    'quantity':quantity_sold,
+                    'sold_via':'external',
+                }
+            )
+            if not sold_item_created:
+                sold_item.quantity = sold_item.quantity + quantity_sold
+                sold_item.full_clean()
+                sold_item.save()
+
+            if quantity_remaining == 0:
+                order.delete()
+            else:
+                order.quantity = quantity_remaining
+                order.full_clean()
+                order.save()
+
+    else:
+        form = SoldItemForm(initial={
+            'quantity_remaining':0
+        })
+    return render(request, 'core/order_sold.html', {'form': form, 'title': 'Mark Order As Sold', 'order':order})
+
+@login_required(login_url=login_url)
+@transaction.atomic
 def item_sell(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     if not item.has_admin(request.user):
@@ -653,16 +714,18 @@ def item_sell(request, pk):
                 quantity = item.quantity,
                 transaction_type = "broker_fee",
             )
+            broker_fee.full_clean()
             broker_fee.save()
             sell_order = MarketOrder(
                 item = item,
-                internal_or_external="internal",
+                internal_or_external="external",
                 buy_or_sell="sell",
                 quantity=item.quantity,
                 listed_at_price = price,
                 transaction_tax = form.cleaned_data['transaction_tax'],
                 broker_fee = form.cleaned_data['broker_fee']
             )
+            sell_order.full_clean()
             sell_order.save()
             item.quantity = 0
             item.save()

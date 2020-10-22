@@ -177,3 +177,6 @@ class SellItemForm(forms.Form):
     broker_fee = forms.DecimalField(
         max_digits=7, decimal_places=4, label="Broker Fee %")
     listed_at_price = forms.DecimalField(max_digits=14, decimal_places=2)
+
+class SoldItemForm(forms.Form):
+    quantity_remaining = forms.IntegerField(min_value=0)

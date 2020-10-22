@@ -12,6 +12,7 @@ from timezone_field import TimeZoneField
 from dateutil.relativedelta import relativedelta
 from django.db.models.fields import BooleanField
 from django.db.models.aggregates import Sum
+from djmoney.money import Money
 
 
 class Corp(models.Model):
@@ -446,6 +447,9 @@ def model_sum(queryset, key):
         return 0
     else:
         return result
+
+def to_isk(number):
+    return Money(amount=round(number,2), currency="EEI")
     
 class InventoryItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
@@ -461,10 +465,10 @@ class InventoryItem(models.Model):
         return "Status"
     
     def isk_balance(self):
-        return model_sum(self.isktransaction_set, 'isk')
+        return to_isk(model_sum(self.isktransaction_set, 'isk'))
 
     def egg_balance(self):
-        return model_sum(self.eggtransaction_set, 'eggs')
+        return to_isk(model_sum(self.eggtransaction_set, 'eggs'))
     
     def total_quantity(self):
         return sum([self.quantity 
@@ -491,11 +495,11 @@ class InventoryItem(models.Model):
             status = status + f" {quantity_junked} Junked"
 
         isk = self.isk_balance()
-        if isk != 0:
-            status = status + f", Profit ISK:{isk}"
+        if isk.amount != 0:
+            status = status + f", Profit:{isk}"
         egg = self.egg_balance()
-        if egg != 0:
-            status = status + f", Profit EGGS:{egg}"
+        if egg.amount != 0:
+            status = status + f", Eggs Profit:{egg}"
 
         return status
     
@@ -517,7 +521,10 @@ class IskTransaction(models.Model):
         ("external_market_price_adjustment_fee", "InGame Market Price Adjustment Fee"),
         ("external_market_gross_profit", "InGame Market Gross Profit"),
     ])
-    notes = models.TextField(default='')
+    notes = models.TextField(default='', blank=True)
+
+    def __str__(self):
+        return f"{self.item.id} - {self.quantity} - {self.time} - {self.isk} - {self.transaction_type} - {self.notes}"
 
 class EggTransaction(models.Model):
     item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
@@ -526,7 +533,7 @@ class EggTransaction(models.Model):
     eggs = MoneyField(
         max_digits=14, decimal_places=2, default_currency='EEI') 
     counterparty_discord_id = models.TextField()
-    notes = models.TextField()
+    notes = models.TextField(default='', blank=True)
 
 
 class MarketOrder(models.Model):
@@ -540,6 +547,12 @@ class MarketOrder(models.Model):
         max_digits=5, decimal_places=2)
     broker_fee= DecimalField(
         max_digits=5, decimal_places=2)
+    
+    def has_admin(self, user):
+        return self.item.has_admin(user)
+    
+    def __str__(self):
+        return f"A {self.buy_or_sell} of {self.item.item} x {self.quantity} listed for {self.listed_at_price} @ {self.internal_or_external} market"
 
 class SoldItem(models.Model):
     item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)

@@ -47,7 +47,9 @@
                 <td>
                   {{item.listed_at_price}}
                 </td>
-                <td></td>
+                <td>
+                  <a class="waves-btn btn green" href="{% url 'order_sold' item.id %}">Sold</a>
+                </td>
             </tr>
           {% endfor %}
         {% endfor %}
