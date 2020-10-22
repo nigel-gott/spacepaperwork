@@ -644,10 +644,12 @@ def order_sold(request, pk):
         if form.is_valid():
             quantity_remaining = form.cleaned_data['quantity_remaining']
             quantity_sold = order.quantity - quantity_remaining
+            if quantity_sold <= 0:
+                messages.error(request, "Cannot sell nothing or more than the order quantity")
+                return forbidden(request)
             transaction_tax_percent = order.transaction_tax/100
             gross_profit = order.listed_at_price * quantity_sold 
             transaction_tax = Money(amount=round((gross_profit * transaction_tax_percent).amount,2), currency="EEI")
-            print(f"{transaction_tax_percent} * {order.listed_at_price} * {quantity_sold} = {transaction_tax}")
             item = order.item
             transaction_tax_line = IskTransaction(
                 item = item,
@@ -656,7 +658,6 @@ def order_sold(request, pk):
                 quantity = quantity_sold,
                 transaction_type = "transaction_tax",
             )
-            print(transaction_tax_line)
             transaction_tax_line.full_clean()
             transaction_tax_line.save()
             profit_line = IskTransaction(
@@ -686,6 +687,7 @@ def order_sold(request, pk):
                 order.quantity = quantity_remaining
                 order.full_clean()
                 order.save()
+            return HttpResponseRedirect(reverse('orders'))
 
     else:
         form = SoldItemForm(initial={
@@ -710,10 +712,11 @@ def item_sell(request, pk):
             price = form.cleaned_data['listed_at_price']
             total_isk_listed = item.quantity * price
             broker_fee_percent = form.cleaned_data['broker_fee']/100
+            broker_fee = Money(amount=round(-(total_isk_listed* broker_fee_percent),2), currency="EEI")
             broker_fee = IskTransaction(
                 item = item,
                 time = timezone.now(),
-                isk = -total_isk_listed * broker_fee_percent,
+                isk = broker_fee, 
                 quantity = item.quantity,
                 transaction_type = "broker_fee",
             )

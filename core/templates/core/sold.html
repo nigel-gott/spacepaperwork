@@ -22,8 +22,8 @@
                 </td>
                 {% endif %}
                 <td>
-                  {% if item.loot_group %}
-                    <a href="{% url 'loot_group_view' item.loot_group.id %}">Loot Group {{item.loot_group.id}}</a>
+                  {% if item.item.loot_group %}
+                    <a href="{% url 'loot_group_view' item.item.loot_group.id %}">Loot Group {{item.item.loot_group.id}}</a>
                     {% else %}
                     No Loot Group
                     {% endif %}

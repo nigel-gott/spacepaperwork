@@ -46,7 +46,8 @@
             <p>
                 <br/>
                 {{fleet.description}}<br/>
-                {{fleet.location}}
+                {{fleet.location}}<br/>
+                Profit So Far: {{fleet.isk_balance}}
             </p>
             {% if not is_member and can_join_fleet %}
             <a class="secondary-content waves-effect waves-light btn purple lighten-2"

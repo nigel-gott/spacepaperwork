@@ -8,6 +8,7 @@
         <p>
           <b>Run At:</b> {{loot_group.fleet_anom.time}}<br />
           <b>Location:</b> {{loot_group.fleet_anom.system}}<br />
+          <b>Total Profit So Far:</b> {{loot_group.isk_balance}}<br />
         </p>
       </div>
       <div class="card-action">
@@ -60,8 +61,8 @@
         {% has_item_admin item user as item_admin %}
         {% if item_admin %}
       {% if item.can_edit %}
-      <a href="{% url 'item_edit' item.id %}">Edit Item</a>
-      <a class="waves-btn btn red" href="{% url 'item_delete' item.id %}">Delete Item</a>
+      <a href="{% url 'item_edit' item.id %}">Edit Item</a><br/>
+      <a class="red-text" href="{% url 'item_delete' item.id %}">Delete Item</a>
       {% endif %}
       {% endif %}
         </td>

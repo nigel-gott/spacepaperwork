@@ -12,9 +12,9 @@ from djmoney.forms.fields import MoneyField
 class SignupFormWithTimezone(SignupForm):
     timezone = TimeZoneFormField(display_GMT_offset=True)
     transaction_tax = forms.DecimalField(
-        max_digits=7, decimal_places=4, label="Transaction Tax %", required=False, initial=15)
+        max_digits=5, decimal_places=2, label="Transaction Tax %", required=False, initial=15)
     broker_fee = forms.DecimalField(
-        max_digits=7, decimal_places=4, label="Broker Fee %", required=False, initial=8)
+        max_digits=5, decimal_places=2, label="Broker Fee %", required=False, initial=8)
     default_character = forms.ModelChoiceField(
         queryset=Character.objects.all(), initial=0)
 
@@ -173,9 +173,9 @@ class DeleteItemForm(forms.Form):
 
 class SellItemForm(forms.Form):
     transaction_tax = forms.DecimalField(
-        max_digits=7, decimal_places=4, label="Transaction Tax %")
+        max_digits=5, decimal_places=2, label="Transaction Tax %")
     broker_fee = forms.DecimalField(
-        max_digits=7, decimal_places=4, label="Broker Fee %")
+        max_digits=5, decimal_places=2, label="Broker Fee %")
     listed_at_price = forms.DecimalField(max_digits=14, decimal_places=2)
 
 class SoldItemForm(forms.Form):

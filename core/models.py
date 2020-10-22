@@ -40,8 +40,8 @@ class Character(models.Model):
 
 class GooseUser(AbstractUser):
     timezone = TimeZoneField(default='Europe/London')
-    broker_fee = models.DecimalField(verbose_name="Your Broker Fee in %", max_digits=7, decimal_places=4, default=8.0)
-    transaction_tax = models.DecimalField(verbose_name="Your Transaction Tax in %", max_digits=7, decimal_places=4, default=15.0)
+    broker_fee = models.DecimalField(verbose_name="Your Broker Fee in %", max_digits=5, decimal_places=2, default=8.0)
+    transaction_tax = models.DecimalField(verbose_name="Your Transaction Tax in %", max_digits=5, decimal_places=2, default=15.0)
     default_character = models.ForeignKey(Character, on_delete=models.CASCADE)
 
     def discord_uid(self):
@@ -230,6 +230,13 @@ class Fleet(models.Model):
         else:
             return f"Ends in {human_delta}"
 
+    def isk_balance(self):
+        result = IskTransaction.objects.filter(item__loot_group__bucket__fleet=self.id).aggregate(result=Sum('isk'))['result']
+        if result is None:
+            return to_isk(0)
+        else:
+            return to_isk(result)
+
     def __str__(self):
         return str(self.name)
 
@@ -393,6 +400,12 @@ class KillMail(models.Model):
 
 class LootBucket(models.Model):
     fleet = models.ForeignKey(Fleet, on_delete=models.CASCADE)
+    def isk_balance(self):
+        result = IskTransaction.objects.filter(item__loot_group__bucket=self.id).aggregate(result=Sum('isk'))['result']
+        if result is None:
+            return to_isk(0)
+        else:
+            return to_isk(result)
 
 
 class LootGroup(models.Model):
@@ -437,9 +450,16 @@ class LootGroup(models.Model):
         return self.still_open() and self.alts_allowed() and num_characters_in_group > 0 and (
             num_chars - num_characters_in_group) > 0
             
+    def isk_balance(self):
+        result = IskTransaction.objects.filter(item__loot_group=self.id).aggregate(result=Sum('isk'))['result']
+        if result is None:
+            return to_isk(0)
+        else:
+            return to_isk(result)
+        
     
     def __str__(self):
-        return str(self.fleet_anom)
+        return str(self.fleet_anom) 
 
 def model_sum(queryset, key):
     result = queryset.aggregate(result=Sum(key))['result']
