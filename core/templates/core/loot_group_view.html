@@ -48,7 +48,11 @@
       <tbody>
         {% for item in loot_group.inventoryitem_set.all %}
         <tr>
-          <td>{{item.item}}</td>
+          <td>
+                <a href="{% url 'item_view' item.id %}">
+                  {{item.item}}
+                </a>
+          </td>
           <td>{{item.quantity}}</td>
           <td>{{item.location}}</td>
           <td>{{item.status}}</td>
