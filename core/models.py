@@ -10,6 +10,8 @@ from django.utils import timezone
 from djmoney.models.fields import MoneyField
 from timezone_field import TimeZoneField
 from dateutil.relativedelta import relativedelta
+from django.db.models.fields import BooleanField
+from django.db.models.aggregates import Sum
 
 
 class Corp(models.Model):
@@ -317,6 +319,13 @@ class ItemLocation(models.Model):
     corp_hanger = models.ForeignKey(
         CorpHanger, on_delete=models.CASCADE, blank=True, null=True)
 
+    def has_admin(self, user):
+        # TODO support corp hanger permisions
+        for char in user.characters():
+            if self.character_location and self.character_location.character == char:
+                return True
+        return False
+
     def clean(self):
         if self.character_location and self.corp_hanger:
             raise ValidationError(
@@ -430,52 +439,118 @@ class LootGroup(models.Model):
     
     def __str__(self):
         return str(self.fleet_anom)
+
+def model_sum(queryset, key):
+    result = queryset.aggregate(result=Sum(key))['result']
+    if result is None:
+        return 0
+    else:
+        return result
     
-
-
 class InventoryItem(models.Model):
-    location = models.ForeignKey(ItemLocation, on_delete=models.CASCADE)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    quantity = models.PositiveBigIntegerField()
-    remaining_quantity = models.PositiveIntegerField()
-    listed_at_price = MoneyField(
-        max_digits=14, decimal_places=2, default_currency='EEI', null=True, blank=True)
-    transaction_tax = DecimalField(
-        max_digits=7, decimal_places=4, null=True, blank=True)
-    total_profit = MoneyField(
-        max_digits=14, decimal_places=2, default_currency='EEI', default=0)
-    total_fees = MoneyField(
-        max_digits=14, decimal_places=2, default_currency='EEI', default=0)
-    loot_group = models.ForeignKey(LootGroup, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    location = models.ForeignKey(ItemLocation, on_delete=models.CASCADE)
+    loot_group = models.ForeignKey(LootGroup, on_delete=models.CASCADE, null=True, blank=True)
 
-    def net_profit(self):
-        return self.total_profit - self.total_fees
 
     def has_admin(self, user):
-        for char in user.characters():
-            if self.location.character_location and self.location.character_location.character == char:
-                return True
-        return False
-
+        return self.location.has_admin(user)
+    
     def status(self):
-        if self.remaining_quantity != 0:
-            if self.listed_at_price:
-                return "Listed"
-            elif self.location.in_station():
-                return "Waiting"
-            else:
-                return "Transit"
-        else:
-            return "All Sold"
+        return "Status"
+    
+    def isk_balance(self):
+        return model_sum(self.isktransaction_set, 'isk')
 
+    def egg_balance(self):
+        return model_sum(self.eggtransaction_set, 'eggs')
+    
+    def total_quantity(self):
+        return sum([self.quantity 
+        ,model_sum(self.marketorder_set, 'quantity')
+        ,model_sum(self.solditem_set,'quantity')
+        ,model_sum(self.junkeditem_set, 'quantity')])
+    
+    def status(self):
+        status = ""
+        if self.quantity != 0:
+            status = status + f" {self.quantity} Waiting"
+        quantity_listed = model_sum(self.marketorder_set, 'quantity')
+        if quantity_listed != 0:
+            status = status + f" {quantity_listed} Listed"
+        quantity_sold = model_sum(self.solditem_set,'quantity')
+        if quantity_sold != 0:
+            status = status + f" {quantity_sold} Sold"
+        quantity_junked = model_sum(self.junkeditem_set, 'quantity')
+        if quantity_junked != 0:
+            status = status + f" {quantity_junked} Junked"
+
+        isk = self.isk_balance()
+        if isk != 0:
+            status = status + f", ISK:{isk}"
+        egg = self.egg_balance()
+        if egg != 0:
+            status = status + f", EGGS:{egg}"
+
+        return status
+    
     def __str__(self):
-        if self.status() == "All Sold":
-            extra = f" - sold for total profit of {self.total_profit}"
-        elif self.listed_at_price:
-            extra = f" - listed @ {self.listed_at_price} for total {self.listed_at_price * self.quantity}"
-        else:
-            extra = ""
-        return f"{self.item} x {self.quantity} @ {self.location} {extra}"
+        return f"{self.item} x {self.quantity} @ {self.location}"
+
+class IskTransaction(models.Model):
+    item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    time = models.DateTimeField()
+    isk = MoneyField(
+        max_digits=14, decimal_places=2, default_currency='EEI') 
+    transaction_type = models.TextField(choices=[
+        ("broker_fee", "Broker Fee"),
+        ("transaction_tax", "Transaction Tax"),
+        ("contract_broker_fee","Contract Broker Fee"),
+        ("contract_transaction_tax","Contract Transaction Tax"),
+        ("contract_gross_profit", "Contract Gross Profit"),
+        ("external_market_price_adjustment_fee", "InGame Market Price Adjustment Fee"),
+        ("external_market_gross_profit", "InGame Market Gross Profit"),
+    ])
+    notes = models.TextField()
+
+class EggTransaction(models.Model):
+    item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    time = models.DateTimeField()
+    eggs = MoneyField(
+        max_digits=14, decimal_places=2, default_currency='EEI') 
+    counterparty_discord_id = models.TextField()
+    notes = models.TextField()
+
+
+class MarketOrder(models.Model):
+    item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
+    internal_or_external = models.TextField(choices=[("internal", "Internal"), ("external", "External")])
+    buy_or_sell = models.TextField(choices=[("buy", "Buy"), ("sell", "Sell")])
+    quantity = models.PositiveIntegerField()
+    listed_at_price = MoneyField(
+        max_digits=14, decimal_places=2, default_currency='EEI') 
+    transaction_tax = DecimalField(
+        max_digits=5, decimal_places=2)
+    broker_fee= DecimalField(
+        max_digits=5, decimal_places=2)
+
+class SoldItem(models.Model):
+    item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    sold_via = models.TextField(choices=[("internal", "Internal Market"), ("external", "External Market"), ("contract", "Contract")])
+    deposited_into_eggs = BooleanField(default=False)
+    transfered_to_participants = BooleanField(default=False)
+
+class JunkedItem(models.Model):
+    item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    reason = models.TextField()
+
+
+
 
 
 class LootShare(models.Model):

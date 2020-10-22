@@ -29,7 +29,11 @@ urlpatterns = [
     path('loot_group/<int:pk>/item/create', item_add, name='item_add'),
     path('item/<int:pk>/edit', item_edit, name='item_edit'),
     path('item/<int:pk>/delete', item_delete, name='item_delete'),
+    path('item/<int:pk>/', item_view, name='item_view'),
     path('item/', items, name='items'),
+    path('orders/', orders, name='orders'),
+    path('sold/', sold, name='sold'),
+    path('junk/', junk, name='junk'),
 
     path(
         r'character-autocomplete/',

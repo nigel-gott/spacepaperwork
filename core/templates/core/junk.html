@@ -2,7 +2,7 @@
 {% load materializecss %}
 <div class="row">
   <div class="col s12 m12">
-    <h5>Items Waiting to be Sold</h5>
+    <h5>Junked Items</h5>
     <table>
       <thead>
         <th>Location</th>
@@ -12,8 +12,8 @@
         <th>Action</th>
       </thead>
       <tbody>
-        {% for loc_items in all_items %}
-          {% for item in loc_items.items %}
+        {% for loc_items in all_junked %}
+          {% for item in loc_items.junked %}
             <tr>
                 {% if forloop.first %}
                 <td rowspan="{{items|length}}">

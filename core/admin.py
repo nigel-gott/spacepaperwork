@@ -24,6 +24,11 @@ admin.site.register(CharacterLocation)
 admin.site.register(ItemLocation)
 admin.site.register(CorpHanger)
 admin.site.register(Station)
+admin.site.register(SoldItem)
+admin.site.register(IskTransaction)
+admin.site.register(EggTransaction)
+admin.site.register(MarketOrder)
+admin.site.register(JunkedItem)
 
 
 class CustomUserAdmin(UserAdmin):

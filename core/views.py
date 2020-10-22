@@ -8,8 +8,8 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
 
-from core.forms import FleetAddMemberForm, FleetForm, InventoryItemForm, InventoryItemSellingForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SettingsForm
-from core.models import AnomType, Character, CharacterLocation, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, ItemLocation, LootBucket, LootGroup, LootShare, active_fleets_query, future_fleets_query, past_fleets_query
+from core.forms import FleetAddMemberForm, FleetForm, InventoryItemForm, InventoryItemSellingForm, JoinFleetForm, LootGroupForm,  LootJoinForm, LootShareForm, SettingsForm
+from core.models import AnomType, Character, CharacterLocation, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, active_fleets_query, future_fleets_query, past_fleets_query
 from django.forms.formsets import formset_factory
 from djmoney.money import Money
 from decimal import Decimal
@@ -503,7 +503,6 @@ def item_add(request, pk):
                 loot_group=loot_group,
                 item=form.cleaned_data['item'],
                 quantity=form.cleaned_data['quantity'],
-                remaining_quantity=form.cleaned_data['quantity']
             )
             item.full_clean()
             item.save()
@@ -514,72 +513,86 @@ def item_add(request, pk):
         form.fields['character'].queryset = request.user.characters()
     return render(request, 'core/loot_item_form.html', {'form': form, 'title': 'Add New Item'})
 
-
 @login_required(login_url=login_url)
-def items(request):
+def junk(request):
     characters = request.user.characters()
-    all_items = []
-    all_items_size = 0
-    initial = []
+    all_junked = []
     for char in characters:
         char_locs = CharacterLocation.objects.filter(character=char)
         for char_loc in char_locs:
             loc = ItemLocation.objects.get(
                 character_location=char_loc, corp_hanger=None)
-            items = InventoryItem.objects.filter(location=loc)
-            first = len(items)
-            for item in items:
-                all_items.append((first, item))
-                first = False
-                initial.append({
-                    'remaining_quantity': item.remaining_quantity,
-                    'listed_at_price': item.listed_at_price,
-                    'transaction_tax': request.user.transaction_tax,
-                    'broker_fee': request.user.broker_fee
-                })
+            junked = JunkedItem.objects.filter(item__location=loc)
 
-    SellingForms = formset_factory(
-        InventoryItemSellingForm, extra=all_items_size)
-    if request.method == 'POST':
-        forms = SellingForms(request.POST, initial=initial)
-        i = 0
-        if forms.is_valid():
-            for form in forms:
-                if form.has_changed():
-                    item = all_items[i][1]
-                    price = form.cleaned_data['listed_at_price']
-                    broker_fee = form.cleaned_data['broker_fee']
-                    transaction_tax = form.cleaned_data['transaction_tax']
-                    remaining = form.cleaned_data['remaining_quantity']
-                    if not item.listed_at_price and price and broker_fee is not None and transaction_tax is not None:
-                        item.listed_at_price = price
-                        item.total_fees = item.total_fees + Money(amount="%.2f" % round(
-                            item.remaining_quantity * price * (broker_fee / 100), 2), currency='EEI')
-                        item.transaction_tax = transaction_tax
-                        item.full_clean()
-                        item.save()
-                    elif remaining is not None:
-                        if item.remaining_quantity > remaining:
-                            diff = item.remaining_quantity - remaining
-                            fee = (100-item.transaction_tax)/100
-                            result = item.listed_at_price.amount * \
-                                Decimal("%.2f" % round(diff*fee, 2))
-                            item.total_profit = item.total_profit + Money(
-                                amount=result.quantize(Decimal('0.01'), rounding=ROUND_UP), currency='EEI')
-                            item.remaining_quantity = remaining
-                            item.full_clean()
-                            item.save()
-                        elif form.cleaned_data['unlist_item']:
-                            item.listed_at_price = None
-                            item.full_clean()
-                            item.save()
+            all_junked.append({
+                'loc': loc,
+                'junked':junked,
+            })
 
-                i = i + 1
-        return render(request, 'core/items.html', {'items': all_items, 'forms': forms})
-    else:
-        forms = SellingForms(initial=initial)
-        return render(request, 'core/items.html', {'items': all_items, 'forms': forms})
+    return render(request, 'core/junk.html', {'all_junked':all_junked})
 
+@login_required(login_url=login_url)
+def sold(request):
+    characters = request.user.characters()
+    all_sold = []
+    for char in characters:
+        char_locs = CharacterLocation.objects.filter(character=char)
+        for char_loc in char_locs:
+            loc = ItemLocation.objects.get(
+                character_location=char_loc, corp_hanger=None)
+            sold = SoldItem.objects.filter(item__location=loc)
+            all_sold.append({
+                'loc': loc,
+                'sold':sold,
+            })
+
+    return render(request, 'core/sold.html', {'all_sold': all_sold})
+
+@login_required(login_url=login_url)
+def orders(request):
+    characters = request.user.characters()
+    all_orders = []
+    for char in characters:
+        char_locs = CharacterLocation.objects.filter(character=char)
+        for char_loc in char_locs:
+            loc = ItemLocation.objects.get(
+                character_location=char_loc, corp_hanger=None)
+            orders = MarketOrder.objects.filter(item__location=loc)
+            all_orders.append({
+                'loc': loc,
+                'orders':orders,
+            })
+
+    return render(request, 'core/orders.html', {'all_orders': all_orders})
+
+
+@login_required(login_url=login_url)
+def items(request):
+    characters = request.user.characters()
+    all_items = []
+    for char in characters:
+        char_locs = CharacterLocation.objects.filter(character=char)
+        for char_loc in char_locs:
+            loc = ItemLocation.objects.get(
+                character_location=char_loc, corp_hanger=None)
+            items = InventoryItem.objects.filter(location=loc, quantity__gt=0)
+            orders = MarketOrder.objects.filter(item__location=loc)
+            sold = SoldItem.objects.filter(item__location=loc)
+            junked = JunkedItem.objects.filter(item__location=loc)
+
+            all_items.append({
+                'loc': loc,
+                'items':items,
+            })
+
+    return render(request, 'core/items.html', {'all_items': all_items})
+
+@login_required(login_url=login_url)
+def item_view(request, pk):
+    item = get_object_or_404(InventoryItem, pk=pk)
+    if not item.has_admin(request.user):
+        return forbidden(request)
+    return render(request, 'core/item_view.html', {'item': item}) 
 
 @login_required(login_url=login_url)
 def item_edit(request, pk):

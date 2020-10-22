@@ -2,18 +2,21 @@
 {% load materializecss %}
 <div class="row">
   <div class="col s12 m12">
-    <h5>Items Waiting to be Sold</h5>
+    <h5>Market Orders</h5>
     <table>
       <thead>
         <th>Location</th>
         <th>Loot Group</th>
         <th>Item</th>
         <th>Quantity</th>
+        <th>Buy/Sell</th>
+        <th>Internal/External</th>
+        <th>List Price</th>
         <th>Action</th>
       </thead>
       <tbody>
-        {% for loc_items in all_items %}
-          {% for item in loc_items.items %}
+        {% for loc_items in all_orders %}
+          {% for item in loc_items.orders %}
             <tr>
                 {% if forloop.first %}
                 <td rowspan="{{items|length}}">
@@ -32,6 +35,15 @@
                 </td>
                 <td>
                   {{item.quantity}}
+                </td>
+                <td>
+                  {{item.buy_or_sell}}
+                </td>
+                <td>
+                  {{item.internal_or_external}}
+                </td>
+                <td>
+                  {{item.listed_at_price}}
                 </td>
                 <td></td>
             </tr>
