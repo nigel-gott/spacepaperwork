@@ -9,7 +9,8 @@ from django.utils import timezone
 from django.views.generic.edit import UpdateView
 
 from core.forms import DeleteItemForm, FleetAddMemberForm, FleetForm, InventoryItemForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SellItemForm, SettingsForm
-from core.models import AnomType, Character, CharacterLocation, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, active_fleets_query, future_fleets_query, past_fleets_query
+from core.models import AnomType, Character, CharacterLocation, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, active_fleets_query, future_fleets_query, past_fleets_query
+from django.db import transaction
 from django.forms.formsets import formset_factory
 from djmoney.money import Money
 from decimal import Decimal
@@ -629,6 +630,7 @@ def item_edit(request, pk):
 
 
 @login_required(login_url=login_url)
+@transaction.atomic
 def item_sell(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     if not item.has_admin(request.user):
@@ -641,8 +643,30 @@ def item_sell(request, pk):
     if request.method == 'POST':
         form = SellItemForm(request.POST)
         if form.is_valid():
-            messages.info(request, f"Worked.")
-            
+            price = form.cleaned_data['listed_at_price']
+            total_isk_listed = item.quantity * price
+            broker_fee_percent = form.cleaned_data['broker_fee']/100
+            broker_fee = IskTransaction(
+                item = item,
+                time = timezone.now(),
+                isk = -total_isk_listed * broker_fee_percent,
+                quantity = item.quantity,
+                transaction_type = "broker_fee",
+            )
+            broker_fee.save()
+            sell_order = MarketOrder(
+                item = item,
+                internal_or_external="internal",
+                buy_or_sell="sell",
+                quantity=item.quantity,
+                listed_at_price = price,
+                transaction_tax = form.cleaned_data['transaction_tax'],
+                broker_fee = form.cleaned_data['broker_fee']
+            )
+            sell_order.save()
+            item.quantity = 0
+            item.save()
+            return HttpResponseRedirect(reverse('items')) 
     else:
         form = SellItemForm(initial={
             'broker_fee':request.user.broker_fee,

@@ -31,7 +31,9 @@
                     {% endif %}
                 </td>
                 <td>
+                    <a href="{% url 'item_view' item.item.id %}">
                   {{item.item}}
+                  </a>
                 </td>
                 <td>
                   {{item.quantity}}

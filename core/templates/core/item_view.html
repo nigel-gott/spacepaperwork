@@ -7,7 +7,7 @@
     <table>
     <tr>
     <td>Quantity</td>
-    <td>{{item.quantity}}</td>
+    <td>{{item.total_quantity}}</td>
     </tr>
     <tr>
     <td>Location</td>
@@ -27,20 +27,27 @@
     {% endif %}
     </td>
     </tr>
+    <tr>
+    <td>Isk Balance</td>
+    <td>
+    {{item.isk_balance}}
+    </td>
+    </tr>
+    <tr>
+    <td>Egg Balance</td>
+    <td>
+    {{item.egg_balance}}
+    </td>
+    </tr>
         {% has_item_admin item user as item_admin %}
         {% if item_admin %}
     <tr>
     <td colspan="2">
       <a class="waves-btn btn orange" href="{% url 'item_edit' item.id %}">Edit Item</a>
+      {% if item.can_sell %}
       <a class="waves-btn btn green" href="{% url 'item_sell' item.id %}">Sell Item</a>
-
-            <form method="post" action="{% url 'item_delete' item.id %}">
-                {% csrf_token %}
-                {% if redirect_field_value %}
-                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
-                {% endif %}
-                <button class="waves-btn btn red" type="submit">Delete Item</button>
-            </form>
+      {% endif %}
+      <a class="waves-btn btn red" href="{% url 'item_delete' item.id %}">Delete Item</a>
     </td>
     </tr>
     {% endif %}

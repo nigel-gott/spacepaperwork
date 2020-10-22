@@ -472,6 +472,10 @@ class InventoryItem(models.Model):
         ,model_sum(self.solditem_set,'quantity')
         ,model_sum(self.junkeditem_set, 'quantity')])
     
+    def can_sell(self):
+        return self.quantity > 0
+
+    
     def status(self):
         status = ""
         if self.quantity != 0:
@@ -488,15 +492,15 @@ class InventoryItem(models.Model):
 
         isk = self.isk_balance()
         if isk != 0:
-            status = status + f", ISK:{isk}"
+            status = status + f", Profit ISK:{isk}"
         egg = self.egg_balance()
         if egg != 0:
-            status = status + f", EGGS:{egg}"
+            status = status + f", Profit EGGS:{egg}"
 
         return status
     
     def __str__(self):
-        return f"{self.item} x {self.quantity} @ {self.location}"
+        return f"{self.item} x {self.total_quantity()} @ {self.location}"
 
 class IskTransaction(models.Model):
     item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
@@ -513,7 +517,7 @@ class IskTransaction(models.Model):
         ("external_market_price_adjustment_fee", "InGame Market Price Adjustment Fee"),
         ("external_market_gross_profit", "InGame Market Gross Profit"),
     ])
-    notes = models.TextField()
+    notes = models.TextField(default='')
 
 class EggTransaction(models.Model):
     item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
