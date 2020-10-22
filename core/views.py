@@ -1,15 +1,15 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.http import HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
 
-from core.forms import DeleteItemForm, FleetAddMemberForm, FleetForm, InventoryItemForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SellItemForm, SettingsForm, SoldItemForm
-from core.models import AnomType, Character, CharacterLocation, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, active_fleets_query, future_fleets_query, past_fleets_query
+from core.forms import DeleteItemForm, DepositEggsForm, FleetAddMemberForm, FleetForm, InventoryItemForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SellItemForm, SettingsForm, SoldItemForm
+from core.models import AnomType, Character, CharacterLocation, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
 from django.db import transaction
 from django.forms.formsets import formset_factory
 from djmoney.money import Money
@@ -694,6 +694,95 @@ def order_sold(request, pk):
             'quantity_remaining':0
         })
     return render(request, 'core/order_sold.html', {'form': form, 'title': 'Mark Order As Sold', 'order':order})
+
+@login_required(login_url=login_url)
+@transaction.atomic
+def deposit_eggs(request):
+    if request.user.has_pending_deposit():
+        messages.error(request, f"Cannot deposit again until previously deposited items have been approved.")
+        return forbidden(request)
+
+    if not request.user.can_deposit():
+        messages.error(request, f"Nothing to deposit")
+        return forbidden(request)
+    
+    to_deposit_qs = SoldItem.objects.filter(item__location__character_location__character__discord_id=request.user.discord_uid(), deposited_into_eggs=False)
+    total = to_deposit_qs.aggregate(result=Sum('item__isktransaction__isk'))['result']
+    count = to_deposit_qs.count()
+    if request.method == 'POST':
+        form = DepositEggsForm(request.POST)
+        if form.is_valid():
+            to_deposit_qs.update(deposited_into_eggs=True)
+            messages.success(request, f"Marked {count} sold items as deposited into eggs, pending approval.")
+            return HttpResponseRedirect(reverse('sold'))
+    else:
+        form = DepositEggsForm(initial={
+            'deposit_command': f'$deposit {total}'
+        })
+    return render(request, 'core/deposit_eggs_form.html', {'form': form, 'title': 'Deposit Eggs', 'total':to_isk(total), 'count':count}) 
+
+@login_required(login_url=login_url)
+@transaction.atomic
+def deposit_approved(request):
+    if not request.user.has_pending_deposit():
+        messages.error(request, f"Must have a pending deposit to confirm it has been approved.")
+        return forbidden(request)
+    to_deposit_qs = request.user.pending_deposits() 
+    total = to_deposit_qs.aggregate(result=Sum('item__isktransaction__isk'))['result']
+    count = to_deposit_qs.count()
+    if request.method == 'POST':
+        form = DepositEggsForm(request.POST)
+        if form.is_valid():
+            request.user.pending_deposits().update(deposit_approved=True)
+            return HttpResponseRedirect(reverse('sold'))
+    else:
+        form = DepositEggsForm()
+    return render(request, 'core/eggs_approved.html', {'form': form, 'title': 'Egg Deposit Approved', 'total':to_isk(total), 'count':count})
+
+
+@login_required(login_url=login_url)
+@transaction.atomic
+def transfer_eggs(request):
+    
+    if not request.user.has_pending_transfers():
+        messages.error(request, f"Must have a deposited and approved eggs to transfer them.")
+        return forbidden(request)
+    
+    total_participation = {}
+    explaination = {}
+    to_transfer = SoldItem.objects.filter(item__location__character_location__character__discord_id=request.user.discord_uid(), deposited_into_eggs=True, deposit_approved=True, transfered_to_participants=False)
+    for sold_item in to_transfer:
+        bucket = sold_item.item.loot_group.bucket
+        total_isk = sold_item.item.isk_balance()
+        participation = bucket.calculate_participation(total_isk, sold_item.item.loot_group)
+        item_id = sold_item.item.id
+        explaination[item_id] = participation
+        explaination[item_id]['item'] = str(sold_item.item)
+        explaination[item_id]['total_isk'] = total_isk 
+        for discord_username, result in participation['participation'].items():
+            isk = result['total_isk']
+            if discord_username in total_participation:
+                total_participation[discord_username] = total_participation[discord_username]+isk
+            else:
+                total_participation[discord_username] = isk 
+
+    total = to_transfer.aggregate(result=Sum('item__isktransaction__isk'))['result']
+    count = to_transfer.count()
+    if request.method == 'POST':
+        form = DepositEggsForm(request.POST)
+        if form.is_valid():
+            to_transfer.update(transfered_to_participants=True)
+            messages.success(request, f"Transfered {total} eggs from {count} sold items to the correct participants.")
+            return HttpResponseRedirect(reverse('sold'))
+    else:
+        command = ""
+        for discord_username, isk in total_participation.items():
+            command = command + f"$transfer {discord_username} {round(isk.amount)}\n"
+
+        form = DepositEggsForm(initial={
+            'deposit_command': command
+        })
+    return render(request, 'core/transfer_eggs_form.html', {'form': form, 'title': 'Transfer Eggs', 'total':to_isk(total), 'count':count, 'command':command, 'explaination':explaination}) 
 
 @login_required(login_url=login_url)
 @transaction.atomic

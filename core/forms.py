@@ -180,3 +180,6 @@ class SellItemForm(forms.Form):
 
 class SoldItemForm(forms.Form):
     quantity_remaining = forms.IntegerField(min_value=0)
+
+class DepositEggsForm(forms.Form):
+    deposit_command = forms.CharField(disabled=True,required=False)

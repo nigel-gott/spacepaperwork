@@ -36,6 +36,9 @@ urlpatterns = [
     path('orders/', orders, name='orders'),
     path('sold/', sold, name='sold'),
     path('junk/', junk, name='junk'),
+    path('deposit_eggs/', deposit_eggs, name='deposit_eggs'),
+    path('deposit_approved/', deposit_approved, name='deposit_approved'),
+    path('transfer_eggs/', transfer_eggs, name='transfer_eggs'),
 
     path(
         r'character-autocomplete/',

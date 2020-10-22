@@ -72,6 +72,20 @@ class GooseUser(AbstractUser):
             pass
         return False
 
+    def can_deposit(self):
+        return SoldItem.objects.filter(item__location__character_location__character__discord_id=self.discord_uid(), deposited_into_eggs=False, deposit_approved=False).count() > 0
+    
+    def pending_deposits(self):
+        return SoldItem.objects.filter(item__location__character_location__character__discord_id=self.discord_uid(), deposited_into_eggs=True, deposit_approved=False)
+    
+    def pending_transfers(self):
+        return SoldItem.objects.filter(item__location__character_location__character__discord_id=self.discord_uid(), deposited_into_eggs=True, deposit_approved=True,transfered_to_participants=False)
+
+    def has_pending_deposit(self):
+        return self.pending_deposits().count() > 0
+    def has_pending_transfers(self):
+        return self.pending_transfers().count() > 0
+
 
 class Region(models.Model):
     name = models.TextField(primary_key=True)
@@ -406,6 +420,39 @@ class LootBucket(models.Model):
             return to_isk(0)
         else:
             return to_isk(result)
+    
+    def calculate_participation(self, isk, loot_group):
+        shares = LootShare.objects.filter(loot_group__bucket=self.id)
+        flat_cuts = shares.filter(loot_group=loot_group.id)
+        total_shares = shares.aggregate(result=Sum('share_quantity'))['result']
+        total_flat_cuts = flat_cuts.aggregate(result=Sum('flat_percent_cut'))['result']
+        if total_flat_cuts is None:
+            total_flat_cuts = 0
+        if total_flat_cuts > 100:
+            raise ValidationError(f"The Loot Group {loot_group.id} is trying to give out a total of {total_flat_cuts}% of flat cuts. Please fix the participations as this is impossible.")
+        shares_by_username = shares.values('character__discord_username').annotate(num_shares=Sum('share_quantity'))
+        flat_cuts_by_username_qs = flat_cuts.values('character__discord_username').annotate(flat_cut=Sum('flat_percent_cut'))
+        flat_cuts_by_username = {}
+        for flat_cut in flat_cuts_by_username_qs:
+            flat_cuts_by_username[flat_cut['character__discord_username']] = flat_cut['flat_cut']
+        result = {
+            'total_shares':total_shares,
+            'total_flat_cuts':total_flat_cuts,
+            'participation':{}
+        }
+        total_after_cuts = isk * (100-total_flat_cuts)/100
+        for group in shares_by_username:
+            username= group['character__discord_username']
+            flat_cut = flat_cuts_by_username[username]
+            result['participation'][username] = {
+                'shares':group['num_shares'],
+                'flat_cut':flat_cut,
+                'flat_cut_isk': (flat_cut/100)*isk,
+                'share_isk': (group['num_shares'] / total_shares) * total_after_cuts ,
+                'total_isk': (group['num_shares'] / total_shares) * total_after_cuts + (flat_cut/100)*isk,
+            }
+        return result
+
 
 
 class LootGroup(models.Model):
@@ -582,6 +629,7 @@ class SoldItem(models.Model):
     quantity = models.PositiveIntegerField()
     sold_via = models.TextField(choices=[("internal", "Internal Market"), ("external", "External Market"), ("contract", "Contract")])
     deposited_into_eggs = BooleanField(default=False)
+    deposit_approved = BooleanField(default=False)
     transfered_to_participants = BooleanField(default=False)
 
 class JunkedItem(models.Model):
@@ -609,3 +657,8 @@ class LootShare(models.Model):
             extra = ""
 
         return f"{self.character.discord_username} has {self.share_quantity} shares {extra}"
+
+
+class EggDeposit(models.Model):
+    user = models.OneToOneField(GooseUser, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
