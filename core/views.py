@@ -600,6 +600,9 @@ def item_edit(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     if not item.has_admin(request.user):
         return forbidden(request)
+    if not item.can_edit():
+        messages.error(request, "Cannot edit an item once market orders have been made for it. PM @thejanitor on discord to make admin edits for you.")
+        return forbidden(request)
     if request.method == 'POST':
         form = InventoryItemForm(request.POST)
         if form.is_valid():
@@ -742,6 +745,9 @@ def item_sell(request, pk):
 def item_delete(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     if not item.has_admin(request.user):
+        return forbidden(request)
+    if not item.can_edit():
+        messages.error(request, "Cannot delete an item once market orders have been made for it. PM @thejanitor on discord to make admin edits for you.")
         return forbidden(request)
     if request.method == 'POST':
         form = DeleteItemForm(request.POST)

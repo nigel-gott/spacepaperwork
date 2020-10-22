@@ -59,11 +59,11 @@
         <td>
         {% has_item_admin item user as item_admin %}
         {% if item_admin %}
-        <a 
-          href="{% url 'item_edit' item.id %}">Edit</a>
-        <a class="red-text" 
-          href="{% url 'item_delete' item.id %}">Delete</a>
-        {% endif %}
+      {% if item.can_edit %}
+      <a href="{% url 'item_edit' item.id %}">Edit Item</a>
+      <a class="waves-btn btn red" href="{% url 'item_delete' item.id %}">Delete Item</a>
+      {% endif %}
+      {% endif %}
         </td>
         </tr>
         {% endfor %}

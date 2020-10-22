@@ -478,6 +478,9 @@ class InventoryItem(models.Model):
     
     def can_sell(self):
         return self.quantity > 0
+    
+    def can_edit(self):
+        return self.marketorder_set.count() + self.solditem_set.count() == 0
 
     
     def status(self):

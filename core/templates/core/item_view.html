@@ -43,11 +43,16 @@
         {% if item_admin %}
     <tr>
     <td colspan="2">
+      {% if item.can_edit %}
       <a class="waves-btn btn orange" href="{% url 'item_edit' item.id %}">Edit Item</a>
+      {% endif %}
       {% if item.can_sell %}
       <a class="waves-btn btn green" href="{% url 'item_sell' item.id %}">Sell Item</a>
       {% endif %}
-      <a class="waves-btn btn red" href="{% url 'item_delete' item.id %}">Delete Item</a>
+      {% if item.can_edit %}
+        <a class="red-text" 
+          href="{% url 'item_delete' item.id %}">Delete</a>
+        {% endif %}
     </td>
     </tr>
     {% endif %}

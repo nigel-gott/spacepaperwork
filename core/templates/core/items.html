@@ -36,13 +36,17 @@
                   {{item.quantity}}
                 </td>
                 <td>
+      {% if item.can_edit %}
       <a class="waves-btn btn orange" href="{% url 'item_edit' item.id %}">Edit Item</a>
+      {% endif %}
       <br/>
       {% if item.can_sell %}
       <a class="waves-btn btn green" href="{% url 'item_sell' item.id %}">Sell Item</a>
       {% endif %}
       <br/>
+      {% if item.can_edit %}
       <a class="waves-btn btn red" href="{% url 'item_delete' item.id %}">Delete Item</a>
+      {% endif %}
                 </td>
             </tr>
           {% endfor %}
