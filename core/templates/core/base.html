@@ -37,11 +37,13 @@
             {% else %}
             <li><a class="waves-effect waves-light btn" href="{% provider_login_url 'discord' %}">Login</a></li>
             {% endif %}
+    {% if user.is_authenticated %}
         <li>
             <b class="red-text">Isk Owed({{user.isk_balance}}) </b>- 
             <b class="orange-text">Eggs Owed({{user.debt_egg_balance.amount|floatformat:"0"}}) </b>- 
             <b class="green-text">Your Eggs({{user.egg_balance|formatmoney|floatformat:"0g"}})</b>
         </li>
+        {% endif %}
         </ul>
     </div>
     {% if user.is_authenticated %}
