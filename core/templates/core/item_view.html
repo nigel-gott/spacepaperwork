@@ -15,7 +15,13 @@
     </tr>
     <tr>
     <td>Status</td>
-    <td>{{item.status}}</td>
+    <td>{{item.status}} 
+    {% if item.solditem %}
+    <br/>
+    {{item.solditem.status}}
+    {% endif %}
+    
+    </td>
     </tr>
     <tr>
     <td>Loot Group</td>

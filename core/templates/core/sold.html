@@ -19,6 +19,7 @@
     {% endif %}
 </div>
 <div class="divider"></div>
+<div class="section">
     <h5>Sold Items</h5>
     <table>
       <thead>
@@ -48,7 +49,62 @@
                     {% endif %}
                 </td>
                 <td>
-                  {{item.item}}
+                  <a href="{% url 'item_view' item.item.id %}">{{item.item}}</a>
+                </td>
+                <td>
+                  {{item.sold_via}}
+                </td>
+                <td>
+                  {{item.quantity}}
+                </td>
+                <td>
+                  {{item.item.isk_balance}}
+                </td>
+                <td>
+                  {{item.status}}
+                </td>
+                <td>
+                </td>
+                <td></td>
+            </tr>
+          {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+    </form>
+  </div>
+<div class="divider"></div>
+<div class="section">
+    <h5>Transfered Items</h5>
+    <table>
+      <thead>
+        <th>Location</th>
+        <th>Loot Group</th>
+        <th>Item</th>
+        <th>Sold Via</th>
+        <th>Quantity</th>
+        <th>Profit</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </thead>
+      <tbody>
+        {% for loc_items in all_sold %}
+          {% for item in loc_items.done %}
+            <tr>
+                {% if forloop.first %}
+                <td rowspan="{{items|length}}">
+                {{loc_items.loc}}
+                </td>
+                {% endif %}
+                <td>
+                  {% if item.item.loot_group %}
+                    <a href="{% url 'loot_group_view' item.item.loot_group.id %}">Loot Group {{item.item.loot_group.id}}</a>
+                    {% else %}
+                    No Loot Group
+                    {% endif %}
+                </td>
+                <td>
+                  <a href="{% url 'item_view' item.item.id %}">{{item.item}}</a>
                 </td>
                 <td>
                   {{item.sold_via}}
@@ -82,6 +138,7 @@
     </table>
     </form>
   </div>
+</div>
 </div>
 
 {% endblock %}

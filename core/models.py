@@ -537,30 +537,48 @@ class InventoryItem(models.Model):
     def egg_balance(self):
         return to_isk(model_sum(self.eggtransaction_set, 'eggs'))
     
+    def order_quantity(self):
+        if hasattr(self, 'marketorder'): 
+            return self.marketorder.quantity
+        else:
+            return 0
+
+    def sold_quantity(self):
+        if hasattr(self, 'solditem'): 
+            return self.solditem.quantity
+        else:
+            return 0
+
+    def junked_quantity(self):
+        if hasattr(self, 'junkeditem'): 
+            return self.junkeditem.quantity
+        else:
+            return 0
+    
     def total_quantity(self):
         return sum([self.quantity 
-        ,model_sum(self.marketorder_set, 'quantity')
-        ,model_sum(self.solditem_set,'quantity')
-        ,model_sum(self.junkeditem_set, 'quantity')])
+        ,self.order_quantity()
+        ,self.sold_quantity()
+        ,self.junked_quantity()])
     
     def can_sell(self):
         return self.quantity > 0
     
     def can_edit(self):
-        return self.marketorder_set.count() + self.solditem_set.count() == 0
+        return not hasattr(self, 'marketorder') and not hasattr(self, 'solditem')
 
     
     def status(self):
         status = ""
         if self.quantity != 0:
             status = status + f" {self.quantity} Waiting"
-        quantity_listed = model_sum(self.marketorder_set, 'quantity')
+        quantity_listed = self.order_quantity() 
         if quantity_listed != 0:
             status = status + f" {quantity_listed} Listed"
-        quantity_sold = model_sum(self.solditem_set,'quantity')
+        quantity_sold = self.sold_quantity() 
         if quantity_sold != 0:
             status = status + f" {quantity_sold} Sold"
-        quantity_junked = model_sum(self.junkeditem_set, 'quantity')
+        quantity_junked = self.junked_quantity() 
         if quantity_junked != 0:
             status = status + f" {quantity_junked} Junked"
 
@@ -607,7 +625,7 @@ class EggTransaction(models.Model):
 
 
 class MarketOrder(models.Model):
-    item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
+    item = models.OneToOneField(InventoryItem, on_delete=models.CASCADE)
     internal_or_external = models.TextField(choices=[("internal", "Internal"), ("external", "External")])
     buy_or_sell = models.TextField(choices=[("buy", "Buy"), ("sell", "Sell")])
     quantity = models.PositiveIntegerField()
@@ -625,15 +643,26 @@ class MarketOrder(models.Model):
         return f"A {self.buy_or_sell} of {self.item.item} x {self.quantity} listed for {self.listed_at_price} @ {self.internal_or_external} market"
 
 class SoldItem(models.Model):
-    item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
+    item = models.OneToOneField(InventoryItem, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     sold_via = models.TextField(choices=[("internal", "Internal Market"), ("external", "External Market"), ("contract", "Contract")])
     deposited_into_eggs = BooleanField(default=False)
     deposit_approved = BooleanField(default=False)
     transfered_to_participants = BooleanField(default=False)
 
+    def status(self):
+        if self.transfered_to_participants:
+            return "Transfered to participants, all done!"
+        elif self.deposited_into_eggs:
+            if self.deposit_approved:
+                return "Egg Deposit Approved, pending transfer to participants."
+            else:
+                return "Deposited into eggs. Awaiting Confirmation of Deposit."
+        else:
+            return "Awaiting Egg deposit."
+
 class JunkedItem(models.Model):
-    item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
+    item = models.OneToOneField(InventoryItem, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     reason = models.TextField()
 

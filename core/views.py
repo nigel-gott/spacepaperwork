@@ -541,10 +541,12 @@ def sold(request):
         for char_loc in char_locs:
             loc = ItemLocation.objects.get(
                 character_location=char_loc, corp_hanger=None)
-            sold = SoldItem.objects.filter(item__location=loc)
+            sold = SoldItem.objects.filter(item__location=loc, transfered_to_participants=False)
+            done = SoldItem.objects.filter(item__location=loc, transfered_to_participants=True)
             all_sold.append({
                 'loc': loc,
                 'sold':sold,
+                'done':done
             })
 
     return render(request, 'core/sold.html', {'all_sold': all_sold})
@@ -577,9 +579,6 @@ def items(request):
             loc = ItemLocation.objects.get(
                 character_location=char_loc, corp_hanger=None)
             items = InventoryItem.objects.filter(location=loc, quantity__gt=0)
-            orders = MarketOrder.objects.filter(item__location=loc)
-            sold = SoldItem.objects.filter(item__location=loc)
-            junked = JunkedItem.objects.filter(item__location=loc)
 
             all_items.append({
                 'loc': loc,

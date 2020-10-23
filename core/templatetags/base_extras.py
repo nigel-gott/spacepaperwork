@@ -1,11 +1,23 @@
 from django.db.models import Q
 from django.utils import timezone
 
-from core.models import Fleet, FleetMember, active_fleets_query, future_fleets_query, past_fleets_query
+from core.models import Fleet, FleetMember, InventoryItem, MarketOrder, SoldItem, active_fleets_query, future_fleets_query, past_fleets_query
 from django import template
 
 register = template.Library()
 
+
+@register.simple_tag
+def num_items(user):
+    return InventoryItem.objects.filter(location__character_location__character__discord_id=user.discord_uid(), quantity_gt=0).count()
+
+@register.simple_tag
+def num_orders(user):
+    return MarketOrder.objects.filter(item__location__character_location__character__discord_id=user.discord_uid()).count()
+
+@register.simple_tag
+def num_sold(user):
+    return SoldItem.objects.filter(item__location__character_location__character__discord_id=user.discord_uid(), transfered_to_participants=False).count()
 
 @register.simple_tag
 def num_active_fleets():
