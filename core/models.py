@@ -52,7 +52,7 @@ class GooseUser(AbstractUser):
 
     def discord_username(self):
         social_account = self.socialaccount_set.only()[0].extra_data
-        return f"@{social_account['username']}#{social_account['discriminator']}"
+        return f"{social_account['username']}#{social_account['discriminator']}"
 
     def characters(self):
         return Character.objects.filter(discord_id=self.discord_uid())
@@ -85,6 +85,13 @@ class GooseUser(AbstractUser):
         return self.pending_deposits().count() > 0
     def has_pending_transfers(self):
         return self.pending_transfers().count() > 0
+    
+    def debt(self):
+        result = IskTransaction.objects.filter(item__location__character_location__character__discord_id=self.discord_uid()).aggregate(result=Sum('isk'))['result']
+        if result is None:
+            return 0
+        else:
+            return result
 
 
 class Region(models.Model):
@@ -244,12 +251,10 @@ class Fleet(models.Model):
         else:
             return f"Ends in {human_delta}"
 
-    def isk_balance(self):
-        result = IskTransaction.objects.filter(item__loot_group__bucket__fleet=self.id).aggregate(result=Sum('isk'))['result']
-        if result is None:
-            return to_isk(0)
-        else:
-            return to_isk(result)
+    def isk_and_eggs_balance(self):
+        isk = to_isk(model_sum(IskTransaction.objects.filter(item__loot_group__bucket__fleet=self.id),'isk'))
+        eggs = to_isk(model_sum(EggTransaction.objects.filter(item__loot_group__bucket__fleet=self.id), 'eggs'))
+        return isk+eggs
 
     def __str__(self):
         return str(self.name)
@@ -414,12 +419,10 @@ class KillMail(models.Model):
 
 class LootBucket(models.Model):
     fleet = models.ForeignKey(Fleet, on_delete=models.CASCADE)
-    def isk_balance(self):
-        result = IskTransaction.objects.filter(item__loot_group__bucket=self.id).aggregate(result=Sum('isk'))['result']
-        if result is None:
-            return to_isk(0)
-        else:
-            return to_isk(result)
+    def isk_and_eggs_balance(self):
+        isk = to_isk(model_sum(IskTransaction.objects.filter(item__loot_group__bucket=self.id),'isk'))
+        eggs = to_isk(model_sum(EggTransaction.objects.filter(item__loot_group__bucket=self.id), 'eggs'))
+        return isk+eggs
     
     def calculate_participation(self, isk, loot_group):
         shares = LootShare.objects.filter(loot_group__bucket=self.id)
@@ -497,12 +500,10 @@ class LootGroup(models.Model):
         return self.still_open() and self.alts_allowed() and num_characters_in_group > 0 and (
             num_chars - num_characters_in_group) > 0
             
-    def isk_balance(self):
-        result = IskTransaction.objects.filter(item__loot_group=self.id).aggregate(result=Sum('isk'))['result']
-        if result is None:
-            return to_isk(0)
-        else:
-            return to_isk(result)
+    def isk_and_eggs_balance(self):
+        isk = to_isk(model_sum(IskTransaction.objects.filter(item__loot_group=self.id),'isk'))
+        eggs = to_isk(model_sum(EggTransaction.objects.filter(item__loot_group=self.id), 'eggs'))
+        return isk+eggs
         
     
     def __str__(self):
@@ -536,6 +537,9 @@ class InventoryItem(models.Model):
 
     def egg_balance(self):
         return to_isk(model_sum(self.eggtransaction_set, 'eggs'))
+    
+    def isk_and_eggs_balance(self):
+        return self.isk_balance()+self.egg_balance()
     
     def order_quantity(self):
         if hasattr(self, 'marketorder'): 
@@ -608,6 +612,7 @@ class IskTransaction(models.Model):
         ("contract_gross_profit", "Contract Gross Profit"),
         ("external_market_price_adjustment_fee", "InGame Market Price Adjustment Fee"),
         ("external_market_gross_profit", "InGame Market Gross Profit"),
+        ("egg_deposit", "Egg Deposit"),
     ])
     notes = models.TextField(default='', blank=True)
 
@@ -620,7 +625,7 @@ class EggTransaction(models.Model):
     time = models.DateTimeField()
     eggs = MoneyField(
         max_digits=14, decimal_places=2, default_currency='EEI') 
-    counterparty_discord_id = models.TextField()
+    counterparty_discord_username = models.TextField()
     notes = models.TextField(default='', blank=True)
 
 
@@ -659,6 +664,12 @@ class SoldItem(models.Model):
     deposit_approved = BooleanField(default=False)
     transfered_to_participants = BooleanField(default=False)
     transfer_log = models.ForeignKey(TransferLog, on_delete=models.CASCADE, null=True, blank=True)
+
+    def isk_balance(self):
+        return self.item.isk_balance()
+
+    def isk_and_eggs_balance(self):
+        return self.item.isk_and_eggs_balance()
 
     def status(self):
         if self.transfered_to_participants:

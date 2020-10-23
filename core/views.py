@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.views.generic.edit import UpdateView
 
 from core.forms import DeleteItemForm, DepositEggsForm, FleetAddMemberForm, FleetForm, InventoryItemForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SellItemForm, SettingsForm, SoldItemForm
-from core.models import AnomType, Character, CharacterLocation, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
+from core.models import AnomType, Character, CharacterLocation, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
 from django.db import transaction
 from django.forms.formsets import formset_factory
 from djmoney.money import Money
@@ -714,11 +714,33 @@ def deposit_eggs(request):
         return forbidden(request)
     
     to_deposit_qs = SoldItem.objects.filter(item__location__character_location__character__discord_id=request.user.discord_uid(), deposited_into_eggs=False)
+    to_deposit_list = list(to_deposit_qs)
     total = to_deposit_qs.aggregate(result=Sum('item__isktransaction__isk'))['result']
     count = to_deposit_qs.count()
     if request.method == 'POST':
         form = DepositEggsForm(request.POST)
         if form.is_valid():
+            current_now = timezone.now()
+            for sold_item in to_deposit_list:
+                isk = sold_item.isk_balance()
+                deposit_transaction = IskTransaction(
+                    item=sold_item.item,
+                    quantity=sold_item.quantity,
+                    time=current_now,
+                    isk=-isk,
+                    transaction_type="egg_deposit"
+                )
+                deposit_transaction.full_clean()
+                deposit_transaction.save()
+                egg_transaction = EggTransaction(
+                    item=sold_item.item,
+                    quantity=sold_item.quantity,
+                    time=current_now,
+                    eggs=isk,
+                    counterparty_discord_username=request.user.discord_username()
+                )
+                egg_transaction.full_clean()
+                egg_transaction.save()
             to_deposit_qs.update(deposited_into_eggs=True)
             messages.success(request, f"Marked {count} sold items as deposited into eggs, pending approval.")
             return HttpResponseRedirect(reverse('sold'))
@@ -763,41 +785,66 @@ def transfer_eggs(request):
         messages.error(request, f"Must have a deposited and approved eggs to transfer them.")
         return forbidden(request)
     
+    if request.method == 'POST':
+        form = DepositEggsForm(request.POST)
+    else:
+        form = None
+
     total_participation = {}
     explaination = {}
     to_transfer = SoldItem.objects.filter(item__location__character_location__character__discord_id=request.user.discord_uid(), deposited_into_eggs=True, deposit_approved=True, transfered_to_participants=False)
+    current_now = timezone.now()
+    total = 0
+    count = 0
     for sold_item in to_transfer:
         bucket = sold_item.item.loot_group.bucket
-        total_isk = sold_item.item.isk_balance()
+        total_isk = sold_item.item.isk_and_eggs_balance()
         participation = bucket.calculate_participation(total_isk, sold_item.item.loot_group)
         item_id = sold_item.item.id
         explaination[item_id] = participation
         explaination[item_id]['item'] = str(sold_item.item)
         explaination[item_id]['total_isk'] = total_isk.amount 
+        total = total + total_isk
+        count = count + 1
         for discord_username, result in participation['participation'].items():
-            isk = result['total_isk']
+            isk = round(result['total_isk'],2)
+            if form and form.is_valid():
+                egg_transaction = EggTransaction(
+                    item=sold_item.item,
+                    quantity=sold_item.quantity,
+                    time=current_now,
+                    eggs=-isk,
+                    counterparty_discord_username=request.user.discord_username()
+                )
+                egg_transaction.full_clean()
+                egg_transaction.save()
+                egg_transaction = EggTransaction(
+                    item=sold_item.item,
+                    quantity=sold_item.quantity,
+                    time=current_now,
+                    eggs=isk,
+                    counterparty_discord_username=discord_username
+                )
+                egg_transaction.full_clean()
+                egg_transaction.save()
             if discord_username in total_participation:
                 total_participation[discord_username] = total_participation[discord_username]+isk
             else:
                 total_participation[discord_username] = isk 
 
-    total = to_transfer.aggregate(result=Sum('item__isktransaction__isk'))['result']
-    count = to_transfer.count()
-    if request.method == 'POST':
-        form = DepositEggsForm(request.POST)
-        if form.is_valid():
-            messages.success(request, f"Transfered {total} eggs from {count} sold items to the correct participants.")
-            log = TransferLog(
-                user=request.user,
-                time=timezone.now(),
-                total=total,
-                count=count,
-                explaination=json.dumps(explaination, cls=ComplexEncoder)
-            )
-            log.full_clean()
-            log.save()
-            to_transfer.update(transfered_to_participants=True, transfer_log=log.id)
-            return HttpResponseRedirect(reverse('sold'))
+    if form and form.is_valid():
+        messages.success(request, f"Transfered {total} eggs from {count} sold items to the correct participants.")
+        log = TransferLog(
+            user=request.user,
+            time=timezone.now(),
+            total=total,
+            count=count,
+            explaination=json.dumps(explaination, cls=ComplexEncoder)
+        )
+        log.full_clean()
+        log.save()
+        to_transfer.update(transfered_to_participants=True, transfer_log=log.id)
+        return HttpResponseRedirect(reverse('sold'))
     else:
         command = ""
         for discord_username, isk in total_participation.items():
@@ -806,7 +853,7 @@ def transfer_eggs(request):
         form = DepositEggsForm(initial={
             'deposit_command': command
         })
-    return render(request, 'core/transfer_eggs_form.html', {'form': form, 'title': 'Transfer Eggs', 'total':to_isk(total), 'count':count, 'command':command, 'explaination':explaination}) 
+    return render(request, 'core/transfer_eggs_form.html', {'form': form, 'title': 'Transfer Eggs', 'total':total, 'count':count, 'command':command, 'explaination':explaination}) 
 
 @login_required(login_url=login_url)
 @transaction.atomic
