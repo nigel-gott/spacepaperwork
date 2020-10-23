@@ -538,6 +538,22 @@ def junk(request):
     return render(request, 'core/junk.html', {'all_junked':all_junked})
 
 @login_required(login_url=login_url)
+def transfered_items(request):
+    characters = request.user.characters()
+    all_sold = []
+    for char in characters:
+        char_locs = CharacterLocation.objects.filter(character=char)
+        for char_loc in char_locs:
+            loc = ItemLocation.objects.get(
+                character_location=char_loc, corp_hanger=None)
+            done = SoldItem.objects.filter(item__location=loc, transfered_to_participants=True)
+            all_sold.append({
+                'loc': loc,
+                'done':done
+            })
+
+    return render(request, 'core/transfered_items.html', {'all_sold': all_sold})
+@login_required(login_url=login_url)
 def sold(request):
     characters = request.user.characters()
     all_sold = []
@@ -547,11 +563,9 @@ def sold(request):
             loc = ItemLocation.objects.get(
                 character_location=char_loc, corp_hanger=None)
             sold = SoldItem.objects.filter(item__location=loc, transfered_to_participants=False)
-            done = SoldItem.objects.filter(item__location=loc, transfered_to_participants=True)
             all_sold.append({
                 'loc': loc,
                 'sold':sold,
-                'done':done
             })
 
     return render(request, 'core/sold.html', {'all_sold': all_sold})
@@ -737,6 +751,7 @@ def deposit_eggs(request):
                     quantity=sold_item.quantity,
                     time=current_now,
                     eggs=isk,
+                    debt=True,
                     counterparty_discord_username=request.user.discord_username()
                 )
                 egg_transaction.full_clean()
@@ -757,7 +772,7 @@ def deposit_approved(request):
         messages.error(request, f"Must have a pending deposit to confirm it has been approved.")
         return forbidden(request)
     to_deposit_qs = request.user.pending_deposits() 
-    total = to_deposit_qs.aggregate(result=Sum('item__isktransaction__isk'))['result']
+    total = to_deposit_qs.aggregate(result=Sum('item__eggtransaction__eggs'))['result']
     count = to_deposit_qs.count()
     if request.method == 'POST':
         form = DepositEggsForm(request.POST)
@@ -814,6 +829,7 @@ def transfer_eggs(request):
                     quantity=sold_item.quantity,
                     time=current_now,
                     eggs=-isk,
+                    debt=True,
                     counterparty_discord_username=request.user.discord_username()
                 )
                 egg_transaction.full_clean()
@@ -823,6 +839,7 @@ def transfer_eggs(request):
                     quantity=sold_item.quantity,
                     time=current_now,
                     eggs=isk,
+                    debt=False,
                     counterparty_discord_username=discord_username
                 )
                 egg_transaction.full_clean()
@@ -848,7 +865,11 @@ def transfer_eggs(request):
     else:
         command = ""
         for discord_username, isk in total_participation.items():
-            command = command + f"$transfer @{discord_username} {floor(isk.amount)}\n"
+            if discord_username != request.user.discord_username():
+                command = command + f"$transfer @{discord_username} {floor(isk.amount)}\n"
+            else:
+                command = command + f"Keep {floor(isk.amount)} for yourself! \n"
+
 
         form = DepositEggsForm(initial={
             'deposit_command': command

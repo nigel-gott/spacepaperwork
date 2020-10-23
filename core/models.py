@@ -66,6 +66,8 @@ class GooseUser(AbstractUser):
             if len(social_infos) == 1:
                 social_info = social_infos[0]
                 avatar_hash = social_info.extra_data['avatar']
+                if avatar_hash == 2:
+                    return False
                 discord_id = social_info.uid
                 return f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar_hash}.png"
         except Exception:
@@ -86,12 +88,14 @@ class GooseUser(AbstractUser):
     def has_pending_transfers(self):
         return self.pending_transfers().count() > 0
     
-    def debt(self):
-        result = IskTransaction.objects.filter(item__location__character_location__character__discord_id=self.discord_uid()).aggregate(result=Sum('isk'))['result']
-        if result is None:
-            return 0
-        else:
-            return result
+    def isk_balance(self):
+        return to_isk(model_sum(IskTransaction.objects.filter(item__location__character_location__character__discord_id=self.discord_uid()), 'isk'))
+
+    def debt_egg_balance(self):
+        return to_isk(model_sum(EggTransaction.objects.filter(counterparty_discord_username=self.discord_username(), debt=True), 'eggs'))
+
+    def egg_balance(self):
+        return to_isk(model_sum(EggTransaction.objects.filter(counterparty_discord_username=self.discord_username(), debt=False), 'eggs'))
 
 
 class Region(models.Model):
@@ -625,8 +629,12 @@ class EggTransaction(models.Model):
     time = models.DateTimeField()
     eggs = MoneyField(
         max_digits=14, decimal_places=2, default_currency='EEI') 
+    debt = BooleanField(default=True)
     counterparty_discord_username = models.TextField()
     notes = models.TextField(default='', blank=True)
+
+    def __str__(self):
+        return f"{self.counterparty_discord_username} - {self.item.id} - {self.quantity} - {self.time} - {self.eggs} - Debt:{self.debt} - {self.notes}"
 
 
 class MarketOrder(models.Model):

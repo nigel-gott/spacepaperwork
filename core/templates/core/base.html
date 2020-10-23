@@ -16,13 +16,14 @@
 <nav class="nav-extended blue-grey darken-3">
     <div class="nav-wrapper ">
         <a href="#" class="brand-logo center">⚙ GooseTools </a>
+        <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
         <ul id="nav-mobile" class="right">
         <li>
             <a class="waves-effect waves-light btn blue lighten-2" href="https://wiki.goosetools.com"><i
                     class="material-icons left">cloud</i>Wiki</a>
         </li>
         </ul>
-        <ul id="nav-mobile" class="left">
+        <ul id="nav-mobile" class="left hide-on-med-and-down">
             <li>
             {% if user.is_authenticated %}
             <form method="post" action="{% url 'account_logout' %}">
@@ -36,10 +37,15 @@
             {% else %}
             <li><a class="waves-effect waves-light btn" href="{% provider_login_url 'discord' %}">Login</a></li>
             {% endif %}
+        <li>
+            <b class="red-text">Isk Owed({{user.isk_balance}}) </b>- 
+            <b class="orange-text">Eggs Owed({{user.debt_egg_balance.amount|floatformat:"0"}}) </b>- 
+            <b class="green-text">Your Eggs({{user.egg_balance|formatmoney|floatformat:"0g"}})</b>
+        </li>
         </ul>
     </div>
     {% if user.is_authenticated %}
-    <div class="nav-content">
+    <div class="nav-content hide-on-med-and-down">
         <ul class="tabs tabs-transparent">
             <li class="tab"><a href="{% url 'settings' %}">Settings</a></li>
             <li class="tab"><a href="{% url 'fleet' %}">Active Fleets
@@ -69,13 +75,71 @@
                 ({{ num_already_sold }})
             </a>
             </li>
-            <li class="tab"><a href="{% url 'junk' %}">Junked Items
+            <li class="tab"><a href="{% url 'transfered_items' %}">Transfered Items
             </a>
             </li>
         </ul>
     </div>
     {% endif %}
 </nav>
+  <ul class="sidenav" id="mobile-demo">
+            <li>
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'account_logout' %}">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <button class="waves-effect waves-light btn" type="submit">{% trans 'Logout' %}</button>
+            </form>
+            </li>
+            {% else %}
+            <li><a class="waves-effect waves-light btn" href="{% provider_login_url 'discord' %}">Login</a></li>
+            {% endif %}
+    {% if user.is_authenticated %}
+        <li>
+            <b class="red-text">Isk Owed({{user.isk_balance}}) </b>
+            </li>
+        <li>
+            <b class="orange-text">Eggs Owed({{user.debt_egg_balance.amount|floatformat:"0"}}) </b>
+            </li>
+        <li>
+            <b class="green-text">Your Eggs({{user.egg_balance|formatmoney|floatformat:"0g"}})</b>
+        </li>
+            <li class="tab"><a href="{% url 'settings' %}">Settings</a></li>
+            <li class="tab"><a href="{% url 'fleet' %}">Active Fleets
+                ({% num_active_fleets %})
+            </a>
+            </li>
+            <li class="tab"><a href="{% url 'fleet_past' %}">Past Fleets
+                ({% num_past_fleets %})
+            </a>
+            </li>
+            <li class="tab"><a href="{% url 'fleet_future' %}">Future Fleets
+                ({% num_future_fleets %})
+            </a>
+            </li>
+            {% num_items user as num_to_sell %}
+            <li class="tab"><a href="{% url 'items' %}">Your Loot To Sell
+                ({{ num_to_sell }})
+            </a>
+            </li>
+            {% num_orders user as num_active_orders %}
+            <li class="tab"><a href="{% url 'orders' %}">Market Orders 
+                ({{ num_active_orders }})
+            </a>
+            </li>
+            {% num_sold user as num_already_sold %}
+            <li class="tab"><a href="{% url 'sold' %}">Sold Items
+                ({{ num_already_sold }})
+            </a>
+            </li>
+            <li class="tab"><a href="{% url 'transfered_items' %}">Transfered Items
+            </a>
+            </li>
+    {% endif %}
+  </ul>
+          
 <div class="container">
 {% if messages %}
 <div class="section">
@@ -104,6 +168,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var instances = M.Datepicker.init(elems);
     var elems = document.querySelectorAll('.timepicker');
     var instances = M.Timepicker.init(elems);
+    var elems = document.querySelectorAll('.sidenav');
+    var instances = M.Sidenav.init(elems);
+
 });
 </script>
 {% endblock %}

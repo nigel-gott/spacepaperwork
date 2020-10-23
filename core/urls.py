@@ -39,6 +39,7 @@ urlpatterns = [
     path('deposit_eggs/', deposit_eggs, name='deposit_eggs'),
     path('deposit_approved/', deposit_approved, name='deposit_approved'),
     path('transfer_eggs/', transfer_eggs, name='transfer_eggs'),
+    path('transfered/', transfered_items, name='transfered_items'),
     path('transfer_log/<int:pk>/', view_transfer_log, name='view_transfer_log'),
 
     path(
