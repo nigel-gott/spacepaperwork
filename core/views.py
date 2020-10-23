@@ -158,7 +158,11 @@ def fleet_add(request, pk):
             new_fleet.save()
             return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
     else:
-        form = FleetAddMemberForm()
+        form = FleetAddMemberForm(initial={
+            'fleet':f.id
+        })
+    existing_members = f.fleetmember_set.values('character__id')
+    form.fields['character'].queryset = Character.objects.exclude(id__in=existing_members)
     return render(request, 'core/add_fleet_form.html', {'form': form, 'fleet': f})
 
 

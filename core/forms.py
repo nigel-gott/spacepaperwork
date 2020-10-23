@@ -35,12 +35,13 @@ def get_discord_names():
 
 
 class FleetAddMemberForm(forms.Form):
+    fleet = forms.IntegerField(widget=forms.HiddenInput(), disabled=True, required=False)
     discord_username = autocomplete.Select2ListCreateChoiceField(choice_list=get_discord_names,
                                                                  required=False,
                                                                  widget=autocomplete.ListSelect2(
                                                                      url='discord-username-autocomplete'))
     character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0, widget=autocomplete.ModelSelect2(url='character-autocomplete',
-                                                                                                                     forward=('discord_username',)))
+                                                                                                                     forward=['discord_username','fleet']))
 
     class Meta:
         exclude = ('discord_username',)

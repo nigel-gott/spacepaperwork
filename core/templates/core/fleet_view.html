@@ -89,6 +89,15 @@
             <th>Actions</th>
             </thead>
             <tbody>
+            {% if admin %}
+            <tr>
+                <td colspan="3">
+                    <a class="waves-effect waves-light btn green darken-2"
+                       href="{% url 'fleet_add' fleet.id %}"><i class='material-icons right'>edit</i>Add Member</a>
+
+                </td>
+            </tr>
+            {% endif %}
             {% for discord_id, members in fleet_members_by_id.items %}
             {% for member in members %}
             <tr>
@@ -134,15 +143,6 @@
             </tr>
             {% endfor %}
             {% endfor %}
-            {% if admin %}
-            <tr>
-                <td colspan="3">
-                    <a class="waves-effect waves-light btn green darken-2"
-                       href="{% url 'fleet_add' fleet.id %}"><i class='material-icons right'>edit</i>Add Member</a>
-
-                </td>
-            </tr>
-            {% endif %}
             </tbody>
         </table>
     </div>

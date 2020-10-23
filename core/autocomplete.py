@@ -1,6 +1,6 @@
 from dal import autocomplete
 
-from core.models import Character, Item, ItemSubSubType, ItemSubType, ItemType, System
+from core.models import Character, FleetMember, Item, ItemSubSubType, ItemSubType, ItemType, System
 
 
 class SystemAutocomplete(autocomplete.Select2QuerySetView):
@@ -116,6 +116,12 @@ class CharacterAutocomplete(autocomplete.Select2QuerySetView):
             return Character.objects.none()
 
         qs = Character.objects.all()
+
+        fleet = self.forwarded.get('fleet', None)
+
+        if fleet:
+            chars = FleetMember.objects.filter(fleet=fleet).values('character__id')
+            qs = qs.exclude(pk__in=chars)
 
         discord_username = self.forwarded.get('discord_username', None)
 

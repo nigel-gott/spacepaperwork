@@ -281,6 +281,9 @@ class FleetMember(models.Model):
         else:
             return self.admin_permissions
 
+    class Meta:
+        unique_together = (('character', 'fleet'),)
+
 
 class ItemType(models.Model):
     name = models.TextField()
