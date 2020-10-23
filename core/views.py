@@ -149,14 +149,18 @@ def fleet_add(request, pk):
     if request.method == 'POST':
         form = FleetAddMemberForm(request.POST)
         if form.is_valid():
-            new_fleet = FleetMember(
-                character=form.cleaned_data['character'],
-                fleet=f,
-                joined_at=timezone.now()
-            )
-            new_fleet.full_clean()
-            new_fleet.save()
-            return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
+            if f.can_join(request.user):
+                new_fleet = FleetMember(
+                    character=form.cleaned_data['character'],
+                    fleet=f,
+                    joined_at=timezone.now()
+                )
+                new_fleet.full_clean()
+                new_fleet.save()
+                return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
+            else:
+                messages.error(request, "You cannot add an alt to this fleet")
+                return forbidden(request)
     else:
         form = FleetAddMemberForm(initial={
             'fleet':f.id
@@ -182,6 +186,7 @@ def fleet_join(request, pk):
                 new_fleet.save()
                 return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
             else:
+                messages.error(request, "You cannot join this fleet with that character")
                 return forbidden(request)
     else:
         form = JoinFleetForm(initial={
