@@ -370,7 +370,7 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
                 new_group.full_clean()
                 new_group.save()
 
-            return HttpResponseRedirect(reverse('fleet_view', args=[fleet_pk]))
+            return HttpResponseRedirect(reverse('loot_group_view', args=[new_group.id]))
 
     else:
         form = LootGroupForm()
