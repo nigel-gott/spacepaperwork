@@ -9,7 +9,7 @@ from django.utils import timezone
 from django.views.generic.edit import UpdateView
 
 from core.forms import DeleteItemForm, DepositEggsForm, FleetAddMemberForm, FleetForm, InventoryItemForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SellItemForm, SettingsForm, SoldItemForm
-from core.models import AnomType, Character, CharacterLocation, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
+from core.models import AnomType, Character, CharacterLocation, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
 from django.db import transaction
 from django.forms.formsets import formset_factory
 from djmoney.money import Money
@@ -17,6 +17,11 @@ from decimal import Decimal
 from _pydecimal import ROUND_UP
 import sys
 from django.contrib import messages
+from math import floor
+import json
+from moneyed.localization import format_money
+import django
+
 
 # Create your views here.
 
@@ -588,10 +593,13 @@ def items(request):
     return render(request, 'core/items.html', {'all_items': all_items})
 
 @login_required(login_url=login_url)
+def view_transfer_log(request, pk):
+    item = get_object_or_404(TransferLog, pk=pk)
+    return render(request, 'core/view_transfer_log.html', {'log': item, 'explaination':json.loads(item.explaination)}) 
+
+@login_required(login_url=login_url)
 def item_view(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
-    if not item.has_admin(request.user):
-        return forbidden(request)
     return render(request, 'core/item_view.html', {'item': item}) 
 
 @login_required(login_url=login_url)
@@ -716,7 +724,7 @@ def deposit_eggs(request):
             return HttpResponseRedirect(reverse('sold'))
     else:
         form = DepositEggsForm(initial={
-            'deposit_command': f'$deposit {total}'
+            'deposit_command': f'$deposit {floor(total)}'
         })
     return render(request, 'core/deposit_eggs_form.html', {'form': form, 'title': 'Deposit Eggs', 'total':to_isk(total), 'count':count}) 
 
@@ -739,6 +747,14 @@ def deposit_approved(request):
     return render(request, 'core/eggs_approved.html', {'form': form, 'title': 'Egg Deposit Approved', 'total':to_isk(total), 'count':count})
 
 
+class ComplexEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Money):
+            return format_money(obj, locale=django.utils.translation.get_language())
+        if isinstance(obj, Decimal):
+            return str(floor(obj)) 
+        # Let the base class default method raise the TypeError
+        return json.JSONEncoder.default(self, obj)
 @login_required(login_url=login_url)
 @transaction.atomic
 def transfer_eggs(request):
@@ -757,7 +773,7 @@ def transfer_eggs(request):
         item_id = sold_item.item.id
         explaination[item_id] = participation
         explaination[item_id]['item'] = str(sold_item.item)
-        explaination[item_id]['total_isk'] = total_isk 
+        explaination[item_id]['total_isk'] = total_isk.amount 
         for discord_username, result in participation['participation'].items():
             isk = result['total_isk']
             if discord_username in total_participation:
@@ -770,13 +786,22 @@ def transfer_eggs(request):
     if request.method == 'POST':
         form = DepositEggsForm(request.POST)
         if form.is_valid():
-            to_transfer.update(transfered_to_participants=True)
             messages.success(request, f"Transfered {total} eggs from {count} sold items to the correct participants.")
+            log = TransferLog(
+                user=request.user,
+                time=timezone.now(),
+                total=total,
+                count=count,
+                explaination=json.dumps(explaination, cls=ComplexEncoder)
+            )
+            log.full_clean()
+            log.save()
+            to_transfer.update(transfered_to_participants=True, transfer_log=log.id)
             return HttpResponseRedirect(reverse('sold'))
     else:
         command = ""
         for discord_username, isk in total_participation.items():
-            command = command + f"$transfer {discord_username} {round(isk.amount)}\n"
+            command = command + f"$transfer @{discord_username} {floor(isk.amount)}\n"
 
         form = DepositEggsForm(initial={
             'deposit_command': command

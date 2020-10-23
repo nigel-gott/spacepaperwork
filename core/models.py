@@ -577,7 +577,7 @@ class InventoryItem(models.Model):
             status = status + f" {quantity_listed} Listed"
         quantity_sold = self.sold_quantity() 
         if quantity_sold != 0:
-            status = status + f" {quantity_sold} Sold"
+            status = status + f" {quantity_sold} Sold ({self.solditem.status()})"
         quantity_junked = self.junked_quantity() 
         if quantity_junked != 0:
             status = status + f" {quantity_junked} Junked"
@@ -642,6 +642,15 @@ class MarketOrder(models.Model):
     def __str__(self):
         return f"A {self.buy_or_sell} of {self.item.item} x {self.quantity} listed for {self.listed_at_price} @ {self.internal_or_external} market"
 
+
+class TransferLog(models.Model):
+    user = models.ForeignKey(GooseUser, on_delete=models.CASCADE)
+    time = models.DateTimeField()
+    explaination = models.JSONField()
+    count = models.PositiveIntegerField()
+    total = MoneyField(
+        max_digits=14, decimal_places=2, default_currency='EEI') 
+
 class SoldItem(models.Model):
     item = models.OneToOneField(InventoryItem, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
@@ -649,17 +658,21 @@ class SoldItem(models.Model):
     deposited_into_eggs = BooleanField(default=False)
     deposit_approved = BooleanField(default=False)
     transfered_to_participants = BooleanField(default=False)
+    transfer_log = models.ForeignKey(TransferLog, on_delete=models.CASCADE, null=True, blank=True)
 
     def status(self):
         if self.transfered_to_participants:
-            return "Transfered to participants, all done!"
+            return "Transfered!"
         elif self.deposited_into_eggs:
             if self.deposit_approved:
-                return "Egg Deposit Approved, pending transfer to participants."
+                return "Deposit Approved, Pending Transfer"
             else:
-                return "Deposited into eggs. Awaiting Confirmation of Deposit."
+                return "Deposited Pending Approval"
         else:
-            return "Awaiting Egg deposit."
+            return "Pending Deposit"
+
+    def __str__(self):
+        return f"{self.item} x {self.quantity} - sold via: {self.sold_via}, status: {self.status()}"
 
 class JunkedItem(models.Model):
     item = models.OneToOneField(InventoryItem, on_delete=models.CASCADE)
@@ -667,6 +680,7 @@ class JunkedItem(models.Model):
     reason = models.TextField()
 
 
+    
 
 
 

@@ -18,7 +18,10 @@
     <td>{{item.status}} 
     {% if item.solditem %}
     <br/>
-    {{item.solditem.status}}
+    {{item.solditem.status}}<br/>
+    {% if item.solditem.transfer_log %}
+    <a href="{% url 'view_transfer_log' item.solditem.transfer_log.id %}">View Transfer Details</a>
+    {% endif %}
     {% endif %}
     
     </td>
