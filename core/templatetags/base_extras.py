@@ -9,7 +9,7 @@ register = template.Library()
 
 @register.simple_tag
 def num_items(user):
-    return InventoryItem.objects.filter(location__character_location__character__discord_id=user.discord_uid(), quantity_gt=0).count()
+    return InventoryItem.objects.filter(location__character_location__character__discord_id=user.discord_uid(), quantity__gt=0).count()
 
 @register.simple_tag
 def num_orders(user):
