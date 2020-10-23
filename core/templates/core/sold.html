@@ -71,11 +71,13 @@
         {% endfor %}
       </tbody>
     </table>
-    </form>
   </div>
 <div class="divider"></div>
 <div class="section">
-    <h5>Transfered Items</h5>
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header"><i class="material-icons">add</i>Old Fully Transfered Items</div>
+                <div class="collapsible-body">
     <table>
       <thead>
         <th>Location</th>
@@ -136,9 +138,20 @@
         {% endfor %}
       </tbody>
     </table>
-    </form>
+    </div>
+    </ul>
+    </li>
   </div>
 </div>
 </div>
 
+<script>
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.collapsible');
+    var instances = M.Collapsible.init(elems);
+  });
+  </script>
+
 {% endblock %}
+
