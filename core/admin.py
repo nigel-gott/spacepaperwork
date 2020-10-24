@@ -30,6 +30,7 @@ admin.site.register(EggTransaction)
 admin.site.register(MarketOrder)
 admin.site.register(JunkedItem)
 admin.site.register(TransferLog)
+admin.site.register(FleetMember)
 
 
 class CustomUserAdmin(UserAdmin):
