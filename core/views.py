@@ -149,14 +149,15 @@ def fleet_add(request, pk):
     if request.method == 'POST':
         form = FleetAddMemberForm(request.POST)
         if form.is_valid():
-            if f.can_join(request.user):
-                new_fleet = FleetMember(
-                    character=form.cleaned_data['character'],
+            character = form.cleaned_data['character']
+            if f.member_can_be_added(character):
+                new_fleet_member = FleetMember(
+                    character=character,
                     fleet=f,
                     joined_at=timezone.now()
                 )
-                new_fleet.full_clean()
-                new_fleet.save()
+                new_fleet_member.full_clean()
+                new_fleet_member.save()
                 return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
             else:
                 messages.error(request, "You cannot add an alt to this fleet")

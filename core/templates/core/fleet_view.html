@@ -106,8 +106,8 @@
                 {% if member.has_admin %}
                     <b>Fleet Admin</b><br/> 
                 {% endif %}
-                {% if member.character.discord_avatar_url != 'https://cdn.discordapp.com/embed/avatars/2.png' %}
-                <img src="{{ member.character.discord_avatar_url }}?size=32" alt=""
+                {% if member.character.fixed_discord_avatar_url %}
+                <img src="{{ member.character.fixed_discord_avatar_url }}?size=32" alt=""
                                                       class="circle">
                                                       {% endif %}
                     {{member.character.discord_username}}

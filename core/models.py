@@ -29,6 +29,19 @@ class Character(models.Model):
     discord_username = models.TextField()
     corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
 
+    def fixed_discord_avatar_url(self):
+        user = self.user_or_false()
+        if user:
+            return user.discord_avatar_url()
+        else:
+            return self.cached_avatar_url()
+    
+    def cached_avatar_url(self):
+        if len(self.discord_avatar_url) == len('https://cdn.discordapp.com/embed/avatars/3.png'):
+            return False
+        else:
+            return self.discord_avatar_url
+
     def user_or_false(self):
         try:
             return SocialAccount.objects.get(uid=self.discord_id).user
@@ -66,7 +79,7 @@ class GooseUser(AbstractUser):
             if len(social_infos) == 1:
                 social_info = social_infos[0]
                 avatar_hash = social_info.extra_data['avatar']
-                if avatar_hash == 2:
+                if len(str(avatar_hash)) == 1:
                     return False
                 discord_id = social_info.uid
                 return f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar_hash}.png"
@@ -217,6 +230,16 @@ class Fleet(models.Model):
         num_characters_in_fleet = len(FleetMember.objects.filter(
             fleet=self, character__discord_id=uid))
 
+        if self.gives_shares_to_alts:
+            return (num_chars - num_characters_in_fleet) > 0
+        else:
+            return num_characters_in_fleet == 0
+
+    def member_can_be_added(self, character):
+        num_chars = len(Character.objects.filter(
+             discord_id=character.discord_id))
+        num_characters_in_fleet = len(FleetMember.objects.filter(
+            fleet=self, character__discord_id=character.discord_id))
         if self.gives_shares_to_alts:
             return (num_chars - num_characters_in_fleet) > 0
         else:
