@@ -873,16 +873,23 @@ def transfer_eggs(request):
         to_transfer.update(transfered_to_participants=True, transfer_log=log.id)
         return HttpResponseRedirect(reverse('sold'))
     else:
-        command = ""
+        end = ""
+        command = "$bulk\n"
+        commands_issued = False
         for discord_username, isk in total_participation.items():
             if discord_username != request.user.discord_username():
-                command = command + f"$transfer @{discord_username} {floor(isk.amount)}\n"
+                commands_issued = True
+                command = command + f"@{discord_username} {floor(isk.amount)}\n"
             else:
-                command = command + f"Keep {floor(isk.amount)} for yourself! \n"
+                end = end + f"Keep {floor(isk.amount)} for yourself! \n"
+        if commands_issued:
+            command = command + "\n\n" + end
+        else:
+            command = end
 
 
         form = DepositEggsForm(initial={
-            'deposit_command': command
+            'deposit_command': command 
         })
     return render(request, 'core/transfer_eggs_form.html', {'form': form, 'title': 'Transfer Eggs', 'total':total, 'count':count, 'command':command, 'explaination':explaination}) 
 
