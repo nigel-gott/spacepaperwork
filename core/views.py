@@ -524,6 +524,16 @@ def reject_contract(request, pk):
         form = Form(request.POST)
         if form.is_valid() and contract.can_accept_or_reject(request.user):
             contract.status = 'rejected'
+            log = []
+            for item in contract.inventoryitem_set.all():
+                log.append({
+                    'id':item.id,
+                    'item':str(item),
+                    'quantity':item.quantity,
+                    'status':item.status(),
+                    'loot_group_id':item.loot_group and item.loot_group.id,
+                })
+            contract.log=json.dumps(log, cls=ComplexEncoder)
             contract.full_clean()
             contract.save()
             contract.inventoryitem_set.update(contract=None)
@@ -546,6 +556,16 @@ def accept_contract(request, pk):
                 character_location=char_loc,
                 corp_hanger=None
             )
+            log = []
+            for item in contract.inventoryitem_set.all():
+                log.append({
+                    'id':item.id,
+                    'item':str(item),
+                    'quantity':item.quantity,
+                    'status':item.status(),
+                    'loot_group_id':item.loot_group and item.loot_group.id,
+                })
+            contract.log=json.dumps(log, cls=ComplexEncoder)
             contract.full_clean()
             contract.save()
             contract.inventoryitem_set.update(contract=None, location=loc)
@@ -686,8 +706,23 @@ def orders(request):
 
 @login_required(login_url=login_url)
 def view_contract(request,pk):
+    contract = get_object_or_404(Contract, pk=pk)
+    if contract.status == "pending":
+        log = []
+        for item in contract.inventoryitem_set.all():
+            log.append({
+                'id':item.id,
+                'item':str(item),
+                'quantity':item.quantity,
+                'status':item.status(),
+                'loot_group_id':item.loot_group and item.loot_group.id,
+            })
+    else:
+        log = json.loads(contract.log)
+
     return render(request, 'core/contract_view.html', {
-        'contract': Contract.objects.get(pk=pk),
+        'contract': contract,
+        'log': log
         })
 
 @login_required(login_url=login_url)

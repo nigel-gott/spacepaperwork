@@ -32,6 +32,7 @@ admin.site.register(JunkedItem)
 admin.site.register(TransferLog)
 admin.site.register(FleetMember)
 admin.site.register(DiscordUser)
+admin.site.register(Contract)
 
 
 class CustomUserAdmin(UserAdmin):

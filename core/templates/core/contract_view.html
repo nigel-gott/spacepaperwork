@@ -37,10 +37,10 @@
         <th>Loot Group</th>
       </thead>
       <tbody>
-        {% for item in contract.inventoryitem_set.all %}
+        {% for item in log %}
             <tr>
                 <td>
-                    <a href="{% url 'item_view' item.id %}">{{item}}</a>
+                    <a href="{% url 'item_view' item.id %}">{{item.item}}</a>
                 </td>
                 <td>
                   {{item.quantity}}
@@ -49,8 +49,8 @@
                   {{item.status}}
                 </td>
                 <td>
-        {% if item.loot_group %}
-          <a href="{% url 'loot_group_view' item.loot_group.id %}">Loot Group {{item.loot_group.id}}</a>
+        {% if item.loot_group_id %}
+          <a href="{% url 'loot_group_view' item.loot_group_id %}">Loot Group {{item.loot_group_id}}</a>
           {% else %}
           No Loot Group
           {% endif %}

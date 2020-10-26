@@ -411,6 +411,7 @@ class Contract(models.Model):
         ("rejected","rejected"),
         ("accepted","accepted"),
         ])
+    log = models.JSONField(null=True,blank=True)
     
     def can_accept_or_reject(self,user):
         return self.status == 'pending' and self.to_char.gooseuser_or_false() == user
