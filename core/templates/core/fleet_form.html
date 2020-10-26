@@ -26,8 +26,8 @@
     <form action="" method="post">
         {% csrf_token %}
         <div class="row">
-            {{ form.name|materializecss:'s6 m6, icon=label'}}
-            {{ form.fc_character|materializecss:'s6 m6, icon=person'}}
+            {{ form.name|materializecss:'s12 m6, icon=label'}}
+            {{ form.fc_character|materializecss:'s12 m6, icon=person'}}
         </div>
         <div class="row">
             {{ form.location|materializecss:'s12 m12, icon=add_location'}}
@@ -36,19 +36,19 @@
             {{ form.description|materializecss:'s12 m12, icon=description'}}
         </div>
         <div class="row">
-            {{ form.fleet_type|materializecss:'s6 m6, icon=directions_boat'}}
-            {{ form.gives_shares_to_alts|materializecss:'s6 m6, icon=group_add'}}
+            {{ form.fleet_type|materializecss:'s12 m6, icon=directions_boat'}}
+            {{ form.gives_shares_to_alts|materializecss:'s12 m6, icon=group_add'}}
         </div>
         <div class="row">
-            {{ form.start_date|materializecss:'s6 m6, icon=date_range'}}
-            {{ form.start_time|materializecss:'s6 m6, icon=access_time'}}
+            {{ form.start_date|materializecss:'s12 m6, icon=date_range'}}
+            {{ form.start_time|materializecss:'s12 m6, icon=access_time'}}
         </div>
         <div class="row">
             {{ form.expected_duration|materializecss:'s12 m12, icon=timelapse'}}
         </div>
         <div class="row">
-            {{ form.end_date|materializecss:'s6 m6, icon=date_range'}}
-            {{ form.end_time|materializecss:'s6 m6, icon=access_time'}}
+            {{ form.end_date|materializecss:'s12 m6, icon=date_range'}}
+            {{ form.end_time|materializecss:'s12 m6, icon=access_time'}}
         </div>
         <button type="submit" class="btn waves-effect waves-light" value="Submit">{{title}}
             <i class="material-icons right">send</i>
