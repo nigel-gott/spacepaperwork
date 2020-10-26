@@ -412,6 +412,10 @@ class Contract(models.Model):
         ("accepted","accepted"),
         ])
     
+    def can_accept_or_reject(self,user):
+        return self.status == 'pending' and self.to_char.gooseuser_or_false() == user
+
+    
     def total_items(self):
         return 0
 

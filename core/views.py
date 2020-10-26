@@ -23,6 +23,7 @@ from moneyed.localization import format_money
 
 from core.forms import DeleteItemForm, DepositEggsForm, FleetAddMemberForm, FleetForm, InventoryItemForm, ItemMoveAllForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SellItemForm, SettingsForm, SoldItemForm
 from core.models import AnomType, Character, CharacterLocation, Contract, DiscordUser, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
+from django.forms.forms import Form
 
 # Create your views here.
 
@@ -515,6 +516,43 @@ def loot_group_view(request, pk):
     return render(request, 'core/loot_group_view.html',
                   {'loot_group': loot_group, 'loot_shares_by_discord_id': by_discord_user})
 
+@transaction.atomic
+@login_required(login_url=login_url)
+def reject_contract(request, pk):
+    contract = get_object_or_404(Contract, pk=pk)
+    if request.method == 'POST':
+        form = Form(request.POST)
+        if form.is_valid() and contract.can_accept_or_reject(request.user):
+            contract.status = 'rejected'
+            contract.full_clean()
+            contract.save()
+            contract.inventoryitem_set.update(contract=None)
+    return HttpResponseRedirect(reverse('view_contract', args=[pk]))
+
+@transaction.atomic
+@login_required(login_url=login_url)
+def accept_contract(request, pk):
+    contract = get_object_or_404(Contract, pk=pk)
+    if request.method == 'POST':
+        form = Form(request.POST)
+        if form.is_valid() and contract.can_accept_or_reject(request.user):
+
+            contract.status = 'accepted'
+            char_loc, _ = CharacterLocation.objects.get_or_create(
+                character=contract.to_char,
+                system=contract.system
+            )
+            loc, _ = ItemLocation.objects.get_or_create(
+                character_location=char_loc,
+                corp_hanger=None
+            )
+            contract.full_clean()
+            contract.save()
+            contract.inventoryitem_set.update(contract=None, location=loc)
+    return HttpResponseRedirect(reverse('view_contract', args=[pk]))
+
+
+@transaction.atomic
 @login_required(login_url=login_url)
 def item_move_all(request):
     if request.method == 'POST':
@@ -522,8 +560,12 @@ def item_move_all(request):
         if form.is_valid():
             system = form.cleaned_data['system']
             character = form.cleaned_data['character']
-            if character in request.user.characters():
-                messages.error(request, "Cannot contract items to yourself") 
+            # if character in request.user.characters():
+            #     messages.error(request, "Cannot contract items to yourself") 
+            #     return forbidden(request)
+            all_your_items = InventoryItem.objects.filter(location__character_location__character__discord_user=request.user.discord_user, quantity__gt=0, marketorder__isnull=True, solditem__isnull=True)
+            if all_your_items.count() == 0:
+                messages.error(request, "You have no items to contract :'(") 
                 return forbidden(request)
 
             contract = Contract(
@@ -535,7 +577,6 @@ def item_move_all(request):
             )
             contract.full_clean()
             contract.save()
-            all_your_items = InventoryItem.objects.filter(location__character_location__character__discord_user=request.user.discord_user)
             all_your_items.update(contract=contract)
             return HttpResponseRedirect(reverse('contracts')) 
     else:
@@ -642,6 +683,12 @@ def orders(request):
 
     return render(request, 'core/orders.html', {'all_orders': all_orders})
 
+
+@login_required(login_url=login_url)
+def view_contract(request,pk):
+    return render(request, 'core/contract_view.html', {
+        'contract': Contract.objects.get(pk=pk),
+        })
 
 @login_required(login_url=login_url)
 def contracts(request):

@@ -21,8 +21,12 @@ def num_sold(user):
     return SoldItem.objects.filter(item__location__character_location__character__discord_user=user.discord_user, transfered_to_participants=False).count()
 
 @register.simple_tag
+def can_accept_reject(user,contract):
+    return contract.can_accept_or_reject(user) 
+
+@register.simple_tag
 def num_contracts (user):
-    return Contract.objects.filter(to_char__discord_user=user.discord_user).count()
+    return Contract.objects.filter(to_char__discord_user=user.discord_user, status='pending').count()
 @register.simple_tag
 def all_sales(user):
     return sum([num_items(user), num_orders(user), num_sold(user)])
