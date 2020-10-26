@@ -22,7 +22,7 @@ from djmoney.money import Money
 from moneyed.localization import format_money
 
 from core.forms import DeleteItemForm, DepositEggsForm, FleetAddMemberForm, FleetForm, InventoryItemForm, ItemMoveAllForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SellItemForm, SettingsForm, SoldItemForm
-from core.models import AnomType, Character, CharacterLocation, DiscordUser, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
+from core.models import AnomType, Character, CharacterLocation, Contract, DiscordUser, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
 
 # Create your views here.
 
@@ -637,6 +637,14 @@ def orders(request):
 
     return render(request, 'core/orders.html', {'all_orders': all_orders})
 
+
+@login_required(login_url=login_url)
+def contracts(request):
+
+    return render(request, 'core/contracts.html', {
+        'my_contracts': Contract.objects.filter(from_char__discord_user=request.user.discord_user), 
+        'contracts': Contract.objects.filter(to_char__discord_user=request.user.discord_user), 
+        })
 
 @login_required(login_url=login_url)
 def items(request):

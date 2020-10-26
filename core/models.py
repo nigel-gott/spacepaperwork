@@ -84,7 +84,10 @@ class GooseUser(AbstractUser):
 
 
     def characters(self):
-        return Character.objects.filter(discord_user=self.discord_user)
+        if getattr(self, 'discord_user'):
+            return Character.objects.filter(discord_user=self.discord_user)
+        else:
+            return Character.objects.none()
 
     def discord_uid(self):
         return self.discord_user.uid 
@@ -398,6 +401,11 @@ class ItemLocation(models.Model):
         else:
             return str(self.corp_hanger)
 
+class Contract(models.Model):
+    from_char = models.ForeignKey(Character, on_delete=models.CASCADE, related_name='my_contracts')
+    to_char = models.ForeignKey(Character, on_delete=models.CASCADE)
+    system = models.ForeignKey(System, on_delete=models.CASCADE)
+
 
 class AnomType(models.Model):
     TYPE_CHOICES = [
@@ -550,6 +558,7 @@ class InventoryItem(models.Model):
     quantity = models.PositiveIntegerField()
     location = models.ForeignKey(ItemLocation, on_delete=models.CASCADE)
     loot_group = models.ForeignKey(LootGroup, on_delete=models.CASCADE, null=True, blank=True)
+    contract = models.ForeignKey(Contract, on_delete=models.CASCADE, null=True, blank=True)
 
 
     def has_admin(self, user):

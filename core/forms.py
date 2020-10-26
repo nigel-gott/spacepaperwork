@@ -21,8 +21,7 @@ class SignupFormWithTimezone(SignupForm):
     def __init__(self, *args, **kwargs):
         sociallogin = kwargs.get('sociallogin', None)
         super(SignupFormWithTimezone, self).__init__(*args, **kwargs)
-        if sociallogin:
-            self.fields['default_character'].queryset = sociallogin.user.characters()
+        self.fields['default_character'].queryset = Character.objects.filter(discord_user__uid=sociallogin.account.uid)
 
 
 class JoinFleetForm(forms.Form):

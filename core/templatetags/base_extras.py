@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.utils import timezone
 
-from core.models import Fleet, FleetMember, InventoryItem, MarketOrder, SoldItem, active_fleets_query, future_fleets_query, past_fleets_query
+from core.models import Contract, Fleet, FleetMember, InventoryItem, MarketOrder, SoldItem, active_fleets_query, future_fleets_query, past_fleets_query
 from django import template
 import math as m
 
@@ -19,6 +19,13 @@ def num_orders(user):
 @register.simple_tag
 def num_sold(user):
     return SoldItem.objects.filter(item__location__character_location__character__discord_user=user.discord_user, transfered_to_participants=False).count()
+
+@register.simple_tag
+def num_contracts (user):
+    return Contract.objects.filter(to_char__discord_user=user.discord_user).count()
+@register.simple_tag
+def all_sales(user):
+    return sum([num_items(user), num_orders(user), num_sold(user)])
 
 @register.simple_tag
 def num_active_fleets():

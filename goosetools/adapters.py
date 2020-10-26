@@ -52,27 +52,20 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             avatar_hash = account.extra_data["avatar"]
         
         existing_user_with_correct_uid = DiscordUser.objects.filter(uid=account.uid)
-        if len(existing_user_with_correct_uid) == 0:
+        if len(existing_user_with_correct_uid) == 1:
             discord_user = existing_user_with_correct_uid[0]
         else:
-            # The DiscordUser table is populated with some users which have had the final 3 digits of their UID truncated.
-            uid_missing_last_three = str(account.uid)[:-3]
-            old_user_from_kris = DiscordUser.objects.filter(uid=uid_missing_last_three)
-            if len(old_user_from_kris) == 1:
-                # This is one of the users with a shortened uid. Below we will override this incorrect UID with the now known correct one .
-                discord_user = old_user_from_kris[0]
-            else:
-                # Must be an unknown discord user to us.
-                discord_user = DiscordUser()
+            discord_user = DiscordUser()
 
         _update_user_from_social_account(discord_user, account)
-        sociallogin.user.discord_user = discord_user.id
+        sociallogin.user.discord_user = discord_user
         user = super().save_user(request, sociallogin, form)
 
     def validate_disconnect(self, account, accounts):
         raise ValidationError("Can not disconnect")
 
 def _update_user_from_social_account(discord_user, account):
+
     discord_user.uid = account.uid 
     discord_user.shortened_uid = False 
     discord_user.username = account.extra_data['username'] + "#" + account.extra_data['discriminator']
