@@ -1,19 +1,22 @@
-from typing import Union
-from django.utils.translation import gettext_lazy as _
+from typing import Optional, Union
 
 from allauth.socialaccount.models import SocialAccount
+from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
 from django.db.models import DecimalField, Q
-from django.utils import timezone
-from djmoney.models.fields import MoneyField
-from timezone_field import TimeZoneField
-from dateutil.relativedelta import relativedelta
-from django.db.models.fields import BooleanField
 from django.db.models.aggregates import Sum
+from django.db.models.expressions import Combinable
+from django.db.models.fields import BooleanField
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _
+from djmoney.models.fields import MoneyField
 from djmoney.money import Money
+from timezone_field import TimeZoneField
+
 
 
 class Corp(models.Model):
@@ -46,81 +49,59 @@ class DiscordUser(models.Model):
     def __str__(self):
         return self.username
 
+
+
 class Character(models.Model):
-    discord_user = models.ForeignKey(DiscordUser, on_delete=models.CASCADE, null=True, blank=True)
-    discord_id = models.TextField()
-    ingame_name = models.TextField()
-    discord_avatar_url = models.TextField()
-    discord_username = models.TextField()
+    discord_user = models.ForeignKey(DiscordUser, on_delete=models.CASCADE)
+    ingame_name = models.TextField(unique=True)
     corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
 
-    def fixed_discord_avatar_url(self):
-        user = self.user_or_false()
-        if user:
-            return user.discord_avatar_url()
-        else:
-            return self.cached_avatar_url()
-    
-    def cached_avatar_url(self):
-        if len(self.discord_avatar_url) == len('https://cdn.discordapp.com/embed/avatars/3.png'):
-            return False
-        else:
-            return self.discord_avatar_url
+    def gooseuser_or_false(self):
+        return self.discord_user and self.discord_user.gooseuser
 
-    def user_or_false(self):
-        try:
-            return SocialAccount.objects.get(uid=self.discord_id).user
-        except ObjectDoesNotExist:
-            return False
+    def discord_avatar_url(self):
+        return self.discord_user and self.discord_user.avatar_url()
+    
+    def discord_username(self):
+        return self.discord_user and self.discord_user.username
+        
 
     def __str__(self):
         return f"[{self.corp}] {self.ingame_name}"
 
+# Add nullable discord_user FK to Character/GooseUser
+# Add new Discord User Model
+# Copy over character data into discord user model
+# Remove nullability and old fields from models + update code
+
 class GooseUser(AbstractUser):
-    discord_user = models.OneToOneField(DiscordUser, on_delete=models.CASCADE, null=True, blank=True)
+    discord_user = models.OneToOneField(DiscordUser, on_delete=models.CASCADE)
     timezone = TimeZoneField(default='Europe/London')
     broker_fee = models.DecimalField(verbose_name="Your Broker Fee in %", max_digits=5, decimal_places=2, default=8.0)
     transaction_tax = models.DecimalField(verbose_name="Your Transaction Tax in %", max_digits=5, decimal_places=2, default=15.0)
-    default_character = models.ForeignKey(Character, on_delete=models.CASCADE)
+    default_character = models.OneToOneField(Character, on_delete=models.CASCADE)
 
-    def discord_uid(self):
-        if len(self.socialaccount_set.all()) == 0:
-            return 0
-        else:
-            return self.socialaccount_set.only()[0].uid
-
-    def discord_username(self):
-        social_account = self.socialaccount_set.only()[0].extra_data
-        return f"{social_account['username']}#{social_account['discriminator']}"
 
     def characters(self):
-        return Character.objects.filter(discord_id=self.discord_uid())
+        return Character.objects.filter(discord_user=self.discord_user)
 
-    def discord_avatar_url(self):
-        """
-        :return: Returns the users discord avatar image link or false if they do not have one or an error occurs.
-        """
-        try:
-            social_infos = SocialAccount.objects.filter(user=self)
-            if len(social_infos) == 1:
-                social_info = social_infos[0]
-                avatar_hash = social_info.extra_data['avatar']
-                if len(str(avatar_hash)) == 1:
-                    return False
-                discord_id = social_info.uid
-                return f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar_hash}.png"
-        except Exception:
-            pass
-        return False
+    def discord_uid(self):
+        return self.discord_user.uid 
+
+    def discord_username(self):
+        return self.discord_user.username
+
+    def discord_avatar_hash(self):
+        return self.discord_user.uid
 
     def can_deposit(self):
-        return SoldItem.objects.filter(item__location__character_location__character__discord_id=self.discord_uid(), deposited_into_eggs=False, deposit_approved=False).count() > 0
+        return SoldItem.objects.filter(item__location__character_location__character__discord_user=self.discord_user, deposited_into_eggs=False, deposit_approved=False).count() > 0
     
     def pending_deposits(self):
-        return SoldItem.objects.filter(item__location__character_location__character__discord_id=self.discord_uid(), deposited_into_eggs=True, deposit_approved=False)
+        return SoldItem.objects.filter(item__location__character_location__character__discord_user=self.discord_user, deposited_into_eggs=True, deposit_approved=False)
     
     def pending_transfers(self):
-        return SoldItem.objects.filter(item__location__character_location__character__discord_id=self.discord_uid(), deposited_into_eggs=True, deposit_approved=True,transfered_to_participants=False)
+        return SoldItem.objects.filter(item__location__character_location__character__discord_user=self.discord_user, deposited_into_eggs=True, deposit_approved=True,transfered_to_participants=False)
 
     def has_pending_deposit(self):
         return self.pending_deposits().count() > 0
@@ -128,7 +109,7 @@ class GooseUser(AbstractUser):
         return self.pending_transfers().count() > 0
     
     def isk_balance(self):
-        return to_isk(model_sum(IskTransaction.objects.filter(item__location__character_location__character__discord_id=self.discord_uid()), 'isk'))
+        return to_isk(model_sum(IskTransaction.objects.filter(item__location__character_location__character__discord_user=self.discord_user), 'isk'))
 
     def debt_egg_balance(self):
         return to_isk(model_sum(EggTransaction.objects.filter(counterparty_discord_username=self.discord_username(), debt=True), 'eggs'))
@@ -214,29 +195,25 @@ class Fleet(models.Model):
     location = models.TextField(blank=True, null=True)
     expected_duration = models.TextField(blank=True, null=True)
 
-    def has_admin(self, user):
+    def members_for_user(self, user):
         uid = user.discord_uid()
-        members = FleetMember.objects.filter(
-            fleet=self, character__discord_id=uid)
+        return FleetMember.objects.filter(
+            fleet=self, character__discord_user=user.discord_user)
+
+    def has_admin(self, user):
         if user.is_staff:
             return True
-        for member in members:
+        for member in self.members_for_user(user):
             if member.admin_permissions:
                 return True
         return self.fc == user
 
     def has_member(self, user):
-        uid = user.discord_uid()
-        num_characters_in_fleet = len(FleetMember.objects.filter(
-            fleet=self, character__discord_id=uid))
-        return num_characters_in_fleet > 0
+        return self.members_for_user(user).count() > 0
 
     def still_can_join_alts(self, user):
-        uid = user.discord_uid()
-        num_chars = len(Character.objects.filter(
-            discord_id=user.discord_uid()))
-        num_characters_in_fleet = len(FleetMember.objects.filter(
-            fleet=self, character__discord_id=uid))
+        num_chars = len(user.characters())
+        num_characters_in_fleet = len(self.members_for_user(user))
         return not self.in_the_past() and self.gives_shares_to_alts and num_characters_in_fleet > 0 and (
             num_chars - num_characters_in_fleet) > 0
 
@@ -251,10 +228,8 @@ class Fleet(models.Model):
             return False
 
         uid = user.discord_uid()
-        num_chars = len(Character.objects.filter(
-            discord_id=user.discord_uid()))
-        num_characters_in_fleet = len(FleetMember.objects.filter(
-            fleet=self, character__discord_id=uid))
+        num_chars = len(user.characters())
+        num_characters_in_fleet = len(self.members_for_user(user))
 
         if self.gives_shares_to_alts:
             return (num_chars - num_characters_in_fleet) > 0
@@ -263,9 +238,9 @@ class Fleet(models.Model):
 
     def member_can_be_added(self, character):
         num_chars = len(Character.objects.filter(
-             discord_id=character.discord_id))
+             discord_user=character.discord_user))
         num_characters_in_fleet = len(FleetMember.objects.filter(
-            fleet=self, character__discord_id=character.discord_id))
+            fleet=self, character__discord_user=character.discord_user))
         if self.gives_shares_to_alts:
             return (num_chars - num_characters_in_fleet) > 0
         else:
@@ -275,7 +250,7 @@ class Fleet(models.Model):
         now = timezone.now()
         difference = self.start - now
         seconds = difference.total_seconds()
-        pos_delta = relativedelta(seconds=abs(seconds))
+        pos_delta = relativedelta(seconds=int(abs(seconds)))
         human_delta = human_readable_relativedelta(pos_delta)
         if abs(seconds) <= 60:
             return "Starts Now"
@@ -295,7 +270,7 @@ class Fleet(models.Model):
 
         difference = self.end - now
         seconds = difference.total_seconds()
-        pos_delta = relativedelta(seconds=abs(seconds))
+        pos_delta = relativedelta(seconds=int(abs(seconds)))
         human_delta = human_readable_relativedelta(pos_delta)
         if abs(seconds) <= 60:
             return "Ends Now"
@@ -320,11 +295,8 @@ class FleetMember(models.Model):
     left_at = models.DateTimeField(blank=True, null=True)
     admin_permissions = models.BooleanField(default=False)
 
-    def user_or_false(self):
-        return self.character.user_or_false()
-
     def has_admin(self):
-        user = self.user_or_false()
+        user = self.character.gooseuser_or_false()
         if user:
             return self.fleet.has_admin(user)
         else:
@@ -381,7 +353,7 @@ class CorpHanger(models.Model):
     ])
 
     def __str__(self):
-        return f"In [{self.corp.name}] Corp {self.hanger} at {self.station} ({self.character.discord_username}"
+        return f"In [{self.corp.name}] Corp {self.hanger} at {self.station} "
 
 
 class CharacterLocation(models.Model):
@@ -391,9 +363,9 @@ class CharacterLocation(models.Model):
 
     def __str__(self):
         if not self.station:
-            return f"In Space on {self.character.ingame_name}({self.character.discord_username})"
+            return f"In Space on {self.character.ingame_name}({self.character.discord_username()})"
         else:
-            return f"In {self.character.ingame_name}'s personal hanger at {self.station} ({self.character.discord_username}"
+            return f"In {self.character.ingame_name}'s personal hanger at {self.station} ({self.character.discord_username()}"
 
 
 class ItemLocation(models.Model):
@@ -489,11 +461,11 @@ class LootBucket(models.Model):
             total_flat_cuts = 0
         if total_flat_cuts > 100:
             raise ValidationError(f"The Loot Group {loot_group.id} is trying to give out a total of {total_flat_cuts}% of flat cuts. Please fix the participations as this is impossible.")
-        shares_by_username = shares.values('character__discord_username').annotate(num_shares=Sum('share_quantity'))
-        flat_cuts_by_username_qs = flat_cuts.values('character__discord_username').annotate(flat_cut=Sum('flat_percent_cut'))
+        shares_by_username = shares.values('character__discord_user__username').annotate(num_shares=Sum('share_quantity'))
+        flat_cuts_by_username_qs = flat_cuts.values('character__discord_user__username').annotate(flat_cut=Sum('flat_percent_cut'))
         flat_cuts_by_username = {}
         for flat_cut in flat_cuts_by_username_qs:
-            flat_cuts_by_username[flat_cut['character__discord_username']] = flat_cut['flat_cut']
+            flat_cuts_by_username[flat_cut['character__discord_user__username']] = flat_cut['flat_cut']
         result = {
             'total_shares':total_shares,
             'total_flat_cuts':total_flat_cuts,
@@ -501,7 +473,7 @@ class LootBucket(models.Model):
         }
         total_after_cuts = isk * (100-total_flat_cuts)/100
         for group in shares_by_username:
-            username= group['character__discord_username']
+            username= group['character__discord_user__username']
             flat_cut = flat_cuts_by_username[username]
             result['participation'][username] = {
                 'shares':group['num_shares'],
@@ -541,18 +513,16 @@ class LootGroup(models.Model):
     def can_join(self, character):
         return self.still_open() and (self.alts_allowed() or len(LootShare.objects.filter(
                 loot_group=self,
-                character__discord_id=character.discord_id
+                character__discord_user=character.discord_user
             )) == 0)
     
     def still_open(self):
         return not self.fleet().in_the_past()
 
     def still_can_join_alts(self, user):
-        uid = user.discord_uid()
-        num_chars = len(Character.objects.filter(
-            discord_id=user.discord_uid()))
+        num_chars = len(user.characters())
         num_characters_in_group = len(LootShare.objects.filter(
-            loot_group=self, character__discord_id=uid))
+            loot_group=self, character__discord_user=user.discord_user))
         return self.still_open() and self.alts_allowed() and num_characters_in_group > 0 and (
             num_chars - num_characters_in_group) > 0
             
@@ -771,8 +741,3 @@ class LootShare(models.Model):
             extra = ""
 
         return f"{self.character.discord_username} has {self.share_quantity} shares {extra}"
-
-
-class EggDeposit(models.Model):
-    user = models.OneToOneField(GooseUser, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()

@@ -10,15 +10,15 @@ register = template.Library()
 
 @register.simple_tag
 def num_items(user):
-    return InventoryItem.objects.filter(location__character_location__character__discord_id=user.discord_uid(), quantity__gt=0).count()
+    return InventoryItem.objects.filter(location__character_location__character__discord_user=user.discord_user, quantity__gt=0).count()
 
 @register.simple_tag
 def num_orders(user):
-    return MarketOrder.objects.filter(item__location__character_location__character__discord_id=user.discord_uid()).count()
+    return MarketOrder.objects.filter(item__location__character_location__character__discord_user=user.discord_user).count()
 
 @register.simple_tag
 def num_sold(user):
-    return SoldItem.objects.filter(item__location__character_location__character__discord_id=user.discord_uid(), transfered_to_participants=False).count()
+    return SoldItem.objects.filter(item__location__character_location__character__discord_user=user.discord_user, transfered_to_participants=False).count()
 
 @register.simple_tag
 def num_active_fleets():

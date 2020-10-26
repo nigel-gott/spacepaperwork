@@ -106,8 +106,8 @@
                 {% if member.has_admin %}
                     <b>Fleet Admin</b><br/> 
                 {% endif %}
-                {% if member.character.fixed_discord_avatar_url %}
-                <img src="{{ member.character.fixed_discord_avatar_url }}?size=32" alt=""
+                {% if member.character.discord_avatar_url %}
+                <img src="{{ member.character.discord_avatar_url }}?size=32" alt=""
                                                       class="circle">
                                                       {% endif %}
                     {{member.character.discord_username}}
@@ -118,7 +118,7 @@
                 </td>
                 <td>
 
-                    {% if member.character.discord_id == user.discord_uid or admin %}
+                    {% if member.character.discord_user == user.discord_user or admin %}
 
                     {% if admin %}
                     <a class="red-text text-darken-3"

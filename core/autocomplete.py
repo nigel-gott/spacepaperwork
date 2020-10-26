@@ -1,6 +1,6 @@
 from dal import autocomplete
 
-from core.models import Character, FleetMember, Item, ItemSubSubType, ItemSubType, ItemType, System
+from core.models import Character, DiscordUser, FleetMember, Item, ItemSubSubType, ItemSubType, ItemType, System
 
 
 class SystemAutocomplete(autocomplete.Select2QuerySetView):
@@ -126,8 +126,8 @@ class CharacterAutocomplete(autocomplete.Select2QuerySetView):
         discord_username = self.forwarded.get('discord_username', None)
 
         if discord_username:
-            char = Character.objects.get(pk=discord_username)
-            qs = qs.filter(discord_username__icontains=char.discord_username)
+            discord_user = DiscordUser.objects.get(pk=discord_username)
+            qs = qs.filter(discord_user=discord_user)
 
         if self.q:
             qs = qs.filter(ingame_name__icontains=self.q)
@@ -137,19 +137,19 @@ class CharacterAutocomplete(autocomplete.Select2QuerySetView):
 
 class DiscordUsernameAutocomplete(autocomplete.Select2QuerySetView):
     def get_result_label(self, item):
-        return item.discord_username
+        return item.username
 
     def get_selected_result_label(self, item):
-        return item.discord_username
+        return item.username
 
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated:
             return Character.objects.none()
 
-        qs = Character.objects.all().distinct('discord_username')
+        qs = DiscordUser.objects.all()
 
         if self.q:
-            qs = qs.filter(discord_username__icontains=self.q)
+            qs = qs.filter(username__icontains=self.q)
 
         return qs

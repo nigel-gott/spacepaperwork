@@ -51,7 +51,7 @@ def settings_view(request):
             })
 
     form.fields['default_character'].queryset = Character.objects.filter(
-        discord_id=goose_user.discord_uid())
+        discord_user=goose_user.discord_user)
     return render(request, 'core/settings.html', {'form': form})
 
 
@@ -84,7 +84,7 @@ def fleet_future(request):
 @login_required(login_url=login_url)
 def fleet_leave(request, pk):
     member = get_object_or_404(FleetMember, pk=pk)
-    if member.character.discord_id == request.user.discord_uid() or request.user == member.fleet.fc:
+    if member.character.discord_user == request.user.discord_user or request.user == member.fleet.fc:
         member.delete()
         return HttpResponseRedirect(reverse('fleet_view', args=[member.fleet.pk]))
     else:
@@ -95,14 +95,14 @@ def fleet_leave(request, pk):
 def fleet_view(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     fleet_members = f.fleetmember_set.all()
-    by_discord_id = {}
+    by_discord_user = {}
     for member in fleet_members:
-        if member.character.discord_id not in by_discord_id:
-            by_discord_id[member.character.discord_id] = []
-        by_discord_id[member.character.discord_id].append(member)
+        if member.character.discord_user.id not in by_discord_user:
+            by_discord_user[member.character.discord_user.id] = []
+        by_discord_user[member.character.discord_user.id].append(member)
     loot_buckets = f.lootbucket_set.prefetch_related('lootgroup_set').all()
     return render(request, 'core/fleet_view.html',
-                  {'fleet': f, 'fleet_members_by_id': by_discord_id, 'loot_buckets': loot_buckets})
+                  {'fleet': f, 'fleet_members_by_id': by_discord_user, 'loot_buckets': loot_buckets})
 
 
 @login_required(login_url=login_url)
@@ -200,10 +200,9 @@ def fleet_join(request, pk):
 
 
 def non_member_chars(fleet_id, user):
-    uid = user.discord_uid()
     existing = FleetMember.objects.filter(fleet=fleet_id).values('character')
     characters = Character.objects.filter(
-        discord_id=uid).exclude(pk__in=existing)
+        discord_user=user.discord_user).exclude(pk__in=existing)
     return characters
 
 
@@ -218,11 +217,8 @@ def loot_group_create(request, pk):
 
 
 def non_participation_chars(loot_group, user):
-    uid = user.discord_uid()
-    existing = LootShare.objects.filter(loot_group=loot_group, character__discord_id=uid).values('character')
-    characters = Character.objects.filter(
-        discord_id=uid).exclude(pk__in=existing)
-    return characters
+    existing = LootShare.objects.filter(loot_group=loot_group, character__discord_user=user.discord_user).values('character')
+    return user.characters().exclude(pk__in=existing)
 
 def forbidden(request):
     return HttpResponseForbidden(render(request, 'core/403.html'))
@@ -301,7 +297,7 @@ def loot_share_delete(request, pk):
         loot_share.delete()
         return HttpResponseRedirect(reverse('loot_group_view', args=[group_pk]))
     else:
-        return HttpResponseNotAllowed()
+        return forbidden(request)
 
 
 @login_required(login_url=login_url)
@@ -489,14 +485,14 @@ def fleet_edit(request, pk):
 @login_required(login_url=login_url)
 def loot_group_view(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
-    by_discord_id = {}
+    by_discord_user = {}
     for loot_share in loot_group.lootshare_set.all():
-        id = loot_share.character.discord_id
-        if id not in by_discord_id:
-            by_discord_id[id] = []
-        by_discord_id[id].append(loot_share)
+        discord_user = loot_share.character.discord_user.id
+        if discord_user not in by_discord_user:
+            by_discord_user[discord_user] = []
+        by_discord_user[discord_user].append(loot_share)
     return render(request, 'core/loot_group_view.html',
-                  {'loot_group': loot_group, 'loot_shares_by_discord_id': by_discord_id})
+                  {'loot_group': loot_group, 'loot_shares_by_discord_id': by_discord_user})
 
 
 @login_required(login_url=login_url)
@@ -738,7 +734,7 @@ def deposit_eggs(request):
         messages.error(request, f"Nothing to deposit")
         return forbidden(request)
     
-    to_deposit_qs = SoldItem.objects.filter(item__location__character_location__character__discord_id=request.user.discord_uid(), deposited_into_eggs=False)
+    to_deposit_qs = SoldItem.objects.filter(item__location__character_location__character__discord_user=request.user.discord_user, deposited_into_eggs=False)
     to_deposit_list = list(to_deposit_qs)
     total = to_deposit_qs.aggregate(result=Sum('item__isktransaction__isk'))['result']
     count = to_deposit_qs.count()
@@ -818,7 +814,7 @@ def transfer_eggs(request):
 
     total_participation = {}
     explaination = {}
-    to_transfer = SoldItem.objects.filter(item__location__character_location__character__discord_id=request.user.discord_uid(), deposited_into_eggs=True, deposit_approved=True, transfered_to_participants=False)
+    to_transfer = SoldItem.objects.filter(item__location__character_location__character__discord_user=request.user.discord_user, deposited_into_eggs=True, deposit_approved=True, transfered_to_participants=False)
     current_now = timezone.now()
     total = 0
     count = 0

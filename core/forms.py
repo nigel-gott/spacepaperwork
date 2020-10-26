@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 
 from .fields import TimeZoneFormField
 from .models import Character, FleetType, GooseUser, AnomType, System
-from core.models import Item, ItemSubSubType, ItemSubType, ItemType, LootShare
+from core.models import DiscordUser, Item, ItemSubSubType, ItemSubType, ItemType, LootShare
 from djmoney.forms.fields import MoneyField
 
 
@@ -19,10 +19,10 @@ class SignupFormWithTimezone(SignupForm):
         queryset=Character.objects.all(), initial=0)
 
     def __init__(self, *args, **kwargs):
-        sociallogin = kwargs.get('sociallogin')
+        sociallogin = kwargs.get('sociallogin', None)
         super(SignupFormWithTimezone, self).__init__(*args, **kwargs)
-        self.fields['default_character'].queryset = Character.objects.filter(
-            discord_id=sociallogin.account.uid)
+        if sociallogin:
+            self.fields['default_character'].queryset = sociallogin.user.characters()
 
 
 class JoinFleetForm(forms.Form):
@@ -31,7 +31,7 @@ class JoinFleetForm(forms.Form):
 
 
 def get_discord_names():
-    return Character.objects.values_list('discord_username', flat=True).distinct()
+    return DiscordUser.objects.values_list('username', flat=True).distinct()
 
 
 class FleetAddMemberForm(forms.Form):
