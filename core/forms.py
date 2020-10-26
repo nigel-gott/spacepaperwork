@@ -51,7 +51,10 @@ class FleetAddMemberForm(forms.Form):
         character = cleaned_data['character']
         manual_character = cleaned_data['manual_character']
 
-        if bool(character) == bool(manual_character):
+        if manual_character and character:
+            raise forms.ValidationError('Fill in one of character or manual character')
+
+        if not manual_character and not character:
             raise forms.ValidationError('Fill in one of character or manual character')
 
         if cleaned_data['manual_character'] and not cleaned_data['manual_discord_username']:
@@ -183,7 +186,10 @@ class LootShareForm(forms.Form):
         character = cleaned_data['character']
         manual_character = cleaned_data['manual_character']
 
-        if bool(character) == bool(manual_character):
+        if manual_character and character:
+            raise forms.ValidationError('Fill in one of character or manual character')
+
+        if not manual_character and not character:
             raise forms.ValidationError('Fill in one of character or manual character')
 
         if cleaned_data['manual_character'] and not cleaned_data['manual_discord_username']:
