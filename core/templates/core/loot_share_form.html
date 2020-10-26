@@ -33,6 +33,17 @@
             {{ form.share_quantity|materializecss:'s12 m6, icon=format_list_numbered'}}
             {{ form.flat_percent_cut|materializecss:'s12 m6, icon=face'}}
         </div>
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header"><i class="material-icons">add</i>Manual Character Entry: Only use this if you cannot find the character in the dropdowns above.</div>
+                <div class="collapsible-body">
+        <div class="row">
+            {{ form.manual_character|materializecss:'s12 m6, icon=user'}}
+            {{ form.manual_discord_username|materializecss:'s12 m6, icon=user'}}
+        </div>
+            </div>
+            </li>
+            </ul>
         <button type="submit" class="btn waves-effect waves-light" value="Submit">{{title}}
             <i class="material-icons right">send</i>
         </button>

@@ -156,17 +156,7 @@ def fleet_add(request, pk):
             character = form.cleaned_data['character']
             manual_character = form.cleaned_data['manual_character']
             if manual_character and not character:
-                user, created = DiscordUser.objects.get_or_create(
-                    username=form.cleaned_data['manual_discord_username']
-                )
-
-                character = Character(
-                    discord_user=user, 
-                    ingame_name=manual_character, 
-                    corp_id="UNKNOWN", 
-                    verified=False)
-                character.full_clean()
-                character.save()
+                character = create_manual_user(manual_character, form.cleaned_data['manual_discord_username'])
             if f.member_can_be_added(character):
                 new_fleet_member = FleetMember(
                     character=character,
@@ -281,6 +271,20 @@ def loot_share_join(request, pk):
     return render(request, 'core/loot_join_form.html', {'form': form, 'title': 'Add Your Participation', 'loot_group':loot_group})
 
 
+def create_manual_user(manual_character, manual_discord_username):
+    user, created = DiscordUser.objects.get_or_create(
+        username=manual_discord_username
+    )
+
+    character = Character(
+        discord_user=user, 
+        ingame_name=manual_character, 
+        corp_id="UNKNOWN", 
+        verified=False)
+    character.full_clean()
+    character.save()
+    return character
+
 @login_required(login_url=login_url)
 def loot_share_add(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
@@ -289,8 +293,12 @@ def loot_share_add(request, pk):
     if request.method == 'POST':
         form = LootShareForm(request.POST)
         if form.is_valid():
+            character = form.cleaned_data['character']
+            manual_character = form.cleaned_data['manual_character']
+            if manual_character and not character:
+                character = create_manual_user(manual_character, form.cleaned_data['manual_discord_username'])
             ls = LootShare(
-                character=form.cleaned_data['character'],
+                character=character,
                 loot_group=loot_group,
                 share_quantity=form.cleaned_data['share_quantity'],
                 flat_percent_cut=form.cleaned_data['flat_percent_cut']

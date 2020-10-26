@@ -167,10 +167,27 @@ class LootJoinForm(forms.Form):
     character = forms.ModelChoiceField(queryset=Character.objects.all())
 
 class LootShareForm(forms.Form):
-    character = forms.ModelChoiceField(queryset=Character.objects.all(
+    character = forms.ModelChoiceField(
+        required=False,
+        queryset=Character.objects.all(
     ), initial=0, widget=autocomplete.ModelSelect2(url='character-autocomplete'))
     share_quantity = forms.IntegerField(min_value=0)
     flat_percent_cut = forms.IntegerField(min_value=0, max_value=100)
+
+    manual_discord_username = forms.CharField(required=False)
+    manual_character = forms.CharField(required=False)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        character = cleaned_data['character']
+        manual_character = cleaned_data['manual_character']
+
+        if bool(character) == bool(manual_character):
+            raise forms.ValidationError('Fill in one of character or manual character')
+
+        if cleaned_data['manual_character'] and not cleaned_data['manual_discord_username']:
+            raise forms.ValidationError('You must fill in Manual Discord Username if you are adding a Manual Character')
 
 
 class InventoryItemForm(forms.Form):
