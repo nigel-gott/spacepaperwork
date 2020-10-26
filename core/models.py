@@ -402,9 +402,18 @@ class ItemLocation(models.Model):
             return str(self.corp_hanger)
 
 class Contract(models.Model):
-    from_char = models.ForeignKey(Character, on_delete=models.CASCADE, related_name='my_contracts')
+    from_user = models.ForeignKey(GooseUser, on_delete=models.CASCADE, related_name='my_contracts')
     to_char = models.ForeignKey(Character, on_delete=models.CASCADE)
     system = models.ForeignKey(System, on_delete=models.CASCADE)
+    created = models.DateTimeField()
+    status = models.TextField(choices=[
+        ("pending","pending"),
+        ("rejected","rejected"),
+        ("accepted","accepted"),
+        ])
+    
+    def total_items(self):
+        return 0
 
 
 class AnomType(models.Model):

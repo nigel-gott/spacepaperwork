@@ -522,21 +522,26 @@ def item_move_all(request):
         if form.is_valid():
             system = form.cleaned_data['system']
             character = form.cleaned_data['character']
-            char_loc, _ = CharacterLocation.objects.get_or_create(
-                character=character,
-                system=system
+            if character in request.user.characters():
+                messages.error(request, "Cannot contract items to yourself") 
+                return forbidden(request)
+
+            contract = Contract(
+                from_user=request.user,
+                to_char=character,
+                system=system,
+                created=timezone.now(),
+                status='pending'
             )
-            loc, _ = ItemLocation.objects.get_or_create(
-                character_location=char_loc,
-                corp_hanger=None
-            )
+            contract.full_clean()
+            contract.save()
             all_your_items = InventoryItem.objects.filter(location__character_location__character__discord_user=request.user.discord_user)
-            all_your_items.update(location=loc)
-            return HttpResponseRedirect(reverse('items')) 
+            all_your_items.update(contract=contract)
+            return HttpResponseRedirect(reverse('contracts')) 
     else:
         form = ItemMoveAllForm(
             initial={'character': request.user.default_character})
-    return render(request, 'core/item_move_all.html', {'form': form, 'title': 'Move/Transfer All Your Items'})
+    return render(request, 'core/item_move_all.html', {'form': form, 'title': 'Contract All Your Items'})
 
 @login_required(login_url=login_url)
 def item_add(request, pk):
@@ -640,10 +645,11 @@ def orders(request):
 
 @login_required(login_url=login_url)
 def contracts(request):
-
     return render(request, 'core/contracts.html', {
-        'my_contracts': Contract.objects.filter(from_char__discord_user=request.user.discord_user), 
-        'contracts': Contract.objects.filter(to_char__discord_user=request.user.discord_user), 
+        'my_contracts': Contract.objects.filter(from_user__discord_user=request.user.discord_user, status='pending'), 
+        'to_me_contracts': list(Contract.objects.filter(to_char__discord_user=request.user.discord_user, status='pending')), 
+        'old_my_contracts': Contract.objects.filter(from_user__discord_user=request.user.discord_user).exclude(status='pending'), 
+        'old_contracts': Contract.objects.filter(to_char__discord_user=request.user.discord_user).exclude(status='pending'), 
         })
 
 @login_required(login_url=login_url)
@@ -687,7 +693,7 @@ def item_edit(request, pk):
         if form.is_valid():
             char_loc = CharacterLocation.objects.get_or_create(
                 character=form.cleaned_data['character'],
-                station=None
+                system=None
             )[0]
             loc = ItemLocation.objects.get_or_create(
                 character_location=char_loc,

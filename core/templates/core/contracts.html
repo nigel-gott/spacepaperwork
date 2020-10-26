@@ -2,55 +2,38 @@
 {% load materializecss %}
 <div class="row">
   <div class="col s12 m12">
-    <h5>Items Waiting to be Sold</h5>
-      <a class="waves-btn btn grey" href="{% url 'item_move_all' %}">Move/Transfer All Items</a>
+    <h5>Pending Contracts Sent To You</h5>
     <table>
       <thead>
-        <th>Location</th>
-        <th>Loot Group</th>
-        <th>Item</th>
-        <th>Quantity</th>
-        <th>Action</th>
+        <th>Link</th>
+        <th>From</th>
+        <th>To</th>
+        <th>System</th>
+        <th>Total Items</th>
+        <th>Created At</th>
       </thead>
       <tbody>
-        {% for loc_items in all_items %}
-          {% for item in loc_items.items %}
+        {% for contract in to_me_contracts %}
             <tr>
-                {% if forloop.first %}
-                <td rowspan="{{items|length}}">
-                {{loc_items.loc}}
-                </td>
-                {% endif %}
                 <td>
-                  {% if item.loot_group %}
-                    <a href="{% url 'loot_group_view' item.loot_group.id %}">Loot Group {{item.loot_group.id}}</a>
-                    {% else %}
-                    No Loot Group
-                    {% endif %}
+                    <a href="{% url 'view_contract' contract.id %}">Contract {{contract.id}}</a>
                 </td>
                 <td>
-                    <a href="{% url 'item_view' item.id %}">
-                  {{item.item}}
-                  </a>
+                  {{contract.from_user}}
                 </td>
                 <td>
-                  {{item.quantity}}
+                  {{contract.to_char}}
                 </td>
                 <td>
-      {% if item.can_edit %}
-      <a class="waves-btn btn orange" href="{% url 'item_edit' item.id %}">Edit Item</a>
-      {% endif %}
-      <br/>
-      {% if item.can_sell %}
-      <a class="waves-btn btn green" href="{% url 'item_sell' item.id %}">Sell Item</a>
-      {% endif %}
-      <br/>
-      {% if item.can_edit %}
-      <a class="waves-btn btn red" href="{% url 'item_delete' item.id %}">Delete Item</a>
-      {% endif %}
+                  {{contract.system}}
+                </td>
+                <td>
+                  {{contract.total_items}}
+                </td>
+                <td>
+                  {{contract.created}}
                 </td>
             </tr>
-          {% endfor %}
         {% endfor %}
       </tbody>
     </table>
