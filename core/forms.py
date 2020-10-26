@@ -42,7 +42,7 @@ class FleetAddMemberForm(forms.Form):
                                                                      url='discord-username-autocomplete'))
     character = forms.ModelChoiceField(required=False, queryset=Character.objects.all(), initial=0, widget=autocomplete.ModelSelect2(url='character-autocomplete',
                                                                                                                      forward=['discord_username','fleet']))
-    manual_discord_username = forms.CharField(required=False)
+    manual_discord_username = forms.CharField(required=False, help_text="Enter their Discord Username or if that is unknown use a sensible name which is the same between all this persons characters.")
     manual_character = forms.CharField(required=False)
 
     def clean(self):
@@ -177,7 +177,7 @@ class LootShareForm(forms.Form):
     share_quantity = forms.IntegerField(min_value=0)
     flat_percent_cut = forms.IntegerField(min_value=0, max_value=100)
 
-    manual_discord_username = forms.CharField(required=False)
+    manual_discord_username = forms.CharField(required=False, help_text="Enter their Discord Username or if that is unknown use a sensible name which is the same between all this persons characters.")
     manual_character = forms.CharField(required=False)
 
     def clean(self):
