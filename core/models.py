@@ -1,3 +1,4 @@
+from typing import Union
 from django.utils.translation import gettext_lazy as _
 
 from allauth.socialaccount.models import SocialAccount
@@ -21,8 +22,32 @@ class Corp(models.Model):
     def __str__(self):
         return str(self.name)
 
+# Represents a unique single person using their unique discord uid if known. They might not have ever have visited goosetools and hence will not have a GooseUser model.
+class DiscordUser(models.Model):
+    username = models.TextField(unique=True)
+    uid = models.TextField(unique=True, blank=True, null=True)
+    avatar_hash = models.TextField(blank=True, null=True)
+    unknown = models.BooleanField(default=False)
+
+    def avatar_url(self) -> Union[bool, str]: 
+        return self.has_custom_avatar() and self._construct_avatar_url()
+    
+    # default avatars look like this: https://cdn.discordapp.com/embed/avatars/3.png 
+    # there is a bug with discord's size selecting mechanism for these, doing 3.png?size=16 still returns a full size default avatar.
+    def has_default_avatar(self):
+        return len(str(self.avatar_hash)) == 1
+    
+    def has_custom_avatar(self):
+        return self.avatar_hash and self.uid and not self.has_default_avatar()
+
+    def _construct_avatar_url(self):
+        return f"https://cdn.discordapp.com/avatars/{self.uid}/{self.avatar_hash}.png"
+    
+    def __str__(self):
+        return self.username
 
 class Character(models.Model):
+    discord_user = models.ForeignKey(DiscordUser, on_delete=models.CASCADE, null=True, blank=True)
     discord_id = models.TextField()
     ingame_name = models.TextField()
     discord_avatar_url = models.TextField()
@@ -52,6 +77,7 @@ class Character(models.Model):
         return f"[{self.corp}] {self.ingame_name}"
 
 class GooseUser(AbstractUser):
+    discord_user = models.OneToOneField(DiscordUser, on_delete=models.CASCADE, null=True, blank=True)
     timezone = TimeZoneField(default='Europe/London')
     broker_fee = models.DecimalField(verbose_name="Your Broker Fee in %", max_digits=5, decimal_places=2, default=8.0)
     transaction_tax = models.DecimalField(verbose_name="Your Transaction Tax in %", max_digits=5, decimal_places=2, default=15.0)

@@ -83,8 +83,10 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_activeurl',
     'materializecssform',
-
+    'dbbackup',  
 ]
+DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
+DBBACKUP_STORAGE_OPTIONS = {'location': env('DB_BACKUP_LOCATION') }
 SITE_ID = env('SITE_ID')
 SOCIALACCOUNT_PROVIDERS = {
     'discord': {
