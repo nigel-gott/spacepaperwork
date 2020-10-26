@@ -16,8 +16,8 @@
         <li class="collection-item avatar">
             {% has_fleet_member fleet user as is_member %}
             {% can_join fleet user as can_join_fleet %}
-            {% if fleet.fc.discord_avatar_url %}
-            <img src="{{ fleet.fc.discord_avatar_url }}" alt="" class="circle">
+            {% if fleet.fc.discord_user.avatar_url %}
+            <img src="{{ fleet.fc.discord_user.avatar_url }}" alt="" class="circle">
             {% else %}
             <i class="circle material-icons">error</i>
             {% endif %}

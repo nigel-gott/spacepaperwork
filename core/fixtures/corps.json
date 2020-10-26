@@ -1,1 +1,9 @@
-[{"model": "core.corp", "pk": "HAUS", "fields": {}}, {"model": "core.corp", "pk": "HONK", "fields": {}}, {"model": "core.corp", "pk": "MEAN", "fields": {}}, {"model": "core.corp", "pk": "XBUX", "fields": {}}]
+[
+  { "model": "core.corp", "pk": "HAUS", "fields": {} },
+  { "model": "core.corp", "pk": "HONK", "fields": {} },
+  { "model": "core.corp", "pk": "MEAN", "fields": {} },
+  { "model": "core.corp", "pk": "XBUX", "fields": {} },
+  { "model": "core.corp", "pk": "UNKNOWN", "fields": {} },
+  { "model": "core.corp", "pk": "UNKNOWN_BUT_STILL_A_GOOSE", "fields": {} },
+  { "model": "core.corp", "pk": "UNKNOWN_IS_A_PUBBIE", "fields": {} }
+]

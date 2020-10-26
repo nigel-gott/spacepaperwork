@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 
 from .fields import TimeZoneFormField
 from .models import Character, FleetType, GooseUser, AnomType, System
-from core.models import DiscordUser, Item, ItemSubSubType, ItemSubType, ItemType, LootShare
+from core.models import Corp, DiscordUser, Item, ItemSubSubType, ItemSubType, ItemType, LootShare
 from djmoney.forms.fields import MoneyField
 
 
@@ -40,11 +40,30 @@ class FleetAddMemberForm(forms.Form):
                                                                  required=False,
                                                                  widget=autocomplete.ListSelect2(
                                                                      url='discord-username-autocomplete'))
-    character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0, widget=autocomplete.ModelSelect2(url='character-autocomplete',
+    character = forms.ModelChoiceField(required=False, queryset=Character.objects.all(), initial=0, widget=autocomplete.ModelSelect2(url='character-autocomplete',
                                                                                                                      forward=['discord_username','fleet']))
+    manual_discord_username = forms.CharField(required=False)
+    manual_character = forms.CharField(required=False)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        character = cleaned_data['character']
+        manual_character = cleaned_data['manual_character']
+
+        if bool(character) == bool(manual_character):
+            raise forms.ValidationError('Fill in one of character or manual character')
+
+        if cleaned_data['manual_character'] and not cleaned_data['manual_discord_username']:
+            raise forms.ValidationError('You must fill in Manual Discord Username if you are adding a Manual Character')
+
+
+        return cleaned_data
 
     class Meta:
         exclude = ('discord_username',)
+    
+
 
 
 class FleetForm(forms.Form):

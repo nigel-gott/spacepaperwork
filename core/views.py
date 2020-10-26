@@ -1,27 +1,32 @@
+import json
+import sys
+from _pydecimal import ROUND_UP
+from decimal import Decimal
+from math import floor
+
+import django
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.db import transaction
 from django.db.models import Q, Sum
-from django.http import HttpResponseForbidden, HttpResponseNotAllowed, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
-from django.urls import reverse_lazy, reverse
+from django.forms.formsets import formset_factory
+from django.http import (HttpResponseForbidden, HttpResponseNotAllowed,
+                         HttpResponseRedirect)
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views.generic.edit import UpdateView
-
-from core.forms import DeleteItemForm, DepositEggsForm, FleetAddMemberForm, FleetForm, InventoryItemForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SellItemForm, SettingsForm, SoldItemForm
-from core.models import AnomType, Character, CharacterLocation, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
-from django.db import transaction
-from django.forms.formsets import formset_factory
 from djmoney.money import Money
-from decimal import Decimal
-from _pydecimal import ROUND_UP
-import sys
-from django.contrib import messages
-from math import floor
-import json
 from moneyed.localization import format_money
-import django
 
+from core.forms import (DeleteItemForm, DepositEggsForm, FleetAddMemberForm,
+                        FleetForm,
+                        InventoryItemForm, JoinFleetForm, LootGroupForm,
+                        LootJoinForm, LootShareForm, SellItemForm,
+                        SettingsForm, SoldItemForm)
+from core.models import AnomType, Character, CharacterLocation, DiscordUser, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
 
 # Create your views here.
 
@@ -140,7 +145,6 @@ def fleet_remove_admin(request, pk):
         return forbidden(request)
     return HttpResponseRedirect(reverse('fleet_view', args=[f.fleet.pk]))
 
-
 @login_required(login_url=login_url)
 def fleet_add(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
@@ -150,6 +154,19 @@ def fleet_add(request, pk):
         form = FleetAddMemberForm(request.POST)
         if form.is_valid():
             character = form.cleaned_data['character']
+            manual_character = form.cleaned_data['manual_character']
+            if manual_character and not character:
+                user, created = DiscordUser.objects.get_or_create(
+                    username=form.cleaned_data['manual_discord_username']
+                )
+
+                character = Character(
+                    discord_user=user, 
+                    ingame_name=manual_character, 
+                    corp_id="UNKNOWN", 
+                    verified=False)
+                character.full_clean()
+                character.save()
             if f.member_can_be_added(character):
                 new_fleet_member = FleetMember(
                     character=character,
@@ -168,7 +185,7 @@ def fleet_add(request, pk):
         })
     existing_members = f.fleetmember_set.values('character__id')
     form.fields['character'].queryset = Character.objects.exclude(id__in=existing_members)
-    return render(request, 'core/add_fleet_form.html', {'form': form, 'fleet': f})
+    return render(request, 'core/add_fleet_form.html', {'form': form, 'fleet': f}) 
 
 
 @login_required(login_url=login_url)

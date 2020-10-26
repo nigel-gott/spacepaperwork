@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
 {% load static %}
+{% load materializecss %}
 {% block body %}
 <h4>Join fleet: {{fleet.name}}</h4>
 <div class="divider"></div>
@@ -23,43 +24,49 @@
     </div>
     {% endif %}
 
-    <div class="row">
         <!-- Display Form -->
-        <form action="" method="post" class="col s12">
-            {% csrf_token %}
-            {% for field in form %}
-            <div class="row">
-                <div class="input-field col s12">
-                    <label>
-                        {{ field.label}}
-                        {{ field }}
-                    </label>
-                    {% if field.help_text %}
-                    <span class="helper-text" data-error="wrong" data-success="right">
-                        {{ field.help_text|safe }}
-                    </span>
-                    {% endif %}
-                    <br/>
-                    <p>
-                        {{ field.errors }}
-                    </p>
-                </div>
-            </div>
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="row">
 
-            {% endfor %}
-            <br/>
-            <button type="submit" class="btn waves-effect waves-light green" value="Submit">Add
-                <i class="material-icons right">send</i>
-            </button>
-        </form>
-    </div>
+            <div class="col m2 m2">
+            Discord Username Filter:
+            </div>
+            <div class="col m10 m10">
+            {{ form.discord_username|materializecss:'s12 m12, icon=user'}}
+            </div>
+            </div>
+        <div class="row">
+            <div class="col m2 m2">
+            Character To Add:
+            </div>
+            <div class="col m10 m10">
+            {{ form.character|materializecss:'s12 m12, icon=user'}}
+        </div>
+            </div>
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header"><i class="material-icons">add</i>Manual Character Entry: Only use this if you cannot find the character in the dropdowns above.</div>
+                <div class="collapsible-body">
+        <div class="row">
+            {{ form.manual_character|materializecss:'s12 m6, icon=user'}}
+            {{ form.manual_discord_username|materializecss:'s12 m6, icon=user'}}
+        </div>
+            </div>
+            </li>
+            </ul>
+        <br/>
+        <button type="submit" class="btn waves-effect waves-light" value="Submit">Add Character
+            <i class="material-icons right">send</i>
+        </button>
+    </form>
     {% endif %}
 </div>
 
 
 {% endblock %}
 
-{% block footer %}
+{% block extrafooter %}
 <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
 
 {{ form.media }}
@@ -95,4 +102,3 @@
 })($)
 </script>
 {% endblock %}
-

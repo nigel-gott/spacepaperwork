@@ -55,6 +55,7 @@ class Character(models.Model):
     discord_user = models.ForeignKey(DiscordUser, on_delete=models.CASCADE)
     ingame_name = models.TextField(unique=True)
     corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
+    verified = models.BooleanField()
 
     def gooseuser_or_false(self):
         return self.discord_user and self.discord_user.gooseuser
@@ -474,7 +475,7 @@ class LootBucket(models.Model):
         total_after_cuts = isk * (100-total_flat_cuts)/100
         for group in shares_by_username:
             username= group['character__discord_user__username']
-            flat_cut = flat_cuts_by_username[username]
+            flat_cut = flat_cuts_by_username.get(username,0)
             result['participation'][username] = {
                 'shares':group['num_shares'],
                 'flat_cut':flat_cut,
