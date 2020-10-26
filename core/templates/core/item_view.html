@@ -37,6 +37,16 @@
     </td>
     </tr>
     <tr>
+    <td>Associated Contract</td>
+    <td>
+  {% if item.contract %}
+    <a href="{% url 'view_contract' item.contract.id %}">Contract {{item.contract.id}}</a>
+    {% else %}
+    No contract
+    {% endif %}
+    </td>
+    </tr>
+    <tr>
     <td>Isk Balance</td>
     <td>
     {{item.isk_balance}}

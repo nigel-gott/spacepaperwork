@@ -40,5 +40,126 @@
     </form>
   </div>
 </div>
+<div class="row">
+  <div class="col s12 m12">
+    <h5>Pending Contracts Sent By You</h5>
+    <table>
+      <thead>
+        <th>Link</th>
+        <th>From</th>
+        <th>To</th>
+        <th>System</th>
+        <th>Total Items</th>
+        <th>Created At</th>
+      </thead>
+      <tbody>
+        {% for contract in my_contracts %}
+            <tr>
+                <td>
+                    <a href="{% url 'view_contract' contract.id %}">Contract {{contract.id}}</a>
+                </td>
+                <td>
+                  {{contract.from_user}}
+                </td>
+                <td>
+                  {{contract.to_char}}
+                </td>
+                <td>
+                  {{contract.system}}
+                </td>
+                <td>
+                  {{contract.total_items}}
+                </td>
+                <td>
+                  {{contract.created}}
+                </td>
+            </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </form>
+  </div>
+</div>
+<div class="row">
+  <div class="col s12 m12">
+    <h5>Old Contracts Sent To You</h5>
+    <table>
+      <thead>
+        <th>Link</th>
+        <th>From</th>
+        <th>To</th>
+        <th>System</th>
+        <th>Total Items</th>
+        <th>Created At</th>
+      </thead>
+      <tbody>
+        {% for contract in old_to_me_contracts %}
+            <tr>
+                <td>
+                    <a href="{% url 'view_contract' contract.id %}">Contract {{contract.id}}</a>
+                </td>
+                <td>
+                  {{contract.from_user}}
+                </td>
+                <td>
+                  {{contract.to_char}}
+                </td>
+                <td>
+                  {{contract.system}}
+                </td>
+                <td>
+                  {{contract.total_items}}
+                </td>
+                <td>
+                  {{contract.created}}
+                </td>
+            </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </form>
+  </div>
+</div>
+<div class="row">
+  <div class="col s12 m12">
+    <h5>Old Contracts Sent By You</h5>
+    <table>
+      <thead>
+        <th>Link</th>
+        <th>From</th>
+        <th>To</th>
+        <th>System</th>
+        <th>Total Items</th>
+        <th>Created At</th>
+      </thead>
+      <tbody>
+        {% for contract in old_my_contracts %}
+            <tr>
+                <td>
+                    <a href="{% url 'view_contract' contract.id %}">Contract {{contract.id}}</a>
+                </td>
+                <td>
+                  {{contract.from_user}}
+                </td>
+                <td>
+                  {{contract.to_char}}
+                </td>
+                <td>
+                  {{contract.system}}
+                </td>
+                <td>
+                  {{contract.total_items}}
+                </td>
+                <td>
+                  {{contract.created}}
+                </td>
+            </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </form>
+  </div>
+</div>
+
 
 {% endblock %}

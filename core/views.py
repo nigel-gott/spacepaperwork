@@ -696,7 +696,7 @@ def contracts(request):
         'my_contracts': Contract.objects.filter(from_user__discord_user=request.user.discord_user, status='pending'), 
         'to_me_contracts': list(Contract.objects.filter(to_char__discord_user=request.user.discord_user, status='pending')), 
         'old_my_contracts': Contract.objects.filter(from_user__discord_user=request.user.discord_user).exclude(status='pending'), 
-        'old_contracts': Contract.objects.filter(to_char__discord_user=request.user.discord_user).exclude(status='pending'), 
+        'old_to_me_contracts': Contract.objects.filter(to_char__discord_user=request.user.discord_user).exclude(status='pending'), 
         })
 
 @login_required(login_url=login_url)

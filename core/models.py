@@ -417,7 +417,7 @@ class Contract(models.Model):
 
     
     def total_items(self):
-        return 0
+        return self.inventoryitem_set.count()
 
 
 class AnomType(models.Model):
