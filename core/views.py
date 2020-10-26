@@ -21,11 +21,7 @@ from django.views.generic.edit import UpdateView
 from djmoney.money import Money
 from moneyed.localization import format_money
 
-from core.forms import (DeleteItemForm, DepositEggsForm, FleetAddMemberForm,
-                        FleetForm,
-                        InventoryItemForm, JoinFleetForm, LootGroupForm,
-                        LootJoinForm, LootShareForm, SellItemForm,
-                        SettingsForm, SoldItemForm)
+from core.forms import DeleteItemForm, DepositEggsForm, FleetAddMemberForm, FleetForm, InventoryItemForm, ItemMoveAllForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SellItemForm, SettingsForm, SoldItemForm
 from core.models import AnomType, Character, CharacterLocation, DiscordUser, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
 
 # Create your views here.
@@ -519,6 +515,28 @@ def loot_group_view(request, pk):
     return render(request, 'core/loot_group_view.html',
                   {'loot_group': loot_group, 'loot_shares_by_discord_id': by_discord_user})
 
+@login_required(login_url=login_url)
+def item_move_all(request):
+    if request.method == 'POST':
+        form = ItemMoveAllForm(request.POST)
+        if form.is_valid():
+            system = form.cleaned_data['system']
+            character = form.cleaned_data['character']
+            char_loc, _ = CharacterLocation.objects.get_or_create(
+                character=character,
+                system=system
+            )
+            loc, _ = ItemLocation.objects.get_or_create(
+                character_location=char_loc,
+                corp_hanger=None
+            )
+            all_your_items = InventoryItem.objects.filter(location__character_location__character__discord_user=request.user.discord_user)
+            all_your_items.update(location=loc)
+            return HttpResponseRedirect(reverse('items')) 
+    else:
+        form = ItemMoveAllForm(
+            initial={'character': request.user.default_character})
+    return render(request, 'core/item_move_all.html', {'form': form, 'title': 'Move/Transfer All Your Items'})
 
 @login_required(login_url=login_url)
 def item_add(request, pk):
@@ -530,7 +548,7 @@ def item_add(request, pk):
         if form.is_valid():
             char_loc = CharacterLocation.objects.get_or_create(
                 character=form.cleaned_data['character'],
-                station=None
+                system=None
             )
             loc = ItemLocation.objects.get_or_create(
                 character_location=char_loc[0],

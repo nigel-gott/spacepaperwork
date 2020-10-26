@@ -27,6 +27,7 @@ urlpatterns = [
     path('loot_share/<int:pk>/edit', loot_share_edit, name='loot_share_edit'),
     path('loot_share/<int:pk>/delete', loot_share_delete, name='loot_share_delete'),
     path('loot_group/<int:pk>/item/create', item_add, name='item_add'),
+    path('item/move/all', item_move_all, name='item_move_all'),
     path('item/<int:pk>/sell', item_sell, name='item_sell'),
     path('item/<int:pk>/edit', item_edit, name='item_edit'),
     path('item/<int:pk>/delete', item_delete, name='item_delete'),

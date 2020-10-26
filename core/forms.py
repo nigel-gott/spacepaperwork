@@ -195,6 +195,12 @@ class LootShareForm(forms.Form):
         if cleaned_data['manual_character'] and not cleaned_data['manual_discord_username']:
             raise forms.ValidationError('You must fill in Manual Discord Username if you are adding a Manual Character')
 
+class ItemMoveAllForm(forms.Form):
+    character = forms.ModelChoiceField(queryset=Character.objects.all(
+    ), initial=0, widget=autocomplete.ModelSelect2(url='character-autocomplete'))
+    system = forms.ModelChoiceField(queryset=System.objects.all(
+    ), initial=0, widget=autocomplete.ModelSelect2(url='system-autocomplete'))
+
 
 class InventoryItemForm(forms.Form):
     character = forms.ModelChoiceField(queryset=Character.objects.all(

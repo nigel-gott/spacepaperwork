@@ -359,14 +359,13 @@ class CorpHanger(models.Model):
 
 class CharacterLocation(models.Model):
     character = models.ForeignKey(Character, on_delete=models.CASCADE)
-    station = models.ForeignKey(
-        Station, on_delete=models.CASCADE, blank=True, null=True)
+    system = models.ForeignKey(System, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
-        if not self.station:
+        if not self.system:
             return f"In Space on {self.character.ingame_name}({self.character.discord_username()})"
         else:
-            return f"In {self.character.ingame_name}'s personal hanger at {self.station} ({self.character.discord_username()}"
+            return f"In station on {self.character.ingame_name} @ {self.system} ({self.character.discord_username()}"
 
 
 class ItemLocation(models.Model):
@@ -391,7 +390,7 @@ class ItemLocation(models.Model):
                 _('An item must be either on a character or in a corp hanger.'))
 
     def in_station(self):
-        return (not self.character_location) or self.character_location.station
+        return (not self.character_location) or self.character_location.system
 
     def __str__(self):
         if self.character_location:
