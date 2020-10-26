@@ -58,7 +58,7 @@ class Character(models.Model):
     verified = models.BooleanField()
 
     def gooseuser_or_false(self):
-        return self.discord_user and self.discord_user.gooseuser
+        return self.discord_user and hasattr(self.discord_user,'gooseuser') and self.discord_user.gooseuser
 
     def discord_avatar_url(self):
         return self.discord_user and self.discord_user.avatar_url()
