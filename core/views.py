@@ -22,7 +22,7 @@ from djmoney.money import Money
 from moneyed.localization import format_money
 
 from core.forms import DeleteItemForm, DepositEggsForm, FleetAddMemberForm, FleetForm, InventoryItemForm, ItemMoveAllForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SellItemForm, SettingsForm, SoldItemForm
-from core.models import AnomType, Character, CharacterLocation, Contract, DiscordUser, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
+from core.models import Item, AnomType, Character, CharacterLocation, Contract, DiscordUser, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
 from django.forms.forms import Form
 
 # Create your views here.
@@ -802,6 +802,11 @@ def items(request):
     characters = request.user.characters()
     return render_item_view(request,characters,True, 'Your Items Waiting To Be Sold')
 
+@login_required(login_url=login_url)
+def items_grouped(request):
+    items = Item.objects.annotate(total=Sum('inventoryitem__quantity')).filter(total__gt=0)
+    print(items)
+    return render(request, 'core/grouped_items.html', {'items': items, 'title':"All Not Sold Items In Goosetools Grouped Together"})
 
 @login_required(login_url=login_url)
 def all_items(request):

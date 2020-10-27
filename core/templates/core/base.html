@@ -50,6 +50,9 @@
             <li ><a href="{% url 'all_items' %}">View Everyone's Items
             </a>
             </li>
+            <li ><a href="{% url 'grouped_items' %}">View Everyone's Items Grouped
+            </a>
+            </li>
 </ul>
 {% endif %}
 <nav class="nav-extended blue-grey darken-3">
@@ -158,6 +161,12 @@
             </a>
             </li>
             <li class="tab"><a href="{% url 'contracts' %}">Your Contracts ({{contracts}})</a></li>
+            <li ><a href="{% url 'all_items' %}">View Everyones Items
+            </a>
+            </li>
+            <li ><a href="{% url 'grouped_items' %}">View Everyones Items Grouped
+            </a>
+            </li>
     {% endif %}
   </ul>
           
