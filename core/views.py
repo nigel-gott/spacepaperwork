@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.db import transaction
-from django.db.models import Q, Sum
+from django.db.models import Count, Q, Sum
 from django.forms.formsets import formset_factory
 from django.http import (HttpResponseForbidden, HttpResponseNotAllowed,
                          HttpResponseRedirect)
@@ -571,6 +571,39 @@ def accept_contract(request, pk):
             contract.inventoryitem_set.update(contract=None, location=loc)
     return HttpResponseRedirect(reverse('view_contract', args=[pk]))
 
+@transaction.atomic
+@login_required(login_url=login_url)
+def create_contract_for_fleet(request, fleet_pk, loc_pk):
+    f = get_object_or_404(Fleet, pk=fleet_pk)
+    loc = get_object_or_404(ItemLocation, pk=loc_pk)
+    if request.method == 'POST':
+        form = ItemMoveAllForm(request.POST)
+        if form.is_valid():
+            if not loc.has_admin(request.user):
+                messages.error(request, f"You do not have permission to move items from {loc}")
+                return forbidden(request)
+            system = form.cleaned_data['system']
+            character = form.cleaned_data['character']
+            items_in_location = InventoryItem.objects.filter(loot_group__fleet_anom__fleet=f, location=loc, quantity__gt=0, marketorder__isnull=True, solditem__isnull=True)
+            if items_in_location.count() == 0:
+                messages.error(request, "You have no items to contract :'(") 
+                return forbidden(request)
+
+            contract = Contract(
+                from_user=request.user,
+                to_char=character,
+                system=system,
+                created=timezone.now(),
+                status='pending'
+            )
+            contract.full_clean()
+            contract.save()
+            items_in_location.update(contract=contract)
+            return HttpResponseRedirect(reverse('contracts')) 
+    else:
+        form = ItemMoveAllForm(
+            )
+    return render(request, 'core/item_move_all.html', {'form': form, 'title': 'Contract All Your Items'})
 
 @transaction.atomic
 @login_required(login_url=login_url)
@@ -580,9 +613,6 @@ def item_move_all(request):
         if form.is_valid():
             system = form.cleaned_data['system']
             character = form.cleaned_data['character']
-            # if character in request.user.characters():
-            #     messages.error(request, "Cannot contract items to yourself") 
-            #     return forbidden(request)
             all_your_items = InventoryItem.objects.filter(location__character_location__character__discord_user=request.user.discord_user, quantity__gt=0, marketorder__isnull=True, solditem__isnull=True)
             if all_your_items.count() == 0:
                 messages.error(request, "You have no items to contract :'(") 
@@ -600,8 +630,8 @@ def item_move_all(request):
             all_your_items.update(contract=contract)
             return HttpResponseRedirect(reverse('contracts')) 
     else:
-        form = ItemMoveAllForm(
-            initial={'character': request.user.default_character})
+        form = ItemMoveAllForm()
+            
     return render(request, 'core/item_move_all.html', {'form': form, 'title': 'Contract All Your Items'})
 
 @login_required(login_url=login_url)
@@ -737,20 +767,39 @@ def contracts(request):
 @login_required(login_url=login_url)
 def items(request):
     characters = request.user.characters()
+    return render_item_view(request,characters,True, 'Your Items Waiting To Be Sold')
+
+
+@login_required(login_url=login_url)
+def all_items(request):
+    characters = Character.objects.annotate(cc=Sum('characterlocation__itemlocation__inventoryitem__quantity')).filter(cc__gt=0)
+    return render_item_view(request,characters,False, 'All Items')
+
+def render_item_view(request, characters, show_contract_all, title):
     all_items = []
     for char in characters:
         char_locs = CharacterLocation.objects.filter(character=char)
         for char_loc in char_locs:
+            items_by_fleet = {}
             loc = ItemLocation.objects.get(
                 character_location=char_loc, corp_hanger=None)
             items = InventoryItem.objects.filter(location=loc, quantity__gt=0)
+            fleets = items.values('loot_group__fleet_anom__fleet').distinct()
+            for fleet in fleets:
+                fleet_id = fleet['loot_group__fleet_anom__fleet']
+                items_by_fleet[fleet_id] = items.filter(loot_group__fleet_anom__fleet=fleet_id)
+            if char_loc.has_admin(request.user):
+                fleet_count = fleets.count()
+            else:
+                fleet_count = 0
 
             all_items.append({
+                'total_in_loc': items.count() + fleet_count, 
                 'loc': loc,
-                'items':items,
+                'items_by_fleet':items_by_fleet,
             })
 
-    return render(request, 'core/items.html', {'all_items': all_items})
+    return render(request, 'core/items.html', {'all_items': all_items, 'show_contract_all':show_contract_all, 'title':title})
 
 @login_required(login_url=login_url)
 def view_transfer_log(request, pk):

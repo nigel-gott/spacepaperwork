@@ -2,11 +2,14 @@
 {% load materializecss %}
 <div class="row">
   <div class="col s12 m12">
-    <h5>Items Waiting to be Sold</h5>
-      <a class="waves-btn btn grey" href="{% url 'item_move_all' %}">Contract All Your Items</a>
+    <h5>{{title}}</h5>
+    {% if show_contract_all %}
+      <a class="waves-btn btn red" href="{% url 'item_move_all' %}">Contract All Your Items</a>
+      {% endif %}
     <table>
       <thead>
         <th>Location</th>
+        <th>Fleet</th>
         <th>Loot Group</th>
         <th>Item</th>
         <th>Quantity</th>
@@ -14,12 +17,34 @@
       </thead>
       <tbody>
         {% for loc_items in all_items %}
-          {% for item in loc_items.items %}
+          {% has_admin loc_items.loc user as has_item_admin %}
+          {% for fleet_id, items in loc_items.items_by_fleet.items %}
+          {% for item in items %}
             <tr>
-                {% if forloop.first %}
-                <td rowspan="{{items|length}}">
+                {% if forloop.parentloop.first and forloop.first %}
+                <td rowspan="{{loc_items.total_in_loc}}">
                 {{loc_items.loc}}
                 </td>
+                {% endif %}
+                {% if forloop.first %}
+              {% if has_item_admin %}
+                <td rowspan="{{items|length|add:"1"}}">
+                {% else %}
+                <td rowspan="{{items|length}}">
+                {% endif %}
+                {% if fleet_id %}
+                    <a href="{% url 'fleet_view' fleet_id %}">Fleet {{fleet_id}}</a>
+                    {% else %}
+                    No Fleet
+                    {% endif %}
+                </td>
+              {% if has_item_admin %}
+              <td colspan="3">
+                <a class="waves-btn btn pink" href="{% url 'item_contract_fleet' fleet_id loc_items.loc.id %}">Create Contract Items For Fleet {{fleet_id}} In This Location</a>
+              </td>
+            </tr>
+            <tr>
+            {% endif %}
                 {% endif %}
                 <td>
                   {% if item.loot_group %}
@@ -37,6 +62,7 @@
                   {{item.quantity}}
                 </td>
                 <td>
+              {% if has_item_admin %}
       {% if item.can_edit %}
       <a class="waves-btn btn orange" href="{% url 'item_edit' item.id %}">Edit Item</a>
       {% endif %}
@@ -48,8 +74,10 @@
       {% if item.can_edit %}
       <a class="waves-btn btn red" href="{% url 'item_delete' item.id %}">Delete Item</a>
       {% endif %}
+      {% endif %}
                 </td>
             </tr>
+          {% endfor %}
           {% endfor %}
         {% endfor %}
       </tbody>

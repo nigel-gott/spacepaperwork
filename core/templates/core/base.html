@@ -47,26 +47,22 @@
             <li ><a href="{% url 'transfered_items' %}">Transfered Items
             </a>
             </li>
+            <li ><a href="{% url 'all_items' %}">View Everyone's Items
+            </a>
+            </li>
 </ul>
 {% endif %}
 <nav class="nav-extended blue-grey darken-3">
     <div class="nav-wrapper ">
         <a href="#" class="brand-logo center">⚙ GooseTools </a>
         <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-        <ul id="nav-mobile" class="right hide-on-med-and-down">
-            {% if user.is_authenticated %}
-        <li>
-            <b class="red-text">Isk Owed({{user.isk_balance}}) </b>- 
-            <b class="orange-text">Eggs Owed({{user.debt_egg_balance.amount|floatformat:"0"}}) </b>- 
-            <b class="green-text">Your Eggs({{user.egg_balance|formatmoney|floatformat:"0g"}})</b>
-        </li>
-            {% endif %}
+        <ul class="right hide-on-med-and-down">
         <li>
             <a class="waves-effect waves-light btn blue lighten-2" href="https://wiki.goosetools.com"><i
                     class="material-icons left">cloud</i>Wiki</a>
         </li>
         </ul>
-        <ul id="nav-mobile" class="left hide-on-med-and-down">
+        <ul class="left hide-on-med-and-down">
             {% if user.is_authenticated %}
             <li>
             <form method="post" action="{% url 'account_logout' %}">
@@ -77,20 +73,34 @@
                 <button class="waves-effect waves-light btn" type="submit">{% trans 'Logout' %}</button>
             </form>
             </li>
+
             {% else %}
             <li><a class="waves-effect waves-light btn" href="{% provider_login_url 'discord' %}">Login</a></li>
             {% endif %}
-    {% if user.is_authenticated %}
-            <li >
-            <a href="{% url 'settings' %}">Settings</a></li>
-            <li><a class="dropdown-trigger" href="#!" data-target="dropdown_fleets">Fleets<i class="material-icons right">arrow_drop_down</i></a></li>
-            {% all_sales user as all_sales_num %}
-            {% num_contracts user as contracts %}
-            <li><a class="dropdown-trigger" href="#!" data-target="dropdown_sales">Loot Sales({{ all_sales_num }})<i class="material-icons right">arrow_drop_down</i></a></li>
-            <li><a href="{% url 'contracts' %}">Your Contracts ({{contracts}})</a></li>
-        {% endif %}
         </ul>
     </div>
+    {% if user.is_authenticated %}
+    <div class="row nav-content">
+        <div class="col m7 s7">
+        <ul class="hide-on-med-and-down valign-wrapper">
+            <li >
+            <a class="tab" href="{% url 'settings' %}">Settings</a></li>
+            <li><a class="dropdown-trigger valign-wrapper" href="#!" data-target="dropdown_fleets">Fleets<i class="material-icons right">arrow_drop_down</i></a></li>
+            {% all_sales user as all_sales_num %}
+            {% num_contracts user as contracts %}
+            <li><a class="dropdown-trigger valign-wrapper" href="#!" data-target="dropdown_sales">Loot Sales({{ all_sales_num }})<i class="material-icons right">arrow_drop_down</i></a></li>
+            <li><a href="{% url 'contracts' %}">Your Contracts ({{contracts}})</a></li>
+            <li>
+        </ul>
+        </div>
+        <div class="col offset-s7 m5 s5 hide-on-med-and-down right-align">
+            Isk Owed({{user.isk_balance}}) - 
+            Eggs Owed({{user.debt_egg_balance.amount|floatformat:"0"}}) -
+            Your Eggs({{user.egg_balance|formatmoney|floatformat:"0g"}})
+        </ul>
+        </div>
+    </div>
+        {% endif %}
 </nav>
   <ul class="sidenav" id="mobile-demo">
             <li>

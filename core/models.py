@@ -364,6 +364,12 @@ class CharacterLocation(models.Model):
     character = models.ForeignKey(Character, on_delete=models.CASCADE)
     system = models.ForeignKey(System, on_delete=models.CASCADE, null=True, blank=True)
 
+    def has_admin(self, user):
+        for char in user.characters():
+            if self.character == char:
+                return True
+        return False
+
     def __str__(self):
         if not self.system:
             return f"In Space on {self.character.ingame_name}({self.character.discord_username()})"

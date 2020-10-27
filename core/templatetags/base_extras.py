@@ -26,7 +26,7 @@ def can_accept_reject(user,contract):
 
 @register.simple_tag
 def num_contracts (user):
-    return Contract.objects.filter(to_char__discord_user=user.discord_user, status='pending').count()
+    return Contract.objects.filter(to_char__discord_user=user.discord_user, status='pending').count() + Contract.objects.filter(from_user=user, status='pending').count()
 @register.simple_tag
 def all_sales(user):
     return sum([num_items(user), num_orders(user), num_sold(user)])
