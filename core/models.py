@@ -340,6 +340,24 @@ class Item(models.Model):
     def __str__(self):
         return f"{str(self.name)}"
 
+class ItemFilterGroup(models.Model):
+    name = models.TextField(primary_key=True)
+
+class ItemFilter(models.Model):
+    group = models.ForeignKey(ItemFilterGroup, on_delete=models.CASCADE)
+    filter_type = models.TextField(choices=[
+        ("exclude","exclude"),
+        ("require","require"),
+        ("suggest","suggest"),
+    ])
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, blank=True)
+    item_sub_sub_type = models.ForeignKey(ItemSubSubType, on_delete=models.CASCADE, null=True, blank=True)
+    item_sub_type = models.ForeignKey(ItemSubType, on_delete=models.CASCADE, null=True, blank=True)
+    item_type = models.ForeignKey(ItemType, on_delete=models.CASCADE, null=True, blank=True)
+
+    
+
+
 
 class Station(models.Model):
     system = models.ForeignKey(System, on_delete=models.CASCADE)
@@ -449,6 +467,7 @@ class AnomType(models.Model):
     level = models.PositiveIntegerField()
     type = models.TextField(choices=TYPE_CHOICES)
     faction = models.TextField(choices=FACTIONS)
+    item_filter_group = models.ForeignKey(ItemFilterGroup, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.faction} {self.type} Level {self.level}"
