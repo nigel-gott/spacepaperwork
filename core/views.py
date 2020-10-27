@@ -804,8 +804,7 @@ def items(request):
 
 @login_required(login_url=login_url)
 def items_grouped(request):
-    items = Item.objects.annotate(total=Sum('inventoryitem__quantity')).filter(total__gt=0)
-    print(items)
+    items = Item.objects.annotate(total=Sum('inventoryitem__quantity')).filter(total__gt=0).order_by('item_type')
     return render(request, 'core/grouped_items.html', {'items': items, 'title':"All Not Sold Items In Goosetools Grouped Together"})
 
 @login_required(login_url=login_url)
