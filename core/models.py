@@ -429,6 +429,8 @@ class Contract(models.Model):
 
 class AnomType(models.Model):
     TYPE_CHOICES = [
+        ('PvP Roam', 'PvP Roam'),
+        ('PvP Gatecamp', 'PvP Gatecamp'),
         ('Deadspace', 'Deadspace'),
         ('Scout', 'Scout'),
         ('Inquisitor', 'Inquisitor'),
@@ -441,7 +443,8 @@ class AnomType(models.Model):
         ('Blood', 'Blood'),
         ('Sansha', 'Sansha'),
         ('Serpentis', 'Serpentis'),
-        ('Asteroids', 'Asteroids')
+        ('Asteroids', 'Asteroids'),
+        ('PvP', 'PvP')
     ]
     level = models.PositiveIntegerField()
     type = models.TextField(choices=TYPE_CHOICES)
