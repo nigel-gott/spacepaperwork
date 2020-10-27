@@ -467,7 +467,7 @@ class AnomType(models.Model):
     level = models.PositiveIntegerField()
     type = models.TextField(choices=TYPE_CHOICES)
     faction = models.TextField(choices=FACTIONS)
-    item_filter_group = models.ForeignKey(ItemFilterGroup, on_delete=models.CASCADE)
+    item_filter_group = models.ForeignKey(ItemFilterGroup, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f"{self.faction} {self.type} Level {self.level}"
