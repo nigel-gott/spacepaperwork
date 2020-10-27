@@ -573,6 +573,39 @@ def accept_contract(request, pk):
 
 @transaction.atomic
 @login_required(login_url=login_url)
+def create_contract_item(request, pk):
+    item = get_object_or_404(InventoryItem, pk=pk)
+    if request.method == 'POST':
+        form = ItemMoveAllForm(request.POST)
+        if form.is_valid():
+            if not item.has_admin(request.user):
+                messages.error(request, f"You do not have permission to move item {item}")
+                return forbidden(request)
+            if item.quantity == 0:
+                messages.error(request, f"You cannot contract an item which is being or has been sold")
+                return forbidden(request)
+            system = form.cleaned_data['system']
+            character = form.cleaned_data['character']
+
+            contract = Contract(
+                from_user=request.user,
+                to_char=character,
+                system=system,
+                created=timezone.now(),
+                status='pending'
+            )
+            contract.full_clean()
+            contract.save()
+            item.contract = contract
+            item.full_clean()
+            item.save()
+            return HttpResponseRedirect(reverse('contracts')) 
+    else:
+        form = ItemMoveAllForm(
+            )
+    return render(request, 'core/item_move_all.html', {'form': form, 'title': 'Contract Individual Item'})
+@transaction.atomic
+@login_required(login_url=login_url)
 def create_contract_for_fleet(request, fleet_pk, loc_pk):
     f = get_object_or_404(Fleet, pk=fleet_pk)
     loc = get_object_or_404(ItemLocation, pk=loc_pk)

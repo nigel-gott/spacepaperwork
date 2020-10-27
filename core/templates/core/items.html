@@ -73,6 +73,8 @@
       <br/>
       {% if item.can_edit %}
       <a class="waves-btn btn red" href="{% url 'item_delete' item.id %}">Delete Item</a>
+      <br/>
+      <a class="waves-btn btn blue" href="{% url 'item_contract' item.id %}">Contract Item</a>
       {% endif %}
       {% endif %}
                 </td>
