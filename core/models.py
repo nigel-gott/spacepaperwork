@@ -723,6 +723,21 @@ class InventoryItem(models.Model):
     def can_edit(self):
         return not hasattr(self, 'marketorder') and not hasattr(self, 'solditem')
 
+    def add(self, quantity):
+        if self.can_edit():
+            resulting_quantity = self.quantity + quantity
+            if resulting_quantity == 0:
+                self.delete()
+                return True 
+            elif resulting_quantity < 0:
+                return False
+            self.quantity = resulting_quantity 
+            self.full_clean()
+            self.save()
+            return True
+        else:
+            return False
+
     
     def status(self):
         status = ""

@@ -61,7 +61,39 @@
                   {{item.item}}
                 </a>
           </td>
-          <td>{{item.total_quantity}}</td>
+          <td>
+          <div class="row">
+          <div class="col s1 m1 valign-wrapper">
+            <h6> 
+          {{item.total_quantity}}
+            </h6>
+            </div>
+          {% if admin %}
+          <div class="col s2 m2">
+            <form method="post" action="{% url 'item_plus' item.id %}">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <button class = "btn-floating blue btn-small" type="submit">
+                <i class="material-icons">exposure_plus_1</i>
+                </button>
+            </form>
+            </div>
+          <div class="col s2 m2">
+            <form method="post" action="{% url 'item_minus' item.id %}">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <button class = "inline btn-floating red darken-2 btn-small" type="submit">
+                <i class="material-icons">exposure_neg_1</i>
+                </button>
+            </form>
+            </div>
+          {% endif %}
+          </div>
+          </td>
           <td>{{item.location}}</td>
           <td>{{item.status}}</td>
         <td>

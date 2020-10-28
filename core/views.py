@@ -888,6 +888,27 @@ def item_view(request, pk):
     return render(request, 'core/item_view.html', {'item': item}) 
 
 @login_required(login_url=login_url)
+def item_minus(request, pk):
+    inventory_item = get_object_or_404(InventoryItem, pk=pk)
+    if not inventory_item.has_admin(request.user):
+        return forbidden(request)
+    if request.method == 'POST':
+        result = inventory_item.add(-1)
+        if not result:
+            messages.error(request, "Failed to increment item")
+    return HttpResponseRedirect(reverse('loot_group_view', args=[inventory_item.loot_group.id]))
+@login_required(login_url=login_url)
+def item_plus(request, pk):
+    inventory_item = get_object_or_404(InventoryItem, pk=pk)
+    if not inventory_item.has_admin(request.user):
+        return forbidden(request)
+    if request.method == 'POST':
+        result = inventory_item.add(1)
+        if not result:
+            messages.error(request, "Failed to increment item")
+    return HttpResponseRedirect(reverse('loot_group_view', args=[inventory_item.loot_group.id]))
+
+@login_required(login_url=login_url)
 def loot_share_plus(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
     if not loot_share.has_admin(request.user):
