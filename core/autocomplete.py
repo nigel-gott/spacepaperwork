@@ -1,6 +1,6 @@
 from dal import autocomplete
 
-from core.models import Character, DiscordUser, FleetMember, Item, ItemSubSubType, ItemSubType, ItemType, System
+from core.models import Character, DiscordUser, FleetAnom, FleetMember, Item, ItemFilterGroup, ItemSubSubType, ItemSubType, ItemType, System
 
 
 class SystemAutocomplete(autocomplete.Select2QuerySetView):
@@ -153,3 +153,25 @@ class DiscordUsernameAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(username__icontains=self.q)
 
         return qs
+
+class ItemFilterGroupAutocomplete(autocomplete.Select2ListView):
+
+    def results(self, results):
+        """Return the result dictionary."""
+        return [dict(id=pk, text=human) for pk,human in results]
+
+    def get_list(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated:
+            return [] 
+        
+        fleet_anom = self.forwarded.get('fleet_anom', None)
+        return create_ifg_choice_list(fleet_anom, self.q)
+
+
+
+def create_ifg_choice_list(fleet_anom_id, name_filter=None):
+    fleet_anom_model = FleetAnom.objects.get(id=fleet_anom_id) 
+    qs = fleet_anom_model.anom_type.scored_item_filter_groups(name_filter)
+    return [(q[0].pk, f"{q[0].name} - Match Score:{q[1]}") for q in qs]
+

@@ -3,6 +3,18 @@
 {% load static %}
 {% block body %}
 <h4>{{title}}</h4>
+<div class="section">
+    <form action="" method="get">
+        {% csrf_token %}
+        <div class="row">
+            {{filter_form.fleet_anom}}
+            {{filter_form.item_filter_group|materializecss:'s12 m12, icon=search'}}
+        </div>
+        <button type="submit" class="btn waves-effect waves-light" value="Submit">Change Item Filter 
+            <i class="material-icons right">send</i>
+        </button>
+    </form>
+</div>
 <div class="divider"></div>
 <div class="section">
     {% if form %}
@@ -26,6 +38,9 @@
 
     <form action="" method="post">
         {% csrf_token %}
+        <div class="row">
+            {{form.item_filter_group|materializecss:'s12 m12, icon=search'}}
+        </div>
         <div class="row">
             {{ form.character|materializecss:'s12 m12, icon=directions_boat'}}
         </div>

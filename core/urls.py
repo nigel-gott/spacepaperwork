@@ -28,7 +28,7 @@ urlpatterns = [
     path('loot_share/<int:pk>/delete', loot_share_delete, name='loot_share_delete'),
     path('loot_share/<int:pk>/plus/', loot_share_plus, name='loot_share_plus'),
     path('loot_share/<int:pk>/minus/', loot_share_minus, name='loot_share_minus'),
-    path('loot_group/<int:pk>/item/create', item_add, name='item_add'),
+    path('loot_group/<int:lg_pk>/item/create', item_add, name='item_add'),
     path('item/move/all', item_move_all, name='item_move_all'),
     path('item/<int:pk>/sell', item_sell, name='item_sell'),
     path('item/<int:pk>/edit', item_edit, name='item_edit'),
@@ -90,5 +90,10 @@ urlpatterns = [
         r'item-sub-sub-type-autocomplete/',
         ItemSubSubTypeAutocomplete.as_view(),
         name='item-sub-sub-type-autocomplete',
+    ),
+    path(
+        r'item-filter-group-autocomplete/',
+        ItemFilterGroupAutocomplete.as_view(),
+        name='item-filter-group-autocomplete',
     ),
 ]

@@ -21,9 +21,11 @@ from django.views.generic.edit import UpdateView
 from djmoney.money import Money
 from moneyed.localization import format_money
 
-from core.forms import DeleteItemForm, DepositEggsForm, FleetAddMemberForm, FleetForm, InventoryItemForm, ItemMoveAllForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SellItemForm, SettingsForm, SoldItemForm
-from core.models import Item, AnomType, Character, CharacterLocation, Contract, DiscordUser, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
+from core.forms import DeleteItemForm, DepositEggsForm, FleetAddMemberForm, FleetForm, InventoryItemForm, ItemMoveAllForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SelectFilterForm, SellItemForm, SettingsForm, SoldItemForm
+from core.models import AnomType, Character, CharacterLocation, Contract, DiscordUser, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, Item, ItemFilterGroup, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
 from django.forms.forms import Form
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from core.autocomplete import create_ifg_choice_list
 
 # Create your views here.
 
@@ -369,13 +371,17 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
             spawned = timezone.now()
 
             if form.cleaned_data['loot_source'] == LootGroupForm.ANOM_LOOT_GROUP:
-                anom_type = AnomType.objects.get_or_create(
-                    level=form.cleaned_data['anom_level'],
-                    type=form.cleaned_data['anom_type'],
-                    faction=form.cleaned_data['anom_faction']
-                )[0]
-                anom_type.full_clean()
-                anom_type.save()
+                try:
+                    anom_type = AnomType.objects.get_or_create(
+                        level=form.cleaned_data['anom_level'],
+                        type=form.cleaned_data['anom_type'],
+                        faction=form.cleaned_data['anom_faction']
+                    )[0]
+                    anom_type.full_clean()
+                    anom_type.save()
+                except ValidationError as e:
+                    form.add_error(None, e)
+                    return render(request, 'core/loot_group_form.html', {'form': form, 'title': 'Start New Loot Group'})
                 fleet_anom = FleetAnom(
                     fleet=f,
                     anom_type=anom_type,
@@ -667,9 +673,15 @@ def item_move_all(request):
             
     return render(request, 'core/item_move_all.html', {'form': form, 'title': 'Contract All Your Items'})
 
+
 @login_required(login_url=login_url)
-def item_add(request, pk):
-    loot_group = get_object_or_404(LootGroup, pk=pk)
+def item_add(request, lg_pk):
+    loot_group = get_object_or_404(LootGroup, pk=lg_pk)
+    ifg_pk = request.GET.get('item_filter_group',None)
+    choice_list = create_ifg_choice_list(loot_group.fleet_anom.id)
+    if not ifg_pk:
+        ifg_pk = choice_list[0][0]
+    item_filter_group = get_object_or_404(ItemFilterGroup, pk=ifg_pk)
     if not loot_group.fleet().has_admin(request.user):
         return forbidden(request)
     if request.method == 'POST':
@@ -705,12 +717,16 @@ def item_add(request, pk):
                     )
                     new_item.full_clean()
                     new_item.save()
-            return HttpResponseRedirect(reverse('loot_group_view', args=[pk]))
+            return HttpResponseRedirect(reverse('loot_group_view', args=[lg_pk]))
     else:
         form = InventoryItemForm(
-            initial={'quantity': 1, 'character': request.user.default_character})
+            initial={'item_filter_group':ifg_pk,'quantity': 1, 'character': request.user.default_character}) 
         form.fields['character'].queryset = request.user.characters()
-    return render(request, 'core/loot_item_form.html', {'form': form, 'title': 'Add New Item'})
+    filter_form = SelectFilterForm()
+    filter_form.fields['item_filter_group'].choices = choice_list 
+    filter_form.fields['item_filter_group'].initial = ifg_pk 
+    filter_form.fields['fleet_anom'].initial = loot_group.fleet_anom.id 
+    return render(request, 'core/loot_item_form.html', {'form': form, 'title': 'Add New Item', 'filter_form':filter_form})
 
 
 

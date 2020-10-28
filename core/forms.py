@@ -2,11 +2,13 @@ from allauth.socialaccount.forms import SignupForm
 from dal import autocomplete
 from django import forms
 from django.core.exceptions import ValidationError
+from djmoney.forms.fields import MoneyField
+
+from core.models import (Corp, DiscordUser, Item, ItemFilterGroup,
+                         ItemSubSubType, ItemSubType, ItemType, LootShare)
 
 from .fields import TimeZoneFormField
-from .models import Character, FleetType, GooseUser, AnomType, System
-from core.models import Corp, DiscordUser, Item, ItemSubSubType, ItemSubType, ItemType, LootShare
-from djmoney.forms.fields import MoneyField
+from .models import AnomType, Character, FleetType, GooseUser, System
 
 
 class SignupFormWithTimezone(SignupForm):
@@ -160,13 +162,14 @@ class LootGroupForm(forms.Form):
         (10, 10),
     ], required=False)
     anom_type = forms.ChoiceField(
-        choices=AnomType.TYPE_CHOICES, required=False)
-    anom_faction = forms.ChoiceField(choices=AnomType.FACTIONS, required=False)
+        choices=ItemFilterGroup.TYPE_CHOICES, required=False)
+    anom_faction = forms.ChoiceField(choices=ItemFilterGroup.FACTIONS, required=False)
     anom_system = forms.ModelChoiceField(queryset=System.objects.all(
     ), initial=0, widget=autocomplete.ModelSelect2(url='system-autocomplete'))
 
 class LootJoinForm(forms.Form):
     character = forms.ModelChoiceField(queryset=Character.objects.all())
+
 
 class LootShareForm(forms.Form):
     character = forms.ModelChoiceField(
@@ -200,8 +203,18 @@ class ItemMoveAllForm(forms.Form):
     system = forms.ModelChoiceField(queryset=System.objects.all(
     ), initial=0, widget=autocomplete.ModelSelect2(url='system-autocomplete'))
 
+class SelectFilterForm(forms.Form):
+    fleet_anom = forms.IntegerField(widget=forms.HiddenInput(), disabled=True, required=False)
+    item_filter_group = autocomplete.Select2ListChoiceField(
+        widget=autocomplete.ListSelect2(url='item-filter-group-autocomplete', forward=['fleet_anom'])
+        )
 
 class InventoryItemForm(forms.Form):
+    item_filter_group = forms.ModelChoiceField(
+        queryset=ItemFilterGroup.objects.all(),
+        disabled=True
+        )
+    fleet_anom = forms.IntegerField(widget=forms.HiddenInput(), disabled=True, required=False)
     character = forms.ModelChoiceField(queryset=Character.objects.all(
     ), initial=0, widget=autocomplete.ModelSelect2(url='character-autocomplete'))
     # item_type = forms.ModelChoiceField(queryset=ItemType.objects.all(), initial=0

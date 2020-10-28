@@ -430,16 +430,8 @@ class Contract(models.Model):
         return self.inventoryitem_set.count()
 
 
-class AnomType(models.Model):
-    TYPE_CHOICES = [
-        ('PvP Roam', 'PvP Roam'),
-        ('PvP Gatecamp', 'PvP Gatecamp'),
-        ('Deadspace', 'Deadspace'),
-        ('Scout', 'Scout'),
-        ('Inquisitor', 'Inquisitor'),
-        ('Condensed Belt', 'Condensed Belt'),
-        ('Condensed Cluster', 'Condensed Cluster'),
-    ]
+
+class ItemFilterGroup(models.Model):
     FACTIONS = [
         ('Guristas', 'Guritas'),
         ('Angel', 'Angel'),
@@ -449,12 +441,76 @@ class AnomType(models.Model):
         ('Asteroids', 'Asteroids'),
         ('PvP', 'PvP')
     ]
+    TYPE_CHOICES = [
+        ('PvP Roam', 'PvP Roam'),
+        ('PvP Gatecamp', 'PvP Gatecamp'),
+        ('Deadspace', 'Deadspace'),
+        ('Scout', 'Scout'),
+        ('Inquisitor', 'Inquisitor'),
+        ('Condensed Belt', 'Condensed Belt'),
+        ('Condensed Cluster', 'Condensed Cluster'),
+    ]
+    name = models.TextField(unique=True)
+    anom_type = models.TextField(choices=TYPE_CHOICES, null=True, blank=True)
+    faction = models.TextField(choices=FACTIONS, null=True, blank=True)
+    min_level = models.PositiveIntegerField(null=True, blank=True)
+    max_level = models.PositiveIntegerField(null=True, blank=True)
+    def clean(self):
+        if self.min_level and self.max_level and self.min_level > self.max_level: 
+            raise ValidationError(_('Min level must be less than or equal to max level'))
+    
+    def __str__(self):
+        return f"{self.name}"
+
+class AnomType(models.Model):
     level = models.PositiveIntegerField()
-    type = models.TextField(choices=TYPE_CHOICES)
-    faction = models.TextField(choices=FACTIONS)
+    type = models.TextField(choices=ItemFilterGroup.TYPE_CHOICES)
+    faction = models.TextField(choices=ItemFilterGroup.FACTIONS)
+
+    def clean(self):
+        if self.level < 6 and self.type == 'Deadspace': 
+            raise ValidationError(
+                _('Deadspaces cannot be lower than level 6'))
+        if self.level < 6 and self.type.startswith('Condensed'):
+            raise ValidationError(
+                _('Condenesed Belts cannot be lower than level 6'))
+        if self.type.startswith('Condensed') and self.faction != 'Asteroids':
+            raise ValidationError(
+                _('A Belt must be in the Asteroids Faction'))
+        if self.type.startswith('PvP') and self.faction != 'PvP':
+            raise ValidationError(
+                _('A PvP type must be in the PvP Faction'))
+
+    def scored_item_filter_groups(self, name_filter=None):
+        groups = ItemFilterGroup.objects.filter(
+            Q(faction__isnull=True) | Q(faction=self.faction) &
+            Q(anom_type__isnull=True) | Q(anom_type=self.type) &
+            Q(min_level__isnull=True) | Q(min_level__lte=self.level) &
+            Q(max_level__isnull=True) | Q(max_level__gte=self.level) 
+            )
+        if name_filter:
+            groups.filter(name__icontains=name_filter)
+        scored_groups = [] 
+        for group in groups:
+            score = 0
+            if group.faction:
+                score = score + 10
+            if group.anom_type: 
+                score = score + 10
+            if group.min_level and group.max_level:
+                score = score + (10-(group.max_level - group.min_level))
+            elif group.min_level:
+                score = score + 10 - group.min_level
+            elif group.max_level:
+                score = score + 10 - group.max_level
+            scored_groups.append((group,score))
+        return sorted(scored_groups, key=lambda tup:tup[1], reverse=True)
+            
+
 
     def __str__(self):
         return f"{self.faction} {self.type} Level {self.level}"
+
 
 
 class FleetAnom(models.Model):
@@ -467,10 +523,6 @@ class FleetAnom(models.Model):
         return f"{self.anom_type} @ {self.time} in {self.system}"
 
 
-class ItemFilterGroup(models.Model):
-    name = models.TextField(primary_key=True)
-    anom_type = models.ManyToManyField(AnomType)
-
 class ItemFilter(models.Model):
     group = models.ForeignKey(ItemFilterGroup, on_delete=models.CASCADE)
     filter_type = models.TextField(choices=[
@@ -482,6 +534,7 @@ class ItemFilter(models.Model):
     item_sub_sub_type = models.ForeignKey(ItemSubSubType, on_delete=models.CASCADE, null=True, blank=True)
     item_sub_type = models.ForeignKey(ItemSubType, on_delete=models.CASCADE, null=True, blank=True)
     item_type = models.ForeignKey(ItemType, on_delete=models.CASCADE, null=True, blank=True)
+
 
 class KillMail(models.Model):
     fleet = models.ForeignKey(Fleet, on_delete=models.CASCADE)
