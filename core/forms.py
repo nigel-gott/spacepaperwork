@@ -212,7 +212,8 @@ class SelectFilterForm(forms.Form):
 class InventoryItemForm(forms.Form):
     item_filter_group = forms.ModelChoiceField(
         queryset=ItemFilterGroup.objects.all(),
-        disabled=True
+        disabled=True,
+        required=False
         )
     fleet_anom = forms.IntegerField(widget=forms.HiddenInput(), disabled=True, required=False)
     character = forms.ModelChoiceField(queryset=Character.objects.all(
