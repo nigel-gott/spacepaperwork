@@ -199,10 +199,10 @@ class LootShareForm(forms.Form):
             raise forms.ValidationError('You must fill in Manual Discord Username if you are adding a Manual Character')
 
 class ItemMoveAllForm(forms.Form):
-    character = forms.ModelChoiceField(queryset=Character.objects.all(
-    ), initial=0, widget=autocomplete.ModelSelect2(url='character-autocomplete'))
+    character = forms.ModelChoiceField(label='Character To Contract Items To',queryset=Character.objects.all(
+    ), initial=0, widget=autocomplete.ModelSelect2(url='character-autocomplete'), help_text='This Person Will Recieve The Items If They Approve The Contract')
     system = forms.ModelChoiceField(queryset=System.objects.all(
-    ), initial=0, widget=autocomplete.ModelSelect2(url='system-autocomplete'))
+    ), initial=0, widget=autocomplete.ModelSelect2(url='system-autocomplete'), help_text='The System Where You Made The Real In-Game Contract')
 
 class SelectFilterForm(forms.Form):
     fleet_anom = forms.IntegerField(widget=forms.HiddenInput(), disabled=True, required=False)

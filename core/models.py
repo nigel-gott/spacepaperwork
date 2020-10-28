@@ -718,10 +718,10 @@ class InventoryItem(models.Model):
         ,self.junked_quantity()])
     
     def can_sell(self):
-        return self.quantity > 0
+        return self.quantity > 0 and not self.contract
     
     def can_edit(self):
-        return not hasattr(self, 'marketorder') and not hasattr(self, 'solditem')
+        return not hasattr(self, 'marketorder') and not hasattr(self, 'solditem') and not self.contract
 
     def add(self, quantity):
         if self.can_edit():

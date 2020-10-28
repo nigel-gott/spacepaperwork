@@ -5,19 +5,16 @@
     <h5>Pending Contracts Sent To You</h5>
     <table>
       <thead>
-        <th>Link</th>
         <th>From</th>
         <th>To</th>
         <th>System</th>
         <th>Total Items</th>
         <th>Created At</th>
+        <th>Link</th>
       </thead>
       <tbody>
         {% for contract in to_me_contracts %}
             <tr>
-                <td>
-                    <a href="{% url 'view_contract' contract.id %}">Contract {{contract.id}}</a>
-                </td>
                 <td>
                   {{contract.from_user}}
                 </td>
@@ -32,6 +29,9 @@
                 </td>
                 <td>
                   {{contract.created}}
+                </td>
+                <td>
+                    <a  class="waves-btn orange btn" href="{% url 'view_contract' contract.id %}">Accept or Reject Contract {{contract.id}}</a>
                 </td>
             </tr>
         {% endfor %}

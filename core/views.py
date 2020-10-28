@@ -610,7 +610,7 @@ def create_contract_item(request, pk):
     else:
         form = ItemMoveAllForm(
             )
-    return render(request, 'core/item_move_all.html', {'form': form, 'title': 'Contract Individual Item'})
+    return render(request, 'core/item_move_all.html', {'form': form, 'title': f'Contract Individual Item: {item}'})
 @transaction.atomic
 @login_required(login_url=login_url)
 def create_contract_for_fleet(request, fleet_pk, loc_pk):
@@ -624,7 +624,7 @@ def create_contract_for_fleet(request, fleet_pk, loc_pk):
                 return forbidden(request)
             system = form.cleaned_data['system']
             character = form.cleaned_data['character']
-            items_in_location = InventoryItem.objects.filter(loot_group__fleet_anom__fleet=f, location=loc, quantity__gt=0, marketorder__isnull=True, solditem__isnull=True)
+            items_in_location = InventoryItem.objects.filter(contract__isnull=True, loot_group__fleet_anom__fleet=f, location=loc, quantity__gt=0, marketorder__isnull=True, solditem__isnull=True)
             if items_in_location.count() == 0:
                 messages.error(request, "You have no items to contract :'(") 
                 return forbidden(request)
@@ -643,7 +643,7 @@ def create_contract_for_fleet(request, fleet_pk, loc_pk):
     else:
         form = ItemMoveAllForm(
             )
-    return render(request, 'core/item_move_all.html', {'form': form, 'title': 'Contract All Your Items'})
+    return render(request, 'core/item_move_all.html', {'form': form, 'title': f'Contract Items For Fleet:{f} in {loc}'})
 
 @transaction.atomic
 @login_required(login_url=login_url)
@@ -653,7 +653,7 @@ def item_move_all(request):
         if form.is_valid():
             system = form.cleaned_data['system']
             character = form.cleaned_data['character']
-            all_your_items = InventoryItem.objects.filter(location__character_location__character__discord_user=request.user.discord_user, quantity__gt=0, marketorder__isnull=True, solditem__isnull=True)
+            all_your_items = InventoryItem.objects.filter(contract__isnull=True, location__character_location__character__discord_user=request.user.discord_user, quantity__gt=0, marketorder__isnull=True, solditem__isnull=True)
             if all_your_items.count() == 0:
                 messages.error(request, "You have no items to contract :'(") 
                 return forbidden(request)
@@ -860,7 +860,7 @@ def render_item_view(request, characters, show_contract_all, title):
             items_by_fleet = {}
             loc = ItemLocation.objects.get(
                 character_location=char_loc, corp_hanger=None)
-            items = InventoryItem.objects.filter(location=loc, quantity__gt=0)
+            items = InventoryItem.objects.filter(contract__isnull=True, location=loc, quantity__gt=0)
             fleets = items.values('loot_group__fleet_anom__fleet').distinct()
             for fleet in fleets:
                 fleet_id = fleet['loot_group__fleet_anom__fleet']
