@@ -14,9 +14,9 @@ from .models import AnomType, Character, FleetType, GooseUser, System
 class SignupFormWithTimezone(SignupForm):
     timezone = TimeZoneFormField(display_GMT_offset=True)
     transaction_tax = forms.DecimalField(
-        max_digits=5, decimal_places=2, label="Transaction Tax %", required=False, initial=15)
+        max_digits=5, decimal_places=2, label="Transaction Tax %", initial=15)
     broker_fee = forms.DecimalField(
-        max_digits=5, decimal_places=2, label="Broker Fee %", required=False, initial=8)
+        max_digits=5, decimal_places=2, label="Broker Fee %", initial=8)
     default_character = forms.ModelChoiceField(
         queryset=Character.objects.all(), initial=0)
 
@@ -130,13 +130,14 @@ class FleetForm(forms.Form):
             )
 
 
-class SettingsForm(forms.ModelForm):
+class SettingsForm(forms.Form):
     timezone = TimeZoneFormField(display_GMT_offset=True)
-
-    class Meta:
-        model = GooseUser
-        fields = ["timezone", "broker_fee",
-                  "transaction_tax", "default_character"]
+    transaction_tax = forms.DecimalField(
+        max_digits=5, decimal_places=2, label="Transaction Tax %", initial=15)
+    broker_fee = forms.DecimalField(
+        max_digits=5, decimal_places=2, label="Broker Fee %", initial=8)
+    default_character = forms.ModelChoiceField(
+        queryset=Character.objects.all(), initial=0)
 
 
 class LootGroupForm(forms.Form):

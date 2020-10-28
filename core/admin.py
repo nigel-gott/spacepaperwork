@@ -36,13 +36,17 @@ admin.site.register(Contract)
 admin.site.register(ItemFilter)
 admin.site.register(ItemFilterGroup)
 
-
+    # discord_user = models.onetoonefield(discorduser, on_delete=models.cascade)
+    # timezone = timezonefield(default='europe/london')
+    # broker_fee = models.decimalfield(verbose_name="your broker fee in %", max_digits=5, decimal_places=2, default=8.0)
+    # transaction_tax = models.decimalfield(verbose_name="your transaction tax in %", max_digits=5, decimal_places=2, default=15.0)
+    # default_character = models.onetoonefield(character, on_delete=models.cascade)
 class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
-        (None, {'fields': ('timezone',)}),
+        (None, {'fields': ('timezone','transaction_tax','discord_user','default_character','broker_fee')}),
     )
     add_fieldsets = UserAdmin.add_fieldsets + (
-        (None, {'fields': ('timezone',)}),
+        (None, {'fields': ('timezone','transaction_tax','discord_user','default_character','broker_fee')}),
     )
 
 
