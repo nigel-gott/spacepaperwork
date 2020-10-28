@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core import validators
 from django.db import models
 from django.db.models import DecimalField, Q
 from django.db.models.aggregates import Sum
@@ -16,6 +17,8 @@ from django.utils.translation import gettext_lazy as _
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 from timezone_field import TimeZoneField
+from django.contrib.auth.validators import UnicodeUsernameValidator 
+from django.utils.deconstruct import deconstructible
 
 
 
@@ -75,7 +78,26 @@ class Character(models.Model):
 # Copy over character data into discord user model
 # Remove nullability and old fields from models + update code
 
+@deconstructible
+class UnicodeAndSpacesUsernameValidator(UnicodeUsernameValidator):
+    regex = r'^[\w.@+- ]+\Z'
+    message = _(
+        'Enter a valid username. This value may contain only letters, '
+        'numbers, and @/./+/-/_/space  characters.'
+    )
+    flags = 0
+
+
 class GooseUser(AbstractUser):
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        validators=[UnicodeAndSpacesUsernameValidator],
+        error_messages={
+            'unique': _("A user with that username already exists."),
+        },
+    )
+
     discord_user = models.OneToOneField(DiscordUser, on_delete=models.CASCADE)
     timezone = TimeZoneField(default='Europe/London')
     broker_fee = models.DecimalField(verbose_name="Your Broker Fee in %", max_digits=5, decimal_places=2, default=8.0)
