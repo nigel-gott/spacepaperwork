@@ -717,7 +717,13 @@ def item_add(request, lg_pk):
                     )
                     new_item.full_clean()
                     new_item.save()
-            return HttpResponseRedirect(reverse('loot_group_view', args=[lg_pk]))
+                    item = new_item
+            add_another = request.POST.get('add_another', False)
+            if add_another:
+                messages.success(request, f"Added {form.cleaned_data['item']} x {form.cleaned_data['quantity']}")
+                return HttpResponseRedirect(reverse('item_add', args=[lg_pk]))
+            else:
+                return HttpResponseRedirect(reverse('loot_group_view', args=[lg_pk]))
     else:
         form = InventoryItemForm(
             initial={'item_filter_group':ifg_pk,'quantity': 1, 'character': request.user.default_character}) 
