@@ -127,7 +127,39 @@
                 </td>
                 {% endif %}
           <td>{{share.character}}</td>
-          <td>{{share.share_quantity}}</td>
+          <td>
+          <div class="row">
+          <div class="col s1 m1 valign-wrapper">
+            <h6 class="font-size:20px;">
+          {{share.share_quantity}}
+            </h6>
+            </div>
+          {% if admin %}
+          <div class="col s2 m2">
+            <form method="post" action="{% url 'loot_share_plus' share.id %}">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <button class = "btn-floating blue btn-small" type="submit">
+                <i class="material-icons">exposure_plus_1</i>
+                </button>
+            </form>
+            </div>
+          <div class="col s2 m2">
+            <form method="post" action="{% url 'loot_share_minus' share.id %}">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <button class = "inline btn-floating red darken-2 btn-small" type="submit">
+                <i class="material-icons">exposure_neg_1</i>
+                </button>
+            </form>
+            </div>
+          {% endif %}
+          </div>
+          </td>
           <td>{{share.flat_percent_cut}}%</td>
           <td>
           {% if admin %}

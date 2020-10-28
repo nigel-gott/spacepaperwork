@@ -782,6 +782,23 @@ class LootShare(models.Model):
     share_quantity = models.PositiveIntegerField(default=0)
     flat_percent_cut = models.PositiveIntegerField(default=0)
 
+    def has_admin(self, user):
+        return self.loot_group.has_admin(user)
+
+
+    def increment(self):
+        self.share_quantity = self.share_quantity + 1
+        self.full_clean()
+        self.save()
+
+    def decrement(self):
+        self.share_quantity = self.share_quantity - 1
+        if self.share_quantity <= 0:
+            self.delete()
+        else:
+            self.full_clean()
+            self.save()
+
     class Meta:
         unique_together = (('character', 'loot_group'),)
 

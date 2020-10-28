@@ -712,6 +712,9 @@ def item_add(request, pk):
         form.fields['character'].queryset = request.user.characters()
     return render(request, 'core/loot_item_form.html', {'form': form, 'title': 'Add New Item'})
 
+
+
+
 @login_required(login_url=login_url)
 def junk(request):
     characters = request.user.characters()
@@ -861,6 +864,24 @@ def view_transfer_log(request, pk):
 def item_view(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     return render(request, 'core/item_view.html', {'item': item}) 
+
+@login_required(login_url=login_url)
+def loot_share_plus(request, pk):
+    loot_share = get_object_or_404(LootShare, pk=pk)
+    if not loot_share.has_admin(request.user):
+        return forbidden(request)
+    if request.method == 'POST':
+        loot_share.increment()
+    return HttpResponseRedirect(reverse('loot_group_view', args=[loot_share.loot_group.id]))
+    
+@login_required(login_url=login_url)
+def loot_share_minus(request, pk):
+    loot_share = get_object_or_404(LootShare, pk=pk)
+    if not loot_share.has_admin(request.user):
+        return forbidden(request)
+    if request.method == 'POST':
+        loot_share.decrement()
+    return HttpResponseRedirect(reverse('loot_group_view', args=[loot_share.loot_group.id]))
 
 @login_required(login_url=login_url)
 def item_edit(request, pk):
