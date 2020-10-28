@@ -2,6 +2,10 @@
 {% load materializecss %}
     <h5>{{title}}</h5>
 <div class="section">
+  <ul id="top_level_thingy" class="collapsible">
+    <li id="help_thingy">
+      <div class="collapsible-header"><i class="material-icons">help</i>How To Send Loot to a Seller or Sell it yourself in Goosetools</div>
+      <div class="collapsible-body">
 <blockquote>
 <b>If you want someone else to sell your fleet's loot:</b>
 <ol>
@@ -22,6 +26,9 @@ Participation will still be tracked and the person receiving the contract will h
 <li> Once some or all of your items have sold finally go to the <a href="{% url 'sold' %}">sold items</a> page in the dropdown. Click deposit and follow the instructions, once the deposit has been approved click approved and then finally click transfer to get the transfer command to split out the loot by participation.</li>
 </ol>
 </blockquote>
+</div>
+</li>
+</ul>
 
 </div>
 <div class="divider"></div>
@@ -111,5 +118,30 @@ Participation will still be tracked and the person receiving the contract will h
     </form>
   </div>
 </div>
+
+{% endblock %}
+
+{% block extrafooter %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.collapsible');
+    var instances = M.Collapsible.init(elems, {
+      'onOpenStart': function(li){
+       localStorage['closed_help'] = 'open'; 
+
+      },
+      'onCloseStart': function(li){
+       localStorage['closed_help'] = 'closed'; 
+      },
+    });
+   if (localStorage['closed_help'] == 'open') {
+     var elem = document.getElementById("top_level_thingy");
+       var instance = M.Collapsible.getInstance(elem);
+       instance.open();
+   } 
+  });
+
+</script>
 
 {% endblock %}
