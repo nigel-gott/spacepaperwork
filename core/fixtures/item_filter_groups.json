@@ -1,1 +1,1 @@
-[{"model": "core.itemfiltergroup", "pk": "None", "fields": {}}]
+[{"model": "core.itemfiltergroup", "pk": 1, "fields": {"name": "None", "anom_type": null, "faction": null, "min_level": null, "max_level": null}}, {"model": "core.itemfiltergroup", "pk": 2, "fields": {"name": "Level 6 Deadspace", "anom_type": "Deadspace", "faction": null, "min_level": 6, "max_level": 6}}, {"model": "core.itemfiltergroup", "pk": 3, "fields": {"name": "Lvl 1 deadspace", "anom_type": "Deadspace", "faction": "Guristas", "min_level": 1, "max_level": 1}}]
