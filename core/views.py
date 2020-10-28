@@ -193,8 +193,8 @@ def fleet_join(request, pk):
                 new_fleet.save()
                 return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
             else:
-                messages.error(request, "You cannot join this fleet with that character")
-                return forbidden(request)
+                messages.error(request, "You cannot join this fleet with that character. Maybe you are already a member or this fleet doesn't allow alts?")
+                return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
     else:
         form = JoinFleetForm(initial={
             'character': request.user.default_character
@@ -256,11 +256,11 @@ def loot_share_join(request, pk):
     else:
         can_still_join = non_participation_chars(loot_group, request.user) 
         if len(can_still_join) == 0: 
-            messages.error(request, f"You have no more characters that can join this loot group.")
-            return forbidden(request) 
+            messages.error(request, f"You have no more characters that can join this loot group. Don't worry you have probably already been added check below to make sure!")
+            return HttpResponseRedirect(reverse('loot_group_view', args=[pk]))
         if loot_group.has_share(request.user) and not loot_group.still_can_join_alts(request.user):
             messages.error(request, f"You cannot join with more characters as the fleet doesn't allow alts to have shares.")
-            return forbidden(request) 
+            return HttpResponseRedirect(reverse('loot_group_view', args=[pk]))
         default_char = request.user.default_character
         if default_char not in can_still_join:
             default_char = can_still_join[0]
