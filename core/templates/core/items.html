@@ -135,7 +135,7 @@ Participation will still be tracked and the person receiving the contract will h
        localStorage['closed_help'] = 'closed'; 
       },
     });
-   if (localStorage['closed_help'] == 'open') {
+   if (localStorage.getItem("closed_help") === null || localStorage['closed_help'] == 'open') {
      var elem = document.getElementById("top_level_thingy");
        var instance = M.Collapsible.getInstance(elem);
        instance.open();
