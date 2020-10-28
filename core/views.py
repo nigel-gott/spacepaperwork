@@ -683,14 +683,28 @@ def item_add(request, pk):
                 character_location=char_loc[0],
                 corp_hanger=None
             )
-            item = InventoryItem(
+            item, created = InventoryItem.objects.get_or_create(
                 location=loc[0],
                 loot_group=loot_group,
                 item=form.cleaned_data['item'],
-                quantity=form.cleaned_data['quantity'],
+                defaults = {
+                    'quantity':form.cleaned_data['quantity']
+                }
             )
-            item.full_clean()
-            item.save()
+            if not created:
+                if item.can_edit():
+                    item.quantity = item.quantity + form.cleaned_data['quantity']
+                    item.full_clean()
+                    item.save()
+                else:
+                    new_item = InventoryItem(
+                        location=loc[0],
+                        loot_group=loot_group,
+                        item=form.cleaned_data['item'],
+                        quantity=form.cleaned_data['quantity']
+                    )
+                    new_item.full_clean()
+                    new_item.save()
             return HttpResponseRedirect(reverse('loot_group_view', args=[pk]))
     else:
         form = InventoryItemForm(
