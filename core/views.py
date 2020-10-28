@@ -643,7 +643,8 @@ def create_contract_for_fleet(request, fleet_pk, loc_pk):
     else:
         form = ItemMoveAllForm(
             )
-    return render(request, 'core/item_move_all.html', {'form': form, 'title': f'Contract Items For Fleet:{f} in {loc}'})
+    return render(request, 'core/item_move_all.html', {'form': form, 'title': f'Contract Your Items From Fleet:{f} {loc}'})
+
 
 @transaction.atomic
 @login_required(login_url=login_url)

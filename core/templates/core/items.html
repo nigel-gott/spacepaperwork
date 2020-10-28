@@ -1,5 +1,19 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
 {% load materializecss %}
+<div class="section">
+<blockquote>
+This page shows all your current items which are not being sold or contracted.<br/> If you want someone else to sell your fleet's loot first:
+<ol>
+<li> Make a contract in game to that person</li>
+<li> Then move the items to them in Goosetools by clicking the appropriate contract button on this page (all your items, or just one fleet's worth, or a single item at once) </li>
+<li> Finally they will have to accept or reject the contract in-game and in Goosetools. You can see your pending contracts <a href="{% url 'contracts'%}">here</a></li>
+</ol>
+<br/>Participation will still be tracked and the person receiving the contract will have the responsibility to deposit and transfer eggs. 
+
+</blockquote>
+
+</div>
+<div class="divider"></div>
 <div class="row">
   <div class="col s12 m12">
     <h5>{{title}}</h5>
