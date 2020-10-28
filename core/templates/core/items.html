@@ -1,12 +1,14 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
 {% load materializecss %}
+    <h5>{{title}}</h5>
 <div class="section">
 <blockquote>
-This page shows all your current items which are not being sold or contracted.<br/> If you want someone else to sell your fleet's loot first:
+<b>If you want someone else to sell your fleet's loot:</b>
 <ol>
-<li> Make a contract in game to that person.</li>
+<li> Make sure they are happy to sell your loot, maybe provide them a link to the loot group showing what is waiting to be sold!</li>
+<li> If they are happy then make contract in game to that person in a system they are happy with.</li>
 <li> Then move the items to them in Goosetools by clicking the appropriate contract button on this page (all your items, or just one fleet's worth, or a single item at once). </li>
-<li> Finally they will have to accept or reject the contract in-game and in Goosetools. You can see your pending contracts <a href="{% url 'contracts'%}">here</a>.</li>
+<li> Finally they will have to accept or reject the contract in-game and in Goosetools. You can see your contracts pending approval <a href="{% url 'contracts'%}">here</a>.</li>
 </ol>
 Participation will still be tracked and the person receiving the contract will have the responsibility to deposit and transfer eggs. 
 
@@ -16,7 +18,6 @@ Participation will still be tracked and the person receiving the contract will h
 <div class="divider"></div>
 <div class="row">
   <div class="col s12 m12">
-    <h5>{{title}}</h5>
     {% if show_contract_all %}
       <a class="waves-btn btn red" href="{% url 'item_move_all' %}">Contract All Your Items</a>
       {% endif %}

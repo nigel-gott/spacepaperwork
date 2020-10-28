@@ -841,7 +841,7 @@ def contracts(request):
 @login_required(login_url=login_url)
 def items(request):
     characters = request.user.characters()
-    return render_item_view(request,characters,True, 'Your Items Waiting To Be Sold')
+    return render_item_view(request,characters,True, 'Your Items Waiting To Be Sold Or Contracted to a Seller')
 
 @login_required(login_url=login_url)
 def items_grouped(request):
