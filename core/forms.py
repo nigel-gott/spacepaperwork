@@ -174,7 +174,7 @@ class LootShareForm(forms.Form):
         queryset=Character.objects.all(
     ), initial=0, widget=autocomplete.ModelSelect2(url='character-autocomplete'))
     share_quantity = forms.IntegerField(min_value=0)
-    flat_percent_cut = forms.IntegerField(min_value=0, max_value=100)
+    flat_percent_cut = forms.IntegerField(min_value=0, max_value=100, help_text="This % cut only applies to loot from this anom and not from the entire bucket.")
 
     manual_discord_username = forms.CharField(required=False, help_text="Enter their Discord Username or if that is unknown use a sensible name which is the same between all this persons characters.")
     manual_character = forms.CharField(required=False)
