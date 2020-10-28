@@ -21,7 +21,7 @@ from django.views.generic.edit import UpdateView
 from djmoney.money import Money
 from moneyed.localization import format_money
 
-from core.forms import DeleteItemForm, DepositEggsForm, FleetAddMemberForm, FleetForm, InventoryItemForm, ItemMoveAllForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SelectFilterForm, SellItemForm, SettingsForm, SoldItemForm
+from core.forms import CharacterForm, DeleteItemForm, DepositEggsForm, FleetAddMemberForm, FleetForm, InventoryItemForm, ItemMoveAllForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SelectFilterForm, SellItemForm, SettingsForm, SoldItemForm
 from core.models import AnomType, Character, CharacterLocation, Contract, DiscordUser, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, Item, ItemFilterGroup, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
 from django.forms.forms import Form
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -678,6 +678,8 @@ def item_move_all(request):
 
 @login_required(login_url=login_url)
 def item_add(request, lg_pk):
+    extra=10
+    InventoryItemFormset= formset_factory(InventoryItemForm,extra=0)
     loot_group = get_object_or_404(LootGroup, pk=lg_pk)
     ifg_pk = request.GET.get('item_filter_group',None)
     choice_list = create_ifg_choice_list(loot_group.fleet_anom.id)
@@ -686,55 +688,64 @@ def item_add(request, lg_pk):
     item_filter_group = get_object_or_404(ItemFilterGroup, pk=ifg_pk)
     if not loot_group.fleet().has_admin(request.user):
         return forbidden(request)
+    initial = [{'item_filter_group':ifg_pk,'quantity': 1, 'character': request.user.default_character} for x in range(0,extra)]
     if request.method == 'POST':
-        form = InventoryItemForm(request.POST)
-        if form.is_valid():
-            char_loc = CharacterLocation.objects.get_or_create(
-                character=form.cleaned_data['character'],
-                system=None
-            )
-            loc = ItemLocation.objects.get_or_create(
-                character_location=char_loc[0],
-                corp_hanger=None
-            )
-            item, created = InventoryItem.objects.get_or_create(
-                location=loc[0],
-                loot_group=loot_group,
-                item=form.cleaned_data['item'],
-                defaults = {
-                    'quantity':form.cleaned_data['quantity']
-                }
-            )
-            if not created:
-                if item.can_edit():
-                    item.quantity = item.quantity + form.cleaned_data['quantity']
-                    item.full_clean()
-                    item.save()
-                else:
-                    new_item = InventoryItem(
+        formset = InventoryItemFormset(request.POST, request.FILES, initial=initial)
+        char_form = CharacterForm(request.POST)
+        if formset.is_valid() and char_form.is_valid():
+            character = char_form.cleaned_data['character']
+            count = 0
+            for form in formset:
+                item = form.cleaned_data['item']
+                quantity = form.cleaned_data['quantity']
+                if item and quantity:
+                    char_loc = CharacterLocation.objects.get_or_create(
+                        character=character,
+                        system=None
+                    )
+                    loc = ItemLocation.objects.get_or_create(
+                        character_location=char_loc[0],
+                        corp_hanger=None
+                    )
+                    item, created = InventoryItem.objects.get_or_create(
                         location=loc[0],
                         loot_group=loot_group,
-                        item=form.cleaned_data['item'],
-                        quantity=form.cleaned_data['quantity']
+                        item=item,
+                        defaults = {
+                            'quantity':quantity
+                        }
                     )
-                    new_item.full_clean()
-                    new_item.save()
-                    item = new_item
+                    count = count + quantity 
+                    if not created:
+                        if item.can_edit():
+                            item.quantity = item.quantity + quantity 
+                            item.full_clean()
+                            item.save()
+                        else:
+                            new_item = InventoryItem(
+                                location=loc[0],
+                                loot_group=loot_group,
+                                item=item,
+                                quantity=quantity,
+                            )
+                            new_item.full_clean()
+                            new_item.save()
             add_another = request.POST.get('add_another', False)
             if add_another:
-                messages.success(request, f"Added {form.cleaned_data['item']} x {form.cleaned_data['quantity']}")
+                messages.success(request, f"Added {count} items") 
                 return HttpResponseRedirect(reverse('item_add', args=[lg_pk]))
             else:
                 return HttpResponseRedirect(reverse('loot_group_view', args=[lg_pk]))
     else:
-        form = InventoryItemForm(
-            initial={'item_filter_group':ifg_pk,'quantity': 1, 'character': request.user.default_character}) 
-        form.fields['character'].queryset = request.user.characters()
+        char_form = CharacterForm()
+        char_form.fields['character'].queryset = request.user.characters()
+        formset = InventoryItemFormset(
+            initial=initial)
     filter_form = SelectFilterForm()
     filter_form.fields['item_filter_group'].choices = choice_list 
     filter_form.fields['item_filter_group'].initial = ifg_pk 
     filter_form.fields['fleet_anom'].initial = loot_group.fleet_anom.id 
-    return render(request, 'core/loot_item_form.html', {'form': form, 'title': 'Add New Item', 'filter_form':filter_form})
+    return render(request, 'core/loot_item_form.html', {'formset': formset, 'char_form':char_form, 'title': 'Add New Items to Loot Bucket', 'filter_form':filter_form})
 
 
 

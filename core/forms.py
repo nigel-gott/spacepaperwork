@@ -210,6 +210,10 @@ class SelectFilterForm(forms.Form):
         widget=autocomplete.ListSelect2(url='item-filter-group-autocomplete', forward=['fleet_anom'])
         )
 
+class CharacterForm(forms.Form):
+    character = forms.ModelChoiceField(queryset=Character.objects.all(
+    ), initial=0, widget=autocomplete.ModelSelect2(url='character-autocomplete'))
+
 class InventoryItemForm(forms.Form):
     item_filter_group = forms.ModelChoiceField(
         queryset=ItemFilterGroup.objects.all(),
@@ -217,8 +221,6 @@ class InventoryItemForm(forms.Form):
         required=False
         )
     fleet_anom = forms.IntegerField(widget=forms.HiddenInput(), disabled=True, required=False)
-    character = forms.ModelChoiceField(queryset=Character.objects.all(
-    ), initial=0, widget=autocomplete.ModelSelect2(url='character-autocomplete'))
     # item_type = forms.ModelChoiceField(queryset=ItemType.objects.all(), initial=0
     #                                    , widget=autocomplete.ModelSelect2(url='item-type-autocomplete'))
     # item_sub_type = forms.ModelChoiceField(queryset=ItemSubType.objects.all(), initial=0
@@ -226,9 +228,9 @@ class InventoryItemForm(forms.Form):
     # item_sub_sub_type = forms.ModelChoiceField(queryset=ItemSubSubType.objects.all(), initial=0
     #                                    , widget=autocomplete.ModelSelect2(url='item-sub-sub-type-autocomplete', forward=('item_type','item_sub_type',)))
     item = forms.ModelChoiceField(queryset=Item.objects.all(
-    ), initial=0, widget=autocomplete.ModelSelect2(url='item-autocomplete'))
+    ), initial=0, widget=autocomplete.ModelSelect2(url='item-autocomplete'), required=False)
     #    forward=('item_type','item_sub_type','item_sub_sub_type',)))
-    quantity = forms.IntegerField(min_value=0)
+    quantity = forms.IntegerField(min_value=0, required=False)
 
 class DeleteItemForm(forms.Form):
     are_you_sure = forms.BooleanField(initial=False)
