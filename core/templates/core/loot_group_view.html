@@ -68,7 +68,8 @@
           {{item.total_quantity}}
             </h6>
             </div>
-          {% if admin %}
+        {% has_item_admin item user as item_admin %}
+          {% if item_admin %}
           <div class="col s2 m2">
             <form method="post" action="{% url 'item_plus' item.id %}">
                 {% csrf_token %}
@@ -97,7 +98,6 @@
           <td>{{item.location}}</td>
           <td>{{item.status}}</td>
         <td>
-        {% has_item_admin item user as item_admin %}
         {% if item_admin %}
       {% if item.can_edit %}
       <a href="{% url 'item_edit' item.id %}">Edit Item</a><br/>
