@@ -38,6 +38,7 @@ def settings_view(request):
     if request.method == 'POST':
         form = SettingsForm(request.POST)
         if form.is_valid():
+            messages.success(request, "Updated your settings!")
             goose_user.default_character = form.cleaned_data['default_character']
             goose_user.timezone = form.cleaned_data['timezone']
             goose_user.broker_fee = form.cleaned_data['broker_fee']
