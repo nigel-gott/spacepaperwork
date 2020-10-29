@@ -1201,6 +1201,7 @@ def item_sold(order, form, remaining_quantity_to_sell):
         isk = -transaction_tax,
         quantity = quantity_sold,
         transaction_type = "transaction_tax",
+        notes=f" - Gross Profit of {gross_profit} * Tax of {transaction_tax_percent*100}%"
     )
     transaction_tax_line.full_clean()
     transaction_tax_line.save()
@@ -1210,6 +1211,7 @@ def item_sold(order, form, remaining_quantity_to_sell):
         isk = gross_profit,
         quantity = quantity_sold,
         transaction_type = "external_market_gross_profit",
+        notes=f"Order Price of {order.listed_at_price} * Quantity Sold of {quantity_sold}"
     )
     profit_line.full_clean()
     profit_line.save()
@@ -1314,7 +1316,7 @@ def deposit_eggs(request):
                     quantity=sold_item.quantity,
                     time=current_now,
                     isk=-isk,
-                    transaction_type="egg_deposit"
+                    transaction_type="egg_deposit",
                 )
                 deposit_transaction.full_clean()
                 deposit_transaction.save()
@@ -1324,7 +1326,7 @@ def deposit_eggs(request):
                     time=current_now,
                     eggs=isk,
                     debt=True,
-                    counterparty_discord_username=request.user.discord_username()
+                    counterparty_discord_username=request.user.discord_username(),
                 )
                 egg_transaction.full_clean()
                 egg_transaction.save()
@@ -1438,14 +1440,19 @@ def transfer_eggs(request):
         end = ""
         command = "$bulk\n"
         commands_issued = False
+        deposit_total = 0
+        keep_total = 0
         for discord_username, isk in total_participation.items():
+            floored_isk = floor(isk.amount)
             if discord_username != request.user.discord_username():
                 commands_issued = True
-                command = command + f"@{discord_username} {floor(isk.amount)}\n"
+                command = command + f"@{discord_username} {floored_isk}\n"
+                deposit_total = deposit_total + floored_isk
             else:
-                end = end + f"Keep {floor(isk.amount)} for yourself! \n"
+                end = end + f"Keep {floored_isk} for yourself! \n"
+                keep_total = keep_total + floored_isk
         if commands_issued:
-            command = command + "\n\n" + end
+            command = f"You are about to transfer {to_isk(deposit_total)} to other geese and keep {to_isk(keep_total)} for yourself:\n\n" + command + "\n\n" + end
         else:
             command = end
 
@@ -1467,6 +1474,7 @@ def sell_item(item, form):
         isk = broker_fee, 
         quantity = item.quantity,
         transaction_type = "broker_fee",
+        notes=f"- Quantity of {item.quantity} * Listed Price at {price} * Broker Fee of {broker_fee_percent*100}%"
     )
     broker_fee.full_clean()
     broker_fee.save()
