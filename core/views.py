@@ -688,7 +688,7 @@ def item_add(request, lg_pk):
     item_filter_group = get_object_or_404(ItemFilterGroup, pk=ifg_pk)
     if not loot_group.fleet().has_admin(request.user):
         return forbidden(request)
-    initial = [{'item_filter_group':ifg_pk,'quantity': 1, 'character': request.user.default_character} for x in range(0,extra)]
+    initial = [{'item_filter_group':ifg_pk,'quantity': 1} for x in range(0,extra)]
     if request.method == 'POST':
         formset = InventoryItemFormset(request.POST, request.FILES, initial=initial)
         char_form = CharacterForm(request.POST)
@@ -737,7 +737,7 @@ def item_add(request, lg_pk):
             else:
                 return HttpResponseRedirect(reverse('loot_group_view', args=[lg_pk]))
     else:
-        char_form = CharacterForm()
+        char_form = CharacterForm(initial={'character': request.user.default_character})
         char_form.fields['character'].queryset = request.user.characters()
         formset = InventoryItemFormset(
             initial=initial)
