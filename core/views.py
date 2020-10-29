@@ -1235,7 +1235,7 @@ def stack_sold(request, pk):
                     if total_to_sell <= 0:
                         break
                     total_to_sell = item_sold(market_order,form, total_to_sell)
-                messages.success(request, "Sold {saved_total} of the stack!")
+                messages.success(request, f"Sold {saved_total} of the stack!")
             return HttpResponseRedirect(reverse('orders'))
     else:
         form = SoldItemForm(initial={
