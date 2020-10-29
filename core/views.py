@@ -1082,6 +1082,9 @@ def deposit_eggs(request):
     to_deposit_qs = SoldItem.objects.filter(item__location__character_location__character__discord_user=request.user.discord_user, deposited_into_eggs=False)
     to_deposit_list = list(to_deposit_qs)
     total = to_deposit_qs.aggregate(result=Sum('item__isktransaction__isk'))['result']
+    if total < 0:
+        messages.error(request, f"You have somehow lost money to the tune of {total} selling your items. Please PM @thejanitor so we can work this out.") 
+        return HttpResponseRedirect(reverse('sold'))
     count = to_deposit_qs.count()
     if request.method == 'POST':
         form = DepositEggsForm(request.POST)
