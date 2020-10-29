@@ -2,6 +2,7 @@ import json
 import sys
 from _pydecimal import ROUND_UP
 from decimal import Decimal
+from functools import total_ordering
 from math import floor
 
 import django
@@ -9,8 +10,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 from django.db.models import Count, Q, Sum
+from django.forms.forms import Form
 from django.forms.formsets import formset_factory
 from django.http import (HttpResponseForbidden, HttpResponseNotAllowed,
                          HttpResponseRedirect)
@@ -21,11 +24,21 @@ from django.views.generic.edit import UpdateView
 from djmoney.money import Money
 from moneyed.localization import format_money
 
-from core.forms import CharacterForm, DeleteItemForm, DepositEggsForm, EditOrderPriceForm, FleetAddMemberForm, FleetForm, InventoryItemForm, ItemMoveAllForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SelectFilterForm, SellItemForm, SettingsForm, SoldItemForm
-from core.models import AnomType, Character, CharacterLocation, Contract, DiscordUser, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, Item, ItemFilterGroup, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, StackedInventoryItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
-from django.forms.forms import Form
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from core.autocomplete import create_ifg_choice_list
+from core.forms import (CharacterForm, DeleteItemForm, DepositEggsForm,
+                        EditOrderPriceForm, FleetAddMemberForm, FleetForm,
+                        InventoryItemForm, ItemMoveAllForm, JoinFleetForm,
+                        LootGroupForm, LootJoinForm, LootShareForm,
+                        SelectFilterForm, SellItemForm, SettingsForm,
+                        SoldItemForm)
+from core.models import (AnomType, Character, CharacterLocation, Contract,
+                         DiscordUser, EggTransaction, Fleet, FleetAnom,
+                         FleetMember, GooseUser, InventoryItem, IskTransaction,
+                         Item, ItemFilterGroup, ItemLocation, JunkedItem,
+                         LootBucket, LootGroup, LootShare, MarketOrder,
+                         SoldItem, StackedInventoryItem, TransferLog,
+                         active_fleets_query, future_fleets_query,
+                         past_fleets_query, to_isk)
 
 # Create your views here.
 
@@ -719,10 +732,10 @@ def stack_change_price(request, pk):
         form = EditOrderPriceForm(request.POST)
         if form.is_valid():
             success = True 
-            for item in stack.items():
+            for market_order in stack.marketorders().all():
                 new_price = form.cleaned_data['new_price']
                 broker_fee = form.cleaned_data['broker_fee']/100
-                inner_success, message = item.marketorder.change_price(new_price, broker_fee, request.user)
+                inner_success, message = market_order.change_price(new_price, broker_fee, request.user)
                 success = inner_success and success
                 if not success:
                     break
@@ -1157,6 +1170,79 @@ def item_edit(request, pk):
     return render(request, 'core/loot_item_form.html', {'form': form, 'title': 'Edit Item'})
 
 
+def item_sold(order, form, remaining_quantity_to_sell):
+    transaction_tax_percent = order.transaction_tax/100
+    quantity_sold = min(order.quantity,remaining_quantity_to_sell)
+    quantity_remaining = order.quantity - quantity_sold
+    gross_profit = order.listed_at_price * quantity_sold 
+    transaction_tax = Money(amount=round((gross_profit * transaction_tax_percent).amount,2), currency="EEI")
+    item = order.item
+    transaction_tax_line = IskTransaction(
+        item = item,
+        time = timezone.now(),
+        isk = -transaction_tax,
+        quantity = quantity_sold,
+        transaction_type = "transaction_tax",
+    )
+    transaction_tax_line.full_clean()
+    transaction_tax_line.save()
+    profit_line = IskTransaction(
+        item = item,
+        time = timezone.now(),
+        isk = gross_profit,
+        quantity = quantity_sold,
+        transaction_type = "external_market_gross_profit",
+    )
+    profit_line.full_clean()
+    profit_line.save()
+    sold_item, sold_item_created = SoldItem.objects.get_or_create(
+        item=item,
+        defaults = {
+            'quantity':quantity_sold,
+            'sold_via':'external',
+        }
+    )
+    if not sold_item_created:
+        sold_item.quantity = sold_item.quantity + quantity_sold
+        sold_item.full_clean()
+        sold_item.save()
+
+    if quantity_remaining == 0:
+        order.delete()
+    else:
+        order.quantity = quantity_remaining
+        order.full_clean()
+        order.save()
+    return remaining_quantity_to_sell-quantity_sold
+
+@login_required(login_url=login_url)
+@transaction.atomic
+def stack_sold(request, pk):
+    stack = get_object_or_404(StackedInventoryItem, pk=pk)
+    if not stack.has_admin(request.user):
+        return forbidden(request)
+
+    if request.method == 'POST':
+        form = SoldItemForm(request.POST)
+        if form.is_valid():
+            quantity_remaining = form.cleaned_data['quantity_remaining']
+            total_to_sell = stack.order_quantity() - quantity_remaining
+            saved_total = total_to_sell
+            if total_to_sell <= 0:
+                messages.error(request, "You requested to sell 0 of this stack which is silly")
+            else:
+                for market_order in stack.marketorders():
+                    if total_to_sell <= 0:
+                        break
+                    total_to_sell = item_sold(market_order,form, total_to_sell)
+                messages.success(request, "Sold {saved_total} of the stack!")
+            return HttpResponseRedirect(reverse('orders'))
+    else:
+        form = SoldItemForm(initial={
+            'quantity_remaining':0
+        })
+    return render(request, 'core/order_sold.html', {'form': form, 'title': 'Mark Stack As Sold', 'order':stack})
+
 @login_required(login_url=login_url)
 @transaction.atomic
 def order_sold(request, pk):
@@ -1168,57 +1254,18 @@ def order_sold(request, pk):
         form = SoldItemForm(request.POST)
         if form.is_valid():
             quantity_remaining = form.cleaned_data['quantity_remaining']
-            quantity_sold = order.quantity - quantity_remaining
-            if quantity_sold <= 0:
-                messages.error(request, "Cannot sell nothing or more than the order quantity")
-                return forbidden(request)
-            transaction_tax_percent = order.transaction_tax/100
-            gross_profit = order.listed_at_price * quantity_sold 
-            transaction_tax = Money(amount=round((gross_profit * transaction_tax_percent).amount,2), currency="EEI")
-            item = order.item
-            transaction_tax_line = IskTransaction(
-                item = item,
-                time = timezone.now(),
-                isk = -transaction_tax,
-                quantity = quantity_sold,
-                transaction_type = "transaction_tax",
-            )
-            transaction_tax_line.full_clean()
-            transaction_tax_line.save()
-            profit_line = IskTransaction(
-                item = item,
-                time = timezone.now(),
-                isk = gross_profit,
-                quantity = quantity_sold,
-                transaction_type = "external_market_gross_profit",
-            )
-            profit_line.full_clean()
-            profit_line.save()
-            sold_item, sold_item_created = SoldItem.objects.get_or_create(
-                item=item,
-                defaults = {
-                    'quantity':quantity_sold,
-                    'sold_via':'external',
-                }
-            )
-            if not sold_item_created:
-                sold_item.quantity = sold_item.quantity + quantity_sold
-                sold_item.full_clean()
-                sold_item.save()
-
-            if quantity_remaining == 0:
-                order.delete()
+            quantity_to_sell = order.quantity - quantity_remaining
+            if quantity_to_sell <= 0:
+                messages.error(request,"Cannot sell 0 or fewer items")
             else:
-                order.quantity = quantity_remaining
-                order.full_clean()
-                order.save()
+                item_sold(order,form, quantity_to_sell)
+                messages.success(request,f"Sold {quantity_to_sell} of item {order.item}")
             return HttpResponseRedirect(reverse('orders'))
-
     else:
         form = SoldItemForm(initial={
             'quantity_remaining':0
         })
-    return render(request, 'core/order_sold.html', {'form': form, 'title': 'Mark Order As Sold', 'order':order})
+    return render(request, 'core/order_sold.html', {'form': form, 'title': 'Mark Order As Sold', 'order':order, 'url_to_order':reverse('item_view',args=[order.item.id])})
 
 @login_required(login_url=login_url)
 @transaction.atomic

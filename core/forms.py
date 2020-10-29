@@ -249,7 +249,7 @@ class SellItemForm(forms.Form):
     listed_at_price = forms.DecimalField(max_digits=14, decimal_places=2)
 
 class SoldItemForm(forms.Form):
-    quantity_remaining = forms.IntegerField(min_value=0)
+    quantity_remaining = forms.IntegerField(min_value=0, help_text="How much of the order is remaining, 0 means the order has fully sold!")
 
 class DepositEggsForm(forms.Form):
     deposit_command = forms.CharField(disabled=True,required=False)

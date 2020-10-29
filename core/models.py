@@ -686,7 +686,11 @@ class StackedInventoryItem(models.Model):
             return False
     
     def marketorder(self):
-        return self._first_item() and self._first_item().marketorder
+        items = self.marketorders()
+        if items.count() > 0:
+            return items.first()
+        else:
+            return False
     
     def order_quantity(self):
         return model_sum(MarketOrder.objects.filter(item__stack=self.id),'quantity')
@@ -699,6 +703,18 @@ class StackedInventoryItem(models.Model):
 
     def total_quantity(self):
         return self.order_quantity() + self.quantity() + self.sold_quantity()
+    def total_quantity_display(self):
+        quantity = self.quantity()
+        orders = self.order_quantity()
+        sold = self.sold_quantity()
+        status = ""
+        if quantity > 0:
+            status = status+f"{quantity} Waiting "
+        if orders > 0:
+            status = status+f"{orders} Selling "
+        if sold > 0:
+            status = status+f"{orders} Sold "
+        return status 
 
     def buy_sell(self):
         return self.marketorder() and self.marketorder().buy_or_sell
@@ -719,6 +735,9 @@ class StackedInventoryItem(models.Model):
     def items(self):
         return self.inventoryitem_set.all()
 
+    def marketorders(self):
+        return MarketOrder.objects.filter(item__stack=self.id).order_by('item__created_at')
+
     def has_admin(self, user):
         items = self.inventoryitem_set.count()
         if items > 0:
@@ -733,7 +752,7 @@ class StackedInventoryItem(models.Model):
         return self._first_item() and self._first_item().item
     
     def __str__(self):
-        return f"Stack of {self.item_info()} x {self.total_quantity()}"
+        return f"Stack of {self.item_info()} x ({self.total_quantity_display()})"
 
 class InventoryItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)

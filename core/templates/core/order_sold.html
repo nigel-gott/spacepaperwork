@@ -3,8 +3,7 @@
 {% load static %}
 {% block body %}
 <h4>{{title}}</h4>
-                  <a>
-                   <a href="{% url 'item_view' order.item.id %}">
+                   <a href="{{ url_to_order }}">
                   {{order}}
                   </a>
 <div class="divider"></div>
