@@ -37,7 +37,7 @@
           {% for item in loc_items.sold %}
             <tr>
                 {% if forloop.first %}
-                <td rowspan="{{items|length}}">
+                <td rowspan="{{loc_items.sold|length}}">
                 {{loc_items.loc}}
                 </td>
                 {% endif %}
@@ -65,7 +65,6 @@
                 </td>
                 <td>
                 </td>
-                <td></td>
             </tr>
           {% endfor %}
         {% endfor %}

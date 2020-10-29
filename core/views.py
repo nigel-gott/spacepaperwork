@@ -920,7 +920,8 @@ def orders(request):
     for char in characters:
         char_locs = CharacterLocation.objects.filter(character=char)
         for char_loc in char_locs:
-            items = get_items_in_location(char_loc, InventoryItem.objects.filter(marketorder__isnull=False))
+            market_items = InventoryItem.objects.filter(marketorder__isnull=False)
+            items = get_items_in_location(char_loc, market_items)
             if items['total_in_loc'] > 0:
                 all_orders.append(
                     items
@@ -977,7 +978,7 @@ def all_items(request):
 def get_items_in_location(char_loc,item_source=None):
     loc = ItemLocation.objects.get(
         character_location=char_loc, corp_hanger=None)
-    if not item_source:
+    if item_source is None:
         item_source= InventoryItem.objects.filter(quantity__gt=0)
     unstacked_items = item_source.filter(stack__isnull=True, contract__isnull=True, location=loc)
     stacked_items = item_source.filter(stack__isnull=False, contract__isnull=True, location=loc)
