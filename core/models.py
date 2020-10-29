@@ -674,6 +674,20 @@ def to_isk(number):
 class StackedInventoryItem(models.Model):
     created_at = models.DateTimeField()
 
+    def loc(self):
+        items = self.inventoryitem_set.count()
+        if items > 0:
+            return self.inventoryitem_set.first().location
+        else:
+            return False 
+
+    def has_admin(self, user):
+        items = self.inventoryitem_set.count()
+        if items > 0:
+            return self.inventoryitem_set.first().has_admin(user)
+        else:
+            return True
+
 class InventoryItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()

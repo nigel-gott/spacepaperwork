@@ -996,7 +996,25 @@ def stack_in_location(loc):
         unstacked_item.save()
     return True, f"Stacked All Items in {loc}!"
 
+@login_required(login_url=login_url)
+@transaction.atomic
+def stack_view(request, pk):
+    stack = get_object_or_404(StackedInventoryItem, pk=pk)
+    return render(request, 'core/view_item_stack.html', {'items': stack.inventoryitem_set.all(), 'title':f"Viewing Item Stack {pk} in {stack.loc()}"}) 
 
+@login_required(login_url=login_url)
+@transaction.atomic
+def stack_delete(request, pk):
+    stack = get_object_or_404(StackedInventoryItem, pk=pk)
+    if request.method == 'POST':
+        if not stack.has_admin(request.user):
+            messages.error(request, f"You do not have permission to delete stack {stack.id}")
+            return HttpResponseRedirect(reverse('items')) 
+        InventoryItem.objects.filter(stack=stack.id).update(stack=None)
+        messages.success(request, f"Deleted stack {stack.id}")
+        return HttpResponseRedirect(reverse('items')) 
+
+    return render(request, 'core/delete_item_stack_confirm.html', {'items': stack.inventoryitem_set.all()}) 
     
 @login_required(login_url=login_url)
 @transaction.atomic
