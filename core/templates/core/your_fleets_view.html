@@ -1,0 +1,43 @@
+{% extends "core/base.html" %} {% load base_extras %} {% block body %}
+{% load materializecss %}
+<div class="row">
+  <div class="col s12 m12">
+    <h5>{{title}}</h5>
+    <table>
+      <thead>
+        <th>Fleet</th>
+        <th>Loot Bucket</th>
+        <th>Loot Group</th>
+        <th>Your Shares</th>
+        <th>Your Flat % Cut</th>
+        <th>Loot Items On You From This Group</th>
+      </thead>
+      <tbody>
+          {% for item in items %}
+          <tr>
+            <td>
+                <a href="{% url 'fleet_view' item.fleet_id %}">Fleet {{item.fleet_id}}</a>
+            </td>
+            <td>
+                {{item.loot_bucket}}
+            </td>
+            <td>
+                <a href="{% url 'loot_group_view' item.loot_group_id %}">Loot Group {{item.loot_group_id}}</a>
+            </td>
+            <td>
+              {{item.total_shares}}
+            </td>
+            <td>
+              {{item.total_cut}}
+            </td>
+            <td>
+              {{item.item_count}}
+            </td>
+         </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

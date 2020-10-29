@@ -971,6 +971,23 @@ def items_grouped(request):
     return render(request, 'core/grouped_items.html', {'items': items, 'title':"All Not Sold Items In Goosetools Grouped Together"})
 
 @login_required(login_url=login_url)
+def fleet_shares(request):
+    loot_shares = LootShare.objects.filter(character__discord_user=request.user.discord_user)
+    items=[]
+    for loot_share in loot_shares:
+        loot_group=loot_share.loot_group
+        items.append({
+            'fleet_id':loot_group.fleet_anom.fleet.id,
+            'loot_bucket':loot_group.bucket.id,
+            'loot_group_id':loot_group.id,
+            'total_shares':loot_share.share_quantity,
+            'total_cut':loot_share.flat_percent_cut,
+            'item_count':InventoryItem.objects.filter(location__character_location__character__discord_user=request.user.discord_user,loot_group=loot_group).count()
+        })
+    items = sorted(items, key=lambda x: x['loot_bucket'])
+    return render(request, 'core/your_fleets_view.html', {'items': items, 'title':"Fleets you have shares and/or items for"})
+
+@login_required(login_url=login_url)
 def all_items(request):
     characters = Character.objects.annotate(cc=Sum('characterlocation__itemlocation__inventoryitem__quantity')).filter(cc__gt=0)
     return render_item_view(request,characters,False, 'All Items')

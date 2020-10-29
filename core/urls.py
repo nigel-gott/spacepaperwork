@@ -57,6 +57,7 @@ urlpatterns = [
     path('contract/<int:pk>/accept', accept_contract, name='accept_contract'),
     path('contract/<int:pk>/edit', contracts, name='edit_contract'),
     path('contract/<int:pk>/delete', contracts, name='delete_contract'),
+    path('fleet_shares/', fleet_shares, name='fleet_shares'),
     path('orders/', orders, name='orders'),
     path('sold/', sold, name='sold'),
     path('junk/', junk, name='junk'),
