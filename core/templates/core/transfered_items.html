@@ -21,7 +21,7 @@
           {% for item in loc_items.done %}
             <tr>
                 {% if forloop.first %}
-                <td rowspan="{{items|length}}">
+                <td rowspan="{{loc_items.done|length}}">
                 {{loc_items.loc}}
                 </td>
                 {% endif %}
