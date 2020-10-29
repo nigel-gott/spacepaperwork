@@ -674,10 +674,6 @@ def to_isk(number):
 class StackedInventoryItem(models.Model):
     created_at = models.DateTimeField()
 
-                    # <td>{{stack.order_quantity}}</td>
-                    # <td>{{stack.buy_sell}}</td>
-                    # <td>{{stack.internal_external}}</td>
-                    # <td>{{stack.list_price}}</td>
     def _first_item(self):
         items = self.inventoryitem_set.count()
         if items > 0:
@@ -713,7 +709,7 @@ class StackedInventoryItem(models.Model):
         if orders > 0:
             status = status+f"{orders} Selling "
         if sold > 0:
-            status = status+f"{orders} Sold "
+            status = status+f"{sold} Sold "
         return status 
 
     def buy_sell(self):
