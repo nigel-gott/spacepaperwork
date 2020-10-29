@@ -48,6 +48,7 @@
                   {{item.listed_at_price}}
                 </td>
                 <td>
+                  <a class="waves-btn btn orange" href="{% url 'edit_order_price' item.id %}">Edit Price</a>
                   <a class="waves-btn btn green" href="{% url 'order_sold' item.id %}">Sold</a>
                 </td>
             </tr>

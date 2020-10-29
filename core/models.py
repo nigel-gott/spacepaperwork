@@ -1,25 +1,26 @@
+from decimal import Decimal
 from typing import Optional, Union
 
 from allauth.socialaccount.models import SocialAccount
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core import validators
-from django.db import models
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db import models, transaction
 from django.db.models import DecimalField, Q
 from django.db.models.aggregates import Sum
 from django.db.models.expressions import Combinable
 from django.db.models.fields import BooleanField
 from django.utils import timezone
+from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext_lazy as _
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 from timezone_field import TimeZoneField
-from django.contrib.auth.validators import UnicodeUsernameValidator 
-from django.utils.deconstruct import deconstructible
-
+import math as m
 
 
 class Corp(models.Model):
@@ -677,6 +678,21 @@ class InventoryItem(models.Model):
     loot_group = models.ForeignKey(LootGroup, on_delete=models.CASCADE, null=True, blank=True)
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, null=True, blank=True)
 
+    def add_isk_transaction(self, isk, transaction_type, quantity, notes, user):
+        if not self.has_admin(user):
+            return False, f"{user} doesn't have permissions to add an isk transaction for {self}"
+        else:
+            new_isk_transaction = IskTransaction(
+                isk=isk,
+                transaction_type=transaction_type,
+                quantity=quantity,
+                notes=notes,
+                time=timezone.now(),
+                item=self
+            )
+            new_isk_transaction.full_clean()
+            new_isk_transaction.save()
+            return True, f"Successfully added: {new_isk_transaction}"
 
     def has_admin(self, user):
         return self.location.has_admin(user)
@@ -772,6 +788,7 @@ class IskTransaction(models.Model):
     isk = MoneyField(
         max_digits=14, decimal_places=2, default_currency='EEI') 
     transaction_type = models.TextField(choices=[
+        ("price_change_broker_fee", "Price Change Broker Fee"),
         ("broker_fee", "Broker Fee"),
         ("transaction_tax", "Transaction Tax"),
         ("contract_broker_fee","Contract Broker Fee"),
@@ -784,7 +801,8 @@ class IskTransaction(models.Model):
     notes = models.TextField(default='', blank=True)
 
     def __str__(self):
-        return f"{self.item.id} - {self.quantity} - {self.time} - {self.isk} - {self.transaction_type} - {self.notes}"
+        return f"Isk Transaction @ {self.time} for {self.isk} of type {self.transaction_type} with notes: '{self.notes}'"
+
 
 class EggTransaction(models.Model):
     item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
@@ -814,6 +832,28 @@ class MarketOrder(models.Model):
     
     def has_admin(self, user):
         return self.item.has_admin(user)
+    
+    def change_price(self, new_price, broker_fee, changing_user):
+        if not self.has_admin(changing_user):
+            return False, f"You do not have permissions as {changing_user} to edit the price of {self}"
+        
+        with transaction.atomic():
+            old_price = self.listed_at_price.amount
+            if new_price == old_price:
+                return False, f"The new price must be different from the old price."
+            else:
+                if old_price > new_price:
+                    notes = 'Market Price Was Reduced'
+                    fee = to_isk(m.floor(new_price * self.quantity * broker_fee/2))
+                else:
+                    notes = 'Market Price Was Increased'
+                    fee = to_isk(m.floor((new_price - old_price/2) * self.quantity * broker_fee))
+                notes = notes + f' incuring a fee of {fee}.'
+                self.listed_at_price = to_isk(new_price) 
+                self.full_clean()
+                self.save()
+                return self.item.add_isk_transaction(-fee, "price_change_broker_fee", self.quantity, notes, changing_user)
+
     
     def __str__(self):
         return f"A {self.buy_or_sell} of {self.item.item} x {self.quantity} listed for {self.listed_at_price} @ {self.internal_or_external} market"

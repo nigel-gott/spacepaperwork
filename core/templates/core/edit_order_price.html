@@ -1,0 +1,108 @@
+{% extends "core/base.html" %}
+{% load materializecss %}
+{% load static %}
+{% block body %}
+<h4>{{title}}</h4>
+For Existing Market Order: 
+                   <a href="{% url 'item_view' order.item.id %}">
+                  {{order}}
+                  </a>
+<div class="divider"></div>
+<div class="section">
+    {% if form %}
+    <!-- Form Errors -->
+    {% if form.non_field_errors %}
+    <div class="row">
+        <div class="col s12 m5">
+            <div class="card-panel red darken-1">
+                <span class="white-text">
+                    <b>Errors with form:</b>
+                <ul class="errors">
+                    {% for error in form.non_field_errors%}
+                    <li>{{ error|escape }}</li>
+                    {% endfor %}
+                </ul>
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col s12 m12">
+                <span>
+                If you've already sold some at the current price please edit the quantity <a href="{% url 'order_sold' order.id %}">here</a> first before changing the price otherwise the fees will be incorrect.</span>
+            </div>
+        </div>
+        <div class="row">
+            {{ form.new_price|materializecss:'s12 m6, icon=attach_money'}}
+            {{ form.broker_fee|materializecss:'s12 m6, icon=content_cut'}}
+        </div>
+        <div class="row">
+            <span class="orange-text" id="fee_display"></span>
+            <br/>
+             <span class="red-text">THIS FEE MUST MATCH THE BROKER FEE SHOWN IN-GAME ON THE CONFIRMATION DIALOG AFTER CHANGING THE ORDERS PRICE. <br/> If it doesn't pm @thejanitor. </span>
+        </div>
+        <button id="submit_btn" type="submit" class="btn waves-effect waves-light" value="Submit">{{title}}
+            <i class="material-icons right">send</i>
+        </button>
+
+    </form>
+
+    {% endif %}
+</div>
+
+
+{% endblock %}
+
+{% block extrafooter %}
+
+<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/9.0.0/decimal.min.js" integrity="sha512-zPQm8HS4Phjo9pUbbk+HPH3rSWu5H03NFvBpPf6D9EU2xasj0ZxhYAc/lvv/HVDWMSE1Autj19i6nZOfiVQbFQ==" crossorigin="anonymous"></script>
+{{ order_json|json_script:"order-data" }}
+
+<script>
+
+function calc_fee(){
+    new_price_str = $("#id_new_price").val();
+    if (new_price_str){
+
+        new_price = new Decimal(new_price_str);
+        
+        const order_data = JSON.parse(document.getElementById('order-data').textContent);
+        broker_fee = new Decimal(order_data['broker_fee']).dividedBy(100);
+        old_price = new Decimal(order_data['old_price']);
+        quantity = new Decimal(order_data['quantity']);
+
+        if(new_price.greaterThan(old_price)){
+            price_diff = new_price.minus(old_price.dividedBy(2))
+            listed_price = price_diff.times(quantity)
+            fee = listed_price.times(broker_fee)
+        } else if(old_price.greaterThan(new_price)){
+            fee = new_price.times(quantity).times(broker_fee.dividedBy(2));
+        } else {
+            fee = new Decimal('0');
+        }
+        if(!new_price.equals(old_price)){
+            $("#fee_display").html("The Change Price Broker Fee will be shown ingame on the confirmation dialog as: <b>" + fee + "</b> ISK");
+            $("#submit_btn").prop('disabled', false)
+        } else {
+            $("#fee_display").text("You must enter a different price.");
+            $("#submit_btn").prop('disabled', true)
+        }
+    } else {
+        $("#fee_display").text("You must enter price.");
+        $("#submit_btn").prop('disabled', true)
+    }
+}
+(function($) {
+
+    $("#id_new_price").on("change paste keyup", calc_fee);
+    calc_fee();
+
+})($)
+</script>
+
+{% endblock %}

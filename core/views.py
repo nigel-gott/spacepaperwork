@@ -21,7 +21,7 @@ from django.views.generic.edit import UpdateView
 from djmoney.money import Money
 from moneyed.localization import format_money
 
-from core.forms import CharacterForm, DeleteItemForm, DepositEggsForm, FleetAddMemberForm, FleetForm, InventoryItemForm, ItemMoveAllForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SelectFilterForm, SellItemForm, SettingsForm, SoldItemForm
+from core.forms import CharacterForm, DeleteItemForm, DepositEggsForm, EditOrderPriceForm, FleetAddMemberForm, FleetForm, InventoryItemForm, ItemMoveAllForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SelectFilterForm, SellItemForm, SettingsForm, SoldItemForm
 from core.models import AnomType, Character, CharacterLocation, Contract, DiscordUser, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, Item, ItemFilterGroup, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
 from django.forms.forms import Form
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -675,6 +675,35 @@ def item_move_all(request):
             
     return render(request, 'core/item_move_all.html', {'form': form, 'title': 'Contract All Your Items'})
 
+@login_required(login_url=login_url)
+def edit_order_price(request, pk):
+    market_order = get_object_or_404(MarketOrder, pk=pk)
+
+    if not market_order.has_admin(request.user):
+        return forbidden(request)
+
+    if request.method == 'POST':
+        form = EditOrderPriceForm(request.POST)
+        if form.is_valid():
+            new_price = form.cleaned_data['new_price']
+            broker_fee = form.cleaned_data['broker_fee']/100
+            success, message = market_order.change_price(new_price, broker_fee, request.user)
+            if success:
+                messages.success(request, message)
+                return HttpResponseRedirect(reverse('orders')) 
+            else:
+                messages.error(request, message)
+                return HttpResponseRedirect(reverse('edit_order_price', args=[pk])) 
+    else:
+        form = EditOrderPriceForm()
+        form.fields['new_price'].initial = market_order.listed_at_price.amount
+        form.fields['broker_fee'].initial = request.user.broker_fee 
+    order_json = {
+        'old_price':market_order.listed_at_price.amount,
+        'quantity':market_order.quantity,
+        'broker_fee':request.user.broker_fee
+    }
+    return render(request, 'core/edit_order_price.html', {'order_json':order_json, 'order':market_order,'form': form, 'title': 'Change Price of An Existing Market Order'})
 
 @login_required(login_url=login_url)
 def item_add(request, lg_pk):

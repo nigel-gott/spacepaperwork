@@ -9,6 +9,7 @@ from core.models import (Corp, DiscordUser, Item, ItemFilterGroup,
 
 from .fields import TimeZoneFormField
 from .models import AnomType, Character, FleetType, GooseUser, System
+from decimal import Decimal
 
 
 class SignupFormWithTimezone(SignupForm):
@@ -235,6 +236,10 @@ class InventoryItemForm(forms.Form):
 class DeleteItemForm(forms.Form):
     are_you_sure = forms.BooleanField(initial=False)
 
+class EditOrderPriceForm(forms.Form):
+    new_price = forms.DecimalField(max_digits=14, decimal_places=2)
+    broker_fee = forms.DecimalField(
+        max_digits=5, decimal_places=2, label="Broker Fee %")
 
 class SellItemForm(forms.Form):
     transaction_tax = forms.DecimalField(
