@@ -674,12 +674,50 @@ def to_isk(number):
 class StackedInventoryItem(models.Model):
     created_at = models.DateTimeField()
 
+                    # <td>{{stack.order_quantity}}</td>
+                    # <td>{{stack.buy_sell}}</td>
+                    # <td>{{stack.internal_external}}</td>
+                    # <td>{{stack.list_price}}</td>
+    def _first_item(self):
+        items = self.inventoryitem_set.count()
+        if items > 0:
+            return self.inventoryitem_set.first()
+        else:
+            return False
+    
+    def marketorder(self):
+        return self._first_item() and self._first_item().marketorder
+    
+    def order_quantity(self):
+        return model_sum(MarketOrder.objects.filter(item__stack=self.id),'quantity')
+
+    def quantity(self):
+        return model_sum(InventoryItem.objects.filter(stack=self.id),'quantity')
+
+    def sold_quantity(self):
+        return model_sum(SoldItem.objects.filter(item__stack=self),'quantity')
+
+    def total_quantity(self):
+        return self.order_quantity() + self.quantity() + self.sold_quantity()
+
+    def buy_sell(self):
+        return self.marketorder() and self.marketorder().buy_or_sell
+
+    def internal_external(self):
+        return self.marketorder() and self.marketorder().internal_or_external
+
+    def list_price(self):
+        return self.marketorder() and self.marketorder().listed_at_price
+
     def loc(self):
         items = self.inventoryitem_set.count()
         if items > 0:
             return self.inventoryitem_set.first().location
         else:
             return False 
+    
+    def items(self):
+        return self.inventoryitem_set.all()
 
     def has_admin(self, user):
         items = self.inventoryitem_set.count()
@@ -687,6 +725,15 @@ class StackedInventoryItem(models.Model):
             return self.inventoryitem_set.first().has_admin(user)
         else:
             return True
+    
+    def can_sell(self):
+        return self._first_item() and self._first_item().can_sell()
+
+    def item_info(self):
+        return self._first_item() and self._first_item().item
+    
+    def __str__(self):
+        return f"Stack of {self.item_info()} x {self.total_quantity()}"
 
 class InventoryItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
@@ -867,12 +914,11 @@ class MarketOrder(models.Model):
                 return False, f"The new price must be different from the old price."
             else:
                 if old_price > new_price:
-                    notes = 'Market Price Was Reduced'
+                    notes = f'Market Price Was Reduced from {old_price} to {new_price}'
                     fee = to_isk(m.floor(new_price * self.quantity * broker_fee/2))
                 else:
-                    notes = 'Market Price Was Increased'
+                    notes = f'Market Price Was Increased from {old_price} to {new_price}'
                     fee = to_isk(m.floor((new_price - old_price/2) * self.quantity * broker_fee))
-                notes = notes + f' incuring a fee of {fee}.'
                 self.listed_at_price = to_isk(new_price) 
                 self.full_clean()
                 self.save()

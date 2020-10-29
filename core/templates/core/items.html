@@ -43,7 +43,8 @@ Participation will still be tracked and the person receiving the contract will h
         <th>Location</th>
         <th>Item</th>
         <th>Quantity</th>
-        <th>Action</th>
+        <th>UnStack</th>
+        <th>Sell</th>
       </thead>
       <tbody>
         {% for loc_items in all_items %}
@@ -60,17 +61,18 @@ Participation will still be tracked and the person receiving the contract will h
                 </td>
           </tr>
           <tr>
-            <td class="center-align" colspan="3">Stacked Items</td>
+            <td class="center-align" colspan="4">Stacked Items</td>
           </tr>
           {% for stack_id, stack in loc_items.stacks.items %}
           <tr>
             <td><a href="{% url 'stack_view' stack.stack_id %}">{{stack.item}}</a></td>
             <td>{{stack.quantity}}</td>
             <td><a href="{% url 'stack_delete' stack.stack_id %}">UnStack</a></td>
+            <td><a class="waves-btn btn green" href="{% url 'stack_sell' stack.stack_id %}">Sell Stack</a></td>
           </tr>
           {% endfor %}
           <tr>
-            <td class="center-align" colspan="3">UnStacked Items</td>
+            <td class="center-align" colspan="4">UnStacked Items</td>
           </tr>
           {% for item in loc_items.unstacked %}
           <tr>

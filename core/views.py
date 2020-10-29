@@ -709,6 +709,41 @@ def item_move_all(request):
     return render(request, 'core/item_move_all.html', {'form': form, 'title': 'Contract All Your Items'})
 
 @login_required(login_url=login_url)
+def stack_change_price(request, pk):
+    stack = get_object_or_404(StackedInventoryItem, pk=pk)
+
+    if not stack.has_admin(request.user):
+        return forbidden(request)
+
+    if request.method == 'POST':
+        form = EditOrderPriceForm(request.POST)
+        if form.is_valid():
+            success = True 
+            for item in stack.items():
+                new_price = form.cleaned_data['new_price']
+                broker_fee = form.cleaned_data['broker_fee']/100
+                inner_success, message = item.marketorder.change_price(new_price, broker_fee, request.user)
+                success = inner_success and success
+                if not success:
+                    break
+
+            if success:
+                messages.success(request, "Succesfully changed the price of the stack.")
+                return HttpResponseRedirect(reverse('orders')) 
+            else:
+                raise ValidationError("Failed changing one a stacks market orders: " + message)
+    else:
+        form = EditOrderPriceForm()
+        form.fields['new_price'].initial = stack.list_price().amount
+        form.fields['broker_fee'].initial = request.user.broker_fee 
+    order_json = {
+        'old_price':stack.list_price().amount,
+        'quantity':stack.order_quantity(),
+        'broker_fee':request.user.broker_fee
+    }
+    return render(request, 'core/stack_edit_order_price.html', {'order_json':order_json, 'order':stack,'form': form, 'title': 'Change Price of An Existing Stack Market Order'})
+
+@login_required(login_url=login_url)
 def edit_order_price(request, pk):
     market_order = get_object_or_404(MarketOrder, pk=pk)
 
@@ -872,13 +907,11 @@ def orders(request):
     for char in characters:
         char_locs = CharacterLocation.objects.filter(character=char)
         for char_loc in char_locs:
-            loc = ItemLocation.objects.get(
-                character_location=char_loc, corp_hanger=None)
-            orders = MarketOrder.objects.filter(item__location=loc)
-            all_orders.append({
-                'loc': loc,
-                'orders':orders,
-            })
+            items = get_items_in_location(char_loc, InventoryItem.objects.filter(marketorder__isnull=False))
+            if items['total_in_loc'] > 0:
+                all_orders.append(
+                    items
+                )
 
     return render(request, 'core/orders.html', {'all_orders': all_orders})
 
@@ -928,17 +961,20 @@ def all_items(request):
     characters = Character.objects.annotate(cc=Sum('characterlocation__itemlocation__inventoryitem__quantity')).filter(cc__gt=0)
     return render_item_view(request,characters,False, 'All Items')
 
-def get_items_in_location(char_loc):
+def get_items_in_location(char_loc,item_source=None):
     loc = ItemLocation.objects.get(
         character_location=char_loc, corp_hanger=None)
-    unstacked_items = InventoryItem.objects.filter(stack__isnull=True, contract__isnull=True, location=loc, quantity__gt=0)
-    stacked_items = InventoryItem.objects.filter(stack__isnull=False, contract__isnull=True, location=loc, quantity__gt=0)
+    if not item_source:
+        item_source= InventoryItem.objects.filter(quantity__gt=0)
+    unstacked_items = item_source.filter(stack__isnull=True, contract__isnull=True, location=loc)
+    stacked_items = item_source.filter(stack__isnull=False, contract__isnull=True, location=loc)
     stacks = {}
     stacks_by_item = {}
     for item in stacked_items.all():
         if item.stack.id not in stacks:
             stacks[item.stack.id] = {
                 'type':'stack',
+                'stack':item.stack,
                 'stack_id':item.stack.id,
                 'item':item.item,
                 'quantity':item.quantity
@@ -1354,6 +1390,62 @@ def transfer_eggs(request):
         })
     return render(request, 'core/transfer_eggs_form.html', {'form': form, 'title': 'Transfer Eggs', 'total':total, 'count':count, 'command':command, 'explaination':explaination}) 
 
+
+def sell_item(item, form):
+    price = form.cleaned_data['listed_at_price']
+    total_isk_listed = item.quantity * price
+    broker_fee_percent = form.cleaned_data['broker_fee']/100
+    broker_fee = Money(amount=round(-(total_isk_listed* broker_fee_percent),2), currency="EEI")
+    broker_fee = IskTransaction(
+        item = item,
+        time = timezone.now(),
+        isk = broker_fee, 
+        quantity = item.quantity,
+        transaction_type = "broker_fee",
+    )
+    broker_fee.full_clean()
+    broker_fee.save()
+    sell_order = MarketOrder(
+        item = item,
+        internal_or_external="external",
+        buy_or_sell="sell",
+        quantity=item.quantity,
+        listed_at_price = price,
+        transaction_tax = form.cleaned_data['transaction_tax'],
+        broker_fee = form.cleaned_data['broker_fee']
+    )
+    sell_order.full_clean()
+    sell_order.save()
+    item.quantity = 0
+    item.save()
+
+@login_required(login_url=login_url)
+@transaction.atomic
+def stack_sell(request, pk):
+    stack = get_object_or_404(StackedInventoryItem, pk=pk)
+    if not stack.has_admin(request.user):
+        messages.error(request, f"You do not have permission to sell stack {stack.id}")
+        return HttpResponseRedirect(reverse('items')) 
+
+    if not stack.can_sell():
+        messages.error(request, f"You cannot sell {stack} as it is already being sold, has been contracted, or has been sold already.")
+        return HttpResponseRedirect(reverse('items')) 
+
+    if request.method == 'POST':
+        form = SellItemForm(request.POST)
+        if form.is_valid():
+            for item in stack.items():
+                sell_item(item, form)
+        messages.success(request,"Succesfully created market order forstack")
+        return HttpResponseRedirect(reverse('items')) 
+    else:
+        form = SellItemForm(initial={
+            'broker_fee':request.user.broker_fee,
+            'transaction_tax':request.user.transaction_tax,
+        })
+
+    return render(request, 'core/sell_stack.html', {'form': form, 'title': f'Sell Stack {stack}', 'stack':stack})
+
 @login_required(login_url=login_url)
 @transaction.atomic
 def item_sell(request, pk):
@@ -1368,32 +1460,7 @@ def item_sell(request, pk):
     if request.method == 'POST':
         form = SellItemForm(request.POST)
         if form.is_valid():
-            price = form.cleaned_data['listed_at_price']
-            total_isk_listed = item.quantity * price
-            broker_fee_percent = form.cleaned_data['broker_fee']/100
-            broker_fee = Money(amount=round(-(total_isk_listed* broker_fee_percent),2), currency="EEI")
-            broker_fee = IskTransaction(
-                item = item,
-                time = timezone.now(),
-                isk = broker_fee, 
-                quantity = item.quantity,
-                transaction_type = "broker_fee",
-            )
-            broker_fee.full_clean()
-            broker_fee.save()
-            sell_order = MarketOrder(
-                item = item,
-                internal_or_external="external",
-                buy_or_sell="sell",
-                quantity=item.quantity,
-                listed_at_price = price,
-                transaction_tax = form.cleaned_data['transaction_tax'],
-                broker_fee = form.cleaned_data['broker_fee']
-            )
-            sell_order.full_clean()
-            sell_order.save()
-            item.quantity = 0
-            item.save()
+            sell_item(item, form)
             return HttpResponseRedirect(reverse('items')) 
     else:
         form = SellItemForm(initial={
