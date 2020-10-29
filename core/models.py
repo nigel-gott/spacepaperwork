@@ -59,7 +59,7 @@ class Character(models.Model):
     discord_user = models.ForeignKey(DiscordUser, on_delete=models.CASCADE)
     ingame_name = models.TextField(unique=True)
     corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
-    verified = models.BooleanField()
+    verified = models.BooleanField(null=True,blank=True)
 
     def gooseuser_or_false(self):
         return self.discord_user and hasattr(self.discord_user,'gooseuser') and self.discord_user.gooseuser
