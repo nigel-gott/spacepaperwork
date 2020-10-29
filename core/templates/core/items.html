@@ -41,8 +41,6 @@ Participation will still be tracked and the person receiving the contract will h
     <table>
       <thead>
         <th>Location</th>
-        <th>Fleet</th>
-        <th>Loot Group</th>
         <th>Item</th>
         <th>Quantity</th>
         <th>Action</th>
@@ -50,41 +48,32 @@ Participation will still be tracked and the person receiving the contract will h
       <tbody>
         {% for loc_items in all_items %}
           {% has_admin loc_items.loc user as has_item_admin %}
-          {% for fleet_id, items in loc_items.items_by_fleet.items %}
-          {% for item in items %}
             <tr>
-                {% if forloop.parentloop.first and forloop.first %}
-                <td rowspan="{{loc_items.total_in_loc}}">
+                <td rowspan="{{loc_items.total_in_loc|add:"3"}}">
                 {{loc_items.loc}}
                 </td>
-                {% endif %}
-                {% if forloop.first %}
-              {% if has_item_admin %}
-                <td rowspan="{{items|length|add:"1"}}">
-                {% else %}
-                <td rowspan="{{items|length}}">
-                {% endif %}
-                {% if fleet_id %}
-                    <a href="{% url 'fleet_view' fleet_id %}">Fleet {{fleet_id}}</a>
-                    {% else %}
-                    No Fleet
-                    {% endif %}
-                </td>
-              {% if has_item_admin %}
-              <td colspan="3">
-                <a class="waves-btn btn pink" href="{% url 'item_contract_fleet' fleet_id loc_items.loc.id %}">Contract Fleet {{fleet_id}} Items Here</a>
-              </td>
-            </tr>
-            <tr>
-            {% endif %}
-                {% endif %}
-                <td>
-                  {% if item.loot_group %}
-                    <a href="{% url 'loot_group_view' item.loot_group.id %}">Loot Group {{item.loot_group.id}}</a>
-                    {% else %}
-                    No Loot Group
-                    {% endif %}
-                </td>
+                <td colspan="3">
+      {% if has_item_admin %}
+      <a class="waves-btn btn green" href="{% url 'stack_items' loc_items.loc.id %}">Stack All In {{loc_items.loc}}</a>
+      <a class="waves-btn btn blue" href="{% url 'contract_items_in_loc' loc_items.loc.id %}">Contract All In {{loc_items.loc}}</a>
+      {% endif %}
+      </td>
+          </tr>
+          <tr>
+            <td colspan="3">Stacked Items:</td>
+          </tr>
+          {% for stack_id, stack in loc_items.stacks.items %}
+          <tr>
+            <td>{{stack.item}}</td>
+            <td>{{stack.quantity}}</td>
+            <td>{{stack.stack_id}}</td>
+          </tr>
+          {% endfor %}
+          <tr>
+            <td colspan="3">UnStacked Items:</td>
+          </tr>
+          {% for item in loc_items.unstacked %}
+          <tr>
                 <td>
                     <a href="{% url 'item_view' item.id %}">
                   {{item.item}}
@@ -111,7 +100,6 @@ Participation will still be tracked and the person receiving the contract will h
       {% endif %}
                 </td>
             </tr>
-          {% endfor %}
           {% endfor %}
         {% endfor %}
       </tbody>

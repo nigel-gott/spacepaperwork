@@ -398,9 +398,9 @@ class CharacterLocation(models.Model):
 
     def __str__(self):
         if not self.system:
-            return f"In Space on {self.character.ingame_name}({self.character.discord_username()})"
+            return f"Space On {self.character.ingame_name}({self.character.discord_username()})"
         else:
-            return f"In station on {self.character.ingame_name} @ {self.system} ({self.character.discord_username()}"
+            return f"{self.system.name} On {self.character.ingame_name}({self.character.discord_username()})"
 
 
 class ItemLocation(models.Model):
@@ -671,12 +671,17 @@ def model_sum(queryset, key):
 def to_isk(number):
     return Money(amount=round(number,2), currency="EEI")
     
+class StackedInventoryItem(models.Model):
+    created_at = models.DateTimeField()
+
 class InventoryItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
+    created_at = models.DateTimeField()
     location = models.ForeignKey(ItemLocation, on_delete=models.CASCADE)
-    loot_group = models.ForeignKey(LootGroup, on_delete=models.CASCADE, null=True, blank=True)
-    contract = models.ForeignKey(Contract, on_delete=models.CASCADE, null=True, blank=True)
+    loot_group = models.ForeignKey(LootGroup, on_delete=models.SET_NULL, null=True, blank=True)
+    contract = models.ForeignKey(Contract, on_delete=models.SET_NULL, null=True, blank=True)
+    stack = models.ForeignKey(StackedInventoryItem, on_delete=models.SET_NULL, null=True, blank=True)
 
     def add_isk_transaction(self, isk, transaction_type, quantity, notes, user):
         if not self.has_admin(user):
@@ -780,7 +785,7 @@ class InventoryItem(models.Model):
     
     def __str__(self):
         return f"{self.item} x {self.total_quantity()} @ {self.location}"
-
+    
 class IskTransaction(models.Model):
     item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
     quantity = models.IntegerField()
@@ -874,7 +879,7 @@ class SoldItem(models.Model):
     deposited_into_eggs = BooleanField(default=False)
     deposit_approved = BooleanField(default=False)
     transfered_to_participants = BooleanField(default=False)
-    transfer_log = models.ForeignKey(TransferLog, on_delete=models.CASCADE, null=True, blank=True)
+    transfer_log = models.ForeignKey(TransferLog, on_delete=models.SET_NULL, null=True, blank=True)
 
     def isk_balance(self):
         return self.item.isk_balance()

@@ -22,7 +22,7 @@ from djmoney.money import Money
 from moneyed.localization import format_money
 
 from core.forms import CharacterForm, DeleteItemForm, DepositEggsForm, EditOrderPriceForm, FleetAddMemberForm, FleetForm, InventoryItemForm, ItemMoveAllForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SelectFilterForm, SellItemForm, SettingsForm, SoldItemForm
-from core.models import AnomType, Character, CharacterLocation, Contract, DiscordUser, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, Item, ItemFilterGroup, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
+from core.models import AnomType, Character, CharacterLocation, Contract, DiscordUser, EggTransaction, Fleet, FleetAnom, FleetMember, GooseUser, InventoryItem, IskTransaction, Item, ItemFilterGroup, ItemLocation, JunkedItem, LootBucket, LootGroup, LootShare, MarketOrder, SoldItem, StackedInventoryItem, TransferLog, active_fleets_query, future_fleets_query, past_fleets_query, to_isk
 from django.forms.forms import Form
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from core.autocomplete import create_ifg_choice_list
@@ -611,6 +611,39 @@ def create_contract_item(request, pk):
         form = ItemMoveAllForm(
             )
     return render(request, 'core/item_move_all.html', {'form': form, 'title': f'Contract Individual Item: {item}'})
+
+@transaction.atomic
+@login_required(login_url=login_url)
+def create_contract_for_loc(request, pk):
+    loc = get_object_or_404(ItemLocation, pk=pk)
+    if request.method == 'POST':
+        form = ItemMoveAllForm(request.POST)
+        if form.is_valid():
+            if not loc.has_admin(request.user):
+                messages.error(request, f"You do not have permission to move items from {loc}")
+                return forbidden(request)
+            system = form.cleaned_data['system']
+            character = form.cleaned_data['character']
+            items_in_location = InventoryItem.objects.filter(contract__isnull=True, location=loc, quantity__gt=0, marketorder__isnull=True, solditem__isnull=True)
+            if items_in_location.count() == 0:
+                messages.error(request, "You have no items to contract :'(") 
+                return forbidden(request)
+
+            contract = Contract(
+                from_user=request.user,
+                to_char=character,
+                system=system,
+                created=timezone.now(),
+                status='pending'
+            )
+            contract.full_clean()
+            contract.save()
+            items_in_location.update(contract=contract)
+            return HttpResponseRedirect(reverse('contracts')) 
+    else:
+        form = ItemMoveAllForm(
+            )
+    return render(request, 'core/item_move_all.html', {'form': form, 'title': f'Contract All Your Items In {loc}'})
 @transaction.atomic
 @login_required(login_url=login_url)
 def create_contract_for_fleet(request, fleet_pk, loc_pk):
@@ -741,7 +774,8 @@ def item_add(request, lg_pk):
                         loot_group=loot_group,
                         item=item,
                         defaults = {
-                            'quantity':quantity
+                            'quantity':quantity,
+                            'created_at':timezone.now()
                         }
                     )
                     count = count + quantity 
@@ -756,6 +790,7 @@ def item_add(request, lg_pk):
                                 loot_group=loot_group,
                                 item=item,
                                 quantity=quantity,
+                                created_at=timezone.now()
                             )
                             new_item.full_clean()
                             new_item.save()
@@ -893,31 +928,94 @@ def all_items(request):
     characters = Character.objects.annotate(cc=Sum('characterlocation__itemlocation__inventoryitem__quantity')).filter(cc__gt=0)
     return render_item_view(request,characters,False, 'All Items')
 
+def get_items_in_location(char_loc):
+    loc = ItemLocation.objects.get(
+        character_location=char_loc, corp_hanger=None)
+    unstacked_items = InventoryItem.objects.filter(stack__isnull=True, contract__isnull=True, location=loc, quantity__gt=0)
+    stacked_items = InventoryItem.objects.filter(stack__isnull=False, contract__isnull=True, location=loc, quantity__gt=0)
+    stacks = {}
+    stacks_by_item = {}
+    for item in stacked_items.all():
+        if item.stack.id not in stacks:
+            stacks[item.stack.id] = {
+                'type':'stack',
+                'stack_id':item.stack.id,
+                'item':item.item,
+                'quantity':item.quantity
+            }
+            if item.item.name not in stacks_by_item:
+                stacks_by_item[item.item.name] = [] 
+            stacks_by_item[item.item.name].append(stacks[item.stack.id])
+        else:
+            stack = stacks[item.stack.id]
+            if item.item != stack['item']:
+                raise ValidationError("Invalid Stack Found: " + item.stack.id)
+            stack['quantity'] = stack['quantity']+item.quantity
+    total_in_loc = len(unstacked_items) + len(stacked_items)
+    return {
+        'total_in_loc':total_in_loc,
+        'loc':char_loc,
+        'char':char_loc.character,
+        'unstacked':unstacked_items,
+        'stacks':stacks,
+        'stacks_by_item':stacks_by_item
+    }
+
 def render_item_view(request, characters, show_contract_all, title):
     all_items = []
     for char in characters:
         char_locs = CharacterLocation.objects.filter(character=char)
         for char_loc in char_locs:
-            items_by_fleet = {}
-            loc = ItemLocation.objects.get(
-                character_location=char_loc, corp_hanger=None)
-            items = InventoryItem.objects.filter(contract__isnull=True, location=loc, quantity__gt=0)
-            fleets = items.values('loot_group__fleet_anom__fleet').distinct()
-            for fleet in fleets:
-                fleet_id = fleet['loot_group__fleet_anom__fleet']
-                items_by_fleet[fleet_id] = items.filter(loot_group__fleet_anom__fleet=fleet_id)
-            if char_loc.has_admin(request.user):
-                fleet_count = fleets.count()
-            else:
-                fleet_count = 0
-
-            all_items.append({
-                'total_in_loc': items.count() + fleet_count, 
-                'loc': loc,
-                'items_by_fleet':items_by_fleet,
-            })
-
+            items = get_items_in_location(char_loc)
+            if items['total_in_loc'] > 0:
+                all_items.append(items)
     return render(request, 'core/items.html', {'all_items': all_items, 'show_contract_all':show_contract_all, 'title':title})
+
+
+def stack_in_location(loc):
+    items = get_items_in_location(loc)
+    unstacked = items['unstacked']
+    stacks_by_item = items['stacks_by_item']
+    merged_stacks_by_item = {}
+    for item, stacks in stacks_by_item.items():
+        merge_stack = stacks[0]
+        for stack in stacks[1:]:
+            InventoryItem.objects.filter(stack=stack['stack_id']).update(stack=merge_stack['stack_id'])
+            StackedInventoryItem.objects.get(id=stack['stack_id']).delete()
+        merged_stacks_by_item[item] = merge_stack['stack_id']
+
+    for unstacked_item in unstacked.all():
+        item_name = unstacked_item.item.name
+        if item_name not in merged_stacks_by_item:
+            new_stack = StackedInventoryItem(created_at=timezone.now())
+            new_stack.full_clean()
+            new_stack.save()
+            merged_stacks_by_item[item_name] = new_stack.id
+        unstacked_item.stack_id = merged_stacks_by_item[item_name]
+        unstacked_item.full_clean()
+        unstacked_item.save()
+    return True, f"Stacked All Items in {loc}!"
+
+
+    
+@login_required(login_url=login_url)
+@transaction.atomic
+def stack_items(request, pk):
+    loc = get_object_or_404(ItemLocation, pk=pk)
+    items = get_items_in_location(loc.character_location)
+    if request.method == 'POST':
+        if not loc.has_admin(request.user):
+            messages.error(request, f"You do not have permission to stack items in {loc}")
+            return HttpResponseRedirect(reverse('items')) 
+        success, message = stack_in_location(loc.character_location)
+        if success:
+            messages.success(request, message)
+            return HttpResponseRedirect(reverse('items')) 
+        else:
+            messages.error(request, message)
+            return HttpResponseRedirect(reverse('stack_items', args=[pk])) 
+
+    return render(request, 'core/item_stack_confirm.html', {'items': items}) 
 
 @login_required(login_url=login_url)
 def view_transfer_log(request, pk):

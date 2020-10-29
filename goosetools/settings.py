@@ -243,3 +243,8 @@ LOGGING = {
 }
 
 ACCOUNT_LOGOUT_REDIRECT_URL='/goosetools/'
+
+GRAPH_MODELS = {
+  'all_applications': True,
+  'group_models': True,
+}
