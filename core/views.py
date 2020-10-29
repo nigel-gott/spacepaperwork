@@ -951,7 +951,7 @@ def get_items_in_location(char_loc):
             if item.item != stack['item']:
                 raise ValidationError("Invalid Stack Found: " + item.stack.id)
             stack['quantity'] = stack['quantity']+item.quantity
-    total_in_loc = len(unstacked_items) + len(stacked_items)
+    total_in_loc = len(unstacked_items) + len(stacked_items.values('stack').distinct())
     return {
         'total_in_loc':total_in_loc,
         'loc':char_loc,
@@ -1035,7 +1035,7 @@ def item_minus(request, pk):
     if request.method == 'POST':
         result = inventory_item.add(-1)
         if not result:
-            messages.error(request, "Failed to increment item")
+            messages.error(request, "Failed to decrement item, maybe it's in a pending contract or being sold?")
     return HttpResponseRedirect(reverse('loot_group_view', args=[inventory_item.loot_group.id]))
 @login_required(login_url=login_url)
 def item_plus(request, pk):
@@ -1045,7 +1045,7 @@ def item_plus(request, pk):
     if request.method == 'POST':
         result = inventory_item.add(1)
         if not result:
-            messages.error(request, "Failed to increment item")
+            messages.error(request, "Failed to increment item, maybe it's in a pending contract or being sold?")
     return HttpResponseRedirect(reverse('loot_group_view', args=[inventory_item.loot_group.id]))
 
 @login_required(login_url=login_url)

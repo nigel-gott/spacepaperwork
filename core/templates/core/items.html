@@ -51,13 +51,13 @@ Participation will still be tracked and the person receiving the contract will h
             <tr>
                 <td rowspan="{{loc_items.total_in_loc|add:"3"}}">
                 {{loc_items.loc}}
-                </td>
-                <td colspan="3">
       {% if has_item_admin %}
-      <a class="waves-btn btn green" href="{% url 'stack_items' loc_items.loc.id %}">Stack All In {{loc_items.loc}}</a>
-      <a class="waves-btn btn blue" href="{% url 'contract_items_in_loc' loc_items.loc.id %}">Contract All In {{loc_items.loc}}</a>
+      <br/>
+      <a class="waves-btn btn green" href="{% url 'stack_items' loc_items.loc.id %}">Stack All</a>
+      <br/>
+      <a class="waves-btn btn blue" href="{% url 'contract_items_in_loc' loc_items.loc.id %}">Contract All</a>
       {% endif %}
-      </td>
+                </td>
           </tr>
           <tr>
             <td colspan="3">Stacked Items:</td>

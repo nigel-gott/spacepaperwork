@@ -763,7 +763,12 @@ class InventoryItem(models.Model):
     def status(self):
         status = ""
         if self.quantity != 0:
-            status = status + f" {self.quantity} Waiting"
+            if self.contract: 
+                status = status + f" In Pending Contract"
+            else:
+                status = status + f" {self.quantity} Waiting"
+        if self.stack:
+            status = status + f" Stacked"
         quantity_listed = self.order_quantity() 
         if quantity_listed != 0:
             status = status + f" {quantity_listed} Listed"
