@@ -94,10 +94,10 @@ Participation will still be tracked and the person receiving the contract will h
                   {{item.quantity}}
                 </td>
                 <td>
-                {% if item.estimated_profit %}
-                  {{item.estimated_profit}}
+                {% if item.estimated_profit_sum != 0%}
+                  {{item.estimated_profit_sum}}
                 {% else %}
-                Missing Market Data
+                  None
                 {% endif %}
                 </td>
                 <td>

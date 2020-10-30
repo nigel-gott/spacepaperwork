@@ -12,6 +12,7 @@
         <th>Your Flat % Cut</th>
         <th>Loot Items On You From This Group</th>
         <th>Estimated Profit Remaining Of Your Loot Items</th>
+        <th>Estimated Profit The Groups Loot Items</th>
       </thead>
       <tbody>
           {% for item in items %}
@@ -35,7 +36,10 @@
               {{item.item_count}}
             </td>
             <td>
-              {{item.estimated_profit}}
+              {{item.my_estimated_profit}}
+            </td>
+            <td>
+              {{item.group_estimated_profit}}
             </td>
          </tr>
         {% endfor %}

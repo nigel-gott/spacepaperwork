@@ -9,7 +9,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core import validators
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models, transaction
-from django.db.models import DecimalField, Q
+from django.db.models import DecimalField, F, FloatField, Q
 from django.db.models.aggregates import Sum
 from django.db.models.expressions import Combinable
 from django.db.models.fields import BooleanField
@@ -21,6 +21,7 @@ from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 from timezone_field import TimeZoneField
 import math as m
+from django.db.models.functions import Coalesce
 
 
 class Corp(models.Model):
@@ -697,6 +698,14 @@ class LootGroup(models.Model):
         eggs = to_isk(model_sum(EggTransaction.objects.filter(item__loot_group=self.id), 'eggs'))
         return isk+eggs
         
+    def estimated_profit(self):
+        return to_isk(InventoryItem.objects.filter(loot_group=self.id).aggregate(estimated_profit_sum=
+                        Sum(
+                            Coalesce(F('item__cached_lowest_sell'), 0) * 
+                            (F('quantity') +
+                            Coalesce(F('marketorder__quantity'),0)),
+                        output_field=FloatField())
+                    )['estimated_profit_sum'] or 0)
     
     def __str__(self):
         return str(self.fleet_anom) 

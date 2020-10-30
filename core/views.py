@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, ExpressionWrapper, F, Q, Sum
 from django.forms.forms import Form
 from django.forms.formsets import formset_factory
 from django.http import (HttpResponseForbidden, HttpResponseNotAllowed,
@@ -40,6 +40,8 @@ from core.models import (AnomType, Character, CharacterLocation, Contract,
                          SoldItem, StackedInventoryItem, TransferLog,
                          active_fleets_query, future_fleets_query,
                          past_fleets_query, to_isk)
+from django.db.models.fields import FloatField
+from django.db.models.functions import Coalesce
 
 # Create your views here.
 
@@ -987,7 +989,8 @@ def fleet_shares(request):
             'loot_group_id':loot_group.id,
             'total_shares':loot_share.share_quantity,
             'total_cut':loot_share.flat_percent_cut,
-            'estimated_profit':estimated_profit,
+            'my_estimated_profit':estimated_profit,
+            'group_estimated_profit':loot_group.estimated_profit(),
             'item_count':my_items.count()
         })
     items = sorted(items, key=lambda x: x['loot_bucket'])
@@ -1004,7 +1007,13 @@ def get_items_in_location(char_loc,item_source=None):
         character_location=char_loc, corp_hanger=None)
     if item_source is None:
         item_source= InventoryItem.objects.filter(quantity__gt=0)
-    unstacked_items = item_source.filter(stack__isnull=True, contract__isnull=True, location=loc).order_by('-item__cached_lowest_sell')
+    unstacked_items = item_source.filter(stack__isnull=True, contract__isnull=True, location=loc).annotate(estimated_profit_sum=
+                    ExpressionWrapper(
+                        Coalesce(F('item__cached_lowest_sell'), 0) * 
+                        (F('quantity') +
+                        Coalesce(F('marketorder__quantity'),0)),
+                    output_field=FloatField())
+                ).order_by('-estimated_profit_sum')
     stacked_items = item_source.filter(stack__isnull=False, contract__isnull=True, location=loc).order_by('-item__cached_lowest_sell')
     stacks = {}
     stacks_by_item = {}
@@ -1032,7 +1041,7 @@ def get_items_in_location(char_loc,item_source=None):
         'loc':char_loc,
         'char':char_loc.character,
         'unstacked':unstacked_items,
-        'stacks':stacks,
+        'stacks':{k: stacks[k] for k in sorted(stacks, key=lambda x: stacks[x]['stack'].estimated_profit() or 0, reverse=True)},
         'stacks_by_item':stacks_by_item
     }
 
