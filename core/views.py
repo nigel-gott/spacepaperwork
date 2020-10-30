@@ -975,6 +975,14 @@ def items_grouped(request):
 
 @login_required(login_url=login_url)
 def all_fleet_shares(request):
+    DiscordUser.objects.annotate()
+    unstacked_items = DiscordUser.objects.filter(stack__isnull=True, contract__isnull=True, location=loc).annotate(estimated_profit_sum=
+                    ExpressionWrapper(
+                        Coalesce(F('item__cached_lowest_sell'), 0) * 
+                        (F('quantity') +
+                        Coalesce(F('marketorder__quantity'),0)),
+                    output_field=FloatField())
+                ).order_by('-estimated_profit_sum')
     users = LootShare.objects.values('character__discord_user', 'character__discord_user__username').distinct()
     return render(request, 'core/users_view.html', {'users': users, 'title':"All Users Shares"})
 

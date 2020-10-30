@@ -53,7 +53,11 @@ Participation will still be tracked and the person receiving the contract will h
           {% has_admin loc_items.loc user as has_item_admin %}
             <tr>
                 <td rowspan="{{loc_items.total_in_loc|add:"3"}}">
+                {% if loc_items.loc %}
+                <a href="{% url 'fleet_shares' loc_items.loc.character.discord_user.pk %}">{{loc_items.loc}}<a>
+                {% else %}
                 {{loc_items.loc}}
+                {% endif %}
       {% if has_item_admin %}
       <br/>
       <a class="waves-btn btn green" href="{% url 'stack_items' loc_items.loc.id %}">Stack All</a>
