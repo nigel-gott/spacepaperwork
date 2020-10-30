@@ -310,6 +310,14 @@ class Fleet(models.Model):
         isk = to_isk(model_sum(IskTransaction.objects.filter(item__loot_group__bucket__fleet=self.id),'isk'))
         eggs = to_isk(model_sum(EggTransaction.objects.filter(item__loot_group__bucket__fleet=self.id), 'eggs'))
         return isk+eggs
+    
+    def estimated_profit(self):
+        total = 0
+        items = InventoryItem.objects.filter(loot_group__fleet_anom__fleet=self.id)
+        for item in items:
+            total = total + (item.estimated_profit() or 0)
+        return total
+
 
     def __str__(self):
         return str(self.name)
@@ -359,11 +367,35 @@ class ItemSubSubType(models.Model):
 class Item(models.Model):
     item_type = models.ForeignKey(ItemSubSubType, on_delete=models.CASCADE)
     name = models.TextField(primary_key=True)
+    eve_echoes_market_id = models.TextField(null=True,blank=True, unique=True)
+    
+    def latest_market_data(self):
+        return self.itemmarketdataevent_set.order_by('-time').first()
+
+    def lowest_sell(self):
+        return self.latest_market_data().lowest_sell
+
 
     def __str__(self):
         return f"{str(self.name)}"
 
-    
+
+class ItemMarketDataEvent(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    time = models.DateTimeField()
+    sell = models.DecimalField(max_digits=14,decimal_places=2,null=True,blank=True)
+    buy = models.DecimalField(max_digits=14,decimal_places=2,null=True,blank=True)
+    lowest_sell = models.DecimalField(max_digits=14,decimal_places=2,null=True,blank=True)
+    highest_buy = models.DecimalField(max_digits=14,decimal_places=2,null=True,blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['-time']) 
+        ]
+
+    def __str__(self):
+        return f"Market Price for {self.item}@{self.time}: ls={self.lowest_sell}, hb={self.highest_buy}, s={self.sell}, b={self.buy}"
+
 
 
 
@@ -688,6 +720,11 @@ class StackedInventoryItem(models.Model):
         else:
             return False
     
+    def estimated_profit(self):
+        lowest_sell = self._first_item() and self._first_item().item.lowest_sell()
+        print(lowest_sell)
+        return lowest_sell and to_isk((self.order_quantity() + self.quantity())*lowest_sell)
+    
     def order_quantity(self):
         return model_sum(MarketOrder.objects.filter(item__stack=self.id),'quantity')
 
@@ -834,6 +871,11 @@ class InventoryItem(models.Model):
             return True
         else:
             return False
+    
+
+    def estimated_profit(self):
+        lowest_sell = self.item.lowest_sell()
+        return lowest_sell and to_isk((self.quantity + self.order_quantity()) * lowest_sell)
 
     
     def status(self):
@@ -854,6 +896,10 @@ class InventoryItem(models.Model):
         quantity_junked = self.junked_quantity() 
         if quantity_junked != 0:
             status = status + f" {quantity_junked} Junked"
+        
+        esimated_profit = self.estimated_profit()
+        if esimated_profit:
+            status = status + f", Est Profit: {esimated_profit}"
 
         isk = self.isk_balance()
         if isk.amount != 0:
@@ -861,6 +907,8 @@ class InventoryItem(models.Model):
         egg = self.egg_balance()
         if egg.amount != 0:
             status = status + f", Eggs Profit:{egg}"
+        
+
 
         return status
     

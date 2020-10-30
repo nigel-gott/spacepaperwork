@@ -3,7 +3,7 @@ import jsonpickle
 
 
 def main():
-    with open("misc_data/items.json", "r") as html_file:
+    with open("../misc_data/items.json", "r") as html_file:
         lines = json.load(html_file)
         groups = lines['groups']
         models = []
@@ -45,6 +45,7 @@ def main():
                             "pk": item_pk,
                             "fields": {
                                 "name": item['name'],
+                                "eve_echoes_market_id": item['id'],
                                 "item_type": item_sub_sub_type_pk
                             }
                         })
@@ -56,7 +57,7 @@ def main():
 
             item_type_pk = item_type_pk + 1
 
-        with open("misc_data/item_fixtures.json", "w") as out_file:
+        with open("../core/fixtures/items.json", "w") as out_file:
             out_file.write(jsonpickle.encode(models, indent=4))
 
 

@@ -44,6 +44,7 @@ Participation will still be tracked and the person receiving the contract will h
         <th>Location</th>
         <th>Item</th>
         <th>Quantity</th>
+        <th>Estimated Profit</th>
         <th>UnStack</th>
         <th>Sell</th>
       </thead>
@@ -68,6 +69,13 @@ Participation will still be tracked and the person receiving the contract will h
           <tr>
             <td><a href="{% url 'stack_view' stack.stack_id %}">{{stack.item}}</a></td>
             <td>{{stack.quantity}}</td>
+                <td>
+                {% if stack.stack.estimated_profit %}
+                  {{stack.stack.estimated_profit}}
+                {% else %}
+                Missing Market Data
+                {% endif %}
+                </td>
             <td><a href="{% url 'stack_delete' stack.stack_id %}">UnStack</a></td>
             <td><a class="waves-btn btn green" href="{% url 'stack_sell' stack.stack_id %}">Sell Stack</a></td>
           </tr>
@@ -84,6 +92,13 @@ Participation will still be tracked and the person receiving the contract will h
                 </td>
                 <td>
                   {{item.quantity}}
+                </td>
+                <td>
+                {% if item.estimated_profit %}
+                  {{item.estimated_profit}}
+                {% else %}
+                Missing Market Data
+                {% endif %}
                 </td>
                 <td>
               {% if has_item_admin %}

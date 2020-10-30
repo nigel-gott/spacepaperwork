@@ -30,6 +30,7 @@
                     <td>{{stack.stack.buy_sell}}</td>
                     <td>{{stack.stack.internal_external}}</td>
                     <td>{{stack.stack.list_price}}</td>
+                    <td>{{stack.stack.estimated_profit}}</td>
                     <td>
                       <a class="waves-btn btn orange" href="{% url 'stack_change_price' stack.stack_id %}">Edit</a><br/>
                       <a class="waves-btn btn green" href="{% url 'stack_sold' stack.stack_id %}">Sold</a>

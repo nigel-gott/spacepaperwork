@@ -976,13 +976,18 @@ def fleet_shares(request):
     items=[]
     for loot_share in loot_shares:
         loot_group=loot_share.loot_group
+        my_items = InventoryItem.objects.filter(location__character_location__character__discord_user=request.user.discord_user,loot_group=loot_group)
+        estimated_profit = 0
+        for item in my_items:
+            estimated_profit = estimated_profit + (item.estimated_profit() or 0)
         items.append({
             'fleet_id':loot_group.fleet_anom.fleet.id,
             'loot_bucket':loot_group.bucket.id,
             'loot_group_id':loot_group.id,
             'total_shares':loot_share.share_quantity,
             'total_cut':loot_share.flat_percent_cut,
-            'item_count':InventoryItem.objects.filter(location__character_location__character__discord_user=request.user.discord_user,loot_group=loot_group).count()
+            'estimated_profit':estimated_profit,
+            'item_count':my_items.count()
         })
     items = sorted(items, key=lambda x: x['loot_bucket'])
     return render(request, 'core/your_fleets_view.html', {'items': items, 'title':"Fleets you have shares and/or items for"})
@@ -1019,12 +1024,13 @@ def get_items_in_location(char_loc,item_source=None):
                 raise ValidationError("Invalid Stack Found: " + item.stack.id)
             stack['quantity'] = stack['quantity']+item.quantity
     total_in_loc = len(unstacked_items) + len(stacked_items.values('stack').distinct())
+
     return {
         'total_in_loc':total_in_loc,
         'loc':char_loc,
         'char':char_loc.character,
-        'unstacked':unstacked_items,
-        'stacks':stacks,
+        'unstacked':sorted(unstacked_items, key=lambda ui:ui.item.lowest_sell() or 0, reverse=True),
+        'stacks':{k: stacks[k] for k in sorted(stacks, key=lambda x: stacks[x]['item'].lowest_sell() or 0, reverse=True)},
         'stacks_by_item':stacks_by_item
     }
 
