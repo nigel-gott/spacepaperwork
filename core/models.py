@@ -373,7 +373,7 @@ class Item(models.Model):
         return self.itemmarketdataevent_set.order_by('-time').first()
 
     def lowest_sell(self):
-        return self.latest_market_data().lowest_sell
+        return self.latest_market_data() and self.latest_market_data().lowest_sell
 
 
     def __str__(self):
