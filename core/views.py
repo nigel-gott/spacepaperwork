@@ -1007,7 +1007,7 @@ def fleet_shares(request, pk):
         else:
             seen_groups[loot_group.id] = True
 
-        my_items = InventoryItem.objects.filter(location__character_location__character__discord_user=request.user.discord_user,loot_group=loot_group)
+        my_items = InventoryItem.objects.filter(location__character_location__character__discord_user=user,loot_group=loot_group)
         estimated_profit = 0
         for item in my_items:
             estimated_profit = estimated_profit + (item.estimated_profit() or 0)
@@ -1016,14 +1016,14 @@ def fleet_shares(request, pk):
         real_profit = loot_group.isk_and_eggs_balance()
         estimated_participation = loot_group.bucket.calculate_participation(total_estimated_profit, loot_group)
         real_participation = loot_group.bucket.calculate_participation(real_profit, loot_group)
-        your_group_estimated_profit = estimated_participation['participation'][request.user.discord_user.username]['total_isk']
-        your_real_profit = real_participation['participation'][request.user.discord_user.username]['total_isk']
+        your_group_estimated_profit = estimated_participation['participation'][user.username]['total_isk']
+        your_real_profit = real_participation['participation'][user.username]['total_isk']
         items.append({
             'fleet_id':loot_group.fleet_anom.fleet.id,
             'loot_bucket':loot_group.bucket.id,
             'loot_group_id':loot_group.id,
-            'your_shares':estimated_participation['participation'][request.user.discord_user.username]['shares'],
-            'your_cut':estimated_participation['participation'][request.user.discord_user.username]['flat_cut'],
+            'your_shares':estimated_participation['participation'][user.username]['shares'],
+            'your_cut':estimated_participation['participation'][user.username]['flat_cut'],
             'total_shares': estimated_participation['total_shares'],
             'total_cuts': estimated_participation['total_flat_cuts'],
             'my_estimated_profit':estimated_profit,
