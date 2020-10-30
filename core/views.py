@@ -977,24 +977,46 @@ def items_grouped(request):
 def fleet_shares(request):
     loot_shares = LootShare.objects.filter(character__discord_user=request.user.discord_user)
     items=[]
+    seen_groups={}
+    all_your_estimated_share_isk = 0
+    all_your_real_share_isk = 0
+
     for loot_share in loot_shares:
         loot_group=loot_share.loot_group
+        if loot_group.id in seen_groups:
+            continue
+        else:
+            seen_groups[loot_group.id] = True
+
         my_items = InventoryItem.objects.filter(location__character_location__character__discord_user=request.user.discord_user,loot_group=loot_group)
         estimated_profit = 0
         for item in my_items:
             estimated_profit = estimated_profit + (item.estimated_profit() or 0)
+        total_estimated_profit =loot_group.estimated_profit()
+        real_profit = loot_group.isk_and_eggs_balance()
+        estimated_participation = loot_group.bucket.calculate_participation(total_estimated_profit, loot_group)
+        real_participation = loot_group.bucket.calculate_participation(real_profit, loot_group)
+        your_group_estimated_profit = estimated_participation['participation'][request.user.discord_user.username]['total_isk']
+        your_real_profit = real_participation['participation'][request.user.discord_user.username]['total_isk']
         items.append({
             'fleet_id':loot_group.fleet_anom.fleet.id,
             'loot_bucket':loot_group.bucket.id,
             'loot_group_id':loot_group.id,
-            'total_shares':loot_share.share_quantity,
-            'total_cut':loot_share.flat_percent_cut,
+            'your_shares':estimated_participation['participation'][request.user.discord_user.username]['shares'],
+            'your_cut':estimated_participation['participation'][request.user.discord_user.username]['flat_cut'],
+            'total_shares': estimated_participation['total_shares'],
+            'total_cuts': estimated_participation['total_flat_cuts'],
             'my_estimated_profit':estimated_profit,
-            'group_estimated_profit':loot_group.estimated_profit(),
+            'group_estimated_profit':total_estimated_profit,
+            'your_group_estimated_profit':your_group_estimated_profit,
+            'group_real_profit':real_profit,
+            'your_real_profit':your_real_profit,
             'item_count':my_items.count()
         })
+        all_your_estimated_share_isk = all_your_estimated_share_isk + your_group_estimated_profit
+        all_your_real_share_isk = all_your_real_share_isk + your_real_profit 
     items = sorted(items, key=lambda x: x['loot_bucket'])
-    return render(request, 'core/your_fleets_view.html', {'items': items, 'title':"Fleets you have shares and/or items for"})
+    return render(request, 'core/your_fleets_view.html', {'all_est':all_your_estimated_share_isk, 'all_real': all_your_real_share_isk, 'items': items, 'title':"Fleets you have shares and/or items for"})
 
 @login_required(login_url=login_url)
 def all_items(request):

@@ -619,6 +619,11 @@ class LootBucket(models.Model):
         eggs = to_isk(model_sum(EggTransaction.objects.filter(item__loot_group__bucket=self.id), 'eggs'))
         return isk+eggs
     
+    def total_shares(self):
+        shares = LootShare.objects.filter(loot_group__bucket=self.id)
+        total_shares = shares.aggregate(result=Sum('share_quantity'))['result']
+        return total_shares
+    
     def calculate_participation(self, isk, loot_group):
         shares = LootShare.objects.filter(loot_group__bucket=self.id)
         flat_cuts = shares.filter(loot_group=loot_group.id)
@@ -660,6 +665,10 @@ class LootGroup(models.Model):
         KillMail, on_delete=models.CASCADE, null=True, blank=True)
     bucket = models.ForeignKey(LootBucket, on_delete=models.CASCADE)
     manual = models.BooleanField(default=False)
+
+    def total_cuts(self):
+        flat_cuts = LootShare.objects.filter(loot_group=self.id)
+        total_flat_cuts = flat_cuts.aggregate(result=Sum('flat_percent_cut'))['result']
 
     def fleet(self):
         return self.fleet_anom.fleet

@@ -3,16 +3,21 @@
 <div class="row">
   <div class="col s12 m12">
     <h5>{{title}}</h5>
+    <div class="section">
+    Your total estimated share in all loot sales currently is <b>{{all_est}}</b><br/>
+    Your real share in all completed loot sales currently is <b>{{all_real}}</b><br/>
+    </div>
     <table>
       <thead>
         <th>Fleet</th>
-        <th>Loot Bucket</th>
-        <th>Loot Group</th>
+        <th>Bucket</th>
+        <th>Group</th>
         <th>Your Shares</th>
-        <th>Your Flat % Cut</th>
-        <th>Loot Items On You From This Group</th>
-        <th>Estimated Profit Remaining Of Your Loot Items</th>
-        <th>Estimated Profit The Groups Loot Items</th>
+        <th>Your % Cut/Total % Cuts</th>
+        <th>Your Loot Items Count</th>
+        <th>Est. Profit Of Items You Need To Sell</th>
+        <th>Your Est. Profit/Total Est. Profit</th>
+        <th>Your Real Profit/Total Real Profit</th>
       </thead>
       <tbody>
           {% for item in items %}
@@ -27,10 +32,10 @@
                 <a href="{% url 'loot_group_view' item.loot_group_id %}">Loot Group {{item.loot_group_id}}</a>
             </td>
             <td>
-              {{item.total_shares}}
+              {{item.your_shares}}/{{item.total_shares}}
             </td>
             <td>
-              {{item.total_cut}}
+              {{item.your_cut}}%/{{item.total_cuts}}%
             </td>
             <td>
               {{item.item_count}}
@@ -39,7 +44,10 @@
               {{item.my_estimated_profit}}
             </td>
             <td>
-              {{item.group_estimated_profit}}
+              {{item.your_group_estimated_profit}}/{{item.group_estimated_profit}}
+            </td>
+            <td>
+              {{item.your_real_profit}}/{{item.group_real_profit}}
             </td>
          </tr>
         {% endfor %}
