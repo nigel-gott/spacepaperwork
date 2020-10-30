@@ -23,14 +23,18 @@ class Job(HourlyJob):
             market_id = line[0]
             time = make_aware(parse_datetime(line[2]), timezone=timezone.utc)
             item = Item.objects.get(eve_echoes_market_id=market_id)
+            lowest_sell = decimal_or_none(line[5])
             event = ItemMarketDataEvent(
                 item = item,
                 time = time,
                 sell = decimal_or_none(line[3]),
                 buy = decimal_or_none(line[4]),
-                lowest_sell = decimal_or_none(line[5]),
+                lowest_sell = lowest_sell,
                 highest_buy = decimal_or_none(line[6]),
             )
+            item.cached_lowest_sell=lowest_sell
+            item.save()
+
             event.full_clean()
             event.save()
 

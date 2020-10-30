@@ -368,13 +368,21 @@ class Item(models.Model):
     item_type = models.ForeignKey(ItemSubSubType, on_delete=models.CASCADE)
     name = models.TextField(primary_key=True)
     eve_echoes_market_id = models.TextField(null=True,blank=True, unique=True)
+    cached_lowest_sell = models.DecimalField(max_digits=14,decimal_places=2,null=True,blank=True)
     
     def latest_market_data(self):
         return self.itemmarketdataevent_set.order_by('-time').first()
 
     def lowest_sell(self):
-        return self.latest_market_data() and self.latest_market_data().lowest_sell
+        if not self.cached_lowest_sell:
+            result = self.latest_market_data() and self.latest_market_data().lowest_sell
+            self.cached_lowest_sell = result
+        return self.cached_lowest_sell
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['-cached_lowest_sell']) 
+        ]
 
     def __str__(self):
         return f"{str(self.name)}"
@@ -722,7 +730,6 @@ class StackedInventoryItem(models.Model):
     
     def estimated_profit(self):
         lowest_sell = self._first_item() and self._first_item().item.lowest_sell()
-        print(lowest_sell)
         return lowest_sell and to_isk((self.order_quantity() + self.quantity())*lowest_sell)
     
     def order_quantity(self):

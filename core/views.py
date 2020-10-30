@@ -1,4 +1,5 @@
 import json
+import time
 import sys
 from _pydecimal import ROUND_UP
 from decimal import Decimal
@@ -995,15 +996,16 @@ def fleet_shares(request):
 @login_required(login_url=login_url)
 def all_items(request):
     characters = Character.objects.annotate(cc=Sum('characterlocation__itemlocation__inventoryitem__quantity')).filter(cc__gt=0)
-    return render_item_view(request,characters,False, 'All Items')
+    result = render_item_view(request,characters,False, 'All Items')
+    return result
 
 def get_items_in_location(char_loc,item_source=None):
     loc = ItemLocation.objects.get(
         character_location=char_loc, corp_hanger=None)
     if item_source is None:
         item_source= InventoryItem.objects.filter(quantity__gt=0)
-    unstacked_items = item_source.filter(stack__isnull=True, contract__isnull=True, location=loc)
-    stacked_items = item_source.filter(stack__isnull=False, contract__isnull=True, location=loc)
+    unstacked_items = item_source.filter(stack__isnull=True, contract__isnull=True, location=loc).order_by('-item__cached_lowest_sell')
+    stacked_items = item_source.filter(stack__isnull=False, contract__isnull=True, location=loc).order_by('-item__cached_lowest_sell')
     stacks = {}
     stacks_by_item = {}
     for item in stacked_items.all():
@@ -1029,8 +1031,8 @@ def get_items_in_location(char_loc,item_source=None):
         'total_in_loc':total_in_loc,
         'loc':char_loc,
         'char':char_loc.character,
-        'unstacked':sorted(unstacked_items, key=lambda ui:ui.item.lowest_sell() or 0, reverse=True),
-        'stacks':{k: stacks[k] for k in sorted(stacks, key=lambda x: stacks[x]['item'].lowest_sell() or 0, reverse=True)},
+        'unstacked':unstacked_items,
+        'stacks':stacks,
         'stacks_by_item':stacks_by_item
     }
 
@@ -1042,7 +1044,8 @@ def render_item_view(request, characters, show_contract_all, title):
             items = get_items_in_location(char_loc)
             if items['total_in_loc'] > 0:
                 all_items.append(items)
-    return render(request, 'core/items.html', {'all_items': all_items, 'show_contract_all':show_contract_all, 'title':title})
+    result = render(request, 'core/items.html', {'all_items': all_items, 'show_contract_all':show_contract_all, 'title':title})
+    return result
 
 
 def stack_in_location(loc):

@@ -123,6 +123,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'core.middleware.TimezoneMiddleware',
+    'core.middleware.ProfilerMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
