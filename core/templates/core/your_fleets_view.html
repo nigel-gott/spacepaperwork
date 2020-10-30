@@ -4,20 +4,21 @@
   <div class="col s12 m12">
     <h5>{{title}}</h5>
     <div class="section">
-    Your total estimated share in all loot sales currently is <b>{{all_est}}</b><br/>
-    Your real share in all completed loot sales currently is <b>{{all_real}}</b><br/>
+    <span class="red-text">{{prefix}} total estimated worth of loot needing to be sold is <b>{{sales_est}}</b></span><br/>
+    <span class="orange-text">{{prefix}} total estimated shares in all loot sales currently is <b>{{all_est}}</b></span><br/>
+    <span class="green-text">{{prefix}} real shares in all completed loot sales currently is <b>{{all_real}}</b></span>
     </div>
     <table>
       <thead>
         <th>Fleet</th>
         <th>Bucket</th>
         <th>Group</th>
-        <th>Your Shares</th>
-        <th>Your % Cut/Total % Cuts</th>
-        <th>Your Loot Items Count</th>
-        <th>Est. Profit Of Items You Need To Sell</th>
-        <th>Your Est. Profit/Total Est. Profit</th>
-        <th>Your Real Profit/Total Real Profit</th>
+        <th>{{prefix2}} Shares</th>
+        <th>{{prefix2}} % Cut/Total % Cuts</th>
+        <th>{{prefix2}} Loot Items Count</th>
+        <th>{{prefix2}} Est. Profit Of Items Needing to be Sold</th>
+        <th>{{prefix2}} Est. Profit/Total Est. Profit</th>
+        <th>{{prefix2}} Real Profit/Total Real Profit</th>
       </thead>
       <tbody>
           {% for item in items %}

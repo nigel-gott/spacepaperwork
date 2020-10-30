@@ -4,6 +4,7 @@ from django.utils import timezone
 from core.models import Contract, Fleet, FleetMember, InventoryItem, MarketOrder, SoldItem, active_fleets_query, future_fleets_query, past_fleets_query
 from django import template
 import math as m
+import core
 
 register = template.Library()
 
@@ -43,6 +44,10 @@ def num_past_fleets():
 @register.filter()
 def formatmoney(value):
     return m.floor(value.amount)
+
+@register.filter()
+def to_isk(value):
+    return core.models.to_isk(value)
 
 @register.simple_tag
 def num_future_fleets():

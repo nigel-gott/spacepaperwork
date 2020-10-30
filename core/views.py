@@ -974,12 +974,31 @@ def items_grouped(request):
     return render(request, 'core/grouped_items.html', {'items': items, 'title':"All Not Sold Items In Goosetools Grouped Together"})
 
 @login_required(login_url=login_url)
-def fleet_shares(request):
-    loot_shares = LootShare.objects.filter(character__discord_user=request.user.discord_user)
+def all_fleet_shares(request):
+    users = LootShare.objects.values('character__discord_user', 'character__discord_user__username').distinct()
+    return render(request, 'core/users_view.html', {'users': users, 'title':"All Users Shares"})
+
+@login_required(login_url=login_url)
+def your_fleet_shares(request):
+    return fleet_shares(request,request.user.discord_user.pk)
+
+@login_required(login_url=login_url)
+def fleet_shares(request, pk):
+    loot_shares = LootShare.objects.filter(character__discord_user_id=pk)
     items=[]
     seen_groups={}
     all_your_estimated_share_isk = 0
     all_your_real_share_isk = 0
+    your_total_est_sales = 0
+
+    user = DiscordUser.objects.get(pk=pk)
+    for_you = user == request.user.discord_user
+    if for_you:
+        prefix = "Your"
+        prefix2 = "Your"
+    else:
+        prefix = f"{user.username}'s"
+        prefix2 = "Their"
 
     for loot_share in loot_shares:
         loot_group=loot_share.loot_group
@@ -992,6 +1011,7 @@ def fleet_shares(request):
         estimated_profit = 0
         for item in my_items:
             estimated_profit = estimated_profit + (item.estimated_profit() or 0)
+        your_total_est_sales = estimated_profit + your_total_est_sales
         total_estimated_profit =loot_group.estimated_profit()
         real_profit = loot_group.isk_and_eggs_balance()
         estimated_participation = loot_group.bucket.calculate_participation(total_estimated_profit, loot_group)
@@ -1016,7 +1036,7 @@ def fleet_shares(request):
         all_your_estimated_share_isk = all_your_estimated_share_isk + your_group_estimated_profit
         all_your_real_share_isk = all_your_real_share_isk + your_real_profit 
     items = sorted(items, key=lambda x: x['loot_bucket'])
-    return render(request, 'core/your_fleets_view.html', {'all_est':all_your_estimated_share_isk, 'all_real': all_your_real_share_isk, 'items': items, 'title':"Fleets you have shares and/or items for"})
+    return render(request, 'core/your_fleets_view.html', {'prefix':prefix, 'prefix2':prefix2,'sales_est':your_total_est_sales,'all_est':all_your_estimated_share_isk, 'all_real': all_your_real_share_isk, 'items': items, 'title':f"{prefix} Fleet Share Summary"})
 
 @login_required(login_url=login_url)
 def all_items(request):

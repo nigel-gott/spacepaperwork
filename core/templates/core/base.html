@@ -27,7 +27,9 @@
                 ({% num_future_fleets %})
             </a>
             </li>
-            <li><a href="{% url 'fleet_shares' %}">Your Fleet Shares/Loot
+            <li><a href="{% url 'your_fleet_shares' %}">Your Fleet Shares/Loot
+            </a>
+            <li><a href="{% url 'all_fleet_shares' %}">Everyones Fleet Shares/Loot
             </a>
             </li>
 </ul>
@@ -159,7 +161,9 @@
                 ({% num_future_fleets %})
             </a>
             </li>
-            <li><a href="{% url 'fleet_shares' %}">Your Fleet Shares/Loot
+            <li><a href="{% url 'your_fleet_shares' %}">Your Fleet Shares/Loot
+            </a>
+            <li><a href="{% url 'all_fleet_shares' %}">Everyones Fleet Shares/Loot
             </a>
             {% num_items user as num_to_sell %}
             <li class="tab"><a href="{% url 'items' %}">Your Loot To Sell

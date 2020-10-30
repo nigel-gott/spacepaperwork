@@ -76,8 +76,16 @@ Participation will still be tracked and the person receiving the contract will h
                 Missing Market Data
                 {% endif %}
                 </td>
-            <td><a href="{% url 'stack_delete' stack.stack_id %}">UnStack</a></td>
-            <td><a class="waves-btn btn green" href="{% url 'stack_sell' stack.stack_id %}">Sell Stack</a></td>
+            <td>
+      {% if has_item_admin %}
+            <a href="{% url 'stack_delete' stack.stack_id %}">UnStack</a>
+            {% endif %}
+            </td>
+            <td>
+      {% if has_item_admin %}
+            <a class="waves-btn btn green" href="{% url 'stack_sell' stack.stack_id %}">Sell Stack</a>
+            {% endif %}
+            </td>
           </tr>
           {% endfor %}
           <tr>
@@ -95,7 +103,7 @@ Participation will still be tracked and the person receiving the contract will h
                 </td>
                 <td>
                 {% if item.estimated_profit_sum != 0%}
-                  {{item.estimated_profit_sum}}
+                  {{item.estimated_profit_sum|to_isk}}
                 {% else %}
                   None
                 {% endif %}

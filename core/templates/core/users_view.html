@@ -1,0 +1,23 @@
+{% extends "core/base.html" %} {% load base_extras %} {% block body %}
+{% load materializecss %}
+<div class="row">
+  <div class="col s12 m12">
+    <h5>{{title}}</h5>
+    <table>
+      <thead>
+        <th>User Shares</th>
+      </thead>
+      <tbody>
+          {% for user in users %}
+          <tr>
+            <td>
+                <a href="{% url 'fleet_shares' user.character__discord_user %}">{{user.character__discord_user__username}}<a>
+            </td>
+         </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
