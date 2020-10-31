@@ -1083,7 +1083,7 @@ def get_items_in_location(char_loc,item_source=None):
         'loc':char_loc,
         'char':char_loc.character,
         'unstacked':unstacked_items,
-        'stacks':{k: stacks[k] for k in sorted(stacks, key=lambda x: stacks[x]['stack'].estimated_profit() or 0, reverse=True)},
+        'stacks':{k: stacks[k] for k in sorted(stacks, key=lambda x: stacks[x]['stack'].estimated_profit() or to_isk(0), reverse=True)},
         'stacks_by_item':stacks_by_item
     }
 
