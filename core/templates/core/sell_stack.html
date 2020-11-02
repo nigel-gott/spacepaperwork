@@ -112,6 +112,8 @@ function calc_fee(){
 (function($) {
 
     $("#id_listed_at_price").on("change paste keyup", calc_fee);
+    $("#id_broker_fee").on("change paste keyup", calc_fee);
+    $("#id_transaction_tax").on("change paste keyup", calc_fee);
     calc_fee();
 
 })($)
