@@ -11,7 +11,6 @@ class Character:
         self.ingame_name = ingame_name
         self.corp = corp.upper()
         self.discord_user_pk = discord_user_pk
-
     def __str__(self):
         return f"pk({self.pk}), ingame_name({self.ingame_name}), corp({self.corp}), discord_user_pk({self.discord_user_pk})" 
 
@@ -72,7 +71,7 @@ def load_existing_models():
         return existing_characters, existing_users, next_character_pk, next_discord_user_pk
 
 def load_kris_dump(chars, users, char_pk, user_pk):
-    with open(os.path.join(os.curdir, "../misc_data/auth.csv"), "r", newline="") as auth_csv:
+    with open(os.path.join(os.curdir, "misc_data/auth.csv"), "r", newline="") as auth_csv:
         lines = list(csv.reader(auth_csv))[1:]
         for line in lines:
             uid = line[0]
@@ -162,7 +161,7 @@ def url_to_hash(url):
 
 def output_models(chars, users):
     models = []
-    with open("../core/fixtures/characters_and_users.json", "w") as out_file:
+    with open("core/fixtures/characters_and_users.json", "w") as out_file:
         for char in chars.values():
             models.append({
                 "model": "core.character",
@@ -170,7 +169,8 @@ def output_models(chars, users):
                 "fields": {
                     "discord_user": char.discord_user_pk,
                     "ingame_name": char.ingame_name,
-                    "corp": char.corp.upper()
+                    "corp": char.corp.upper(),
+                    "verified":True
                 }
             })
         for user in users.values():
@@ -178,8 +178,8 @@ def output_models(chars, users):
                 "model": "core.discorduser",
                 "pk": user.pk,
                 "fields": {
-                    "uid": user.uid,
                     "username": user.username, 
+                    "uid": user.uid,
                     "avatar_hash": user.avatar_hash,
                     "unknown": False
                 }
