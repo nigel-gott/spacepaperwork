@@ -1268,7 +1268,7 @@ def item_sold(order, form, remaining_quantity_to_sell):
     profit_line = IskTransaction(
         item = item,
         time = timezone.now(),
-        isk = floor(gross_profit),
+        isk = to_isk(floor(gross_profit.amount)),
         quantity = quantity_sold,
         transaction_type = "external_market_gross_profit",
         notes=f"Order Price of {order.listed_at_price} * Quantity Sold of {quantity_sold}"
