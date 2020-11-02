@@ -11,7 +11,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models, transaction
 from django.db.models import DecimalField, F, FloatField, Q
 from django.db.models.aggregates import Sum
-from django.db.models.expressions import Combinable
+from django.db.models.expressions import Combinable, ExpressionWrapper
 from django.db.models.fields import BooleanField
 from django.utils import timezone
 from django.utils.deconstruct import deconstructible
@@ -313,10 +313,13 @@ class Fleet(models.Model):
         return isk+eggs
     
     def estimated_profit(self):
-        total = 0
-        items = InventoryItem.objects.filter(loot_group__fleet_anom__fleet=self.id)
-        for item in items:
-            total = total + (item.estimated_profit() or 0)
+        total = to_isk(InventoryItem.objects.filter(loot_group__fleet_anom__fleet=self.id).aggregate(estimated_profit_sum=
+                    Sum(
+                        Coalesce(F('item__cached_lowest_sell'), 0) * 
+                        F('quantity') +
+                        Coalesce(F('marketorder__listed_at_price'),0) * Coalesce(F('marketorder__quantity'),0),
+                    output_field=FloatField())
+                )['estimated_profit_sum'] or 0)
         return total
 
 
