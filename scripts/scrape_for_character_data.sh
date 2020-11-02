@@ -12,6 +12,6 @@ docker run --rm -it -v $(pwd)/misc_data/discord_channel_dump:/app/out tyrrrz/dis
 python3 manage.py dbbackup
 python3 manage.py dumpdata core.Character core.DiscordUser > misc_data/char_dump.json
 python3 scripts/parse_bot_spam.py 
-python3 manage.py loaddata core.characters_and_users.json
+python3 manage.py loaddata characters_and_users 
 
 
