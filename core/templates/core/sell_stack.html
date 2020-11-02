@@ -37,7 +37,11 @@ Selling Stack:
             {{ form.transaction_tax|materializecss:'s12 m6, icon=format_list_numbered'}}
             {{ form.broker_fee|materializecss:'s12 m6, icon=face'}}
         </div>
-        <button type="submit" class="btn waves-effect waves-light" value="Submit">{{title}}
+        <div class="row">
+            <span id="fee_display"></span>
+            <br/>
+        </div>
+        <button id="submit_btn" type="submit" class="btn waves-effect waves-light" value="Submit">{{title}}
             <i class="material-icons right">send</i>
         </button>
 
@@ -52,35 +56,63 @@ Selling Stack:
 {% block extrafooter %}
 
 <script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/9.0.0/decimal.min.js" integrity="sha512-zPQm8HS4Phjo9pUbbk+HPH3rSWu5H03NFvBpPf6D9EU2xasj0ZxhYAc/lvv/HVDWMSE1Autj19i6nZOfiVQbFQ==" crossorigin="anonymous"></script>
+{{ order_json|json_script:"order-data" }}
 
-{{ form.media }}
 <script>
+
+function valid_fee(fee){
+    return fee && fee.greaterThanOrEqualTo(0) && fee.lessThanOrEqualTo(100)
+}
+
+function valid_price_str(price_str){
+    var num = price_str.replace(/,/g, '');
+    return !isNaN(num) && num > 0
+}
+function numberWithCommas(x) {
+    var x = x.toString();
+    var x = x.replace(/,/g, '');
+    return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function calc_fee(){
+    listed_at_price_str = $("#id_listed_at_price").val();
+    $("#id_listed_at_price").val(numberWithCommas(listed_at_price_str));
+    broker_fee_str = $("#id_broker_fee").val();
+    transaction_tax_str = $("#id_transaction_tax").val();
+    if (valid_price_str(listed_at_price_str) && broker_fee_str && transaction_tax_str){
+        $("#id_listed_at_price")[0].setCustomValidity('')
+        listed_at_price = new Decimal(listed_at_price_str.replace(/,/g, ''));
+        broker_fee = new Decimal(broker_fee_str.replace(/,/g, ''));
+        transaction_tax = new Decimal(transaction_tax_str.replace(/,/g, ''));
+        
+        const order_data = JSON.parse(document.getElementById('order-data').textContent);
+        quantity = new Decimal(order_data['quantity']);
+
+        if(listed_at_price.greaterThan(0) && valid_fee(broker_fee) && valid_fee(transaction_tax)){
+            total_isk_quantity = quantity.times(listed_at_price)
+            result_broker_fee = (((broker_fee.dividedBy(100)).times(total_isk_quantity)).floor())
+            result_transaction_tax = (((transaction_tax.dividedBy(100)).times(total_isk_quantity)).floor())
+            net_profit = ((total_isk_quantity.floor().minus(result_broker_fee).minus(result_transaction_tax)).floor())
+            $("#fee_display").html(
+                "Broker Fee: <b class='red-text'>" + numberWithCommas(result_broker_fee) + " ISK </b> <br/>Transaction Tax: <b class='red-text'>" + numberWithCommas(result_transaction_tax) + " ISK </b> <br/>Net Profit <b class='green-text'>" + numberWithCommas(net_profit) + " ISK");
+            $("#submit_btn").prop('disabled', false)
+        } else {
+            $("#fee_display").html("<b class='red-text'>You must enter a valid non zero price, broker fee and transaction tax.</b>");
+            $("#submit_btn").prop('disabled', true)
+        }
+    } else {
+        if(!valid_price_str(listed_at_price_str)){
+            $("#id_listed_at_price")[0].setCustomValidity('Price must be greater than 0 and a valid number')
+        }
+        $("#fee_display").html("<b class='red-text'>You must enter a valid non zero price, broker fee and transaction tax.</b>");
+        $("#submit_btn").prop('disabled', true)
+    }
+}
 (function($) {
-    $('#add-form').click(function() {
-        var index = $('#id_inline_test_models-TOTAL_FORMS').val()
-        var newTable = $('#id_inline_test_models-__prefix__-DELETE').parents('table').clone()
-        newTable.find(':input').each(function() {
-            for (attr of ['name', 'id'])
-                $(this).attr(
-                    attr,
-                    $(this).attr(attr).replace('__prefix__', index)
-                )
-        })
-        newTable.insertBefore($(this))
-        $('#id_inline_test_models-TOTAL_FORMS').val(
-            parseInt($('#id_inline_test_models-TOTAL_FORMS').val()) + 1
-        )
-        newTable.slideDown()
-    })
 
-    // Bind on continent field change
-    $(':input[name$=discord_username]').on('change', function() {
-        // Get the field prefix, ie. if this comes from a formset form
-        var prefix = $(this).getFormPrefix();
-
-        // Clear the autocomplete with the same prefix
-       $(':input[name=' + prefix + 'character]').val(null).trigger('change');
-});
+    $("#id_listed_at_price").on("change paste keyup", calc_fee);
+    calc_fee();
 
 })($)
 </script>

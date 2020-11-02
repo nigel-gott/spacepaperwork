@@ -246,7 +246,7 @@ class SellItemForm(forms.Form):
         max_digits=5, decimal_places=2, label="Transaction Tax %")
     broker_fee = forms.DecimalField(
         max_digits=5, decimal_places=2, label="Broker Fee %")
-    listed_at_price = forms.DecimalField(max_digits=14, decimal_places=2)
+    listed_at_price = forms.CharField()
 
 class SoldItemForm(forms.Form):
     quantity_remaining = forms.IntegerField(min_value=0, help_text="How much of the order is remaining, 0 means the order has fully sold!")

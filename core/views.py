@@ -1524,7 +1524,7 @@ def transfer_eggs(request):
 
 
 def sell_item(item, form):
-    price = form.cleaned_data['listed_at_price']
+    price = Decimal(form.cleaned_data['listed_at_price'].replace(',',''))
     total_isk_listed = item.quantity * price
     broker_fee_percent = form.cleaned_data['broker_fee']/100
     broker_fee = Money(amount=floor(-(total_isk_listed* broker_fee_percent)), currency="EEI")
@@ -1577,7 +1577,11 @@ def stack_sell(request, pk):
             'transaction_tax':request.user.transaction_tax,
         })
 
-    return render(request, 'core/sell_stack.html', {'form': form, 'title': f'Sell Stack {stack}', 'stack':stack})
+    order_json = {
+        'quantity':stack.quantity(),
+    }
+
+    return render(request, 'core/sell_stack.html', {'form': form, 'title': f'Sell Stack {stack}', 'stack':stack, 'order_json':order_json})
 
 @login_required(login_url=login_url)
 @transaction.atomic
@@ -1601,7 +1605,11 @@ def item_sell(request, pk):
             'transaction_tax':request.user.transaction_tax,
         })
 
-    return render(request, 'core/sell_item.html', {'form': form, 'title': 'Sell Item', 'item':item})
+    order_json = {
+        'quantity':item.quantity
+    }
+
+    return render(request, 'core/sell_item.html', {'form': form, 'title': 'Sell Item', 'item':item, 'order_json':order_json})
 
 @login_required(login_url=login_url)
 def item_delete(request, pk):
