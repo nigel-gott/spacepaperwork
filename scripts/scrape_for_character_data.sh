@@ -8,7 +8,7 @@ source /opt/goosetools_venv/bin/activate
 
 rm -rf misc_data/discord_channel_dump/
 mkdir -p misc_data/discord_channel_dump 
-docker run --rm -it -v $(pwd)/misc_data/discord_channel_dump:/app/out tyrrrz/discordchatexporter:stable export -c 754139786679156807 -t $token -f Json
+docker run --rm -v $(pwd)/misc_data/discord_channel_dump:/app/out tyrrrz/discordchatexporter:stable export -c 754139786679156807 -t $token -f Json
 python3 manage.py dbbackup
 python3 manage.py dumpdata core.Character core.DiscordUser > misc_data/char_dump.json
 python3 scripts/parse_bot_spam.py 
