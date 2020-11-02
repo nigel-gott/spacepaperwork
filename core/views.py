@@ -1253,7 +1253,7 @@ def item_sold(order, form, remaining_quantity_to_sell):
     quantity_sold = min(order.quantity,remaining_quantity_to_sell)
     quantity_remaining = order.quantity - quantity_sold
     gross_profit = order.listed_at_price * quantity_sold 
-    transaction_tax = Money(amount=round((gross_profit * transaction_tax_percent).amount,2), currency="EEI")
+    transaction_tax = Money(amount=floor(round((gross_profit * transaction_tax_percent).amount,2)), currency="EEI")
     item = order.item
     transaction_tax_line = IskTransaction(
         item = item,
@@ -1268,7 +1268,7 @@ def item_sold(order, form, remaining_quantity_to_sell):
     profit_line = IskTransaction(
         item = item,
         time = timezone.now(),
-        isk = gross_profit,
+        isk = floor(gross_profit),
         quantity = quantity_sold,
         transaction_type = "external_market_gross_profit",
         notes=f"Order Price of {order.listed_at_price} * Quantity Sold of {quantity_sold}"
@@ -1527,7 +1527,7 @@ def sell_item(item, form):
     price = form.cleaned_data['listed_at_price']
     total_isk_listed = item.quantity * price
     broker_fee_percent = form.cleaned_data['broker_fee']/100
-    broker_fee = Money(amount=round(-(total_isk_listed* broker_fee_percent),2), currency="EEI")
+    broker_fee = Money(amount=floor(round(-(total_isk_listed* broker_fee_percent),2)), currency="EEI")
     broker_fee = IskTransaction(
         item = item,
         time = timezone.now(),
