@@ -41,7 +41,7 @@ class DiscordUser:
 
 
 def load_existing_models():
-    with open(os.path.join(os.curdir, "../misc_data/char_dump.json"), "r") as existing_models_file:
+    with open(os.path.join(os.curdir, "misc_data/char_dump.json"), "r") as existing_models_file:
         existing_models = json.load(existing_models_file)
         existing_characters = {}
         existing_users = {}
@@ -91,7 +91,7 @@ def load_kris_dump(chars, users, char_pk, user_pk):
     return chars, users, char_pk, user_pk 
 
 def parse_chat_data():
-    chat_filenames = glob.glob('../misc_data/Gooseflock Featheration - stupid Goon chat - general-bot-spam*.json')
+    chat_filenames = glob.glob('misc_data/discord_channel_dump/Gooseflock Featheration - stupid Goon chat - general-bot-spam*.json')
     if len(chat_filenames) != 1:
         raise Exception("Found multiple or no chat files in sub dir: " + str(chat_filenames))
     chat_filename = chat_filenames[0]
@@ -123,8 +123,6 @@ def parse_chat_data():
                         unknown_removes.append(f"{author_id}, {message['id']}, {character}")
                     else:
                         discord_id_to_characters[author_id].pop(character, None)
-        with open("../misc_data/discord_id_to_char.json", "w") as out_file:
-            out_file.write(jsonpickle.encode(discord_id_to_characters, indent=4))
     return discord_id_to_characters, author_info
 
 def load_chat_data(chars, users, char_pk, user_pk):
@@ -164,7 +162,7 @@ def url_to_hash(url):
 
 def output_models(chars, users):
     models = []
-    with open("../misc_data/characters_and_users.json", "w") as out_file:
+    with open("../core/fixtures/characters_and_users.json", "w") as out_file:
         for char in chars.values():
             models.append({
                 "model": "core.character",
@@ -193,7 +191,6 @@ def output_models(chars, users):
 
 def main():
     chars, users, next_char_pk, next_user_pk = load_existing_models()
-    chars, users, next_char_pk, next_user_pk = load_kris_dump(chars, users, next_char_pk, next_user_pk)
     chars, users, next_char_pk, next_user_pk = load_chat_data(chars, users, next_char_pk, next_user_pk)
     output_models(chars, users)
 
