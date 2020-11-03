@@ -5760,6 +5760,26 @@
         }
     },
     {
+        "model": "core.character",
+        "pk": 581,
+        "fields": {
+            "discord_user": 177,
+            "ingame_name": "Roadside Vendor",
+            "corp": "XBUX",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 582,
+        "fields": {
+            "discord_user": 315,
+            "ingame_name": "Liberate Honkong",
+            "corp": "HAUS",
+            "verified": true
+        }
+    },
+    {
         "model": "core.discorduser",
         "pk": 1,
         "fields": {
