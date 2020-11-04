@@ -877,7 +877,7 @@ def sell_all_items(request, pk):
         stack = stack_data['stack']
         estimate, datapoints, other = estimate_price(stack.item(), hours)
         quantity = stack.quantity()
-        if estimate*quantity > 250000:
+        if estimate is None or not estimate or estimate*quantity > 250000:
             initial.append({
                 'stack':stack_id,
                 'estimate_price':estimate,
@@ -889,7 +889,7 @@ def sell_all_items(request, pk):
     for item in items['unstacked']:
         estimate, datapoints, other = estimate_price(item.item, hours)
         quantity = item.quantity
-        if estimate*quantity > 250000:
+        if estimate is None or not estimate or estimate*quantity > 250000:
             initial.append({
                 'inv_item':item.id,
                 'estimate_price':estimate,
