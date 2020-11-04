@@ -74,7 +74,7 @@
                   {{form.quantity.value}}
                 </td>
                 <td>
-                  {% if form.estimate_price %}
+                  {% if form.estimate_price.value > 0 %}
                   {{form.estimate_price.value|to_isk}}
                   {% else %}
                   Missing Market Data
