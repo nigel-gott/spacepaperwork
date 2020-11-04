@@ -253,10 +253,10 @@ class BulkSellItemFormHead(forms.Form):
     overall_cut = forms.DecimalField(
         max_digits=5, decimal_places=2, label="Cut %", initial=35)
 class BulkSellItemForm(forms.Form):
-    quality = forms.CharField(disabled=True)
+    quality = forms.CharField(disabled=True, required=False)
     listed_at_price = forms.CharField()
     estimate_price = forms.DecimalField(
-        max_digits=20, decimal_places=2, disabled=True) 
+        max_digits=20, decimal_places=2, disabled=True, required=False) 
     item = forms.ModelChoiceField(queryset=Item.objects.all(), disabled=True)
     inv_item = forms.ModelChoiceField(widget=forms.HiddenInput(),required=False,queryset=InventoryItem.objects.all(), disabled=True)
     stack = forms.ModelChoiceField(widget=forms.HiddenInput(),required=False,queryset=StackedInventoryItem.objects.all(), disabled=True)
