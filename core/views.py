@@ -881,7 +881,7 @@ def sell_all_items(request, pk):
             'stack':stack_id,
             'estimate_price':estimate,
             'listed_at_price':estimate,
-            'quality':f'{datapoints} datapoints, {other}, sell_min',
+            'quality':f'{datapoints} datapoints, {to_isk(other or 0)} sell_min',
             'quantity':quantity,
             'item':stack.item()
         })
@@ -892,7 +892,7 @@ def sell_all_items(request, pk):
             'inv_item':item.id,
             'estimate_price':estimate,
             'listed_at_price':estimate,
-            'quality':f'{datapoints} datapoints, {other} sell_min',
+            'quality':f'{datapoints} datapoints, {to_isk(other or 0)} sell_min',
             'quantity':quantity,
             'item':item.item
         })
