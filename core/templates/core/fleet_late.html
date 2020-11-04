@@ -75,7 +75,7 @@
           {% for user,data in user_total_z.items %}
           <tr>
             <td>
-                <a href="{% url 'fleet_shares' data.user.id %}">{{data.user.username}}<a>
+                <a href="{% url 'fleet_shares' data.user.id %}">{{data.user.username}} - {{data.user.character_set.all}}<a>
             </td>
             <td>
               {{data.total}}
