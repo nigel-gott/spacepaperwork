@@ -942,7 +942,7 @@ def sell_all_items(request, pk):
                 messages.success(request, f"Items succesfully bought")
                 return HttpResponseRedirect(reverse('sold'))
             else:
-                message.error(request, f"Invalid {formset.errors} {head_form.errors}")
+                messages.error(request, f"Invalid {formset.errors} {head_form.errors}")
     else:
         head_form = BulkSellItemFormHead() 
         formset = BulkSellItemFormSet(initial=initial)
