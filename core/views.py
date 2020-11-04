@@ -852,8 +852,8 @@ def edit_order_price(request, pk):
     return render(request, 'core/edit_order_price.html', {'order_json':order_json, 'order':market_order,'form': form, 'title': 'Change Price of An Existing Market Order'})
 
 def estimate_price(item, hours):
-    price, datapoints = item.min_of_last_x_hours(hours)
-    return price, datapoints
+    price, datapoints, price_other = item.min_of_last_x_hours(hours)
+    return price, datapoints, price_other
 
 @login_required(login_url=login_url)
 @transaction.atomic
@@ -875,24 +875,24 @@ def sell_all_items(request, pk):
     initial = []
     for stack_id, stack_data in items['stacks'].items():
         stack = stack_data['stack']
-        estimate, datapoints = estimate_price(stack.item(), hours)
+        estimate, datapoints, other = estimate_price(stack.item(), hours)
         quantity = stack.quantity()
         initial.append({
             'stack':stack_id,
             'estimate_price':estimate,
             'listed_at_price':estimate,
-            'quality':f'{datapoints} datapoints',
+            'quality':f'{datapoints} datapoints, {other}, sell_min',
             'quantity':quantity,
             'item':stack.item()
         })
     for item in items['unstacked']:
-        estimate, datapoints = estimate_price(item.item, hours)
+        estimate, datapoints, other = estimate_price(item.item, hours)
         quantity = item.quantity
         initial.append({
             'inv_item':item.id,
             'estimate_price':estimate,
             'listed_at_price':estimate,
-            'quality':f'{datapoints} datapoints',
+            'quality':f'{datapoints} datapoints, {other} sell_min',
             'quantity':quantity,
             'item':item.item
         })

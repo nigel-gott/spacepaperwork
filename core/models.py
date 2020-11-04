@@ -380,8 +380,9 @@ class Item(models.Model):
     def min_of_last_x_hours(self, hours):
         time_threshold = timezone.now() - timezone.timedelta(hours=hours)
         min_price = self.itemmarketdataevent_set.filter(time__gte=time_threshold).aggregate(min_lowest_sell=Min('lowest_sell'))['min_lowest_sell']
+        min_price_other = self.itemmarketdataevent_set.filter(time__gte=time_threshold).aggregate(min_sell=Min('sell'))['min_sell']
         datapoints_used = self.itemmarketdataevent_set.filter(time__gte=time_threshold).values('lowest_sell').distinct().count()
-        return min_price, datapoints_used
+        return min_price, datapoints_used, min_price_other
 
     def lowest_sell(self):
         if not self.cached_lowest_sell:
