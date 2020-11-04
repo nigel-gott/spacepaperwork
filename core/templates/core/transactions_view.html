@@ -1,6 +1,7 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
 {% load materializecss %}
 <div class="row">
+  <a class="btn waves-btn" href="{% url 'all_fleet_shares' %}">Everyones Transactions</a>
   <div class="col s12 m12">
     <h5>All Isk Transactions</h5>
     <table>
