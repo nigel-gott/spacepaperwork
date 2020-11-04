@@ -12,7 +12,7 @@
           {% for user in users %}
           <tr>
             <td>
-                <a href="{% url 'fleet_shares' user.character__discord_user %}">{{user.character__discord_user__username}}<a>
+                <a class="waves-btn btn green" href="{% url 'fleet_shares' user.character__discord_user %}">{{user.character__discord_user__username}}'s Shares<a>
             </td>
             <td>
             {% if user.character__discord_user__gooseuser__id %}
