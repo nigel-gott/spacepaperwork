@@ -982,6 +982,12 @@ class IskTransaction(models.Model):
     def __str__(self):
         return f"Isk Transaction @ {self.time} for {self.isk} of type {self.transaction_type} with notes: '{self.notes}'"
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['time']) 
+        ]
+
+
 
 class EggTransaction(models.Model):
     item = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
@@ -995,6 +1001,11 @@ class EggTransaction(models.Model):
 
     def __str__(self):
         return f"{self.counterparty_discord_username} - {self.item.id} - {self.quantity} - {self.time} - {self.eggs} - Debt:{self.debt} - {self.notes}"
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['time']) 
+        ]
 
 
 class MarketOrder(models.Model):
