@@ -110,7 +110,7 @@ def display_time(seconds, granularity=5):
 def fleet_late(request):
     if not request.user.is_staff:
         return HttpResponseForbidden()
-    users = DiscordUser.objects.annotate(shares=Count('character__lootshare')).order_by('-shares')
+    users = DiscordUser.objects.annotate(shares=Count('character__lootshare')).filter(shares__gt=0).order_by('-shares')
     fleets = Fleet.objects.all()
     outliers = []
     for fleet in fleets:
