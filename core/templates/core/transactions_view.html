@@ -44,6 +44,7 @@
         <th>Type</th>
         <th>Associated Quantity</th>
         <th>Notes</th>
+        <th>Balance</th>
       </thead>
       <tbody>
         {% for isk_tran in isk_transactions %}
@@ -68,6 +69,9 @@
                 <td>
                   {{isk_tran.notes}}
                 </td>
+                <td>
+                  {{isk_tran.so_far}}
+                </td>
             </tr>
         {% endfor %}
       </tbody>
@@ -86,6 +90,7 @@
         <th>Counterparty</th>
         <th>Associated Quantity</th>
         <th>Notes</th>
+        <th>Balance</th>
       </thead>
       <tbody>
         {% for isk_tran in egg_transactions %}
@@ -109,6 +114,9 @@
                 </td>
                 <td>
                   {{isk_tran.notes}}
+                </td>
+                <td>
+                  {{isk_tran.so_far}}
                 </td>
             </tr>
         {% endfor %}

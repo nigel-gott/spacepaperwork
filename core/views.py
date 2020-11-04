@@ -1141,10 +1141,26 @@ def all_fleet_shares(request):
 @login_required(login_url=login_url)
 def user_transactions(request, pk):
     user = get_object_or_404(GooseUser,pk=pk)
+    isk_transactions = user.isk_transactions().order_by('time').all()
+    total_isk = to_isk(0)
+    for tran in isk_transactions:
+        total_isk = total_isk + tran.isk
+        tran.so_far = total_isk
+    isk_transactions = list(isk_transactions)
+    isk_transactions.reverse()
+    egg_transactions = user.egg_transactions().order_by('time').all()
+    total_eggs = to_isk(0)
+    for tran in egg_transactions:
+        total_eggs = total_eggs + tran.eggs
+        tran.so_far = total_eggs
+    egg_transactions = list(egg_transactions)
+    egg_transactions.reverse()
+
+
     return render(request, 'core/transactions_view.html', {
-        'transfer_logs': user.transferlog_set.all(), 
-        'isk_transactions': user.isk_transactions().all(), 
-        'egg_transactions': user.isk_transactions().all(), 
+        'transfer_logs': user.transferlog_set.order_by('-time').all(), 
+        'isk_transactions': isk_transactions,
+        'egg_transactions': egg_transactions, 
         })
 
 @login_required(login_url=login_url)
