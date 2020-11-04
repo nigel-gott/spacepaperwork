@@ -1139,6 +1139,10 @@ def all_fleet_shares(request):
     return render(request, 'core/users_view.html', {'users': users, 'title':"All Users Shares"})
 
 @login_required(login_url=login_url)
+def own_user_transactions(request):
+    return HttpResponseRedirect(reverse('user_transactions', args=[request.user.pk])) 
+
+@login_required(login_url=login_url)
 def user_transactions(request, pk):
     user = get_object_or_404(GooseUser,pk=pk)
     isk_transactions = user.isk_transactions().order_by('time').all()

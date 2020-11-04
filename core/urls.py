@@ -62,6 +62,7 @@ urlpatterns = [
     path('fleet_shares/all/', all_fleet_shares, name='all_fleet_shares'),
     path('fleet_shares/', your_fleet_shares, name='your_fleet_shares'),
     path('fleet_shares/<int:pk>/', fleet_shares, name='fleet_shares'),
+    path('transactions/own/', own_user_transactions, name='own_user_transactions'),
     path('transactions/<int:pk>/', user_transactions, name='user_transactions'),
     path('orders/', orders, name='orders'),
     path('sold/', sold, name='sold'),
