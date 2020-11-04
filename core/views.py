@@ -869,33 +869,35 @@ def sell_all_items(request, pk):
         if head_form.is_valid():
             cut = head_form.cleaned_data['overall_cut']
         else: 
-            cut = 25
+            cut = 35
     else: 
-        cut = 25
+        cut = 35
     initial = []
     for stack_id, stack_data in items['stacks'].items():
         stack = stack_data['stack']
         estimate, datapoints, other = estimate_price(stack.item(), hours)
         quantity = stack.quantity()
-        initial.append({
-            'stack':stack_id,
-            'estimate_price':estimate,
-            'listed_at_price':estimate,
-            'quality':f'{datapoints} datapoints, {to_isk(other or 0)} sell_min',
-            'quantity':quantity,
-            'item':stack.item()
-        })
+        if estimate*quantity > 250000:
+            initial.append({
+                'stack':stack_id,
+                'estimate_price':estimate,
+                'listed_at_price':estimate,
+                'quality':f'{datapoints} datapoints, {to_isk(other or 0)} sell_min',
+                'quantity':quantity,
+                'item':stack.item()
+            })
     for item in items['unstacked']:
         estimate, datapoints, other = estimate_price(item.item, hours)
         quantity = item.quantity
-        initial.append({
-            'inv_item':item.id,
-            'estimate_price':estimate,
-            'listed_at_price':estimate,
-            'quality':f'{datapoints} datapoints, {to_isk(other or 0)} sell_min',
-            'quantity':quantity,
-            'item':item.item
-        })
+        if estimate*quantity > 250000:
+            initial.append({
+                'inv_item':item.id,
+                'estimate_price':estimate,
+                'listed_at_price':estimate,
+                'quality':f'{datapoints} datapoints, {to_isk(other or 0)} sell_min',
+                'quantity':quantity,
+                'item':item.item
+            })
     if request.method == 'POST':
         formset = BulkSellItemFormSet(request.POST, request.FILES, initial=initial)
         head_form = BulkSellItemFormHead(request.POST)
