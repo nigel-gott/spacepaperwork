@@ -61,5 +61,36 @@
     </table>
   </div>
 </div>
+<div class="row">
+  <div class="col s12 m12">
+    <h5>{{title}}</h5>
+    <table>
+      <thead>
+        <th>User</th>
+        <th>Total ZScore</th>
+        <th>Count ZScore</th>
+        <th>Mean ZScore</th>
+      </thead>
+      <tbody>
+          {% for user,data in user_total_z.items %}
+          <tr>
+            <td>
+                <a href="{% url 'fleet_shares' data.user.id %}">{{data.user.username}}<a>
+            </td>
+            <td>
+              {{data.total}}
+            </td>
+            <td>
+              {{data.count}}
+            </td>
+            <td>
+              {{data.mean}}
+            </td>
+         </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 
 {% endblock %}

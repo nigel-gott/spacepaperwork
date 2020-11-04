@@ -113,6 +113,7 @@ def fleet_late(request):
     users = DiscordUser.objects.annotate(shares=Count('character__lootshare')).filter(shares__gt=0).order_by('-shares')
     fleets = Fleet.objects.all()
     outliers = []
+    user_total_z = {}
     for fleet in fleets:
         members = fleet.fleetmember_set 
         stats = members.aggregate(avg_join_at=Avg(Extract('joined_at', 'epoch')), std_dev_join_at=StdDev(Extract('joined_at','epoch')))
@@ -122,10 +123,28 @@ def fleet_late(request):
         stats['human_avg_joined_at'] = str(datetime_obj_with_tz) 
         stats['minutes_std_dev'] = display_time(int(stats['std_dev_join_at']))
         z_scores = members.annotate(z_score=Func(ExpressionWrapper((Extract('joined_at','epoch')-stats['avg_join_at'])/stats['std_dev_join_at'], output_field=FloatField()),function='ABS')).filter(z_score__gte=1).order_by('-z_score')
+        for z_score in z_scores:
+            username = z_score.character.discord_user.username 
+            if username not in user_total_z: 
+                user_total_z[username] = {
+                    'user': z_score.character.discord_user,
+                    'count': 1,
+                    'total': z_score.z_score,
+                    'mean': z_score.z_score,
+                }
+
+            else:
+                existing = user_total_z[username]
+                user_total_z[username] = {
+                    'user': z_score.character.discord_user,
+                    'count': existing['count'] + 1,
+                    'total': existing['count'] + z_score.z_score,
+                    'mean': (existing['total'] + z_score.z_score)/(existing['count'] + 1),
+                }
         if len(z_scores) > 0:
             outliers.append({'fleet':fleet, 'stats':stats,'z_scores':z_scores})
 
-    context = {'users': users, 'Title': 'Late Joiners View', 'outliers':outliers}
+    context = {'users': users, 'Title': 'Late Joiners View', 'outliers':outliers, 'user_total_z':{k: v for k, v in sorted(user_total_z.items(), key=lambda item: item[1]['total'], reverse=True)}}
     return render(request, 'core/fleet_late.html', context)
 
 
