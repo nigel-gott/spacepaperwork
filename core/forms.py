@@ -251,7 +251,7 @@ class SellItemForm(forms.Form):
 
 class BulkSellItemFormHead(forms.Form):
     overall_cut = forms.DecimalField(
-        max_digits=5, decimal_places=2, label="Cut %", initial=20)
+        max_digits=5, decimal_places=2, label="Cut %", initial=25)
 class BulkSellItemForm(forms.Form):
     quality = forms.CharField(disabled=True)
     listed_at_price = forms.CharField()

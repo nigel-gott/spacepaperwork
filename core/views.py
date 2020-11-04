@@ -869,9 +869,9 @@ def sell_all_items(request, pk):
         if head_form.is_valid():
             cut = head_form.cleaned_data['overall_cut']
         else: 
-            cut = 20
+            cut = 25
     else: 
-        cut = 20
+        cut = 25
     initial = []
     for stack_id, stack_data in items['stacks'].items():
         stack = stack_data['stack']
