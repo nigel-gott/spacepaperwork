@@ -1,15 +1,16 @@
+from decimal import Decimal
+
 from allauth.socialaccount.forms import SignupForm
 from dal import autocomplete
 from django import forms
 from django.core.exceptions import ValidationError
+from django.db.models.fields import PositiveIntegerField
 from djmoney.forms.fields import MoneyField
 
-from core.models import (Corp, DiscordUser, Item, ItemFilterGroup,
-                         ItemSubSubType, ItemSubType, ItemType, LootShare)
+from core.models import Corp, DiscordUser, InventoryItem, Item, ItemFilterGroup, ItemSubSubType, ItemSubType, ItemType, LootShare, StackedInventoryItem
 
 from .fields import TimeZoneFormField
 from .models import AnomType, Character, FleetType, GooseUser, System
-from decimal import Decimal
 
 
 class SignupFormWithTimezone(SignupForm):
@@ -237,7 +238,7 @@ class DeleteItemForm(forms.Form):
     are_you_sure = forms.BooleanField(initial=False)
 
 class EditOrderPriceForm(forms.Form):
-    new_price = forms.DecimalField(max_digits=14, decimal_places=2)
+    new_price = forms.DecimalField(max_digits=20, decimal_places=2)
     broker_fee = forms.DecimalField(
         max_digits=5, decimal_places=2, label="Broker Fee %")
 
@@ -247,6 +248,19 @@ class SellItemForm(forms.Form):
     broker_fee = forms.DecimalField(
         max_digits=5, decimal_places=2, label="Broker Fee %")
     listed_at_price = forms.CharField()
+
+class BulkSellItemFormHead(forms.Form):
+    overall_cut = forms.DecimalField(
+        max_digits=5, decimal_places=2, label="Cut %", initial=20)
+class BulkSellItemForm(forms.Form):
+    quality = forms.CharField(disabled=True)
+    listed_at_price = forms.CharField()
+    estimate_price = forms.DecimalField(
+        max_digits=20, decimal_places=2, disabled=True) 
+    item = forms.ModelChoiceField(queryset=Item.objects.all(), disabled=True)
+    inv_item = forms.ModelChoiceField(widget=forms.HiddenInput(),required=False,queryset=InventoryItem.objects.all(), disabled=True)
+    stack = forms.ModelChoiceField(widget=forms.HiddenInput(),required=False,queryset=StackedInventoryItem.objects.all(), disabled=True)
+    quantity = forms.IntegerField(disabled=True, min_value=1)
 
 class SoldItemForm(forms.Form):
     quantity_remaining = forms.IntegerField(min_value=0, help_text="How much of the order is remaining, 0 means the order has fully sold!")

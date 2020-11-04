@@ -26,12 +26,7 @@ from djmoney.money import Money
 from moneyed.localization import format_money
 
 from core.autocomplete import create_ifg_choice_list
-from core.forms import (CharacterForm, DeleteItemForm, DepositEggsForm,
-                        EditOrderPriceForm, FleetAddMemberForm, FleetForm,
-                        InventoryItemForm, ItemMoveAllForm, JoinFleetForm,
-                        LootGroupForm, LootJoinForm, LootShareForm,
-                        SelectFilterForm, SellItemForm, SettingsForm,
-                        SoldItemForm)
+from core.forms import BulkSellItemForm, BulkSellItemFormHead, CharacterForm, DeleteItemForm, DepositEggsForm, EditOrderPriceForm, FleetAddMemberForm, FleetForm, InventoryItemForm, ItemMoveAllForm, JoinFleetForm, LootGroupForm, LootJoinForm, LootShareForm, SelectFilterForm, SellItemForm, SettingsForm, SoldItemForm
 from core.models import (AnomType, Character, CharacterLocation, Contract,
                          DiscordUser, EggTransaction, Fleet, FleetAnom,
                          FleetMember, GooseUser, InventoryItem, IskTransaction,
@@ -122,7 +117,7 @@ def fleet_late(request):
         datetime_obj_with_tz = make_aware(datetime.datetime.fromtimestamp(int(stats['avg_join_at'])))
         stats['human_avg_joined_at'] = str(datetime_obj_with_tz) 
         stats['minutes_std_dev'] = display_time(int(stats['std_dev_join_at']))
-        z_scores = members.annotate(z_score=Func(ExpressionWrapper((Extract('joined_at','epoch')-stats['avg_join_at'])/stats['std_dev_join_at'], output_field=FloatField()),function='ABS')).filter(z_score__gte=1).order_by('-z_score')
+        z_scores = members.annotate(z_score=ExpressionWrapper((Extract('joined_at','epoch')-stats['avg_join_at'])/stats['std_dev_join_at'], output_field=FloatField())).filter(z_score__gte=1).order_by('-z_score')
         for z_score in z_scores:
             username = z_score.character.discord_user.username 
             if username not in user_total_z: 
@@ -856,6 +851,102 @@ def edit_order_price(request, pk):
     }
     return render(request, 'core/edit_order_price.html', {'order_json':order_json, 'order':market_order,'form': form, 'title': 'Change Price of An Existing Market Order'})
 
+def estimate_price(item, hours):
+    price, datapoints = item.min_of_last_x_hours(hours)
+    return price, datapoints
+
+@login_required(login_url=login_url)
+@transaction.atomic
+def sell_all_items(request, pk):
+    loc = get_object_or_404(CharacterLocation, pk=pk)
+    if not loc.has_admin(request.user) or not request.user.is_staff:
+        return HttpResponseForbidden()
+    items = get_items_in_location(loc)
+    BulkSellItemFormSet= formset_factory(BulkSellItemForm,extra=0)
+    hours = 24*7
+    if request.method == 'POST':
+        head_form = BulkSellItemFormHead(request.POST)
+        if head_form.is_valid():
+            cut = head_form.cleaned_data['overall_cut']
+        else: 
+            cut = 20
+    else: 
+        cut = 20
+    initial = []
+    for stack_id, stack_data in items['stacks'].items():
+        stack = stack_data['stack']
+        estimate, datapoints = estimate_price(stack.item(), hours)
+        quantity = stack.quantity()
+        initial.append({
+            'stack':stack_id,
+            'estimate_price':estimate,
+            'listed_at_price':estimate,
+            'quality':f'{datapoints} datapoints',
+            'quantity':quantity,
+            'item':stack.item()
+        })
+    for item in items['unstacked']:
+        estimate, datapoints = estimate_price(item.item, hours)
+        quantity = item.quantity
+        initial.append({
+            'inv_item':item.id,
+            'estimate_price':estimate,
+            'listed_at_price':estimate,
+            'quality':f'{datapoints} datapoints',
+            'quantity':quantity,
+            'item':item.item
+        })
+    if request.method == 'POST':
+        formset = BulkSellItemFormSet(request.POST, request.FILES, initial=initial)
+        head_form = BulkSellItemFormHead(request.POST)
+        if formset.is_valid() and head_form.is_valid():
+            for form in formset:
+                inv_item = form.cleaned_data['inv_item']
+                stack = form.cleaned_data['stack']
+                cut = 1-Decimal(head_form.cleaned_data['overall_cut']/100)
+                uncommaed_price = form.cleaned_data['listed_at_price'].replace(',','')
+                price = Decimal(uncommaed_price)
+                cut_price = price*cut
+                items = []
+                if inv_item:
+                    items = [inv_item] 
+                else:
+                    items=stack.inventoryitem_set.all()
+                for item in items:
+                    if not item.can_sell():
+                        messages.error(request, f"Item {item} cannot be sold, maybe it is already being sold or is in a pending contract?")
+                        return HttpResponseRedirect(reverse('sell_all', args=[pk]))
+                    profit_line = IskTransaction(
+                        item = item,
+                        time = timezone.now(),
+                        isk = to_isk(floor(cut_price*item.quantity)),
+                        quantity = item.quantity,
+                        transaction_type = "buyback",
+                        notes=f"Corp Buyback using price {price} and a cut for the corp of {cut*100}% "
+                    )
+                    profit_line.full_clean()
+                    profit_line.save()
+                    sold_item = SoldItem(
+                        item=item,
+                            quantity=item.quantity,
+                            sold_via='internal'
+                    )
+                    sold_item.full_clean()
+                    sold_item.save()
+                    item.quantity = 0
+                    item.full_clean()
+                    item.save()
+
+                messages.success(request, f"Items succesfully bought")
+                return HttpResponseRedirect(reverse('sold'))
+            else:
+                print(f"Invalid {formset.errors} {head_form.errors}")
+    else:
+        head_form = BulkSellItemFormHead() 
+        formset = BulkSellItemFormSet(initial=initial)
+    return render(request, 'core/sell_all.html', {'formset':formset, 'head_form': head_form, 'title': 'Change Price of An Existing Market Order'})
+
+
 @login_required(login_url=login_url)
 def item_add(request, lg_pk):
     extra=10
@@ -876,9 +967,9 @@ def item_add(request, lg_pk):
             character = char_form.cleaned_data['character']
             count = 0
             for form in formset:
-                item = form.cleaned_data['item']
+                item_type = form.cleaned_data['item']
                 quantity = form.cleaned_data['quantity']
-                if item and quantity:
+                if item_type and quantity:
                     char_loc = CharacterLocation.objects.get_or_create(
                         character=character,
                         system=None
@@ -890,7 +981,7 @@ def item_add(request, lg_pk):
                     item, created = InventoryItem.objects.get_or_create(
                         location=loc[0],
                         loot_group=loot_group,
-                        item=item,
+                        item=item_type,
                         defaults = {
                             'quantity':quantity,
                             'created_at':timezone.now()
@@ -906,7 +997,7 @@ def item_add(request, lg_pk):
                             new_item = InventoryItem(
                                 location=loc[0],
                                 loot_group=loot_group,
-                                item=item,
+                                item=item_type,
                                 quantity=quantity,
                                 created_at=timezone.now()
                             )
@@ -1313,7 +1404,6 @@ def item_edit(request, pk):
             }
         )
     return render(request, 'core/loot_item_form.html', {'form': form, 'title': 'Edit Item'})
-
 
 def item_sold(order, form, remaining_quantity_to_sell):
     transaction_tax_percent = order.transaction_tax/100

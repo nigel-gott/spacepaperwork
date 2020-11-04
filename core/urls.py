@@ -46,6 +46,7 @@ urlpatterns = [
     path('item/<int:pk>/minus/', item_minus, name='item_minus'),
     path('item/', items, name='items'),
     path('loc/<int:pk>/stack/all/', stack_items, name='stack_items'),
+    path('loc/<int:pk>/sell/all/', sell_all_items, name='sell_all'),
     path('item/all/', all_items, name='all_items'),
     path('item/grouped/', items_grouped, name='grouped_items'),
     path('contracts/', contracts, name='contracts'),

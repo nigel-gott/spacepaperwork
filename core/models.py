@@ -372,14 +372,16 @@ class Item(models.Model):
     item_type = models.ForeignKey(ItemSubSubType, on_delete=models.CASCADE)
     name = models.TextField(primary_key=True)
     eve_echoes_market_id = models.TextField(null=True,blank=True, unique=True)
-    cached_lowest_sell = models.DecimalField(max_digits=14,decimal_places=2,null=True,blank=True)
+    cached_lowest_sell = models.DecimalField(max_digits=20,decimal_places=2,null=True,blank=True)
     
     def latest_market_data(self):
         return self.itemmarketdataevent_set.order_by('-time').first()
 
     def min_of_last_x_hours(self, hours):
         time_threshold = timezone.now() - timezone.timedelta(hours=hours)
-        return self.itemmarketdataevent_set.filter(time__gte=time_threshold).aggregrate(min_lowest_sell=Min('lowest_sell'))['min_lowest_sell']
+        min_price = self.itemmarketdataevent_set.filter(time__gte=time_threshold).aggregate(min_lowest_sell=Min('lowest_sell'))['min_lowest_sell']
+        datapoints_used = self.itemmarketdataevent_set.filter(time__gte=time_threshold).values('lowest_sell').distinct().count()
+        return min_price, datapoints_used
 
     def lowest_sell(self):
         if not self.cached_lowest_sell:
@@ -399,10 +401,10 @@ class Item(models.Model):
 class ItemMarketDataEvent(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     time = models.DateTimeField()
-    sell = models.DecimalField(max_digits=14,decimal_places=2,null=True,blank=True)
-    buy = models.DecimalField(max_digits=14,decimal_places=2,null=True,blank=True)
-    lowest_sell = models.DecimalField(max_digits=14,decimal_places=2,null=True,blank=True)
-    highest_buy = models.DecimalField(max_digits=14,decimal_places=2,null=True,blank=True)
+    sell = models.DecimalField(max_digits=20,decimal_places=2,null=True,blank=True)
+    buy = models.DecimalField(max_digits=20,decimal_places=2,null=True,blank=True)
+    lowest_sell = models.DecimalField(max_digits=20,decimal_places=2,null=True,blank=True)
+    highest_buy = models.DecimalField(max_digits=20,decimal_places=2,null=True,blank=True)
 
     class Meta:
         indexes = [
@@ -745,6 +747,9 @@ class StackedInventoryItem(models.Model):
             return self.inventoryitem_set.first()
         else:
             return False
+
+    def item(self):
+        return self._first_item() and self._first_item().item
     
     def marketorder(self):
         items = self.marketorders()
@@ -952,7 +957,7 @@ class IskTransaction(models.Model):
     quantity = models.IntegerField()
     time = models.DateTimeField()
     isk = MoneyField(
-        max_digits=14, decimal_places=2, default_currency='EEI') 
+        max_digits=20, decimal_places=2, default_currency='EEI') 
     transaction_type = models.TextField(choices=[
         ("price_change_broker_fee", "Price Change Broker Fee"),
         ("broker_fee", "Broker Fee"),
@@ -963,6 +968,7 @@ class IskTransaction(models.Model):
         ("external_market_price_adjustment_fee", "InGame Market Price Adjustment Fee"),
         ("external_market_gross_profit", "InGame Market Gross Profit"),
         ("egg_deposit", "Egg Deposit"),
+        ("buyback", "Buy Back"),
     ])
     notes = models.TextField(default='', blank=True)
 
@@ -975,7 +981,7 @@ class EggTransaction(models.Model):
     quantity = models.IntegerField()
     time = models.DateTimeField()
     eggs = MoneyField(
-        max_digits=14, decimal_places=2, default_currency='EEI') 
+        max_digits=20, decimal_places=2, default_currency='EEI') 
     debt = BooleanField(default=True)
     counterparty_discord_username = models.TextField()
     notes = models.TextField(default='', blank=True)
@@ -990,7 +996,7 @@ class MarketOrder(models.Model):
     buy_or_sell = models.TextField(choices=[("buy", "Buy"), ("sell", "Sell")])
     quantity = models.PositiveIntegerField()
     listed_at_price = MoneyField(
-        max_digits=14, decimal_places=2, default_currency='EEI') 
+        max_digits=20, decimal_places=2, default_currency='EEI') 
     transaction_tax = DecimalField(
         max_digits=5, decimal_places=2)
     broker_fee= DecimalField(
@@ -1030,7 +1036,7 @@ class TransferLog(models.Model):
     explaination = models.JSONField()
     count = models.PositiveIntegerField()
     total = MoneyField(
-        max_digits=14, decimal_places=2, default_currency='EEI') 
+        max_digits=20, decimal_places=2, default_currency='EEI') 
 
 class SoldItem(models.Model):
     item = models.OneToOneField(InventoryItem, on_delete=models.CASCADE)
