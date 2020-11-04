@@ -37,7 +37,7 @@
           {% for data in outliers%}
             {% for member in data.z_scores %}
           <tr>
-            {% if forloop.first and forloop.parentloop.first %}
+            {% if forloop.first %}
             <td rowspan="{{data.z_scores|length}}">
                 <a href="{% url 'fleet_view' data.fleet.id %}">{{data.fleet}}</a><br/>
 
