@@ -9,6 +9,7 @@ urlpatterns = [
     path('fleet/past', fleet_past, name='fleet_past'),
     path('fleet/future', fleet_future, name='fleet_future'),
     path('settings/', settings_view, name='settings'),
+    path('fleet/late/', fleet_late, name='fleet_late'),
     path('fleet/create/', fleet_create, name='fleet_create'),
     path('fleet/<int:pk>/', fleet_view, name='fleet_view'),
     path('fleet/<int:pk>/join/', fleet_join, name='fleet_join'),

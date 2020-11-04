@@ -32,6 +32,11 @@
             <li><a href="{% url 'all_fleet_shares' %}">Everyones Fleet Shares/Loot
             </a>
             </li>
+            {% if user.is_staff %}
+            <li><a href="{% url 'fleet_late' %}">Late Joiners Admin View
+            </a>
+            </li>
+            {% endif %}
 </ul>
 <ul id="dropdown_sales" class="dropdown-content">
             {% num_items user as num_to_sell %}
@@ -165,6 +170,11 @@
             </a>
             <li><a href="{% url 'all_fleet_shares' %}">Everyones Fleet Shares/Loot
             </a>
+            {% if user.is_staff %}
+            <li><a href="{% url 'fleet_late' %}">Late Joiners Admin View
+            </a>
+            </li>
+            {% endif %}
             {% num_items user as num_to_sell %}
             <li class="tab"><a href="{% url 'items' %}">Your Loot To Sell
                 ({{ num_to_sell }})

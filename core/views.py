@@ -13,7 +13,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
-from django.db.models import Count, ExpressionWrapper, F, Q, Sum
+from django.db.models import Avg, Count, ExpressionWrapper, F, Q, StdDev, Sum
 from django.forms.forms import Form
 from django.forms.formsets import formset_factory
 from django.http import (HttpResponseForbidden, HttpResponseNotAllowed,
@@ -41,7 +41,10 @@ from core.models import (AnomType, Character, CharacterLocation, Contract,
                          active_fleets_query, future_fleets_query,
                          past_fleets_query, to_isk)
 from django.db.models.fields import FloatField
-from django.db.models.functions import Coalesce
+from django.db.models.functions import Coalesce, Extract
+from django.db.models.expressions import Func
+from django.utils.timezone import make_aware
+import datetime
 
 # Create your views here.
 
@@ -81,6 +84,49 @@ def fleet(request):
     active_fleets = active_fleets_query()
     context = {'fleets': active_fleets, 'header': 'Active Fleets'}
     return render(request, 'core/fleet.html', context)
+
+intervals = (
+    ('weeks', 604800),  # 60 * 60 * 24 * 7
+    ('days', 86400),    # 60 * 60 * 24
+    ('hours', 3600),    # 60 * 60
+    ('minutes', 60),
+    ('seconds', 1),
+    )
+
+def display_time(seconds, granularity=5):
+    result = []
+
+    for name, count in intervals:
+        value = seconds // count
+        if value:
+            seconds -= value * count
+            if value == 1:
+                name = name.rstrip('s')
+            result.append("{} {}".format(value, name))
+    return ', '.join(result[:granularity])
+
+
+@login_required(login_url=login_url)
+def fleet_late(request):
+    if not request.user.is_staff:
+        return HttpResponseForbidden()
+    users = DiscordUser.objects.annotate(shares=Count('character__lootshare')).order_by('-shares')
+    fleets = Fleet.objects.all()
+    outliers = []
+    for fleet in fleets:
+        members = fleet.fleetmember_set 
+        stats = members.aggregate(avg_join_at=Avg(Extract('joined_at', 'epoch')), std_dev_join_at=StdDev(Extract('joined_at','epoch')))
+        if stats['std_dev_join_at'] == 0:
+            continue
+        datetime_obj_with_tz = make_aware(datetime.datetime.fromtimestamp(int(stats['avg_join_at'])))
+        stats['human_avg_joined_at'] = str(datetime_obj_with_tz) 
+        stats['minutes_std_dev'] = display_time(int(stats['std_dev_join_at']))
+        z_scores = members.annotate(z_score=Func(ExpressionWrapper((Extract('joined_at','epoch')-stats['avg_join_at'])/stats['std_dev_join_at'], output_field=FloatField()),function='ABS')).filter(z_score__gte=1).order_by('-z_score')
+        if len(z_scores) > 0:
+            outliers.append({'fleet':fleet, 'stats':stats,'z_scores':z_scores})
+
+    context = {'users': users, 'Title': 'Late Joiners View', 'outliers':outliers}
+    return render(request, 'core/fleet_late.html', context)
 
 
 @login_required(login_url=login_url)
@@ -265,7 +311,8 @@ def loot_share_join(request, pk):
                 character=selected_character,
                 loot_group=loot_group,
                 share_quantity=1,
-                flat_percent_cut=0
+                flat_percent_cut=0,
+                created_at=timezone.now()
             )
             ls.full_clean()
             ls.save()
@@ -317,7 +364,8 @@ def loot_share_add(request, pk):
                 character=character,
                 loot_group=loot_group,
                 share_quantity=form.cleaned_data['share_quantity'],
-                flat_percent_cut=form.cleaned_data['flat_percent_cut']
+                flat_percent_cut=form.cleaned_data['flat_percent_cut'],
+                created_at=timezone.now()
             )
             ls.full_clean()
             ls.save()
@@ -369,7 +417,7 @@ def loot_share_add_fleet_members(request, pk):
             LootShare.objects.get_or_create(
                 character=fleet_member.character,
                 loot_group=loot_group,
-                defaults={'share_quantity': 1, 'flat_percent_cut': 0}
+                defaults={'share_quantity': 1, 'flat_percent_cut': 0, 'created_at':timezone.now()}
             )
     return HttpResponseRedirect(reverse('loot_group_view', args=[pk]))
 

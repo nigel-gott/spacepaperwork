@@ -10,7 +10,7 @@ from django.core import validators
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models, transaction
 from django.db.models import DecimalField, F, FloatField, Q
-from django.db.models.aggregates import Sum
+from django.db.models.aggregates import Min, Sum
 from django.db.models.expressions import Combinable, ExpressionWrapper
 from django.db.models.fields import BooleanField
 from django.utils import timezone
@@ -376,6 +376,10 @@ class Item(models.Model):
     
     def latest_market_data(self):
         return self.itemmarketdataevent_set.order_by('-time').first()
+
+    def min_of_last_x_hours(self, hours):
+        time_threshold = timezone.now() - timezone.timedelta(hours=hours)
+        return self.itemmarketdataevent_set.filter(time__gte=time_threshold).aggregrate(min_lowest_sell=Min('lowest_sell'))['min_lowest_sell']
 
     def lowest_sell(self):
         if not self.cached_lowest_sell:
@@ -1072,6 +1076,7 @@ class LootShare(models.Model):
     loot_group = models.ForeignKey(LootGroup, on_delete=models.CASCADE)
     share_quantity = models.PositiveIntegerField(default=0)
     flat_percent_cut = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField()
 
     def has_admin(self, user):
         return self.loot_group.has_admin(user)
