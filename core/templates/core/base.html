@@ -113,7 +113,11 @@
             <li>
         </ul>
         </div>
+        <ul>
         <div class="col offset-s7 m5 s5 hide-on-med-and-down right-align">
+            <a class="waves-btn btn" href="{% url 'user_transactions' user.id %}">
+            Your Transactions
+            </a>
             Isk Owed({{user.isk_balance}}) - 
             Eggs Owed({{user.debt_egg_balance.amount|floatformat:"0"}}) -
             Your Eggs({{user.egg_balance|formatmoney|floatformat:"0g"}})

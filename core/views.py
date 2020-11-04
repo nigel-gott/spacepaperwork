@@ -1135,8 +1135,17 @@ def items_grouped(request):
 
 @login_required(login_url=login_url)
 def all_fleet_shares(request):
-    users = LootShare.objects.values('character__discord_user', 'character__discord_user__username').distinct()
+    users = LootShare.objects.values('character__discord_user', 'character__discord_user__username', 'character__discord_user__gooseuser__id').distinct()
     return render(request, 'core/users_view.html', {'users': users, 'title':"All Users Shares"})
+
+@login_required(login_url=login_url)
+def user_transactions(request, pk):
+    user = get_object_or_404(GooseUser,pk=pk)
+    return render(request, 'core/transactions_view.html', {
+        'transfer_logs': user.transferlog_set.all(), 
+        'isk_transactions': user.isk_transactions().all(), 
+        'egg_transactions': user.isk_transactions().all(), 
+        })
 
 @login_required(login_url=login_url)
 def your_fleet_shares(request):

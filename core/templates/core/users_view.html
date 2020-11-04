@@ -6,12 +6,22 @@
     <table>
       <thead>
         <th>User Shares</th>
+        <th>User Transactions</th>
       </thead>
       <tbody>
           {% for user in users %}
           <tr>
             <td>
                 <a href="{% url 'fleet_shares' user.character__discord_user %}">{{user.character__discord_user__username}}<a>
+            </td>
+            <td>
+            {% if user.character__discord_user__gooseuser__id %}
+            <a class="waves-btn btn" href="{% url 'user_transactions' user.character__discord_user__gooseuser__id %}">
+            {{user.character__discord_user__username}}'s Transactions
+            </a>
+            {% else %}
+            {{user.character__discord_user__username}} has not yet signed up on GooseTools
+            {% endif %}
             </td>
          </tr>
         {% endfor %}

@@ -136,6 +136,12 @@ class GooseUser(AbstractUser):
     def has_pending_transfers(self):
         return self.pending_transfers().count() > 0
     
+    def isk_transactions(self):
+        return IskTransaction.objects.filter(item__location__character_location__character__discord_user=self.discord_user)
+
+    def egg_transactions(self):
+        return EggTransaction.objects.filter(counterparty_discord_username=self.discord_username()) 
+    
     def isk_balance(self):
         return to_isk(model_sum(IskTransaction.objects.filter(item__location__character_location__character__discord_user=self.discord_user), 'isk'))
 
