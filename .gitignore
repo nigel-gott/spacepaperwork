@@ -1,6 +1,7 @@
 staticfiles/
 .idea/
 misc_data/
+.ipython/
 .env
 
 # Django #
