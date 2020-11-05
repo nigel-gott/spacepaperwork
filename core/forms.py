@@ -21,7 +21,7 @@ from core.models import (
 )
 
 from .fields import TimeZoneFormField
-from .models import AnomType, Character, FleetType, GooseUser, System
+from .models import AnomType, Character, FleetType, LootType, GooseUser, System
 
 
 class SignupFormWithTimezone(SignupForm):
@@ -105,6 +105,7 @@ class FleetForm(forms.Form):
     fc_character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0)
     name = forms.CharField(max_length=100)
     fleet_type = forms.ModelChoiceField(queryset=FleetType.objects.all(), initial=0)
+    loot_type = forms.ModelChoiceField(queryset=LootType.objects.all(), initial=0)
     gives_shares_to_alts = forms.BooleanField(
         required=False, initial=False, widget=forms.CheckboxInput(attrs={})
     )

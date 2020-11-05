@@ -230,6 +230,13 @@ class FleetType(models.Model):
     def __str__(self):
         return str(self.type)
 
+class LootType(models.Model):
+    type = models.TextField()
+    material_icon = models.TextField()
+    material_colour = models.TextField()
+
+    def __str__(self):
+        return str(self.type)
 
 def human_readable_relativedelta(delta):
     attrs = ["years", "months", "days", "hours", "minutes"]
@@ -276,6 +283,7 @@ class Fleet(models.Model):
     )
     name = models.TextField()
     fleet_type = models.ForeignKey(FleetType, on_delete=models.CASCADE)
+    loot_type = models.ForeignKey(LootType, on_delete=models.CASCADE)
     gives_shares_to_alts = models.BooleanField(default=False)
     start = models.DateTimeField()
     end = models.DateTimeField(blank=True, null=True)
@@ -300,6 +308,9 @@ class Fleet(models.Model):
 
     def has_member(self, user):
         return self.members_for_user(user).count() > 0
+
+    def is_master_looter(self):
+        return self.loot_type.type == "Master Looter"
 
     def still_can_join_alts(self, user):
         num_chars = len(user.characters())

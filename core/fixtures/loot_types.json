@@ -1,0 +1,20 @@
+[
+  {
+    "model": "core.loottype",
+    "pk": 1,
+    "fields": {
+      "type": "Master Looter",
+      "material_icon": "star",
+      "material_colour": "lime-text text-lighten-3"
+    }
+  },
+  {
+    "model": "core.loottype",
+    "pk": 2,
+    "fields": {
+      "type": "Free For All",
+      "material_icon": "face",
+      "material_colour": "lime-text text-lighten-3"
+    }
+  }
+]
