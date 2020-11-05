@@ -645,6 +645,7 @@ def fleet_create(request):
             new_fleet = Fleet(
                 fc=request.user,
                 fleet_type=form.cleaned_data["fleet_type"],
+                loot_type=form.cleaned_data["loot_type"],
                 name=form.cleaned_data["name"],
                 description=form.cleaned_data["description"],
                 location=form.cleaned_data["location"],
@@ -708,6 +709,7 @@ def fleet_edit(request, pk):
 
             existing_fleet.fc = existing_fleet.fc
             existing_fleet.fleet_type = form.cleaned_data["fleet_type"]
+            existing_fleet.loot_type = form.cleaned_data["loot_type"]
             existing_fleet.name = form.cleaned_data["name"]
             existing_fleet.description = form.cleaned_data["description"]
             existing_fleet.location = form.cleaned_data["location"]
@@ -730,6 +732,7 @@ def fleet_edit(request, pk):
                 "end_date": existing_fleet.end and existing_fleet.end.date(),
                 "end_time": existing_fleet.end and existing_fleet.end.time(),
                 "fleet_type": existing_fleet.fleet_type,
+                "loot_type": existing_fleet.loot_type,
                 "name": existing_fleet.name,
                 "description": existing_fleet.description,
                 "location": existing_fleet.location,

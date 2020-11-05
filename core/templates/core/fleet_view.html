@@ -61,6 +61,30 @@
         </div>
     </div>
 </div>
+
+{% if fleet.is_master_looter %}
+<div class="row">
+    <div class="col s12 m12">
+        <div class="card blue-grey lighten-2">
+            <div class="card-content white-text">
+                <span class="card-title">
+                   <i class="material-icons">attach_money</i> Master Looting
+                </span>
+                <p>
+                    All loot, wrecks, and containers will be gathered by a designated looter
+                    and distributed to all fleet members.
+                </p>
+                <p>
+                    <strong>
+                        Do not loot unless given permission to do so by the fleet commander.
+                    </strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="row">
     <div class="col m12 s12">
         <ul class="collapsible">
