@@ -136,7 +136,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 ACCOUNT_LOGOUT_REDIRECT_URL = "/goosetools/"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
-LOGIN_REDIRECT_URL = "fleets"
+LOGIN_REDIRECT_URL = "fleet"
 # LOGIN_REDIRECT_URL = 'fleet'
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
 LOGIN_URL = "account_login"
