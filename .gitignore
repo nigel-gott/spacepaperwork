@@ -4,6 +4,7 @@ misc_data/
 .ipython/
 .vscode/
 .env
+python
 
 # Django #
 *.log
