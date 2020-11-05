@@ -515,6 +515,7 @@ def fleet_create(request):
                 gives_shares_to_alts=form.cleaned_data['gives_shares_to_alts'],
                 start=combined_start,
                 end=combined_end,
+                loot_was_stolen=form.cleaned_data['loot_was_stolen']
             )
             new_fleet.full_clean()
             new_fleet.save()
@@ -567,6 +568,7 @@ def fleet_edit(request, pk):
             existing_fleet.end = combined_end
             existing_fleet.expected_duration = form.cleaned_data['expected_duration']
             existing_fleet.gives_shares_to_alts = form.cleaned_data['gives_shares_to_alts']
+            existing_fleet.loot_was_stolen=form.cleaned_data['loot_was_stolen']
             existing_fleet.full_clean()
             existing_fleet.save()
             return HttpResponseRedirect(reverse('fleet_view', args=[pk]))
@@ -583,6 +585,7 @@ def fleet_edit(request, pk):
             'location': existing_fleet.location,
             'expected_duration': existing_fleet.expected_duration,
             'gives_shares_to_alts': existing_fleet.gives_shares_to_alts,
+            'loot_was_stolen': existing_fleet.loot_was_stolen
         })
         form.fields['fc_character'].queryset = existing_fleet.fc.characters()
 

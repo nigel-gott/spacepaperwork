@@ -81,6 +81,9 @@ class FleetForm(forms.Form):
     gives_shares_to_alts = forms.BooleanField(required=False, initial=False, widget=forms.CheckboxInput(attrs={
 
     }))
+    loot_was_stolen = forms.BooleanField(required=False, initial=False, widget=forms.CheckboxInput(attrs={
+
+    }))
     description = forms.CharField(required=False)
     location = forms.CharField(required=False)
     start_date = forms.DateField(

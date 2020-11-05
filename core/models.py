@@ -228,6 +228,7 @@ class Fleet(models.Model):
     description = models.TextField(blank=True, null=True)
     location = models.TextField(blank=True, null=True)
     expected_duration = models.TextField(blank=True, null=True)
+    loot_was_stolen = models.BooleanField(default=False)
 
     def members_for_user(self, user):
         uid = user.discord_uid()
