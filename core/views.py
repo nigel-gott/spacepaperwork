@@ -40,6 +40,7 @@ from django.db.models.functions import Coalesce, Extract
 from django.db.models.expressions import Func
 from django.utils.timezone import make_aware
 import datetime
+from django.utils.safestring import mark_safe
 
 # Create your views here.
 
@@ -1550,6 +1551,14 @@ def deposit_eggs(request):
         return forbidden(request)
     
     to_deposit_qs = SoldItem.objects.filter(item__location__character_location__character__discord_user=request.user.discord_user, deposited_into_eggs=False)
+    loot_groups = to_deposit_qs.values('item__loot_group').distinct()
+    invalid_groups = LootGroup.objects.filter(id__in=loot_groups).annotate(share_sum=Coalesce(Sum(F('lootshare__share_quantity')+F('lootshare__flat_percent_cut')),0)).filter(share_sum__lte=0)
+    if len(invalid_groups) > 0:
+        error_message = "The following loot groups you are attempting to deposit isk for have no participation at all, you must first setup some participation for these groups before you can deposit isk:"
+        for invalid_group in invalid_groups:
+            error_message = error_message + f"<br/> *  <a href='{reverse('loot_group_view', args=[invalid_group.pk])}'>{invalid_group}</a> " 
+        messages.error(request, mark_safe(error_message)) 
+        return HttpResponseRedirect(reverse('sold'))
     to_deposit_list = list(to_deposit_qs)
     total = to_deposit_qs.aggregate(result=Sum('item__isktransaction__isk'))['result']
     if total < 0:
