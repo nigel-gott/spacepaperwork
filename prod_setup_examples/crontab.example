@@ -1,0 +1,2 @@
+@hourly /opt/goosetools_venv/bin/python3 /opt/goosetools/goosetools/manage.py runjobs hourly >> /opt/goosetools/logs/market_data_cronLog.txt 2>&1
+@hourly cd /opt/goosetools/goosetools && ./fixture_utils/scrape_for_character_data.sh >> /opt/goosetools/logs/char_scrape_cronLog.txt 2>&1

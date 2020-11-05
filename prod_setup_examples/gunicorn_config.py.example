@@ -1,0 +1,5 @@
+command = '/opt/goosetools_venv/bin/gunicorn'
+pythonpath = '/opt/goosetools/goosetools'
+bind = '127.0.0.1:8001'
+workers = 3
+logconfig = '/opt/goosetools/logging.conf'
