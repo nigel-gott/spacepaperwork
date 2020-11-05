@@ -1,0 +1,5 @@
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+POSTGRES_DB=goosetools
+POSTGRES_USER=goosetools_user
+POSTGRES_PASSWORD=local_dev_password
