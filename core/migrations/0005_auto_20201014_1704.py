@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0004_fleet_expected_duration'),
+        ("core", "0004_fleet_expected_duration"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='character',
-            name='user',
+            model_name="character",
+            name="user",
         ),
         migrations.AddField(
-            model_name='character',
-            name='discord_id',
-            field=models.TextField(default='NA'),
+            model_name="character",
+            name="discord_id",
+            field=models.TextField(default="NA"),
             preserve_default=False,
         ),
     ]

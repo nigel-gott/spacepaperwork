@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0003_fleettype_material_colour'),
+        ("core", "0003_fleettype_material_colour"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fleet',
-            name='expected_duration',
+            model_name="fleet",
+            name="expected_duration",
             field=models.TextField(blank=True, null=True),
         ),
     ]

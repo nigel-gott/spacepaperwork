@@ -7,17 +7,22 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0042_character_verified'),
+        ("core", "0042_character_verified"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='characterlocation',
-            name='station',
+            model_name="characterlocation",
+            name="station",
         ),
         migrations.AddField(
-            model_name='characterlocation',
-            name='system',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.system'),
+            model_name="characterlocation",
+            name="system",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="core.system",
+            ),
         ),
     ]

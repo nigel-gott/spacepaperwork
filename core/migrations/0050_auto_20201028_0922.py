@@ -7,21 +7,40 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0049_auto_20201028_0815'),
+        ("core", "0049_auto_20201028_0815"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='itemfiltergroup',
-            name='anom_type',
+            model_name="itemfiltergroup",
+            name="anom_type",
         ),
         migrations.CreateModel(
-            name='ItemFilterLink',
+            name="ItemFilterLink",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('default', models.BooleanField(default=False)),
-                ('anom_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.anomtype')),
-                ('item_filter_group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.itemfiltergroup')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("default", models.BooleanField(default=False)),
+                (
+                    "anom_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.anomtype"
+                    ),
+                ),
+                (
+                    "item_filter_group",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.itemfiltergroup",
+                    ),
+                ),
             ],
         ),
     ]

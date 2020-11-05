@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0014_auto_20201017_1138'),
+        ("core", "0014_auto_20201017_1138"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='inventoryitem',
-            old_name='net_sold_at_price',
-            new_name='total_profit',
+            model_name="inventoryitem",
+            old_name="net_sold_at_price",
+            new_name="total_profit",
         ),
         migrations.RenameField(
-            model_name='inventoryitem',
-            old_name='net_sold_at_price_currency',
-            new_name='total_profit_currency',
+            model_name="inventoryitem",
+            old_name="net_sold_at_price_currency",
+            new_name="total_profit_currency",
         ),
         migrations.AddField(
-            model_name='inventoryitem',
-            name='remaining_quantity',
+            model_name="inventoryitem",
+            name="remaining_quantity",
             field=models.PositiveIntegerField(default=1),
             preserve_default=False,
         ),

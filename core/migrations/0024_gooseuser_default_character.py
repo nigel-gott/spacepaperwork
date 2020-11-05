@@ -7,14 +7,18 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0023_auto_20201018_1322'),
+        ("core", "0023_auto_20201018_1322"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='gooseuser',
-            name='default_character',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='core.character'),
+            model_name="gooseuser",
+            name="default_character",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="core.character",
+            ),
             preserve_default=False,
         ),
     ]

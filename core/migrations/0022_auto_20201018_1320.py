@@ -6,27 +6,39 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0021_gooseuser_market_fee'),
+        ("core", "0021_gooseuser_market_fee"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='gooseuser',
-            name='market_fee',
+            model_name="gooseuser",
+            name="market_fee",
         ),
         migrations.AddField(
-            model_name='gooseuser',
-            name='broker_fee',
-            field=models.DecimalField(decimal_places=4, default=8.0, max_digits=7, verbose_name='Your Broker Fee in %'),
+            model_name="gooseuser",
+            name="broker_fee",
+            field=models.DecimalField(
+                decimal_places=4,
+                default=8.0,
+                max_digits=7,
+                verbose_name="Your Broker Fee in %",
+            ),
         ),
         migrations.AddField(
-            model_name='gooseuser',
-            name='transaction_tax',
-            field=models.DecimalField(decimal_places=4, default=15.0, max_digits=7, verbose_name='Your Transaction Tax in %'),
+            model_name="gooseuser",
+            name="transaction_tax",
+            field=models.DecimalField(
+                decimal_places=4,
+                default=15.0,
+                max_digits=7,
+                verbose_name="Your Transaction Tax in %",
+            ),
         ),
         migrations.AddField(
-            model_name='inventoryitem',
-            name='transaction_fee',
-            field=models.DecimalField(blank=True, decimal_places=4, max_digits=7, null=True),
+            model_name="inventoryitem",
+            name="transaction_fee",
+            field=models.DecimalField(
+                blank=True, decimal_places=4, max_digits=7, null=True
+            ),
         ),
     ]

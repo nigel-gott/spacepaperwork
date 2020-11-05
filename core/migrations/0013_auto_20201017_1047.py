@@ -7,18 +7,28 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0012_auto_20201017_0804'),
+        ("core", "0012_auto_20201017_0804"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='lootgroup',
-            name='fleet_anom',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.fleetanom'),
+            model_name="lootgroup",
+            name="fleet_anom",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="core.fleetanom",
+            ),
         ),
         migrations.AlterField(
-            model_name='lootgroup',
-            name='killmail',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.killmail'),
+            model_name="lootgroup",
+            name="killmail",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="core.killmail",
+            ),
         ),
     ]

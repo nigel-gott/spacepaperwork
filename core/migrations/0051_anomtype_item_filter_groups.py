@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0050_auto_20201028_0922'),
+        ("core", "0050_auto_20201028_0922"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='anomtype',
-            name='item_filter_groups',
-            field=models.ManyToManyField(through='core.ItemFilterLink', to='core.ItemFilterGroup'),
+            model_name="anomtype",
+            name="item_filter_groups",
+            field=models.ManyToManyField(
+                through="core.ItemFilterLink", to="core.ItemFilterGroup"
+            ),
         ),
     ]

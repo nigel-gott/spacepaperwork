@@ -6,14 +6,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0002_fleettype_material_icon'),
+        ("core", "0002_fleettype_material_icon"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fleettype',
-            name='material_colour',
-            field=models.TextField(default='lime lighten-3'),
+            model_name="fleettype",
+            name="material_colour",
+            field=models.TextField(default="lime lighten-3"),
             preserve_default=False,
         ),
     ]

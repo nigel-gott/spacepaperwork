@@ -19,10 +19,10 @@ class TimezoneMiddleware:
 
     def __call__(self, request):
         user = auth.get_user(request)
-        if hasattr(user, 'timezone'):
+        if hasattr(user, "timezone"):
             tzname = user.timezone
         else:
-            tzname = pytz.timezone('UTC')
+            tzname = pytz.timezone("UTC")
         if tzname:
             timezone.activate(tzname)
         else:
@@ -41,13 +41,13 @@ class ProfilerMiddleware(object):
 
         response = self.get_response(request)
 
-        if settings.DEBUG and 'prof' in request.GET:
+        if settings.DEBUG and "prof" in request.GET:
             self.profiler.create_stats()
             out = StringIO()
             old_stdout, sys.stdout = sys.stdout, out
             self.profiler.print_stats(1)
             sys.stdout = old_stdout
-            response.content = '<pre>%s</pre>' % out.getvalue()
+            response.content = "<pre>%s</pre>" % out.getvalue()
         return response
         # Code to be executed for each request/response after
         # the view is called.
@@ -55,7 +55,7 @@ class ProfilerMiddleware(object):
         return response
 
     def process_view(self, request, callback, callback_args, callback_kwargs):
-        if settings.DEBUG and 'prof' in request.GET:
+        if settings.DEBUG and "prof" in request.GET:
             self.profiler = cProfile.Profile()
             args = (request,) + callback_args
             return self.profiler.runcall(callback, *args, **callback_kwargs)

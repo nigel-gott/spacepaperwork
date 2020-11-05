@@ -7,43 +7,49 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0040_auto_20201026_0921'),
+        ("core", "0040_auto_20201026_0921"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='character',
-            name='discord_avatar_url',
+            model_name="character",
+            name="discord_avatar_url",
         ),
         migrations.RemoveField(
-            model_name='character',
-            name='discord_id',
+            model_name="character",
+            name="discord_id",
         ),
         migrations.RemoveField(
-            model_name='character',
-            name='discord_username',
+            model_name="character",
+            name="discord_username",
         ),
         migrations.AlterField(
-            model_name='character',
-            name='discord_user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.discorduser'),
+            model_name="character",
+            name="discord_user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="core.discorduser"
+            ),
         ),
         migrations.AlterField(
-            model_name='character',
-            name='ingame_name',
+            model_name="character",
+            name="ingame_name",
             field=models.TextField(unique=True),
         ),
         migrations.AlterField(
-            model_name='gooseuser',
-            name='default_character',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='core.character'),
+            model_name="gooseuser",
+            name="default_character",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to="core.character"
+            ),
         ),
         migrations.AlterField(
-            model_name='gooseuser',
-            name='discord_user',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='core.discorduser'),
+            model_name="gooseuser",
+            name="discord_user",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to="core.discorduser"
+            ),
         ),
         migrations.DeleteModel(
-            name='EggDeposit',
+            name="EggDeposit",
         ),
     ]

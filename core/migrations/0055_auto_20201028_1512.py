@@ -7,13 +7,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0054_auto_20201028_1135'),
+        ("core", "0054_auto_20201028_1135"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='gooseuser',
-            name='username',
-            field=models.CharField(error_messages={'unique': 'A user with that username already exists.'}, max_length=150, unique=True, validators=[core.models.UnicodeAndSpacesUsernameValidator]),
+            model_name="gooseuser",
+            name="username",
+            field=models.CharField(
+                error_messages={"unique": "A user with that username already exists."},
+                max_length=150,
+                unique=True,
+                validators=[core.models.UnicodeAndSpacesUsernameValidator],
+            ),
         ),
     ]

@@ -6,13 +6,15 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0063_auto_20201030_0734'),
+        ("core", "0063_auto_20201030_0734"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='item',
-            name='cached_lowest_sell',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=14, null=True),
+            model_name="item",
+            name="cached_lowest_sell",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=14, null=True
+            ),
         ),
     ]

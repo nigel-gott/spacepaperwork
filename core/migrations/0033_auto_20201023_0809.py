@@ -7,23 +7,29 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0032_solditem_deposit_approved'),
+        ("core", "0032_solditem_deposit_approved"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='junkeditem',
-            name='item',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='core.inventoryitem'),
+            model_name="junkeditem",
+            name="item",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to="core.inventoryitem"
+            ),
         ),
         migrations.AlterField(
-            model_name='marketorder',
-            name='item',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='core.inventoryitem'),
+            model_name="marketorder",
+            name="item",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to="core.inventoryitem"
+            ),
         ),
         migrations.AlterField(
-            model_name='solditem',
-            name='item',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='core.inventoryitem'),
+            model_name="solditem",
+            name="item",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, to="core.inventoryitem"
+            ),
         ),
     ]

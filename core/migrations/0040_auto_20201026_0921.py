@@ -3,22 +3,23 @@
 from django.db import migrations
 from allauth.socialaccount.models import SocialAccount
 
+
 def combine_names(apps, schema_editor):
     # We can't import the Person model directly as it may be a newer
     # version than this migration expects. We use the historical version.
-    Character = apps.get_model('core', 'Character')
-    DiscordUser = apps.get_model('core', 'DiscordUser')
-    GooseUser = apps.get_model('core', 'GooseUser')
+    Character = apps.get_model("core", "Character")
+    DiscordUser = apps.get_model("core", "DiscordUser")
+    GooseUser = apps.get_model("core", "GooseUser")
     # First populate DiscordUser for social accounts we have full data on
     for account in SocialAccount.objects.all():
         extra = account.extra_data
         discord_user = DiscordUser.objects.get_or_create(
             uid=account.uid,
-            defaults = {
-                'username': extra['username'] + "#" + extra['discriminator'],
-                'avatar_hash': extra['avatar'],
-                'unknown': False
-            }
+            defaults={
+                "username": extra["username"] + "#" + extra["discriminator"],
+                "avatar_hash": extra["avatar"],
+                "unknown": False,
+            },
         )[0]
         discord_user.full_clean()
         discord_user.save()
@@ -27,14 +28,14 @@ def combine_names(apps, schema_editor):
         account.user.save()
     # Next create missing DiscordUsers from the Character data
     for character in Character.objects.all():
-        avatar_hash = character.discord_avatar_url.split('/')[-1].split('.')[0]
+        avatar_hash = character.discord_avatar_url.split("/")[-1].split(".")[0]
         discord_user = DiscordUser.objects.get_or_create(
             uid=character.discord_id,
-            defaults = {
-                'username': character.discord_username,
-                'avatar_hash': avatar_hash,
-                'unknown': False
-            }
+            defaults={
+                "username": character.discord_username,
+                "avatar_hash": avatar_hash,
+                "unknown": False,
+            },
         )[0]
         discord_user.full_clean()
         discord_user.save()
@@ -42,10 +43,11 @@ def combine_names(apps, schema_editor):
         character.full_clean()
         character.save()
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0039_auto_20201026_0920'),
+        ("core", "0039_auto_20201026_0920"),
     ]
 
     operations = [

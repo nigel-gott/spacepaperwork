@@ -6,28 +6,36 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0062_auto_20201030_0732'),
+        ("core", "0062_auto_20201030_0732"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='itemmarketdataevent',
-            name='buy',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=14, null=True),
+            model_name="itemmarketdataevent",
+            name="buy",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=14, null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='itemmarketdataevent',
-            name='highest_buy',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=14, null=True),
+            model_name="itemmarketdataevent",
+            name="highest_buy",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=14, null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='itemmarketdataevent',
-            name='lowest_sell',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=14, null=True),
+            model_name="itemmarketdataevent",
+            name="lowest_sell",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=14, null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='itemmarketdataevent',
-            name='sell',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=14, null=True),
+            model_name="itemmarketdataevent",
+            name="sell",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=14, null=True
+            ),
         ),
     ]

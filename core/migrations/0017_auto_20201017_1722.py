@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0016_auto_20201017_1705'),
+        ("core", "0016_auto_20201017_1705"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='lootshare',
-            name='flat_percent_cut',
+            model_name="lootshare",
+            name="flat_percent_cut",
             field=models.PositiveIntegerField(default=0),
         ),
         migrations.AlterField(
-            model_name='lootshare',
-            name='share_quantity',
+            model_name="lootshare",
+            name="share_quantity",
             field=models.PositiveIntegerField(default=0),
         ),
     ]

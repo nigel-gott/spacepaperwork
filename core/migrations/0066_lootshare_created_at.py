@@ -7,13 +7,13 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0065_auto_20201030_0837'),
+        ("core", "0065_auto_20201030_0837"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='lootshare',
-            name='created_at',
+            model_name="lootshare",
+            name="created_at",
             field=models.DateTimeField(default=django.utils.timezone.now),
             preserve_default=False,
         ),

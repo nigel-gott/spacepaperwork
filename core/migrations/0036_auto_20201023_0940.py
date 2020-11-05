@@ -7,23 +7,39 @@ import djmoney.models.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0035_auto_20201023_0927'),
+        ("core", "0035_auto_20201023_0927"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='eggtransaction',
-            old_name='counterparty_discord_id',
-            new_name='counterparty_discord_username',
+            model_name="eggtransaction",
+            old_name="counterparty_discord_id",
+            new_name="counterparty_discord_username",
         ),
         migrations.AlterField(
-            model_name='isktransaction',
-            name='transaction_type',
-            field=models.TextField(choices=[('broker_fee', 'Broker Fee'), ('transaction_tax', 'Transaction Tax'), ('contract_broker_fee', 'Contract Broker Fee'), ('contract_transaction_tax', 'Contract Transaction Tax'), ('contract_gross_profit', 'Contract Gross Profit'), ('external_market_price_adjustment_fee', 'InGame Market Price Adjustment Fee'), ('external_market_gross_profit', 'InGame Market Gross Profit'), ('egg_deposit', 'Egg Deposit')]),
+            model_name="isktransaction",
+            name="transaction_type",
+            field=models.TextField(
+                choices=[
+                    ("broker_fee", "Broker Fee"),
+                    ("transaction_tax", "Transaction Tax"),
+                    ("contract_broker_fee", "Contract Broker Fee"),
+                    ("contract_transaction_tax", "Contract Transaction Tax"),
+                    ("contract_gross_profit", "Contract Gross Profit"),
+                    (
+                        "external_market_price_adjustment_fee",
+                        "InGame Market Price Adjustment Fee",
+                    ),
+                    ("external_market_gross_profit", "InGame Market Gross Profit"),
+                    ("egg_deposit", "Egg Deposit"),
+                ]
+            ),
         ),
         migrations.AlterField(
-            model_name='transferlog',
-            name='total',
-            field=djmoney.models.fields.MoneyField(decimal_places=2, default_currency='EEI', max_digits=14),
+            model_name="transferlog",
+            name="total",
+            field=djmoney.models.fields.MoneyField(
+                decimal_places=2, default_currency="EEI", max_digits=14
+            ),
         ),
     ]

@@ -7,16 +7,21 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0026_auto_20201021_1243'),
+        ("core", "0026_auto_20201021_1243"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='inventoryitem',
-            name='loot_group',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.lootgroup'),
+            model_name="inventoryitem",
+            name="loot_group",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="core.lootgroup",
+            ),
         ),
         migrations.DeleteModel(
-            name='LootGroupShare',
+            name="LootGroupShare",
         ),
     ]

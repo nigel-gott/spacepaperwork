@@ -6,16 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0068_auto_20201104_1450'),
+        ("core", "0068_auto_20201104_1450"),
     ]
 
     operations = [
         migrations.AddIndex(
-            model_name='eggtransaction',
-            index=models.Index(fields=['time'], name='core_eggtra_time_812557_idx'),
+            model_name="eggtransaction",
+            index=models.Index(fields=["time"], name="core_eggtra_time_812557_idx"),
         ),
         migrations.AddIndex(
-            model_name='isktransaction',
-            index=models.Index(fields=['time'], name='core_isktra_time_634b39_idx'),
+            model_name="isktransaction",
+            index=models.Index(fields=["time"], name="core_isktra_time_634b39_idx"),
         ),
     ]

@@ -7,53 +7,71 @@ import djmoney.models.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0066_lootshare_created_at'),
+        ("core", "0066_lootshare_created_at"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='eggtransaction',
-            name='eggs',
-            field=djmoney.models.fields.MoneyField(decimal_places=2, default_currency='EEI', max_digits=20),
+            model_name="eggtransaction",
+            name="eggs",
+            field=djmoney.models.fields.MoneyField(
+                decimal_places=2, default_currency="EEI", max_digits=20
+            ),
         ),
         migrations.AlterField(
-            model_name='isktransaction',
-            name='isk',
-            field=djmoney.models.fields.MoneyField(decimal_places=2, default_currency='EEI', max_digits=20),
+            model_name="isktransaction",
+            name="isk",
+            field=djmoney.models.fields.MoneyField(
+                decimal_places=2, default_currency="EEI", max_digits=20
+            ),
         ),
         migrations.AlterField(
-            model_name='item',
-            name='cached_lowest_sell',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=20, null=True),
+            model_name="item",
+            name="cached_lowest_sell",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=20, null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='itemmarketdataevent',
-            name='buy',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=20, null=True),
+            model_name="itemmarketdataevent",
+            name="buy",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=20, null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='itemmarketdataevent',
-            name='highest_buy',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=20, null=True),
+            model_name="itemmarketdataevent",
+            name="highest_buy",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=20, null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='itemmarketdataevent',
-            name='lowest_sell',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=20, null=True),
+            model_name="itemmarketdataevent",
+            name="lowest_sell",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=20, null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='itemmarketdataevent',
-            name='sell',
-            field=models.DecimalField(blank=True, decimal_places=2, max_digits=20, null=True),
+            model_name="itemmarketdataevent",
+            name="sell",
+            field=models.DecimalField(
+                blank=True, decimal_places=2, max_digits=20, null=True
+            ),
         ),
         migrations.AlterField(
-            model_name='marketorder',
-            name='listed_at_price',
-            field=djmoney.models.fields.MoneyField(decimal_places=2, default_currency='EEI', max_digits=20),
+            model_name="marketorder",
+            name="listed_at_price",
+            field=djmoney.models.fields.MoneyField(
+                decimal_places=2, default_currency="EEI", max_digits=20
+            ),
         ),
         migrations.AlterField(
-            model_name='transferlog',
-            name='total',
-            field=djmoney.models.fields.MoneyField(decimal_places=2, default_currency='EEI', max_digits=20),
+            model_name="transferlog",
+            name="total",
+            field=djmoney.models.fields.MoneyField(
+                decimal_places=2, default_currency="EEI", max_digits=20
+            ),
         ),
     ]

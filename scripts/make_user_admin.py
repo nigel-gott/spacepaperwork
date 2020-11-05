@@ -1,5 +1,5 @@
-
 from core.models import GooseUser, DiscordUser
+
 
 def run(*args):
     if len(args) != 1:
@@ -11,4 +11,3 @@ def run(*args):
     user.is_admin = True
     user.is_superuser = True
     user.save()
-    

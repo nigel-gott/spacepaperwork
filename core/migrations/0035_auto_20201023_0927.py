@@ -7,24 +7,31 @@ import djmoney.models.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0034_auto_20201023_0854'),
+        ("core", "0034_auto_20201023_0854"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='transferlog',
-            name='count',
+            model_name="transferlog",
+            name="count",
             field=models.PositiveIntegerField(default=0),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='transferlog',
-            name='total',
-            field=djmoney.models.fields.MoneyField(decimal_places=2, default_currency='EEI', max_digits=14, default=0),
+            model_name="transferlog",
+            name="total",
+            field=djmoney.models.fields.MoneyField(
+                decimal_places=2, default_currency="EEI", max_digits=14, default=0
+            ),
         ),
         migrations.AddField(
-            model_name='transferlog',
-            name='total_currency',
-            field=djmoney.models.fields.CurrencyField(choices=[('EEI', 'Eve Echoes ISK')], default='EEI', editable=False, max_length=3),
+            model_name="transferlog",
+            name="total_currency",
+            field=djmoney.models.fields.CurrencyField(
+                choices=[("EEI", "Eve Echoes ISK")],
+                default="EEI",
+                editable=False,
+                max_length=3,
+            ),
         ),
     ]

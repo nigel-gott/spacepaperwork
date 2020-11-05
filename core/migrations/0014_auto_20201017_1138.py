@@ -7,22 +7,34 @@ import djmoney.models.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0013_auto_20201017_1047'),
+        ("core", "0013_auto_20201017_1047"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='fleetanom',
-            name='looter',
+            model_name="fleetanom",
+            name="looter",
         ),
         migrations.AlterField(
-            model_name='inventoryitem',
-            name='listed_at_price',
-            field=djmoney.models.fields.MoneyField(blank=True, decimal_places=2, default_currency='EEI', max_digits=14, null=True),
+            model_name="inventoryitem",
+            name="listed_at_price",
+            field=djmoney.models.fields.MoneyField(
+                blank=True,
+                decimal_places=2,
+                default_currency="EEI",
+                max_digits=14,
+                null=True,
+            ),
         ),
         migrations.AlterField(
-            model_name='inventoryitem',
-            name='net_sold_at_price',
-            field=djmoney.models.fields.MoneyField(blank=True, decimal_places=2, default_currency='EEI', max_digits=14, null=True),
+            model_name="inventoryitem",
+            name="net_sold_at_price",
+            field=djmoney.models.fields.MoneyField(
+                blank=True,
+                decimal_places=2,
+                default_currency="EEI",
+                max_digits=14,
+                null=True,
+            ),
         ),
     ]

@@ -8,30 +8,42 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0044_auto_20201026_1914'),
+        ("core", "0044_auto_20201026_1914"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='contract',
-            name='from_char',
+            model_name="contract",
+            name="from_char",
         ),
         migrations.AddField(
-            model_name='contract',
-            name='created',
+            model_name="contract",
+            name="created",
             field=models.DateTimeField(default=django.utils.timezone.now),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='contract',
-            name='from_user',
-            field=models.ForeignKey(default=0, on_delete=django.db.models.deletion.CASCADE, related_name='my_contracts', to='core.gooseuser'),
+            model_name="contract",
+            name="from_user",
+            field=models.ForeignKey(
+                default=0,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="my_contracts",
+                to="core.gooseuser",
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='contract',
-            name='status',
-            field=models.TextField(choices=[('pending', 'pending'), ('rejected', 'rejected'), ('accepted', 'accepted')], default='pending'),
+            model_name="contract",
+            name="status",
+            field=models.TextField(
+                choices=[
+                    ("pending", "pending"),
+                    ("rejected", "rejected"),
+                    ("accepted", "accepted"),
+                ],
+                default="pending",
+            ),
             preserve_default=False,
         ),
     ]

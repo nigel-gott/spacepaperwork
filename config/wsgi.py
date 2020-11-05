@@ -1,4 +1,3 @@
-
 """
 WSGI config for goosetools project.
 This module contains the WSGI application used by Django's development server

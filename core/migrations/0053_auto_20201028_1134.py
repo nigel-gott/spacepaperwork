@@ -7,27 +7,67 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0052_auto_20201028_1017'),
+        ("core", "0052_auto_20201028_1017"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ItemFilterGroup2',
+            name="ItemFilterGroup2",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.TextField(unique=True)),
-                ('anom_type', models.TextField(blank=True, choices=[('PvP Roam', 'PvP Roam'), ('PvP Gatecamp', 'PvP Gatecamp'), ('Deadspace', 'Deadspace'), ('Scout', 'Scout'), ('Inquisitor', 'Inquisitor'), ('Condensed Belt', 'Condensed Belt'), ('Condensed Cluster', 'Condensed Cluster')], null=True)),
-                ('faction', models.TextField(blank=True, choices=[('Guristas', 'Guritas'), ('Angel', 'Angel'), ('Blood', 'Blood'), ('Sansha', 'Sansha'), ('Serpentis', 'Serpentis'), ('Asteroids', 'Asteroids'), ('PvP', 'PvP')], null=True)),
-                ('min_level', models.PositiveIntegerField(blank=True, null=True)),
-                ('max_level', models.PositiveIntegerField(blank=True, null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.TextField(unique=True)),
+                (
+                    "anom_type",
+                    models.TextField(
+                        blank=True,
+                        choices=[
+                            ("PvP Roam", "PvP Roam"),
+                            ("PvP Gatecamp", "PvP Gatecamp"),
+                            ("Deadspace", "Deadspace"),
+                            ("Scout", "Scout"),
+                            ("Inquisitor", "Inquisitor"),
+                            ("Condensed Belt", "Condensed Belt"),
+                            ("Condensed Cluster", "Condensed Cluster"),
+                        ],
+                        null=True,
+                    ),
+                ),
+                (
+                    "faction",
+                    models.TextField(
+                        blank=True,
+                        choices=[
+                            ("Guristas", "Guritas"),
+                            ("Angel", "Angel"),
+                            ("Blood", "Blood"),
+                            ("Sansha", "Sansha"),
+                            ("Serpentis", "Serpentis"),
+                            ("Asteroids", "Asteroids"),
+                            ("PvP", "PvP"),
+                        ],
+                        null=True,
+                    ),
+                ),
+                ("min_level", models.PositiveIntegerField(blank=True, null=True)),
+                ("max_level", models.PositiveIntegerField(blank=True, null=True)),
             ],
         ),
         migrations.AlterField(
-            model_name='itemfilter',
-            name='group',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.itemfiltergroup2'),
+            model_name="itemfilter",
+            name="group",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="core.itemfiltergroup2"
+            ),
         ),
         migrations.DeleteModel(
-            name='ItemFilterGroup',
+            name="ItemFilterGroup",
         ),
     ]

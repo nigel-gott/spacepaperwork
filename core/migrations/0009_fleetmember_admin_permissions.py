@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0008_fleet_gives_shares_to_alts'),
+        ("core", "0008_fleet_gives_shares_to_alts"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='fleetmember',
-            name='admin_permissions',
+            model_name="fleetmember",
+            name="admin_permissions",
             field=models.BooleanField(default=False),
         ),
     ]

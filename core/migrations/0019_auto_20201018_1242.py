@@ -7,18 +7,29 @@ import djmoney.models.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0018_auto_20201017_1756'),
+        ("core", "0018_auto_20201017_1756"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='inventoryitem',
-            name='total_fees',
-            field=djmoney.models.fields.MoneyField(blank=True, decimal_places=2, default_currency='EEI', max_digits=14, null=True),
+            model_name="inventoryitem",
+            name="total_fees",
+            field=djmoney.models.fields.MoneyField(
+                blank=True,
+                decimal_places=2,
+                default_currency="EEI",
+                max_digits=14,
+                null=True,
+            ),
         ),
         migrations.AddField(
-            model_name='inventoryitem',
-            name='total_fees_currency',
-            field=djmoney.models.fields.CurrencyField(choices=[('EEI', 'Eve Echoes ISK')], default='EEI', editable=False, max_length=3),
+            model_name="inventoryitem",
+            name="total_fees_currency",
+            field=djmoney.models.fields.CurrencyField(
+                choices=[("EEI", "Eve Echoes ISK")],
+                default="EEI",
+                editable=False,
+                max_length=3,
+            ),
         ),
     ]

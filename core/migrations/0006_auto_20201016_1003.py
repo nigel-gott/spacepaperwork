@@ -6,20 +6,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0005_auto_20201014_1704'),
+        ("core", "0005_auto_20201014_1704"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='character',
-            name='avatar_url',
-            field=models.TextField(default='unknown'),
+            model_name="character",
+            name="avatar_url",
+            field=models.TextField(default="unknown"),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='character',
-            name='discord_name',
-            field=models.TextField(default='unknown'),
+            model_name="character",
+            name="discord_name",
+            field=models.TextField(default="unknown"),
             preserve_default=False,
         ),
     ]

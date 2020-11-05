@@ -8,123 +8,292 @@ import djmoney.models.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0024_gooseuser_default_character'),
+        ("core", "0024_gooseuser_default_character"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='inventoryitem',
-            name='listed_at_price',
+            model_name="inventoryitem",
+            name="listed_at_price",
         ),
         migrations.RemoveField(
-            model_name='inventoryitem',
-            name='listed_at_price_currency',
+            model_name="inventoryitem",
+            name="listed_at_price_currency",
         ),
         migrations.RemoveField(
-            model_name='inventoryitem',
-            name='loot_group',
+            model_name="inventoryitem",
+            name="loot_group",
         ),
         migrations.RemoveField(
-            model_name='inventoryitem',
-            name='remaining_quantity',
+            model_name="inventoryitem",
+            name="remaining_quantity",
         ),
         migrations.RemoveField(
-            model_name='inventoryitem',
-            name='total_fees',
+            model_name="inventoryitem",
+            name="total_fees",
         ),
         migrations.RemoveField(
-            model_name='inventoryitem',
-            name='total_fees_currency',
+            model_name="inventoryitem",
+            name="total_fees_currency",
         ),
         migrations.RemoveField(
-            model_name='inventoryitem',
-            name='total_profit',
+            model_name="inventoryitem",
+            name="total_profit",
         ),
         migrations.RemoveField(
-            model_name='inventoryitem',
-            name='total_profit_currency',
+            model_name="inventoryitem",
+            name="total_profit_currency",
         ),
         migrations.RemoveField(
-            model_name='inventoryitem',
-            name='transaction_tax',
+            model_name="inventoryitem",
+            name="transaction_tax",
         ),
         migrations.AlterField(
-            model_name='inventoryitem',
-            name='location',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.characterlocation'),
+            model_name="inventoryitem",
+            name="location",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="core.characterlocation"
+            ),
         ),
         migrations.AlterField(
-            model_name='inventoryitem',
-            name='quantity',
+            model_name="inventoryitem",
+            name="quantity",
             field=models.PositiveIntegerField(),
         ),
         migrations.CreateModel(
-            name='SoldItem',
+            name="SoldItem",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.PositiveIntegerField()),
-                ('sold_via', models.TextField(choices=[('internal', 'Internal Market'), ('external', 'External Market'), ('contract', 'Contract')])),
-                ('deposited_into_eggs', models.BooleanField(default=False)),
-                ('transfered_to_participants', models.BooleanField(default=False)),
-                ('item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.inventoryitem')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("quantity", models.PositiveIntegerField()),
+                (
+                    "sold_via",
+                    models.TextField(
+                        choices=[
+                            ("internal", "Internal Market"),
+                            ("external", "External Market"),
+                            ("contract", "Contract"),
+                        ]
+                    ),
+                ),
+                ("deposited_into_eggs", models.BooleanField(default=False)),
+                ("transfered_to_participants", models.BooleanField(default=False)),
+                (
+                    "item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.inventoryitem",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='MarketOrder',
+            name="MarketOrder",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('internal_or_external', models.TextField(choices=[('internal', 'Internal'), ('external', 'External')])),
-                ('buy_or_sell', models.TextField(choices=[('buy', 'Buy'), ('sell', 'Sell')])),
-                ('quantity', models.PositiveIntegerField()),
-                ('listed_at_price_currency', djmoney.models.fields.CurrencyField(choices=[('EEI', 'Eve Echoes ISK')], default='EEI', editable=False, max_length=3)),
-                ('listed_at_price', djmoney.models.fields.MoneyField(decimal_places=2, default_currency='EEI', max_digits=14)),
-                ('transaction_tax', models.DecimalField(decimal_places=2, max_digits=5)),
-                ('broker_fee', models.DecimalField(decimal_places=2, max_digits=5)),
-                ('item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.inventoryitem')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "internal_or_external",
+                    models.TextField(
+                        choices=[("internal", "Internal"), ("external", "External")]
+                    ),
+                ),
+                (
+                    "buy_or_sell",
+                    models.TextField(choices=[("buy", "Buy"), ("sell", "Sell")]),
+                ),
+                ("quantity", models.PositiveIntegerField()),
+                (
+                    "listed_at_price_currency",
+                    djmoney.models.fields.CurrencyField(
+                        choices=[("EEI", "Eve Echoes ISK")],
+                        default="EEI",
+                        editable=False,
+                        max_length=3,
+                    ),
+                ),
+                (
+                    "listed_at_price",
+                    djmoney.models.fields.MoneyField(
+                        decimal_places=2, default_currency="EEI", max_digits=14
+                    ),
+                ),
+                (
+                    "transaction_tax",
+                    models.DecimalField(decimal_places=2, max_digits=5),
+                ),
+                ("broker_fee", models.DecimalField(decimal_places=2, max_digits=5)),
+                (
+                    "item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.inventoryitem",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='LootGroupShare',
+            name="LootGroupShare",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.PositiveIntegerField()),
-                ('item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.inventoryitem')),
-                ('loot_group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.lootgroup')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("quantity", models.PositiveIntegerField()),
+                (
+                    "item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.inventoryitem",
+                    ),
+                ),
+                (
+                    "loot_group",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.lootgroup"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='JunkedItem',
+            name="JunkedItem",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.PositiveIntegerField()),
-                ('reason', models.TextField()),
-                ('item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.inventoryitem')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("quantity", models.PositiveIntegerField()),
+                ("reason", models.TextField()),
+                (
+                    "item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.inventoryitem",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='IskTransaction',
+            name="IskTransaction",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.IntegerField()),
-                ('time', models.DateTimeField()),
-                ('isk_currency', djmoney.models.fields.CurrencyField(choices=[('EEI', 'Eve Echoes ISK')], default='EEI', editable=False, max_length=3)),
-                ('isk', djmoney.models.fields.MoneyField(decimal_places=2, default_currency='EEI', max_digits=14)),
-                ('transaction_type', models.TextField(choices=[('broker_fee', 'Broker Fee'), ('transaction_tax', 'Transaction Tax'), ('contract_broker_fee', 'Contract Broker Fee'), ('contract_transaction_tax', 'Contract Transaction Tax'), ('contract_gross_profit', 'Contract Gross Profit'), ('external_market_price_adjustment_fee', 'InGame Market Price Adjustment Fee'), ('external_market_gross_profit', 'InGame Market Gross Profit')])),
-                ('notes', models.TextField()),
-                ('item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.inventoryitem')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("quantity", models.IntegerField()),
+                ("time", models.DateTimeField()),
+                (
+                    "isk_currency",
+                    djmoney.models.fields.CurrencyField(
+                        choices=[("EEI", "Eve Echoes ISK")],
+                        default="EEI",
+                        editable=False,
+                        max_length=3,
+                    ),
+                ),
+                (
+                    "isk",
+                    djmoney.models.fields.MoneyField(
+                        decimal_places=2, default_currency="EEI", max_digits=14
+                    ),
+                ),
+                (
+                    "transaction_type",
+                    models.TextField(
+                        choices=[
+                            ("broker_fee", "Broker Fee"),
+                            ("transaction_tax", "Transaction Tax"),
+                            ("contract_broker_fee", "Contract Broker Fee"),
+                            ("contract_transaction_tax", "Contract Transaction Tax"),
+                            ("contract_gross_profit", "Contract Gross Profit"),
+                            (
+                                "external_market_price_adjustment_fee",
+                                "InGame Market Price Adjustment Fee",
+                            ),
+                            (
+                                "external_market_gross_profit",
+                                "InGame Market Gross Profit",
+                            ),
+                        ]
+                    ),
+                ),
+                ("notes", models.TextField()),
+                (
+                    "item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.inventoryitem",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='EggTransaction',
+            name="EggTransaction",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.IntegerField()),
-                ('time', models.DateTimeField()),
-                ('eggs_currency', djmoney.models.fields.CurrencyField(choices=[('EEI', 'Eve Echoes ISK')], default='EEI', editable=False, max_length=3)),
-                ('eggs', djmoney.models.fields.MoneyField(decimal_places=2, default_currency='EEI', max_digits=14)),
-                ('counterparty_discord_id', models.TextField()),
-                ('notes', models.TextField()),
-                ('item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.inventoryitem')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("quantity", models.IntegerField()),
+                ("time", models.DateTimeField()),
+                (
+                    "eggs_currency",
+                    djmoney.models.fields.CurrencyField(
+                        choices=[("EEI", "Eve Echoes ISK")],
+                        default="EEI",
+                        editable=False,
+                        max_length=3,
+                    ),
+                ),
+                (
+                    "eggs",
+                    djmoney.models.fields.MoneyField(
+                        decimal_places=2, default_currency="EEI", max_digits=14
+                    ),
+                ),
+                ("counterparty_discord_id", models.TextField()),
+                ("notes", models.TextField()),
+                (
+                    "item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.inventoryitem",
+                    ),
+                ),
             ],
         ),
     ]

@@ -1,17 +1,16 @@
-
 from .base import *  # noqa
 from .base import env
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 INTERNAL_IPS = [
-    '127.0.0.1',
+    "127.0.0.1",
 ]
 
 ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
 
 GRAPH_MODELS = {
-  'all_applications': True,
-  'group_models': True,
+    "all_applications": True,
+    "group_models": True,
 }
 
 CACHES = {

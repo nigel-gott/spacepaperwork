@@ -6,32 +6,32 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0060_itemmarketdataevent'),
+        ("core", "0060_itemmarketdataevent"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='itemmarketdataevent',
-            name='buy',
+            model_name="itemmarketdataevent",
+            name="buy",
             field=models.DecimalField(decimal_places=2, max_digits=14, null=True),
         ),
         migrations.AlterField(
-            model_name='itemmarketdataevent',
-            name='highest_sell',
+            model_name="itemmarketdataevent",
+            name="highest_sell",
             field=models.DecimalField(decimal_places=2, max_digits=14, null=True),
         ),
         migrations.AlterField(
-            model_name='itemmarketdataevent',
-            name='lowest_buy',
+            model_name="itemmarketdataevent",
+            name="lowest_buy",
             field=models.DecimalField(decimal_places=2, max_digits=14, null=True),
         ),
         migrations.AlterField(
-            model_name='itemmarketdataevent',
-            name='sell',
+            model_name="itemmarketdataevent",
+            name="sell",
             field=models.DecimalField(decimal_places=2, max_digits=14, null=True),
         ),
         migrations.AddIndex(
-            model_name='itemmarketdataevent',
-            index=models.Index(fields=['-time'], name='core_itemma_time_b82837_idx'),
+            model_name="itemmarketdataevent",
+            index=models.Index(fields=["-time"], name="core_itemma_time_b82837_idx"),
         ),
     ]

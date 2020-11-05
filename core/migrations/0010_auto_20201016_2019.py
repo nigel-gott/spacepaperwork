@@ -8,148 +8,437 @@ import djmoney.models.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0009_fleetmember_admin_permissions'),
+        ("core", "0009_fleetmember_admin_permissions"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='AnomType',
+            name="AnomType",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('level', models.PositiveIntegerField()),
-                ('type', models.TextField(choices=[('Deadspace', 'Deadspace'), ('Scout', 'Scout'), ('Inquisitor', 'Inquisitor'), ('Condensed Belt', 'Condensed Belt')])),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("level", models.PositiveIntegerField()),
+                (
+                    "type",
+                    models.TextField(
+                        choices=[
+                            ("Deadspace", "Deadspace"),
+                            ("Scout", "Scout"),
+                            ("Inquisitor", "Inquisitor"),
+                            ("Condensed Belt", "Condensed Belt"),
+                        ]
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='CharacterLocation',
+            name="CharacterLocation",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('character', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.character')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "character",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.character"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='CorpHanger',
+            name="CorpHanger",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('hanger', models.CharField(choices=[('1', 'Hanger 1'), ('2', 'Hanger 2'), ('3', 'Hanger 3'), ('4', 'Hanger 4')], max_length=1)),
-                ('corp', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.corp')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "hanger",
+                    models.CharField(
+                        choices=[
+                            ("1", "Hanger 1"),
+                            ("2", "Hanger 2"),
+                            ("3", "Hanger 3"),
+                            ("4", "Hanger 4"),
+                        ],
+                        max_length=1,
+                    ),
+                ),
+                (
+                    "corp",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.corp"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='FleetAnom',
+            name="FleetAnom",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('time', models.DateTimeField()),
-                ('anom_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.anomtype')),
-                ('fleet', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.fleet')),
-                ('looter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.character')),
-                ('system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.system')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("time", models.DateTimeField()),
+                (
+                    "anom_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.anomtype"
+                    ),
+                ),
+                (
+                    "fleet",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.fleet"
+                    ),
+                ),
+                (
+                    "looter",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.character"
+                    ),
+                ),
+                (
+                    "system",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.system"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ItemType',
+            name="ItemType",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.TextField()),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.TextField()),
             ],
         ),
         migrations.CreateModel(
-            name='KillMail',
+            name="KillMail",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('killed_ship', models.TextField()),
-                ('description', models.TextField()),
-                ('fleet', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.fleet')),
-                ('looter', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.character')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("killed_ship", models.TextField()),
+                ("description", models.TextField()),
+                (
+                    "fleet",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.fleet"
+                    ),
+                ),
+                (
+                    "looter",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.character",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='LootBucket',
+            name="LootBucket",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('fleet', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.fleet')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "fleet",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.fleet"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='LootGroup',
+            name="LootGroup",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('manual', models.BooleanField(default=False)),
-                ('bucket', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.lootbucket')),
-                ('fleet_anom', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.fleetanom')),
-                ('killmail', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.killmail')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("manual", models.BooleanField(default=False)),
+                (
+                    "bucket",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.lootbucket",
+                    ),
+                ),
+                (
+                    "fleet_anom",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.fleetanom"
+                    ),
+                ),
+                (
+                    "killmail",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.killmail"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Station',
+            name="Station",
             fields=[
-                ('name', models.TextField(primary_key=True, serialize=False)),
-                ('system', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.system')),
+                ("name", models.TextField(primary_key=True, serialize=False)),
+                (
+                    "system",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.system"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='LootShare',
+            name="LootShare",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('share_quantity', models.PositiveIntegerField(blank=True, null=True)),
-                ('flat_percent_cut', models.PositiveIntegerField(blank=True, null=True)),
-                ('character', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.character')),
-                ('loot_group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.lootgroup')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("share_quantity", models.PositiveIntegerField(blank=True, null=True)),
+                (
+                    "flat_percent_cut",
+                    models.PositiveIntegerField(blank=True, null=True),
+                ),
+                (
+                    "character",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.character"
+                    ),
+                ),
+                (
+                    "loot_group",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.lootgroup"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ItemSubType',
+            name="ItemSubType",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.TextField()),
-                ('item_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.itemtype')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.TextField()),
+                (
+                    "item_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.itemtype"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ItemSubSubType',
+            name="ItemSubSubType",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.TextField()),
-                ('item_sub_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.itemsubtype')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.TextField()),
+                (
+                    "item_sub_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.itemsubtype",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='ItemLocation',
+            name="ItemLocation",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('character_location', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.characterlocation')),
-                ('corp_hanger', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.corphanger')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "character_location",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.characterlocation",
+                    ),
+                ),
+                (
+                    "corp_hanger",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.corphanger",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Item',
+            name="Item",
             fields=[
-                ('name', models.TextField(primary_key=True, serialize=False)),
-                ('item_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.itemsubsubtype')),
+                ("name", models.TextField(primary_key=True, serialize=False)),
+                (
+                    "item_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.itemsubsubtype",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='InventoryItem',
+            name="InventoryItem",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.PositiveBigIntegerField()),
-                ('listed_at_price_currency', djmoney.models.fields.CurrencyField(choices=[('EEI', 'Eve Echoes ISK')], default='EEI', editable=False, max_length=3)),
-                ('listed_at_price', djmoney.models.fields.MoneyField(decimal_places=2, default_currency='EEI', max_digits=14)),
-                ('net_sold_at_price_currency', djmoney.models.fields.CurrencyField(choices=[('EEI', 'Eve Echoes ISK')], default='EEI', editable=False, max_length=3)),
-                ('net_sold_at_price', djmoney.models.fields.MoneyField(decimal_places=2, default_currency='EEI', max_digits=14)),
-                ('item', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.item')),
-                ('location', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.itemlocation')),
-                ('loot_group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.lootgroup')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("quantity", models.PositiveBigIntegerField()),
+                (
+                    "listed_at_price_currency",
+                    djmoney.models.fields.CurrencyField(
+                        choices=[("EEI", "Eve Echoes ISK")],
+                        default="EEI",
+                        editable=False,
+                        max_length=3,
+                    ),
+                ),
+                (
+                    "listed_at_price",
+                    djmoney.models.fields.MoneyField(
+                        decimal_places=2, default_currency="EEI", max_digits=14
+                    ),
+                ),
+                (
+                    "net_sold_at_price_currency",
+                    djmoney.models.fields.CurrencyField(
+                        choices=[("EEI", "Eve Echoes ISK")],
+                        default="EEI",
+                        editable=False,
+                        max_length=3,
+                    ),
+                ),
+                (
+                    "net_sold_at_price",
+                    djmoney.models.fields.MoneyField(
+                        decimal_places=2, default_currency="EEI", max_digits=14
+                    ),
+                ),
+                (
+                    "item",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.item"
+                    ),
+                ),
+                (
+                    "location",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="core.itemlocation",
+                    ),
+                ),
+                (
+                    "loot_group",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="core.lootgroup"
+                    ),
+                ),
             ],
         ),
         migrations.AddField(
-            model_name='corphanger',
-            name='station',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.station'),
+            model_name="corphanger",
+            name="station",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="core.station"
+            ),
         ),
         migrations.AddField(
-            model_name='characterlocation',
-            name='station',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.station'),
+            model_name="characterlocation",
+            name="station",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="core.station",
+            ),
         ),
     ]

@@ -7,13 +7,15 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0025_auto_20201021_1217'),
+        ("core", "0025_auto_20201021_1217"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='inventoryitem',
-            name='location',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.itemlocation'),
+            model_name="inventoryitem",
+            name="location",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="core.itemlocation"
+            ),
         ),
     ]

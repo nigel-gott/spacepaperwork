@@ -6,18 +6,38 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0046_contract_log'),
+        ("core", "0046_contract_log"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='anomtype',
-            name='faction',
-            field=models.TextField(choices=[('Guristas', 'Guritas'), ('Angel', 'Angel'), ('Blood', 'Blood'), ('Sansha', 'Sansha'), ('Serpentis', 'Serpentis'), ('Asteroids', 'Asteroids'), ('PvP', 'PvP')]),
+            model_name="anomtype",
+            name="faction",
+            field=models.TextField(
+                choices=[
+                    ("Guristas", "Guritas"),
+                    ("Angel", "Angel"),
+                    ("Blood", "Blood"),
+                    ("Sansha", "Sansha"),
+                    ("Serpentis", "Serpentis"),
+                    ("Asteroids", "Asteroids"),
+                    ("PvP", "PvP"),
+                ]
+            ),
         ),
         migrations.AlterField(
-            model_name='anomtype',
-            name='type',
-            field=models.TextField(choices=[('PvP Roam', 'PvP Roam'), ('PvP Gatecamp', 'PvP Gatecamp'), ('Deadspace', 'Deadspace'), ('Scout', 'Scout'), ('Inquisitor', 'Inquisitor'), ('Condensed Belt', 'Condensed Belt'), ('Condensed Cluster', 'Condensed Cluster')]),
+            model_name="anomtype",
+            name="type",
+            field=models.TextField(
+                choices=[
+                    ("PvP Roam", "PvP Roam"),
+                    ("PvP Gatecamp", "PvP Gatecamp"),
+                    ("Deadspace", "Deadspace"),
+                    ("Scout", "Scout"),
+                    ("Inquisitor", "Inquisitor"),
+                    ("Condensed Belt", "Condensed Belt"),
+                    ("Condensed Cluster", "Condensed Cluster"),
+                ]
+            ),
         ),
     ]

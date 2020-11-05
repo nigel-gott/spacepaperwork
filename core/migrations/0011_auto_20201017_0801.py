@@ -6,20 +6,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0010_auto_20201016_2019'),
+        ("core", "0010_auto_20201016_2019"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='system',
-            name='jumps_to_jita',
+            model_name="system",
+            name="jumps_to_jita",
             field=models.PositiveIntegerField(default=999),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='system',
-            name='security',
-            field=models.TextField(default='1.0'),
+            model_name="system",
+            name="security",
+            field=models.TextField(default="1.0"),
             preserve_default=False,
         ),
     ]
