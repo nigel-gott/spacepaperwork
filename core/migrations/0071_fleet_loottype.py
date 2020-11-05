@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
             model_name="fleet",
             name="loot_type",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="core.loottype"
+                on_delete=django.db.models.deletion.CASCADE, to="core.loottype",null=True
             ),
         ),
         migrations.AddField(
