@@ -6,3 +6,4 @@
     ```
     docker-compose -f local.yml up --build
     ```
+3. Visit http://localhost:8000/goosetools
