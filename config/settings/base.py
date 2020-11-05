@@ -150,6 +150,8 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#middleware
