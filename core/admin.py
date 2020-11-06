@@ -6,7 +6,6 @@ from .models import *
 # Register your models here.
 admin.site.register(Fleet)
 admin.site.register(FleetType)
-admin.site.register(LootType)
 admin.site.register(Corp)
 admin.site.register(Character)
 admin.site.register(System)

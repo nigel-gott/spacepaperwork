@@ -10,38 +10,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name="LootType",
-            fields=[
-                (
-                    "id",
-                    models.AutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                ("type", models.TextField()),
-            ],
-        ),
         migrations.AddField(
             model_name="fleet",
             name="loot_type",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="core.loottype",null=True
-            ),
-        ),
-        migrations.AddField(
-            model_name="loottype",
-            name="material_icon",
-            field=models.TextField(default="star"),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name="loottype",
-            name="material_colour",
-            field=models.TextField(default="lime lighten-3"),
-            preserve_default=False,
+            field=models.TextField(choices=[('Master Looter', 'Master Looter'), ('Free For All', 'Free For All')]),
         ),
     ]
