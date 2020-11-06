@@ -303,7 +303,7 @@ class Fleet(models.Model):
         return self.members_for_user(user).count() > 0
 
     def is_master_looter(self):
-        return self.loot_type.type == "Master Looter"
+        return self.loot_type == "Master Looter"
 
     def still_can_join_alts(self, user):
         num_chars = len(user.characters())
