@@ -15,6 +15,7 @@ from core.models import (
 from django import template
 import math as m
 import core
+import numbers
 
 register = template.Library()
 
@@ -76,6 +77,24 @@ def num_past_fleets():
 @register.filter()
 def formatmoney(value):
     return m.floor(value.amount)
+
+
+@register.filter()
+def nicemoney(value):
+    if isinstance(value, numbers.Number):
+        floored = m.floor(value)
+    else:
+        floored = m.floor(value.amount)
+
+    if floored > 1000000000000:
+        return str(round(floored / 1000000000000, 2)) + "T"
+    if floored > 1000000000:
+        return str(round(floored / 1000000000, 2)) + "B"
+    if floored > 1000000:
+        return str(round(floored / 1000000, 2)) + "M"
+    if floored > 1000:
+        return str(round(floored / 1000, 2)) + "K"
+    return flooredValue
 
 
 @register.filter()

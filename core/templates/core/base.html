@@ -117,9 +117,9 @@
             <a class="waves-btn btn" href="{% url 'own_user_transactions' %}">
             Your Transactions
             </a>
-            Isk Owed({{user.isk_balance}}) - 
-            Eggs Owed({{user.debt_egg_balance.amount|floatformat:"0"}}) -
-            Your Eggs({{user.egg_balance|formatmoney|floatformat:"0g"}})
+            Isk Owed({{user.isk_balance|nicemoney}}) -
+            Eggs Owed({{user.debt_egg_balance|nicemoney}}) -
+            Your Eggs({{user.egg_balance|nicemoney}})
         </ul>
         </div>
     </div>
