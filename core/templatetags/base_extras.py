@@ -94,7 +94,7 @@ def nicemoney(value):
         return str(round(floored / 1000000, 2)) + "M"
     if floored > 1000:
         return str(round(floored / 1000, 2)) + "K"
-    return flooredValue
+    return floored
 
 
 @register.filter()
