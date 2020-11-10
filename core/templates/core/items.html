@@ -52,7 +52,7 @@ Participation will still be tracked and the person receiving the contract will h
         {% for loc_items in all_items %}
           {% has_admin loc_items.loc user as has_item_admin %}
             <tr>
-                <td rowspan="{{loc_items.total_in_loc|add:"3"}}">
+                <td style="vertical-align: top !important" rowspan="{{loc_items.total_in_loc|add:"3"}}">
                 {% if loc_items.loc %}
                 <a href="{% url 'fleet_shares' loc_items.loc.character.discord_user.pk %}">{{loc_items.loc}}<a>
                 {% else %}
