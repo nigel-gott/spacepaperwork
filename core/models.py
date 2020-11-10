@@ -276,7 +276,7 @@ class Fleet(models.Model):
     )
     name = models.TextField()
     fleet_type = models.ForeignKey(FleetType, on_delete=models.CASCADE)
-    loot_type = models.TextField(choices=LOOT_TYPE_CHOICES)
+    loot_type = models.TextField(choices=LOOT_TYPE_CHOICES, default='Master Looter')
     gives_shares_to_alts = models.BooleanField(default=False)
     start = models.DateTimeField()
     end = models.DateTimeField(blank=True, null=True)
