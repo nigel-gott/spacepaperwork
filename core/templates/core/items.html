@@ -54,17 +54,17 @@ Participation will still be tracked and the person receiving the contract will h
             <tr>
                 <td style="vertical-align: top !important" rowspan="{{loc_items.total_in_loc|add:"3"}}">
                 {% if loc_items.loc %}
-                <a href="{% url 'fleet_shares' loc_items.loc.character.discord_user.pk %}">{{loc_items.loc}}<a>
+                <a href="{% url 'fleet_shares' loc_items.loc.character.discord_user.pk %}">{{loc_items.loc}}</a>
                 {% else %}
                 {{loc_items.loc}}
                 {% endif %}
       {% if has_item_admin %}
       <br/>
-      <a class="waves-btn btn green" href="{% url 'stack_items' loc_items.loc.id %}">Stack All</a>
+      <a class="waves-btn btn green" href="{% url 'stack_items' loc_items.loc.id %}">Stack</a>
       <br/>
-      <a class="waves-btn btn orange" href="{% url 'sell_all' loc_items.loc.id %}">Sell All @ Estimate</a>
+      <a class="waves-btn btn orange" href="{% url 'sell_all' loc_items.loc.id %}">Sell @ Estimate</a>
       <br/>
-      <a class="waves-btn btn blue" href="{% url 'contract_items_in_loc' loc_items.loc.id %}">Contract All</a>
+      <a class="waves-btn btn blue" href="{% url 'contract_items_in_loc' loc_items.loc.id %}">Contract</a>
       {% endif %}
                 </td>
           </tr>
