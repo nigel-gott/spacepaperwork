@@ -1,3 +1,6 @@
+import debug_toolbar
+from django.conf.urls import include
+from django.urls.conf import path
 from .base import *  # noqa
 from .base import env
 
@@ -24,7 +27,15 @@ CACHES = {
 # WhiteNoise
 # ------------------------------------------------------------------------------
 # http://whitenoise.evans.io/en/latest/django.html#using-whitenoise-in-development
-INSTALLED_APPS = ["whitenoise.runserver_nostatic"] + INSTALLED_APPS  # noqa F405
+INSTALLED_APPS = [
+    "whitenoise.runserver_nostatic",
+    "goosetools.stub_discord_auth.apps.StubDiscordAuthConfig",
+] + INSTALLED_APPS  # noqa F405
+
+ENV_SPECIFIC_URLS = [
+    path("stub_discord_auth/", include("stub_discord_auth.urls")),
+    path("__debug__/", include(debug_toolbar.urls)),
+]
 
 # django-debug-toolbar
 # ------------------------------------------------------------------------------

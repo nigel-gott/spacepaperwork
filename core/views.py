@@ -1850,7 +1850,9 @@ def item_edit(request, pk):
         char_form = CharacterForm(initial={"character": request.user.default_character})
         char_form.fields["character"].queryset = request.user.characters()
     return render(
-        request, "core/item_edit_form.html", {"char_form": char_form, "form": form, "title": "Edit Item"}
+        request,
+        "core/item_edit_form.html",
+        {"char_form": char_form, "form": form, "title": "Edit Item"},
     )
 
 

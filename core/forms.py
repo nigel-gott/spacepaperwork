@@ -105,7 +105,9 @@ class FleetForm(forms.Form):
     fc_character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0)
     name = forms.CharField(max_length=100)
     fleet_type = forms.ModelChoiceField(queryset=FleetType.objects.all(), initial=0)
-    loot_type = forms.ChoiceField(choices=Fleet.LOOT_TYPE_CHOICES, initial='master_looter')
+    loot_type = forms.ChoiceField(
+        choices=Fleet.LOOT_TYPE_CHOICES, initial="master_looter"
+    )
     gives_shares_to_alts = forms.BooleanField(
         required=False, initial=False, widget=forms.CheckboxInput(attrs={})
     )

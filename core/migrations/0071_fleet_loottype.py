@@ -3,6 +3,7 @@
 from django.db import migrations, models
 import django.db.models.deletion
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -13,6 +14,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="fleet",
             name="loot_type",
-            field=models.TextField(choices=[('Master Looter', 'Master Looter'), ('Free For All', 'Free For All')], default='Master Looter'),
+            field=models.TextField(
+                choices=[
+                    ("Master Looter", "Master Looter"),
+                    ("Free For All", "Free For All"),
+                ],
+                default="Master Looter",
+            ),
         ),
     ]

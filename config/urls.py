@@ -4,6 +4,7 @@ import debug_toolbar
 from django.contrib import admin
 from django.urls import path
 from django.conf.urls import include, url
+from django.conf import settings
 
 urlpatterns = [
     url(
@@ -13,8 +14,8 @@ urlpatterns = [
                 path("admin/", admin.site.urls),
                 path("", include("core.urls")),
                 path("accounts/", include("allauth.urls")),
-                path("__debug__/", include(debug_toolbar.urls)),
             ]
+            + settings.ENV_SPECIFIC_URLS
         ),
     ),
 ]

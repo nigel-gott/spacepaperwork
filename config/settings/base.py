@@ -150,7 +150,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_VERIFICATION = "none"
 
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
@@ -183,6 +183,8 @@ STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 ]
+
+ENV_SPECIFIC_URLS = []
 
 # MEDIA
 # ------------------------------------------------------------------------------

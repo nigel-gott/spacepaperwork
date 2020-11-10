@@ -230,6 +230,7 @@ class FleetType(models.Model):
     def __str__(self):
         return str(self.type)
 
+
 def human_readable_relativedelta(delta):
     attrs = ["years", "months", "days", "hours", "minutes"]
     return ", ".join(
@@ -269,14 +270,17 @@ def future_fleets_query():
 
 
 class Fleet(models.Model):
-    LOOT_TYPE_CHOICES = [('Master Looter','Master Looter'), ('Free For All', 'Free For All')]
+    LOOT_TYPE_CHOICES = [
+        ("Master Looter", "Master Looter"),
+        ("Free For All", "Free For All"),
+    ]
     fc = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
     )
     name = models.TextField()
     fleet_type = models.ForeignKey(FleetType, on_delete=models.CASCADE)
-    loot_type = models.TextField(choices=LOOT_TYPE_CHOICES, default='Master Looter')
+    loot_type = models.TextField(choices=LOOT_TYPE_CHOICES, default="Master Looter")
     gives_shares_to_alts = models.BooleanField(default=False)
     start = models.DateTimeField()
     end = models.DateTimeField(blank=True, null=True)
