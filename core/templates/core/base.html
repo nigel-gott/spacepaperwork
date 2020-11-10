@@ -106,37 +106,7 @@
     </div>
 </nav>
   <ul class="sidenav" id="mobile-demo">
-            <li>
-        <a class="waves-effect waves-light btn green" href="https://discord.com/users/244766405260476417/"><i class='material-icons right'>help</i>Help/Suggestions</a>
-        </li>
-            <li>
-            {% if user.is_authenticated %}
-            <form method="post" action="{% url 'account_logout' %}">
-                {% csrf_token %}
-                {% if redirect_field_value %}
-                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
-                {% endif %}
-                <button class="waves-effect waves-light btn" type="submit">{% trans 'Logout' %}</button>
-            </form>
-            </li>
-            {% else %}
-            <li><a class="waves-effect waves-light btn" href="{% provider_login_url 'discord' %}">Login</a></li>
-            {% endif %}
-        <li>
-            <a class="waves-effect waves-light btn deep-orange accent-3" href="https://wiki.goosetools.com/index.php?title=Goosetools"><i
-                    class="material-icons right">help_outline</i>Goosetools Guide</a>
-        </li>
     {% if user.is_authenticated %}
-        <li class="tab">
-            <b class="red-text">Isk Owed({{user.isk_balance}}) </b>
-            </li>
-        <li class="tab">
-            <b class="orange-text">Eggs Owed({{user.debt_egg_balance.amount|floatformat:"0"}}) </b>
-            </li>
-        <li class="tab">
-            <b class="green-text">Your Eggs({{user.egg_balance|formatmoney|floatformat:"0g"}})</b>
-        </li>
-            <li class="tab"><a href="{% url 'settings' %}">Settings</a></li>
             <li class="tab"><a href="{% url 'fleet' %}">Active Fleets
                 ({% num_active_fleets %})
             </a>
@@ -183,6 +153,18 @@
             <li ><a href="{% url 'grouped_items' %}">View Everyones Items Grouped
             </a>
             </li>
+            <li class="tab"><a href="{% url 'settings' %}">Settings</a></li>
+       <li class="center">
+            <form method="post" action="{% url 'account_logout' %}">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <button class="waves-effect waves-light btn" type="submit">{% trans 'Logout' %}</button>
+            </form>
+            </li>
+                  {% else %}
+            <li><a class="waves-effect waves-light btn" href="{% provider_login_url 'discord' %}">Login</a></li>
     {% endif %}
   </ul>
 
