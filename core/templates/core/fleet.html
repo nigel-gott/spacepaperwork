@@ -47,8 +47,8 @@
                 <br/>
                 {{fleet.description}}<br/>
                 {{fleet.location}}<br/>
-                Estimated Profit Remaining: {{fleet.estimated_profit}}<br/>
-                Actual Profit So Far: {{fleet.isk_and_eggs_balance}}<br/>
+                Estimated Profit Remaining: {{fleet.estimated_profit|nicemoney}}<br/>
+                Actual Profit So Far: {{fleet.isk_and_eggs_balance|nicemoney}}<br/>
             </p>
             {% if not is_member and can_join_fleet %}
             <a class="secondary-content waves-effect waves-light btn purple lighten-2"

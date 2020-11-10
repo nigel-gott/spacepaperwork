@@ -4,9 +4,9 @@
   <div class="col s12 m12">
     <h5>{{title}}</h5>
     <div class="section">
-    <span class="red-text">{{prefix}} total estimated worth of loot needing to be sold is <b>{{sales_est}}</b></span><br/>
-    <span class="orange-text">{{prefix}} total estimated shares in all loot sales currently is <b>{{all_est}}</b></span><br/>
-    <span class="green-text">{{prefix}} real shares in all completed loot sales currently is <b>{{all_real}}</b></span>
+    <span class="red-text">{{prefix}} total estimated worth of loot needing to be sold is <b>{{sales_est|nicemoney}}</b></span><br/>
+    <span class="orange-text">{{prefix}} total estimated shares in all loot sales currently is <b>{{all_est|nicemoney}}</b></span><br/>
+    <span class="green-text">{{prefix}} real shares in all completed loot sales currently is <b>{{all_real|nicemoney}}</b></span>
     </div>
     <table>
       <thead>
@@ -45,10 +45,10 @@
               {{item.my_estimated_profit}}
             </td>
             <td>
-              {{item.your_group_estimated_profit}}/{{item.group_estimated_profit}}
+              {{item.your_group_estimated_profit|nicemoney}}/{{item.group_estimated_profit|nicemoney}}
             </td>
             <td>
-              {{item.your_real_profit}}/{{item.group_real_profit}}
+              {{item.your_real_profit|nicemoney}}/{{item.group_real_profit|nicemoney}}
             </td>
          </tr>
         {% endfor %}
