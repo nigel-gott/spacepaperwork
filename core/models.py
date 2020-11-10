@@ -1080,6 +1080,7 @@ class InventoryItem(models.Model):
         return (
             not hasattr(self, "marketorder")
             and not hasattr(self, "solditem")
+            and not hasattr(self, "junkeditem")
             and not self.contract
         )
 
@@ -1101,7 +1102,7 @@ class InventoryItem(models.Model):
     def estimated_profit(self):
         lowest_sell = self.item.lowest_sell()
         return lowest_sell and to_isk(
-            (self.quantity + self.order_quantity()) * lowest_sell
+            (self.quantity + self.order_quantity() + self.junked_quantity()) * lowest_sell
         )
 
     def status(self):

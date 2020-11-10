@@ -40,7 +40,7 @@ from core.forms import (
     FleetForm,
     InventoryItemForm,
     ItemMoveAllForm,
-    JoinFleetForm,
+    JoinFleetForm, JunkItemsForm,
     LootGroupForm,
     LootJoinForm,
     LootShareForm,
@@ -1307,7 +1307,13 @@ def junk(request):
             loc = ItemLocation.objects.get(
                 character_location=char_loc, corp_hanger=None
             )
-            junked = JunkedItem.objects.filter(item__location=loc)
+            junked = JunkedItem.objects.filter(item__location=loc)\
+                .annotate(
+                    estimated_profit_sum=ExpressionWrapper(
+                        Coalesce(F("item__item__cached_lowest_sell"), 0)
+                        * F("quantity"),
+                        output_field=FloatField()),
+                ).order_by("-estimated_profit_sum")
 
             all_junked.append(
                 {
@@ -1732,6 +1738,66 @@ def stack_delete(request, pk):
         {"items": stack.inventoryitem_set.all()},
     )
 
+@login_required(login_url=login_url)
+@transaction.atomic
+def unjunk_item(request, pk):
+    junk_item = get_object_or_404(JunkedItem, pk=pk)
+    if not junk_item.item.has_admin(request.user):
+        messages.error(request, "You do not have permission to unjunk this item.")
+        return HttpResponseRedirect(reverse("items"))
+    if request.method == "POST":
+        junk_item.item.quantity = junk_item.quantity
+        junk_item.item.full_clean()
+        junk_item.item.save()
+        junk_item.delete()
+        return HttpResponseRedirect(reverse("junk"))
+    else:
+        return HttpResponseNotAllowed("POST")
+
+@login_required(login_url=login_url)
+@transaction.atomic
+def junk_item(request, pk):
+    item = get_object_or_404(InventoryItem, pk=pk)
+    if not item.has_admin(request.user):
+        messages.error(request, "You do not have permission to junk this item.")
+        return HttpResponseRedirect(reverse("items"))
+    if request.method == "POST":
+        if item.can_edit(): 
+            junk_item = JunkedItem(item=item, quantity=item.quantity, reason="Manual")
+            junk_item.full_clean()
+            junk_item.save()
+            item.quantity = 0
+            item.full_clean()
+            item.save()
+        else:
+            messages.error(request, "Cannot junk this item as it is in a contract or already sold")
+        return HttpResponseRedirect(reverse("items"))
+    else:
+        return HttpResponseNotAllowed("POST")
+
+@login_required(login_url=login_url)
+@transaction.atomic
+def junk_items(request, pk):
+    loc = get_object_or_404(ItemLocation, pk=pk)
+    if not loc.has_admin(request.user):
+        messages.error(request, "You do not have permission to junk items here.")
+        return HttpResponseRedirect(reverse("items"))
+    items = InventoryItem.objects.filter(quantity__gt=0, contract__isnull=True, location=loc, item__cached_lowest_sell__isnull=False)
+    if request.method == "POST":
+        form = JunkItemsForm(request.POST) 
+        if form.is_valid():
+            for item in items:
+                if item.can_edit() and item.estimated_profit().amount <= form.cleaned_data['max_price']:
+                    junk_item = JunkedItem(item=item, quantity=item.quantity, reason="Automatic")
+                    junk_item.full_clean()
+                    junk_item.save()
+                    item.quantity = 0
+                    item.full_clean()
+                    item.save()
+        return HttpResponseRedirect(reverse("junk"))
+    else:
+        form = JunkItemsForm(initial={'max_price':1000000}) 
+    return render(request, "core/junk_item_form.html", {"form": form, "items":items, 'title':f'Junk Cheap Items In {loc}'})
 
 @login_required(login_url=login_url)
 @transaction.atomic

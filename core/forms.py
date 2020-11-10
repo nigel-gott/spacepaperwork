@@ -334,6 +334,9 @@ class EditOrderPriceForm(forms.Form):
         max_digits=5, decimal_places=2, label="Broker Fee %"
     )
 
+class JunkItemsForm(forms.Form):
+    max_price = forms.DecimalField(max_digits=20, decimal_places=2, help_text="Items with an estimated price under this value will be moved to the junked items page where you can unjunk them afterwards if so desired.")
+
 
 class SellItemForm(forms.Form):
     transaction_tax = forms.DecimalField(

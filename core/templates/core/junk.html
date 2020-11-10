@@ -6,34 +6,38 @@
     <table>
       <thead>
         <th>Location</th>
-        <th>Loot Group</th>
         <th>Item</th>
         <th>Quantity</th>
+        <th>Estimated Price</th>
         <th>Action</th>
       </thead>
       <tbody>
         {% for loc_items in all_junked %}
-          {% for item in loc_items.junked %}
+          {% for junk in loc_items.junked %}
             <tr>
                 {% if forloop.first %}
-                <td rowspan="{{items|length}}">
+                <td rowspan="{{loc_items.junked|length}}">
                 {{loc_items.loc}}
                 </td>
                 {% endif %}
                 <td>
-                  {% if item.loot_group %}
-                    <a href="{% url 'loot_group_view' item.loot_group.id %}">Loot Group {{item.loot_group.id}}</a>
-                    {% else %}
-                    No Loot Group
-                    {% endif %}
+                  {{junk.item.item}}
                 </td>
                 <td>
-                  {{item.item}}
+                  {{junk.quantity}}
                 </td>
                 <td>
-                  {{item.quantity}}
+                  {{junk.item.estimated_profit}}
                 </td>
-                <td></td>
+                <td>
+                <form action="{% url 'unjunk_item' junk.id %}" method="POST">
+        {% csrf_token %}
+
+        <button type="submit" class="btn waves-effect waves-light" value="Submit">UnJunk
+            <i class="material-icons right">send</i>
+        </button>
+                </form>
+                </td>
             </tr>
           {% endfor %}
         {% endfor %}

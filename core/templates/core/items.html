@@ -65,6 +65,8 @@ Participation will still be tracked and the person receiving the contract will h
       <a class="waves-btn btn orange" href="{% url 'sell_all' loc_items.loc.id %}">Sell @ Estimate</a>
       <br/>
       <a class="waves-btn btn blue" href="{% url 'contract_items_in_loc' loc_items.loc.id %}">Contract</a>
+      <br/>
+      <a class="waves-btn btn red" href="{% url 'junk_items' loc_items.loc.id %}">Junk Cheap Items</a>
       {% endif %}
                 </td>
           </tr>
@@ -128,6 +130,13 @@ Participation will still be tracked and the person receiving the contract will h
       <a class="waves-btn btn red" href="{% url 'item_delete' item.id %}">Delete Item</a>
       <br/>
       <a class="waves-btn btn blue" href="{% url 'item_contract' item.id %}">Contract Item</a>
+                <form action="{% url 'junk_item' item.id %}" method="POST">
+        {% csrf_token %}
+
+        <button type="submit" class="btn waves-effect waves-light" value="Submit">Junk
+            <i class="material-icons right">send</i>
+        </button>
+                </form>
       {% endif %}
       {% endif %}
                 </td>
