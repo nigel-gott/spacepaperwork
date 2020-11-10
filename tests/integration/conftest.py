@@ -48,7 +48,7 @@ def http_service(docker_ip, docker_services):
     # `port_for` takes a container port and returns the corresponding host port
     port = docker_services.port_for("django", 8000)
     url = "http://{}:{}/goosetools/".format(docker_ip, port)
-    timeout_seconds = 30.0
+    timeout_seconds = 60.0
     try:
         docker_services.wait_until_responsive(
             timeout=timeout_seconds, pause=0.2, check=lambda: is_responsive(url)
