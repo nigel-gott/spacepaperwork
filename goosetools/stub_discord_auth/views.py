@@ -20,10 +20,10 @@ def authorize_url(request):
 def profile_url(request):
     return JsonResponse(
         {
-            "id": "244766405260476417",
-            "username": "thejanitor",
+            "id": "123456789",
+            "username": "TEST USER",
             "avatar": "e71b856158d285d6ac6e8877d17bae45",
-            "discriminator": "3614",
+            "discriminator": "1234",
             "public_flags": 0,
             "flags": 0,
             "locale": "en-US",
