@@ -42,6 +42,7 @@ urlpatterns = [
     path("loot_group/<int:lg_pk>/item/create", item_add, name="item_add"),
     path("item/move/all", item_move_all, name="item_move_all"),
     path("stack/<int:pk>/sell", stack_sell, name="stack_sell"),
+    path("stack/<int:pk>/junk", junk_stack, name="junk_stack"),
     path("stack/<int:pk>/change_price", stack_change_price, name="stack_change_price"),
     path("stack/<int:pk>/sold", stack_sold, name="stack_sold"),
     path("stack/<int:pk>/view", stack_view, name="stack_view"),

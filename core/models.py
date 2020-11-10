@@ -822,6 +822,7 @@ class LootGroup(models.Model):
 
     def fleet(self):
         return self.fleet_anom.fleet
+    
 
     def has_admin(self, user):
         return self.fleet().has_admin(user)
@@ -913,6 +914,14 @@ class StackedInventoryItem(models.Model):
             return self.inventoryitem_set.first()
         else:
             return False
+    
+    def junk(self):
+        for item in self.inventoryitem_set.all():
+            item.junk()
+    
+    def unjunk(self):
+        for item in self.inventoryitem_set.all():
+            item.junkeditem.unjunk()
 
     def item(self):
         return self._first_item() and self._first_item().item
@@ -954,6 +963,9 @@ class StackedInventoryItem(models.Model):
         if sold > 0:
             status = status + f"{sold} Sold "
         return status
+
+    def can_edit(self):
+        return self._first_item() and self._first_item().can_edit()
 
     def buy_sell(self):
         return self.marketorder() and self.marketorder().buy_or_sell
@@ -1098,6 +1110,14 @@ class InventoryItem(models.Model):
             return True
         else:
             return False
+
+    def junk(self):
+        junk_item = JunkedItem(item=self, quantity=self.quantity, reason="Manual")
+        junk_item.full_clean()
+        junk_item.save()
+        self.quantity = 0
+        self.full_clean()
+        self.save()
 
     def estimated_profit(self):
         lowest_sell = self.item.lowest_sell()
@@ -1289,6 +1309,13 @@ class JunkedItem(models.Model):
     item = models.OneToOneField(InventoryItem, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     reason = models.TextField()
+
+    def unjunk(self):
+        item = self.item
+        item.quantity = self.quantity
+        item.full_clean()
+        item.save()
+        self.delete()
 
 
 class LootShare(models.Model):

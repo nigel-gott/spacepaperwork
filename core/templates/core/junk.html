@@ -6,6 +6,7 @@
     <table>
       <thead>
         <th>Location</th>
+        <th>Stack Id</th>
         <th>Item</th>
         <th>Quantity</th>
         <th>Estimated Price</th>
@@ -21,6 +22,9 @@
                 </td>
                 {% endif %}
                 <td>
+                  {{junk.item.stack.id}}
+                </td>
+                <td>
                   {{junk.item.item}}
                 </td>
                 <td>
@@ -33,7 +37,7 @@
                 <form action="{% url 'unjunk_item' junk.id %}" method="POST">
         {% csrf_token %}
 
-        <button type="submit" class="btn waves-effect waves-light" value="Submit">UnJunk
+        <button type="submit" class="btn waves-effect waves-light" value="Submit">UnJunk {% if junk.item.stack %} Entire Stack {% endif %}
             <i class="material-icons right">send</i>
         </button>
                 </form>

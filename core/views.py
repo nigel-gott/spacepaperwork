@@ -1746,11 +1746,27 @@ def unjunk_item(request, pk):
         messages.error(request, "You do not have permission to unjunk this item.")
         return HttpResponseRedirect(reverse("items"))
     if request.method == "POST":
-        junk_item.item.quantity = junk_item.quantity
-        junk_item.item.full_clean()
-        junk_item.item.save()
-        junk_item.delete()
+        if junk_item.item.stack:
+            junk_item.item.stack.unjunk()
+        else:
+            junk_item.unjunk()
         return HttpResponseRedirect(reverse("junk"))
+    else:
+        return HttpResponseNotAllowed("POST")
+
+@login_required(login_url=login_url)
+@transaction.atomic
+def junk_stack(request, pk):
+    stack = get_object_or_404(StackedInventoryItem, pk=pk)
+    if not stack.has_admin(request.user):
+        messages.error(request, "You do not have permission to junk this item.")
+        return HttpResponseRedirect(reverse("items"))
+    if request.method == "POST":
+        if stack.can_edit(): 
+            stack.junk()
+        else:
+            messages.error(request, "Cannot junk this stack as it is in a contract or already sold")
+        return HttpResponseRedirect(reverse("items"))
     else:
         return HttpResponseNotAllowed("POST")
 
@@ -1763,12 +1779,7 @@ def junk_item(request, pk):
         return HttpResponseRedirect(reverse("items"))
     if request.method == "POST":
         if item.can_edit(): 
-            junk_item = JunkedItem(item=item, quantity=item.quantity, reason="Manual")
-            junk_item.full_clean()
-            junk_item.save()
-            item.quantity = 0
-            item.full_clean()
-            item.save()
+            item.junk()
         else:
             messages.error(request, "Cannot junk this item as it is in a contract or already sold")
         return HttpResponseRedirect(reverse("items"))
@@ -1782,18 +1793,26 @@ def junk_items(request, pk):
     if not loc.has_admin(request.user):
         messages.error(request, "You do not have permission to junk items here.")
         return HttpResponseRedirect(reverse("items"))
-    items = InventoryItem.objects.filter(quantity__gt=0, contract__isnull=True, location=loc, item__cached_lowest_sell__isnull=False)
+    items = get_items_in_location(loc.character_location, InventoryItem.objects.filter(quantity__gt=0, contract__isnull=True, location=loc, item__cached_lowest_sell__isnull=False))
     if request.method == "POST":
         form = JunkItemsForm(request.POST) 
         if form.is_valid():
-            for item in items:
-                if item.can_edit() and item.estimated_profit().amount <= form.cleaned_data['max_price']:
-                    junk_item = JunkedItem(item=item, quantity=item.quantity, reason="Automatic")
-                    junk_item.full_clean()
-                    junk_item.save()
-                    item.quantity = 0
-                    item.full_clean()
-                    item.save()
+            count = 0
+            isk = 0
+            for _, stack_data in items["stacks"].items():
+                stack = stack_data["stack"]
+                profit = stack.estimated_profit().amount
+                if profit <= form.cleaned_data['max_price']:
+                    count = count + 1
+                    isk = isk + profit
+                    stack.junk()
+            for item in items["unstacked"]:
+                profit = item.estimated_profit().amount
+                if item.can_edit() and profit <= form.cleaned_data['max_price']:
+                    count = count + 1
+                    isk = isk + profit
+                    item.junk()
+            messages.success(request, f"Succesfully junked {count} items with a total isk estimated value of {to_isk(isk)}")
         return HttpResponseRedirect(reverse("junk"))
     else:
         form = JunkItemsForm(initial={'max_price':1000000}) 

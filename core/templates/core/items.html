@@ -45,7 +45,7 @@ Participation will still be tracked and the person receiving the contract will h
         <th>Item</th>
         <th>Quantity</th>
         <th>Estimated Profit</th>
-        <th>UnStack</th>
+        <th>Actions</th>
         <th>Sell</th>
       </thead>
       <tbody>
@@ -86,7 +86,16 @@ Participation will still be tracked and the person receiving the contract will h
                 </td>
             <td>
       {% if has_item_admin %}
-            <a href="{% url 'stack_delete' stack.stack_id %}">UnStack</a>
+            <a class="btn waves-btn waves-light" href="{% url 'stack_delete' stack.stack_id %}">UnStack</a>
+      {% if stack.stack.can_edit %}
+                <form action="{% url 'junk_stack' stack.stack_id %}" method="POST">
+        {% csrf_token %}
+
+        <button type="submit" class="btn waves-effect waves-light red" value="Submit">Junk
+            <i class="material-icons right">send</i>
+        </button>
+                </form>
+            {% endif %}
             {% endif %}
             </td>
             <td>
