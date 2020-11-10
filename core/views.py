@@ -1823,9 +1823,10 @@ def item_edit(request, pk):
         return forbidden(request)
     if request.method == "POST":
         form = InventoryItemForm(request.POST)
-        if form.is_valid():
+        char_form = CharacterForm(request.POST)
+        if form.is_valid() and char_form.is_valid():
             char_loc = CharacterLocation.objects.get_or_create(
-                character=form.cleaned_data["character"], system=None
+                character=char_form.cleaned_data["character"], system=None
             )[0]
             loc = ItemLocation.objects.get_or_create(
                 character_location=char_loc, corp_hanger=None
@@ -1844,11 +1845,12 @@ def item_edit(request, pk):
             initial={
                 "item": item.item,
                 "quantity": item.quantity,
-                "character": item.location.character_location.character,
             }
         )
+        char_form = CharacterForm(initial={"character": request.user.default_character})
+        char_form.fields["character"].queryset = request.user.characters()
     return render(
-        request, "core/loot_item_form.html", {"form": form, "title": "Edit Item"}
+        request, "core/item_edit_form.html", {"char_form": char_form, "form": form, "title": "Edit Item"}
     )
 
 
