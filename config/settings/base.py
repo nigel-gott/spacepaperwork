@@ -267,7 +267,7 @@ EEI = moneyed.add_currency(
 )
 
 # Currency Formatter will output 2.000,00 Bs.
-_FORMATTER.add_sign_definition("default", EEI, prefix=u"ISK. ")
+_FORMATTER.add_sign_definition("default", EEI, prefix=u"Ƶ ")
 
 _FORMATTER.add_formatting_definition(
     "es_BO",

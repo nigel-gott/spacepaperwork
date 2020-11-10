@@ -2,11 +2,20 @@
 {% load materializecss %}
 <div class="row">
   <div class="col s12 m12">
+    <h5>Your Balances</h5>
+    <div>
+      <ul>
+        <li>Isk Owed: Ƶ {{user.isk_balance|nicemoney}}</li>
+        <li>Eggs Owed: Ƶ {{user.debt_egg_balance|nicemoney}}</li>
+        <li>Your Eggs: Ƶ {{user.egg_balance|nicemoney}}</li>
+      </ul>
+    </div>
+
     <h5>{{title}}</h5>
     <div class="section">
-    <span class="red-text">{{prefix}} total estimated worth of loot needing to be sold is <b>{{sales_est|nicemoney}}</b></span><br/>
-    <span class="orange-text">{{prefix}} total estimated shares in all loot sales currently is <b>{{all_est|nicemoney}}</b></span><br/>
-    <span class="green-text">{{prefix}} real shares in all completed loot sales currently is <b>{{all_real|nicemoney}}</b></span>
+    <span class="red-text">{{prefix}} total estimated worth of loot needing to be sold is <b>Ƶ {{sales_est|nicemoney}}</b></span><br/>
+    <span class="orange-text">{{prefix}} total estimated shares in all loot sales currently is <b>Ƶ {{all_est|nicemoney}}</b></span><br/>
+    <span class="green-text">{{prefix}} real shares in all completed loot sales currently is <b>Ƶ {{all_real|nicemoney}}</b></span>
     </div>
     <table>
       <thead>
@@ -45,10 +54,10 @@
               {{item.my_estimated_profit}}
             </td>
             <td>
-              {{item.your_group_estimated_profit|nicemoney}}/{{item.group_estimated_profit|nicemoney}}
+              Ƶ {{item.your_group_estimated_profit|nicemoney}}/{{item.group_estimated_profit|nicemoney}}
             </td>
             <td>
-              {{item.your_real_profit|nicemoney}}/{{item.group_real_profit|nicemoney}}
+              Ƶ {{item.your_real_profit|nicemoney}}/{{item.group_real_profit|nicemoney}}
             </td>
          </tr>
         {% endfor %}
