@@ -210,12 +210,13 @@ class LootGroupForm(forms.Form):
             (10, 10),
         ],
         required=False,
+        initial=6
     )
-    anom_type = forms.ChoiceField(choices=ItemFilterGroup.TYPE_CHOICES, required=False)
-    anom_faction = forms.ChoiceField(choices=ItemFilterGroup.FACTIONS, required=False)
+    anom_type = forms.ChoiceField(choices=ItemFilterGroup.TYPE_CHOICES, required=False, initial='Inquisitor')
+    anom_faction = forms.ChoiceField(choices=ItemFilterGroup.FACTIONS, required=False, initial='Serpentis')
     anom_system = forms.ModelChoiceField(
         queryset=System.objects.all(),
-        initial=0,
+        initial='98Q-8O',
         widget=autocomplete.ModelSelect2(url="system-autocomplete"),
     )
 

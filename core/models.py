@@ -608,12 +608,16 @@ class Contract(models.Model):
             ("pending", "pending"),
             ("rejected", "rejected"),
             ("accepted", "accepted"),
+            ("cancelled", "cancelled"),
         ]
     )
     log = models.JSONField(null=True, blank=True)
 
     def can_accept_or_reject(self, user):
         return self.status == "pending" and self.to_char.gooseuser_or_false() == user
+
+    def can_cancel(self, user):
+        return self.status == "pending" and self.from_user == user
 
     def total_items(self):
         return self.inventoryitem_set.count()

@@ -5,6 +5,7 @@
     <h5>Pending Contracts Sent To You</h5>
     <table>
       <thead>
+        <th>Contract ID</th>
         <th>From</th>
         <th>To</th>
         <th>System</th>
@@ -15,6 +16,9 @@
       <tbody>
         {% for contract in to_me_contracts %}
             <tr>
+                <td>
+                  {{contract.id}}
+                </td>
                 <td>
                   {{contract.from_user}}
                 </td>
@@ -71,6 +75,9 @@
                 </td>
                 <td>
                   {{contract.created}}
+                </td>
+                <td>
+                    <a  class="waves-btn orange btn" href="{% url 'cancel_contract' contract.id %}">Cancel Contract {{contract.id}}</a>
                 </td>
             </tr>
         {% endfor %}

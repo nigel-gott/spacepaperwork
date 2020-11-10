@@ -16,6 +16,4 @@ class StubDiscordAuthConfig(AppConfig):
     def get_url(self, url):
         from django.contrib.sites.shortcuts import get_current_site
 
-        return "".join(
-            ["http://", 'localhost', ":8000", reverse(url)]
-        )
+        return "".join(["http://", "localhost", ":8000", reverse(url)])

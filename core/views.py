@@ -792,34 +792,53 @@ def reject_contract(request, pk):
 
 @transaction.atomic
 @login_required(login_url=login_url)
+def cancel_contract(request, pk):
+    contract = get_object_or_404(Contract, pk=pk)
+    if request.method == "POST":
+        if contract.can_cancel(request.user):
+            change_contract_status(contract, "cancelled", False)
+        else:
+            messages.error(request, 'You cannot cancel someone elses contract')
+        return HttpResponseRedirect(reverse("view_contract", args=[pk]))
+    else:
+        return render(request, "core/cancel_contract_form.html", {"contract": contract})
+
+
+def change_contract_status(contract, status, change_location):
+    contract.status = status
+    char_loc, _ = CharacterLocation.objects.get_or_create(
+        character=contract.to_char, system=contract.system
+    )
+    loc, _ = ItemLocation.objects.get_or_create(
+        character_location=char_loc, corp_hanger=None
+    )
+    log = []
+    for item in contract.inventoryitem_set.all():
+        log.append(
+            {
+                "id": item.id,
+                "item": str(item),
+                "quantity": item.quantity,
+                "status": item.status(),
+                "loot_group_id": item.loot_group and item.loot_group.id,
+            }
+        )
+    contract.log = json.dumps(log, cls=ComplexEncoder)
+    contract.full_clean()
+    contract.save()
+    contract.inventoryitem_set.update(contract=None) 
+    if change_location:
+        contract.inventoryitem_set.update(location=loc)
+
+
+@transaction.atomic
+@login_required(login_url=login_url)
 def accept_contract(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if request.method == "POST":
         form = Form(request.POST)
         if form.is_valid() and contract.can_accept_or_reject(request.user):
-
-            contract.status = "accepted"
-            char_loc, _ = CharacterLocation.objects.get_or_create(
-                character=contract.to_char, system=contract.system
-            )
-            loc, _ = ItemLocation.objects.get_or_create(
-                character_location=char_loc, corp_hanger=None
-            )
-            log = []
-            for item in contract.inventoryitem_set.all():
-                log.append(
-                    {
-                        "id": item.id,
-                        "item": str(item),
-                        "quantity": item.quantity,
-                        "status": item.status(),
-                        "loot_group_id": item.loot_group and item.loot_group.id,
-                    }
-                )
-            contract.log = json.dumps(log, cls=ComplexEncoder)
-            contract.full_clean()
-            contract.save()
-            contract.inventoryitem_set.update(contract=None, location=loc)
+            change_contract_status(contract, "accepted", True)
     return HttpResponseRedirect(reverse("view_contract", args=[pk]))
 
 
