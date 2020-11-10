@@ -245,9 +245,9 @@ def human_readable_relativedelta(delta):
 
 def active_fleets_query():
     now = timezone.now()
-    now_minus_24_hours = now - timezone.timedelta(days=1)
+    now_minus_12_hours = now - timezone.timedelta(hours=12)
     active_fleets = Fleet.objects.filter(
-        (Q(end__isnull=True) & Q(start__gte=now_minus_24_hours) & Q(start__lt=now))
+        (Q(end__isnull=True) & Q(start__gte=now_minus_12_hours) & Q(start__lt=now))
         | (Q(start__lte=now) & Q(end__gt=now))
     ).order_by("-start")
     return active_fleets
@@ -255,10 +255,10 @@ def active_fleets_query():
 
 def past_fleets_query():
     now = timezone.now()
-    now_minus_24_hours = now - timezone.timedelta(days=1)
+    now_minus_12_hours = now - timezone.timedelta(hours=12)
     past_fleets = Fleet.objects.filter(
         (Q(end__isnull=False) & Q(end__lte=now))
-        | (Q(end__isnull=True) & Q(start__lte=now_minus_24_hours))
+        | (Q(end__isnull=True) & Q(start__lte=now_minus_12_hours))
     ).order_by("-start")
     return past_fleets
 
@@ -321,11 +321,7 @@ class Fleet(models.Model):
 
     def in_the_past(self):
         now = timezone.now()
-        now_minus_24_hours = now - timezone.timedelta(days=1)
-
-        return (self.end and self.end < now) or (
-            not self.end and self.start < now_minus_24_hours
-        )
+        return self.auto_end() and now < self.auto_end()
 
     def can_join(self, user):
         if self.in_the_past():
@@ -364,13 +360,24 @@ class Fleet(models.Model):
             return f"Starts in {human_delta}"
         else:
             return f"Started {human_delta} ago"
+    
+    def auto_end(self):
+        now = timezone.now()
+        if not self.end:
+            now_minus_12_hours = now - timezone.timedelta(hours=12)
+            if self.start < now_minus_12_hours:
+                return self.start + timezone.timedelta(hours=12)
+            else:
+                return False
+        else:
+            return self.end
 
     def human_readable_ended(self):
         now = timezone.now()
         if not self.end:
-            now_minus_24_hours = now - timezone.timedelta(days=1)
-            if self.start < now_minus_24_hours:
-                return "Automatically expired after 24 hours"
+            now_minus_12_hours = now - timezone.timedelta(hours=12)
+            if self.start < now_minus_12_hours:
+                return "Automatically expired after 12 hours"
             else:
                 return False
 
