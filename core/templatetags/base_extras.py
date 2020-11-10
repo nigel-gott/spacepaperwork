@@ -86,6 +86,8 @@ def nicemoney(value):
     else:
         floored = m.floor(value.amount)
 
+    floored = 200000000
+
     if floored > 1000000000000:
         return str(round(floored / 1000000000000, 2)) + "T"
     if floored > 1000000000:

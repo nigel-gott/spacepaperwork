@@ -67,20 +67,25 @@
 </ul>
 {% endif %}
 <nav class="nav-extended blue-grey darken-3">
-    <div class="nav-wrapper ">
-        <a href="#" class="brand-logo center">⚙ GooseTools </a>
+    <div class="nav-wrapper">
         <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
-        <ul class="right hide-on-med-and-down">
-        <li>
-            <a class="waves-effect waves-light btn deep-orange accent-3" href="https://wiki.goosetools.com/index.php?title=Goosetools"><i
-                    class="material-icons left">help_outline</i>Goosetools Guide</a>
-        </li>
-        <li>
-            <a class="waves-effect waves-light btn blue lighten-2" href="https://wiki.goosetools.com"><i
-                    class="material-icons left">cloud</i>Wiki</a>
-        </li>
+            {% if user.is_authenticated %}
+         <ul class="left hide-on-med-and-down valign-wrapper">
+
+            <li><a class="dropdown-trigger valign-wrapper" href="#!" data-target="dropdown_fleets">Fleets<i class="material-icons right">arrow_drop_down</i></a></li>
+            {% all_sales user as all_sales_num %}
+            {% num_contracts user as contracts %}
+            <li><a class="dropdown-trigger valign-wrapper" href="#!" data-target="dropdown_sales">Loot Sales({{ all_sales_num }})<i class="material-icons right">arrow_drop_down</i></a></li>
+            <li><a href="{% url 'contracts' %}">Your Contracts ({{contracts}})</a></li>
+              <li>
+            <a class="tab" href="{% url 'settings' %}">Settings</a></li>
+
+               <a class="tab" href="{% url 'own_user_transactions' %}">  Your Transactions</a></li>
+
+            <li>
         </ul>
-        <ul class="left hide-on-med-and-down">
+        {% endif %}
+        <ul class="right hide-on-med-and-down">
             {% if user.is_authenticated %}
             <li>
             <form method="post" action="{% url 'account_logout' %}">
@@ -95,37 +100,8 @@
             {% else %}
             <li><a class="waves-effect waves-light btn" href="{% provider_login_url 'discord' %}">Login</a></li>
             {% endif %}
-        <li>
-        <a class="waves-effect waves-light btn green" href="https://discord.com/users/244766405260476417/"><i class='material-icons right'>help</i>PM @thejanitor for help/suggestions</a>
-        </li>
         </ul>
     </div>
-    {% if user.is_authenticated %}
-    <div class="row nav-content">
-        <div class="col m7 s7">
-        <ul class="hide-on-med-and-down valign-wrapper">
-            <li >
-            <a class="tab" href="{% url 'settings' %}">Settings</a></li>
-            <li><a class="dropdown-trigger valign-wrapper" href="#!" data-target="dropdown_fleets">Fleets<i class="material-icons right">arrow_drop_down</i></a></li>
-            {% all_sales user as all_sales_num %}
-            {% num_contracts user as contracts %}
-            <li><a class="dropdown-trigger valign-wrapper" href="#!" data-target="dropdown_sales">Loot Sales({{ all_sales_num }})<i class="material-icons right">arrow_drop_down</i></a></li>
-            <li><a href="{% url 'contracts' %}">Your Contracts ({{contracts}})</a></li>
-            <li>
-        </ul>
-        </div>
-        <ul>
-        <div class="col offset-s7 m5 s5 hide-on-med-and-down right-align">
-            <a class="waves-btn btn" href="{% url 'own_user_transactions' %}">
-            Your Transactions
-            </a>
-            Isk Owed({{user.isk_balance|nicemoney}}) -
-            Eggs Owed({{user.debt_egg_balance|nicemoney}}) -
-            Your Eggs({{user.egg_balance|nicemoney}})
-        </ul>
-        </div>
-    </div>
-        {% endif %}
 </nav>
   <ul class="sidenav" id="mobile-demo">
             <li>
@@ -186,7 +162,7 @@
             </a>
             </li>
             {% num_orders user as num_active_orders %}
-            <li class="tab"><a href="{% url 'orders' %}">Market Orders 
+            <li class="tab"><a href="{% url 'orders' %}">Market Orders
                 ({{ num_active_orders }})
             </a>
             </li>
@@ -207,7 +183,7 @@
             </li>
     {% endif %}
   </ul>
-          
+
 <div class="container">
 {% if messages %}
 <div class="section">
@@ -226,6 +202,24 @@
     {% endblock %}
 </div>
 {% block footer %}
+    <footer class="page-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col l6 s12">
+                    <h5 class="white-text">⚙ GooseTools</h5>
+                    <ul>
+                        <li><a class="grey-text text-lighten-3"
+                               href="https://wiki.goosetools.com/index.php?title=Goosetools">How to use GooseTools</a>
+                        </li>
+                        <li><a class="grey-text text-lighten-3" href="https://wiki.goosetools.com">Honk Wiki</a></li>
+                        <li><a class="grey-text text-lighten-3" href="https://discord.com/users/244766405260476417/">PM
+                            @thejanitor for help and suggestions</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
 <script type="text/javascript" src="{% static 'core/js/materialize.js' %}"></script>
 
 <script>

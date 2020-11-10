@@ -2,6 +2,15 @@
 {% load materializecss %}
 <div class="row">
   <div class="col s12 m12">
+    <h5>Your Balances</h5>
+    <div>
+      <ul>
+        <li>Isk Owed: Ƶ {{user.isk_balance|nicemoney}}</li>
+        <li>Eggs Owed: Ƶ {{user.debt_egg_balance|nicemoney}}</li>
+        <li>Your Eggs: Ƶ {{user.egg_balance|nicemoney}}</li>
+      </ul>
+    </div>
+
     <h5>{{title}}</h5>
     <div class="section">
     <span class="red-text">{{prefix}} total estimated worth of loot needing to be sold is <b>{{sales_est|nicemoney}}</b></span><br/>
