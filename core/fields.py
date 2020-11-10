@@ -17,7 +17,7 @@ class TimeZoneFormField(forms.TypedChoiceField):
     def __init__(self, *args, **kwargs):
         if kwargs.get("display_GMT_offset", False):
             choices = []
-            by_hours = OrderedDict()
+            by_hours = []
             dt = datetime.datetime.utcnow()
             for tz in pytz.common_timezones:
                 a = self.coerce_to_pytz(tz)
@@ -29,9 +29,9 @@ class TimeZoneFormField(forms.TypedChoiceField):
                     int(offset_hours),
                     int((offset_hours % 1) * 60),
                 )
-                by_hours[offset_hours] = (tz, name)
+                by_hours.append((offset_hours, (tz, name)))
                 choices.append((tz, name))
-            choices = [v for k, v in sorted(by_hours.items(), key=lambda item: item[0])]
+            choices = [v for k, v in sorted(by_hours, key=lambda item: item[0])]
 
         else:
             choices = [(tz, tz.replace("_", " ")) for tz in pytz.common_timezones]
