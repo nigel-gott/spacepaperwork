@@ -40,7 +40,8 @@ from core.forms import (
     FleetForm,
     InventoryItemForm,
     ItemMoveAllForm,
-    JoinFleetForm, JunkItemsForm,
+    JoinFleetForm,
+    JunkItemsForm,
     LootGroupForm,
     LootJoinForm,
     LootShareForm,
@@ -798,7 +799,7 @@ def cancel_contract(request, pk):
         if contract.can_cancel(request.user):
             change_contract_status(contract, "cancelled", False)
         else:
-            messages.error(request, 'You cannot cancel someone elses contract')
+            messages.error(request, "You cannot cancel someone elses contract")
         return HttpResponseRedirect(reverse("view_contract", args=[pk]))
     else:
         return render(request, "core/cancel_contract_form.html", {"contract": contract})
@@ -826,9 +827,9 @@ def change_contract_status(contract, status, change_location):
     contract.log = json.dumps(log, cls=ComplexEncoder)
     contract.full_clean()
     contract.save()
-    contract.inventoryitem_set.update(contract=None) 
     if change_location:
         contract.inventoryitem_set.update(location=loc)
+    contract.inventoryitem_set.update(contract=None)
 
 
 @transaction.atomic
@@ -1307,13 +1308,17 @@ def junk(request):
             loc = ItemLocation.objects.get(
                 character_location=char_loc, corp_hanger=None
             )
-            junked = JunkedItem.objects.filter(item__location=loc)\
+            junked = (
+                JunkedItem.objects.filter(item__location=loc)
                 .annotate(
                     estimated_profit_sum=ExpressionWrapper(
                         Coalesce(F("item__item__cached_lowest_sell"), 0)
                         * F("quantity"),
-                        output_field=FloatField()),
-                ).order_by("-estimated_profit_sum")
+                        output_field=FloatField(),
+                    ),
+                )
+                .order_by("-estimated_profit_sum")
+            )
 
             all_junked.append(
                 {
@@ -1738,6 +1743,7 @@ def stack_delete(request, pk):
         {"items": stack.inventoryitem_set.all()},
     )
 
+
 @login_required(login_url=login_url)
 @transaction.atomic
 def unjunk_item(request, pk):
@@ -1754,6 +1760,7 @@ def unjunk_item(request, pk):
     else:
         return HttpResponseNotAllowed("POST")
 
+
 @login_required(login_url=login_url)
 @transaction.atomic
 def junk_stack(request, pk):
@@ -1762,13 +1769,16 @@ def junk_stack(request, pk):
         messages.error(request, "You do not have permission to junk this item.")
         return HttpResponseRedirect(reverse("items"))
     if request.method == "POST":
-        if stack.can_edit(): 
+        if stack.can_edit():
             stack.junk()
         else:
-            messages.error(request, "Cannot junk this stack as it is in a contract or already sold")
+            messages.error(
+                request, "Cannot junk this stack as it is in a contract or already sold"
+            )
         return HttpResponseRedirect(reverse("items"))
     else:
         return HttpResponseNotAllowed("POST")
+
 
 @login_required(login_url=login_url)
 @transaction.atomic
@@ -1778,13 +1788,16 @@ def junk_item(request, pk):
         messages.error(request, "You do not have permission to junk this item.")
         return HttpResponseRedirect(reverse("items"))
     if request.method == "POST":
-        if item.can_edit(): 
+        if item.can_edit():
             item.junk()
         else:
-            messages.error(request, "Cannot junk this item as it is in a contract or already sold")
+            messages.error(
+                request, "Cannot junk this item as it is in a contract or already sold"
+            )
         return HttpResponseRedirect(reverse("items"))
     else:
         return HttpResponseNotAllowed("POST")
+
 
 @login_required(login_url=login_url)
 @transaction.atomic
@@ -1793,30 +1806,46 @@ def junk_items(request, pk):
     if not loc.has_admin(request.user):
         messages.error(request, "You do not have permission to junk items here.")
         return HttpResponseRedirect(reverse("items"))
-    items = get_items_in_location(loc.character_location, InventoryItem.objects.filter(quantity__gt=0, contract__isnull=True, location=loc, item__cached_lowest_sell__isnull=False))
+    items = get_items_in_location(
+        loc.character_location,
+        InventoryItem.objects.filter(
+            quantity__gt=0,
+            contract__isnull=True,
+            location=loc,
+            item__cached_lowest_sell__isnull=False,
+        ),
+    )
     if request.method == "POST":
-        form = JunkItemsForm(request.POST) 
+        form = JunkItemsForm(request.POST)
         if form.is_valid():
             count = 0
             isk = 0
             for _, stack_data in items["stacks"].items():
                 stack = stack_data["stack"]
                 profit = stack.estimated_profit().amount
-                if profit <= form.cleaned_data['max_price']:
+                if profit <= form.cleaned_data["max_price"]:
                     count = count + 1
                     isk = isk + profit
                     stack.junk()
             for item in items["unstacked"]:
                 profit = item.estimated_profit().amount
-                if item.can_edit() and profit <= form.cleaned_data['max_price']:
+                if item.can_edit() and profit <= form.cleaned_data["max_price"]:
                     count = count + 1
                     isk = isk + profit
                     item.junk()
-            messages.success(request, f"Succesfully junked {count} items with a total isk estimated value of {to_isk(isk)}")
+            messages.success(
+                request,
+                f"Succesfully junked {count} items with a total isk estimated value of {to_isk(isk)}",
+            )
         return HttpResponseRedirect(reverse("junk"))
     else:
-        form = JunkItemsForm(initial={'max_price':1000000}) 
-    return render(request, "core/junk_item_form.html", {"form": form, "items":items, 'title':f'Junk Cheap Items In {loc}'})
+        form = JunkItemsForm(initial={"max_price": 1000000})
+    return render(
+        request,
+        "core/junk_item_form.html",
+        {"form": form, "items": items, "title": f"Junk Cheap Items In {loc}"},
+    )
+
 
 @login_required(login_url=login_url)
 @transaction.atomic
