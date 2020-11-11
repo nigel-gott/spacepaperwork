@@ -26,4 +26,4 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
 
 
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.ManifestStaticFilesStorage'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
