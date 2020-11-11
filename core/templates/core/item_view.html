@@ -1,162 +1,162 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
 {% load materializecss %}
 <div class="row">
-  <div class="col s12 m12">
-  <h4>{{item.item}}</h4> 
+    <div class="col s12 m12">
+        <h4>{{item.item}}</h4>
 
-    <table>
-    <tr>
-    <td>Quantity</td>
-    <td>{{item.total_quantity}}</td>
-    </tr>
-    <tr>
-    <td>Location</td>
-    <td>{{item.location}}</td>
-    </tr>
-    <tr>
-    <td>Status</td>
-    <td>{{item.status}} 
-    {% if item.solditem %}
-    <br/>
-    {{item.solditem.status}}<br/>
-    {% if item.solditem.transfer_log %}
-    <a href="{% url 'view_transfer_log' item.solditem.transfer_log.id %}">View Transfer Details</a>
-    {% endif %}
-    {% endif %}
-    
-    </td>
-    </tr>
-    <tr>
-    <td>Loot Group</td>
-    <td>
-  {% if item.loot_group %}
-    <a href="{% url 'loot_group_view' item.loot_group.id %}">Loot Group {{item.loot_group.id}}</a>
-    {% else %}
-    No Loot Group
-    {% endif %}
-    </td>
-    </tr>
-    <tr>
-    <td>Associated Contract</td>
-    <td>
-  {% if item.contract %}
-    <a href="{% url 'view_contract' item.contract.id %}">Contract {{item.contract.id}}</a>
-    {% else %}
-    No contract
-    {% endif %}
-    </td>
-    </tr>
-    <tr>
-    <td>Isk Balance</td>
-    <td>
-    {{item.isk_balance}}
-    </td>
-    </tr>
-    <tr>
-    <td>Egg Balance</td>
-    <td>
-    {{item.egg_balance}}
-    </td>
-    </tr>
-        {% has_item_admin item user as item_admin %}
-        {% if item_admin %}
-    <tr>
-    <td colspan="2">
-      {% if item.can_edit %}
-      <a class="waves-btn btn orange" href="{% url 'item_edit' item.id %}">Edit Item</a>
-      {% endif %}
-      {% if item.can_sell %}
-      <a class="waves-btn btn green" href="{% url 'item_sell' item.id %}">Sell Item</a>
-      {% endif %}
-      {% if item.can_edit %}
-        <a class="red-text" 
-          href="{% url 'item_delete' item.id %}">Delete</a>
-        {% endif %}
-    </td>
-    </tr>
-    {% endif %}
-    <tbody>
-    </tbody>
-    </table>
-  </div>
+        <table>
+            <tr>
+                <td>Quantity</td>
+                <td>{{item.total_quantity}}</td>
+            </tr>
+            <tr>
+                <td>Location</td>
+                <td>{{item.location}}</td>
+            </tr>
+            <tr>
+                <td>Status</td>
+                <td>{{item.status}}
+                    {% if item.solditem %}
+                    <br/>
+                    {{item.solditem.status}}<br/>
+                    {% if item.solditem.transfer_log %}
+                    <a href="{% url 'view_transfer_log' item.solditem.transfer_log.id %}">View Transfer Details</a>
+                    {% endif %}
+                    {% endif %}
+
+                </td>
+            </tr>
+            <tr>
+                <td>Loot Group</td>
+                <td>
+                    {% if item.loot_group %}
+                    <a href="{% url 'loot_group_view' item.loot_group.id %}">Loot Group {{item.loot_group.id}}</a>
+                    {% else %}
+                    No Loot Group
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Associated Contract</td>
+                <td>
+                    {% if item.contract %}
+                    <a href="{% url 'view_contract' item.contract.id %}">Contract {{item.contract.id}}</a>
+                    {% else %}
+                    No contract
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Isk Balance</td>
+                <td>
+                    {{item.isk_balance}}
+                </td>
+            </tr>
+            <tr>
+                <td>Egg Balance</td>
+                <td>
+                    {{item.egg_balance}}
+                </td>
+            </tr>
+            {% has_item_admin item user as item_admin %}
+            {% if item_admin %}
+            <tr>
+                <td colspan="2">
+                    {% if item.can_edit %}
+                    <a class="waves-btn btn orange" href="{% url 'item_edit' item.id %}">Edit Item</a>
+                    {% endif %}
+                    {% if item.can_sell %}
+                    <a class="waves-btn btn green" href="{% url 'item_sell' item.id %}">Sell Item</a>
+                    {% endif %}
+                    {% if item.can_edit %}
+                    <a class="red-text"
+                       href="{% url 'item_delete' item.id %}">Delete</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endif %}
+            <tbody>
+            </tbody>
+        </table>
+    </div>
 </div>
 <div class="row">
-  <div class="col s12 m12">
-    <h5>Associated Isk Transactions</h5>
-    <table>
-      <thead>
-        <th>Time</th>
-        <th>Isk</th>
-        <th>Type</th>
-        <th>Associated Quantity</th>
-        <th>Notes</th>
-        <th>Action</th>
-      </thead>
-      <tbody>
-        {% for isk_tran in item.isktransaction_set.all %}
+    <div class="col s12 m12">
+        <h5>Associated Isk Transactions</h5>
+        <table>
+            <thead>
+            <th>Time</th>
+            <th>Isk</th>
+            <th>Type</th>
+            <th>Associated Quantity</th>
+            <th>Notes</th>
+            <th>Action</th>
+            </thead>
+            <tbody>
+            {% for isk_tran in item.isktransaction_set.all %}
             <tr>
                 <td>
-                  {{isk_tran.time}}
+                    {{isk_tran.time}}
                 </td>
                 <td>
-                  {{isk_tran.isk}}
+                    {{isk_tran.isk}}
                 </td>
                 <td>
-                  {{isk_tran.transaction_type}}
+                    {{isk_tran.transaction_type}}
                 </td>
                 <td>
-                  {{isk_tran.quantity}}
+                    {{isk_tran.quantity}}
                 </td>
                 <td>
-                  {{isk_tran.notes}}
+                    {{isk_tran.notes}}
                 </td>
                 <td>
                 </td>
             </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    </form>
-  </div>
+            {% endfor %}
+            </tbody>
+        </table>
+        </form>
+    </div>
 </div>
 <div class="row">
-  <div class="col s12 m12">
-    <h5>Associated Egg Transactions</h5>
-    <table>
-      <thead>
-        <th>Time</th>
-        <th>Isk</th>
-        <th>Counterparty</th>
-        <th>Associated Quantity</th>
-        <th>Notes</th>
-        <th>Action</th>
-      </thead>
-      <tbody>
-        {% for isk_tran in item.eggtransaction_set.all %}
+    <div class="col s12 m12">
+        <h5>Associated Egg Transactions</h5>
+        <table>
+            <thead>
+            <th>Time</th>
+            <th>Isk</th>
+            <th>Counterparty</th>
+            <th>Associated Quantity</th>
+            <th>Notes</th>
+            <th>Action</th>
+            </thead>
+            <tbody>
+            {% for isk_tran in item.eggtransaction_set.all %}
             <tr>
                 <td>
-                  {{isk_tran.time}}
+                    {{isk_tran.time}}
                 </td>
                 <td>
-                  {{isk_tran.eggs}}
+                    {{isk_tran.eggs}}
                 </td>
                 <td>
-                  {{isk_tran.counterparty_discord_username}}
+                    {{isk_tran.counterparty_discord_username}}
                 </td>
                 <td>
-                  {{isk_tran.quantity}}
+                    {{isk_tran.quantity}}
                 </td>
                 <td>
-                  {{isk_tran.notes}}
+                    {{isk_tran.notes}}
                 </td>
                 <td>
                 </td>
             </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    </form>
-  </div>
+            {% endfor %}
+            </tbody>
+        </table>
+        </form>
+    </div>
 </div>
 
 

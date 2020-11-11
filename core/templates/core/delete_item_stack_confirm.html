@@ -1,43 +1,44 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
 {% load materializecss %}
-    <h5>{{title}}</h5>
+<h5>{{title}}</h5>
 <div class="row">
-  <div class="col s12 m12">
-        <form action="" method="post" class="col s12">
+    <div class="col s12 m12">
+        <form action="" class="col s12" method="post">
             {% csrf_token %}
-            <button type="submit" class="btn waves-effect waves-light red" value="Submit">Confirm UnStacking the below items, 
+            <button class="btn waves-effect waves-light red" type="submit" value="Submit">Confirm UnStacking the below
+                items,
                 <i class="material-icons right">send</i>
             </button>
-<span> They will appear as unstacked seperate items in the same location after!</span>
+            <span> They will appear as unstacked seperate items in the same location after!</span>
         </form>
-  </div>
-  <div class="col s12 m12">
-    <table>
-      <thead>
-        <th>Location</th>
-        <th>Item</th>
-        <th>Quantity</th>
-      </thead>
-      <tbody>
-          {% for item in items %}
-          <tr>
-          {% if forloop.first %}
-          <td rowspan="{{ items|length }}">{{item.location}}</td>
-          {% endif %}
+    </div>
+    <div class="col s12 m12">
+        <table>
+            <thead>
+            <th>Location</th>
+            <th>Item</th>
+            <th>Quantity</th>
+            </thead>
+            <tbody>
+            {% for item in items %}
+            <tr>
+                {% if forloop.first %}
+                <td rowspan="{{ items|length }}">{{item.location}}</td>
+                {% endif %}
                 <td>
                     <a href="{% url 'item_view' item.id %}">
-                  {{item.item}}
-                  </a>
+                        {{item.item}}
+                    </a>
                 </td>
                 <td>
-                  {{item.quantity}}
+                    {{item.quantity}}
                 </td>
             </tr>
-          {% endfor %}
-      </tbody>
-    </table>
-    </form>
-  </div>
+            {% endfor %}
+            </tbody>
+        </table>
+        </form>
+    </div>
 </div>
 
 {% endblock %}

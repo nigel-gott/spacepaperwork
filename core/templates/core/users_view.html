@@ -1,33 +1,35 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
 {% load materializecss %}
 <div class="row">
-  <div class="col s12 m12">
-    <h5>{{title}}</h5>
-    <table>
-      <thead>
-        <th>User Shares</th>
-        <th>User Transactions</th>
-      </thead>
-      <tbody>
-          {% for user in users %}
-          <tr>
-            <td>
-                <a class="waves-btn btn green" href="{% url 'fleet_shares' user.character__discord_user %}">{{user.character__discord_user__username}}'s Shares<a>
-            </td>
-            <td>
-            {% if user.character__discord_user__gooseuser__id %}
-            <a class="waves-btn btn" href="{% url 'user_transactions' user.character__discord_user__gooseuser__id %}">
-            {{user.character__discord_user__username}}'s Transactions
-            </a>
-            {% else %}
-            {{user.character__discord_user__username}} has not yet signed up on GooseTools
-            {% endif %}
-            </td>
-         </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+    <div class="col s12 m12">
+        <h5>{{title}}</h5>
+        <table>
+            <thead>
+            <th>User Shares</th>
+            <th>User Transactions</th>
+            </thead>
+            <tbody>
+            {% for user in users %}
+            <tr>
+                <td>
+                    <a class="waves-btn btn green" href="{% url 'fleet_shares' user.character__discord_user %}">{{user.character__discord_user__username}}'s
+                        Shares<a>
+                </td>
+                <td>
+                    {% if user.character__discord_user__gooseuser__id %}
+                    <a class="waves-btn btn"
+                       href="{% url 'user_transactions' user.character__discord_user__gooseuser__id %}">
+                        {{user.character__discord_user__username}}'s Transactions
+                    </a>
+                    {% else %}
+                    {{user.character__discord_user__username}} has not yet signed up on GooseTools
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 {% endblock %}

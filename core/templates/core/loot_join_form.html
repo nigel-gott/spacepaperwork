@@ -2,7 +2,7 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<h4>{{title}}</h4> 
+<h4>{{title}}</h4>
 <div class="divider"></div>
 <div class="section">
     <h7>For Loot Group {{loot_group}}</h7>
@@ -30,7 +30,7 @@
         <div class="row">
             {{ form.character|materializecss:'s12 m12, icon=directions_boat'}}
         </div>
-        <button type="submit" class="btn waves-effect waves-light" value="Submit">{{title}}
+        <button class="btn waves-effect waves-light" type="submit" value="Submit">{{title}}
             <i class="material-icons right">send</i>
         </button>
     </form>

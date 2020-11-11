@@ -2,10 +2,12 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<h4>{{title}}</h4> 
-<div class ="section">
+<h4>{{title}}</h4>
+<div class="section">
 
-<b class="green-text"> Please send the command below to the <a href="https://discord.com/channels/747575380436713583/754139786679156807/764900253358227506">#general-bot-spam</a> channel on GooseFleet discord. </b>
+    <b class="green-text"> Please send the command below to the <a
+            href="https://discord.com/channels/747575380436713583/754139786679156807/764900253358227506">#general-bot-spam</a>
+        channel on GooseFleet discord. </b>
 </div>
 <div class="divider"></div>
 <div class="section">
@@ -35,7 +37,8 @@
             {{ form.deposit_command|materializecss:'s12 m12, icon=directions_boat'}}
         </div>
         <br/>
-        <button type="submit" class="btn waves-effect waves-light" value="Submit">I have sent the deposit command in Discord.
+        <button class="btn waves-effect waves-light" type="submit" value="Submit">I have sent the deposit command in
+            Discord.
             <i class="material-icons right">send</i>
         </button>
     </form>

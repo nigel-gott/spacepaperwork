@@ -3,28 +3,30 @@
 {% load static %}
 {% block body %}
 <h4>{{title}}</h4>
-{% comment %} <div class="section">
+{% comment %}
+<div class="section">
     <form action="" method="get">
         {% csrf_token %}
         <div class="row">
             {{filter_form.fleet_anom}}
             {{filter_form.item_filter_group|materializecss:'s12 m12, icon=search'}}
         </div>
-        <button type="submit" class="btn waves-effect waves-light" value="Submit">Change Item Filter 
+        <button class="btn waves-effect waves-light" type="submit" value="Submit">Change Item Filter
             <i class="material-icons right">send</i>
         </button>
     </form>
 </div> {% endcomment %}
 <div class="divider"></div>
-    <form action="" method="post">
+<form action="" method="post">
     <div class="section">
-            <button type="submit" name="add_another" class="btn waves-effect waves-light orange" value="Submit">{{title}} And Then Add Another
-                <i class="material-icons right">send</i>
-            </button>
-            <button type="submit" class="btn waves-effect waves-light" value="Submit">{{title}}
-                <i class="material-icons right">send</i>
-            </button>
-            </div>
+        <button class="btn waves-effect waves-light orange" name="add_another" type="submit" value="Submit">{{title}}
+            And Then Add Another
+            <i class="material-icons right">send</i>
+        </button>
+        <button class="btn waves-effect waves-light" type="submit" value="Submit">{{title}}
+            <i class="material-icons right">send</i>
+        </button>
+    </div>
     <div class="section">
         {% if char_form.non_field_errors %}
         <div class="row">
@@ -42,9 +44,9 @@
             </div>
         </div>
         {% endif %}
-            <div class="row">
-                {{ char_form.character|materializecss:'s12 m12, icon=person'}}
-            </div>
+        <div class="row">
+            {{ char_form.character|materializecss:'s12 m12, icon=person'}}
+        </div>
     </div>
     <div class="divider"></div>
     {{ formset.management_form }}
@@ -69,11 +71,11 @@
         </div>
         {% endif %}
 
-            {% csrf_token %}
-            <div class="row">
-                {{ form.item|materializecss:'s12 m6, icon=directions_boat'}}
-                {{ form.quantity|materializecss:'s12 m6, icon=directions_boat'}}
-            </div>
+        {% csrf_token %}
+        <div class="row">
+            {{ form.item|materializecss:'s12 m6, icon=directions_boat'}}
+            {{ form.quantity|materializecss:'s12 m6, icon=directions_boat'}}
+        </div>
 
 
         {% endif %}
@@ -86,7 +88,7 @@
 
 {% block extrafooter %}
 
-<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
 
 {{ formset.media }}
 
@@ -139,6 +141,7 @@
 });
 
 })($)
+
 </script>
 
 {% endblock %}

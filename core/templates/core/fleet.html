@@ -4,7 +4,8 @@
 {% block body %}
 
 <div class="section">
-    <a id="start_new_fleet_button" class="waves-effect waves-light btn light-green darken-3" href="{% url 'fleet_create' %}"><i
+    <a class="waves-effect waves-light btn light-green darken-3" href="{% url 'fleet_create' %}"
+       id="start_new_fleet_button"><i
             class='material-icons right'>add_circle</i>Start New Fleet</a>
 
     {% if fleets %}
@@ -17,7 +18,7 @@
             {% has_fleet_member fleet user as is_member %}
             {% can_join fleet user as can_join_fleet %}
             {% if fleet.fc.discord_user.avatar_url %}
-            <img src="{{ fleet.fc.discord_user.avatar_url }}" alt="" class="circle">
+            <img alt="" class="circle" src="{{ fleet.fc.discord_user.avatar_url }}">
             {% else %}
             <i class="circle material-icons">error</i>
             {% endif %}

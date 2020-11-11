@@ -11,7 +11,7 @@
             <div class="card-content white-text">
           <span class="card-title">
             {% if fleet.fc.discord_avatar_url %}
-            <img src="{{ fleet.fc.discord_avatar_url }}?size=64" alt="" class="circle">
+            <img alt="" class="circle" src="{{ fleet.fc.discord_avatar_url }}?size=64">
             {% else %}
             <i class="circle material-icons">error</i>
             {% endif %}
@@ -90,10 +90,12 @@
                 <div class="collapsible-body">
                     <div class="input-field">
                         <i class="material-icons prefix">share</i>
-                        <input type="text" id="shareurl" value="{{request.build_absolute_uri}}join"> 
+                        <input id="shareurl" type="text" value="{{request.build_absolute_uri}}join">
                         <label for="shareurl">Shareable Fleet Invite Link</label>
                     </div>
-                    <button data-clipboard-target="#shareurl" class="waves-effect waves-light btn" id="share_button">Copy Invite Link</button>
+                    <button class="waves-effect waves-light btn" data-clipboard-target="#shareurl" id="share_button">
+                        Copy Invite Link
+                    </button>
                 </div>
             </li>
         </ul>
@@ -124,18 +126,18 @@
             <tr>
                 {% if forloop.first %}
                 <td rowspan="{{members|length}}">
-                {% if member.has_admin %}
-                    <b>Fleet Admin</b><br/> 
-                {% endif %}
-                {% if member.character.discord_avatar_url %}
-                <img src="{{ member.character.discord_avatar_url }}?size=32" alt=""
-                                                      class="circle">
-                                                      {% endif %}
+                    {% if member.has_admin %}
+                    <b>Fleet Admin</b><br/>
+                    {% endif %}
+                    {% if member.character.discord_avatar_url %}
+                    <img alt="" class="circle"
+                         src="{{ member.character.discord_avatar_url }}?size=32">
+                    {% endif %}
                     {{member.character.discord_username}}
                 </td>
                 {% endif %}
                 <td>
-                {{member.character}}
+                    {{member.character}}
                 </td>
                 <td>
 
@@ -153,8 +155,8 @@
                     {% if admin %}
 
                     {% if member.admin_permissions %}
-                    <a class="orange-text text-darken-2" title="Remove Admin"
-                       href="{% url 'fleet_remove_admin' member.id %}">Remove Admin</a>
+                    <a class="orange-text text-darken-2" href="{% url 'fleet_remove_admin' member.id %}"
+                       title="Remove Admin">Remove Admin</a>
                     {% else %}
                     <a class="orange-text text-darken-2"
                        href="{% url 'fleet_make_admin' member.id %}">Give Admin</a>
@@ -182,8 +184,8 @@
             <tr>
 
                 {% if forloop.first %}
-                <td rowspan="{{bucket.lootgroup_set.all|length|add:"1"}}">
-                    {{bucket.id}}
+                <td rowspan="{{bucket.lootgroup_set.all|length|add:'1'}}">
+                {{bucket.id}}
                 </td>
                 {% endif %}
                 <td>{{lootgroup.fleet_anom.anom_type}} - {{lootgroup.fleet_anom.system}}
@@ -194,11 +196,14 @@
             </tr>
             {% endfor %}
             {% if admin %}
-            <tr><td colspan="2">
+            <tr>
+                <td colspan="2">
                     <a class="waves-effect waves-light btn yellow darken-2"
-                       href="{% url 'loot_group_add' fleet.id bucket.id %}"><i class='material-icons right'>add_circle</i>
+                       href="{% url 'loot_group_add' fleet.id bucket.id %}"><i
+                            class='material-icons right'>add_circle</i>
                         Add Anom To This Bucket</a>
-                        </td></tr>
+                </td>
+            </tr>
             {% endif %}
             {% endfor %}
             {% if admin %}
@@ -225,8 +230,6 @@
 <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
 
 
-
-
 <script>
 var clipboard = new ClipboardJS('.btn');
 
@@ -235,10 +238,8 @@ var clipboard = new ClipboardJS('.btn');
     var instances = M.Collapsible.init(elems);
   });
 
+
 </script>
-
-
-
 
 
 {% endblock %}

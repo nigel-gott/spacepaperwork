@@ -3,10 +3,10 @@
 {% load static %}
 {% block body %}
 <h4>{{title}}</h4>
-Deleting Item: 
-                   <a href="{% url 'item_view' item.id %}">
-                  {{item}}
-                  </a>
+Deleting Item:
+<a href="{% url 'item_view' item.id %}">
+    {{item}}
+</a>
 <div class="divider"></div>
 <div class="section">
     {% if form %}
@@ -33,7 +33,7 @@ Deleting Item:
         <div class="row">
             {{ form.are_you_sure|materializecss:'s12 m12, icon=directions_boat'}}
         </div>
-        <button type="submit" class="btn waves-effect waves-light red" value="Submit">{{title}}
+        <button class="btn waves-effect waves-light red" type="submit" value="Submit">{{title}}
             <i class="material-icons right">send</i>
         </button>
 
@@ -47,7 +47,7 @@ Deleting Item:
 
 {% block extrafooter %}
 
-<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
 
 {{ form.media }}
 <script>
@@ -79,6 +79,7 @@ Deleting Item:
 });
 
 })($)
+
 </script>
 
 {% endblock %}

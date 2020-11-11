@@ -24,40 +24,42 @@
     </div>
     {% endif %}
 
-        <!-- Display Form -->
+    <!-- Display Form -->
     <form action="" method="post">
         {% csrf_token %}
         <div class="row">
 
             <div class="col m2 m2">
-            Discord Username Filter:
+                Discord Username Filter:
             </div>
             <div class="col m10 m10">
-            {{ form.discord_username|materializecss:'s12 m12, icon=user'}}
+                {{ form.discord_username|materializecss:'s12 m12, icon=user'}}
             </div>
-            </div>
+        </div>
         <div class="row">
             <div class="col m2 m2">
-            Character To Add:
+                Character To Add:
             </div>
             <div class="col m10 m10">
-            {{ form.character|materializecss:'s12 m12, icon=user'}}
-        </div>
+                {{ form.character|materializecss:'s12 m12, icon=user'}}
             </div>
+        </div>
         <ul class="collapsible">
             <li>
-                <div class="collapsible-header"><i class="material-icons">add</i>Manual Character Entry: Only use this if you cannot find the character in the dropdowns above.</div>
+                <div class="collapsible-header"><i class="material-icons">add</i>Manual Character Entry: Only use this
+                    if you cannot find the character in the dropdowns above.
+                </div>
                 <div class="collapsible-body">
-        <div class="row">
-            <span class="red-text">You should only use this for non-geese members. If you cannot find a goosefleet member in the dropdowns please let @thejanitor know who is missing in discord.</span>
-            </div>
-        <div class="row">
-            {{ form.manual_character|materializecss:'s12 m6, icon=user'}}
-            {{ form.manual_discord_username|materializecss:'s12 m6, icon=user'}}
-        </div>
-            </div>
+                    <div class="row">
+                        <span class="red-text">You should only use this for non-geese members. If you cannot find a goosefleet member in the dropdowns please let @thejanitor know who is missing in discord.</span>
+                    </div>
+                    <div class="row">
+                        {{ form.manual_character|materializecss:'s12 m6, icon=user'}}
+                        {{ form.manual_discord_username|materializecss:'s12 m6, icon=user'}}
+                    </div>
+                </div>
             </li>
-            </ul>
+        </ul>
         <br/>
         <button type="submit" class="btn waves-effect waves-light" value="Submit">Add Character
             <i class="material-icons right">send</i>
@@ -103,5 +105,6 @@
 });
 
 })($)
+
 </script>
 {% endblock %}

@@ -1,161 +1,189 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
 {% load materializecss %}
-    <h5>{{title}}</h5>
+<h5>{{title}}</h5>
 <div class="section">
-  <ul id="top_level_thingy" class="collapsible">
-    <li id="help_thingy">
-      <div class="collapsible-header"><i class="material-icons">add</i>How To Send Loot to a Seller or Sell it yourself in Goosetools (click this to hide help)</div>
-      <div class="collapsible-body">
-<blockquote>
-<b>If you want someone else to sell your fleet's loot:</b>
-<ol>
-<li> Make sure they are happy to sell your loot, maybe provide them a link to the loot group showing what is waiting to be sold!</li>
-<li> If they are happy then make contract in game to that person in a system they are happy with.</li>
-<li> Then move the items to them in Goosetools by clicking the appropriate contract button on this page (all your items, or just one fleet's worth, or a single item at once). </li>
-<li> Finally they will have to accept or reject the contract in-game and in Goosetools. You can see your contracts pending approval <a href="{% url 'contracts'%}">here</a>.</li>
-</ol>
-Participation will still be tracked and the person receiving the contract will have the responsibility to deposit and transfer eggs. 
-</blockquote>
-<blockquote>
-<b>If you want to sell loot yourself:</b>
-<ol>
-<li> Move all your loot to a good selling hub and make sure you have atleast 5/4/0 accounting skill</li>
-<li> Click the stack all button in Goosetools to group your items to make them easier to sell, participation will still be tracked.</li> 
-<li> Go through all your items below, click sell and indicate what price you have listed the items at and what your market taxes are. Set your default taxes in <a href="{% url 'settings'%}">settings</a>.</li>
-<li> As your items sell go to your <a href="{% url 'orders'%}">market orders</a> page in the Loot Sales dropdown and indicate for each order how many of the item are remaining to be sold. </li>
-<li> If you need to change the price of an order ingame please also update the market order in Goosetools by going to your  <a href="{% url 'orders'%}">market orders</a> and clicking edit on the order. </li>
-<li> For now if you need to cancel a market order PM @thejanitor </li>
-<li> Once some or all of your items have sold finally go to the <a href="{% url 'sold' %}">sold items</a> page in the dropdown. Click deposit and follow the instructions, once the deposit has been approved click approved and then finally click transfer to get the transfer command to split out the loot by participation.</li>
-</ol>
-</blockquote>
-</div>
-</li>
-</ul>
+    <ul class="collapsible" id="top_level_thingy">
+        <li id="help_thingy">
+            <div class="collapsible-header"><i class="material-icons">add</i>How To Send Loot to a Seller or Sell it
+                yourself in Goosetools (click this to hide help)
+            </div>
+            <div class="collapsible-body">
+                <blockquote>
+                    <b>If you want someone else to sell your fleet's loot:</b>
+                    <ol>
+                        <li> Make sure they are happy to sell your loot, maybe provide them a link to the loot group
+                            showing what is waiting to be sold!
+                        </li>
+                        <li> If they are happy then make contract in game to that person in a system they are happy
+                            with.
+                        </li>
+                        <li> Then move the items to them in Goosetools by clicking the appropriate contract button on
+                            this page (all your items, or just one fleet's worth, or a single item at once).
+                        </li>
+                        <li> Finally they will have to accept or reject the contract in-game and in Goosetools. You can
+                            see your contracts pending approval <a href="{% url 'contracts'%}">here</a>.
+                        </li>
+                    </ol>
+                    Participation will still be tracked and the person receiving the contract will have the
+                    responsibility to deposit and transfer eggs.
+                </blockquote>
+                <blockquote>
+                    <b>If you want to sell loot yourself:</b>
+                    <ol>
+                        <li> Move all your loot to a good selling hub and make sure you have atleast 5/4/0 accounting
+                            skill
+                        </li>
+                        <li> Click the stack all button in Goosetools to group your items to make them easier to sell,
+                            participation will still be tracked.
+                        </li>
+                        <li> Go through all your items below, click sell and indicate what price you have listed the
+                            items at and what your market taxes are. Set your default taxes in <a
+                                    href="{% url 'settings'%}">settings</a>.
+                        </li>
+                        <li> As your items sell go to your <a href="{% url 'orders'%}">market orders</a> page in the
+                            Loot Sales dropdown and indicate for each order how many of the item are remaining to be
+                            sold.
+                        </li>
+                        <li> If you need to change the price of an order ingame please also update the market order in
+                            Goosetools by going to your <a href="{% url 'orders'%}">market orders</a> and clicking edit
+                            on the order.
+                        </li>
+                        <li> For now if you need to cancel a market order PM @thejanitor</li>
+                        <li> Once some or all of your items have sold finally go to the <a href="{% url 'sold' %}">sold
+                            items</a> page in the dropdown. Click deposit and follow the instructions, once the deposit
+                            has been approved click approved and then finally click transfer to get the transfer command
+                            to split out the loot by participation.
+                        </li>
+                    </ol>
+                </blockquote>
+            </div>
+        </li>
+    </ul>
 
 </div>
 <div class="divider"></div>
 <div class="row">
-  <div class="col s12 m12">
-    {% if show_contract_all %}
-      <a class="waves-btn btn red" href="{% url 'item_move_all' %}">Contract All Your Items</a>
-      {% endif %}
-    <table>
-      <thead>
-        <th>Location</th>
-        <th>Item</th>
-        <th>Quantity</th>
-        <th>Estimated Profit</th>
-        <th>Actions</th>
-        <th>Sell</th>
-      </thead>
-      <tbody>
-        {% for loc_items in all_items %}
-          {% has_admin loc_items.loc user as has_item_admin %}
+    <div class="col s12 m12">
+        {% if show_contract_all %}
+        <a class="waves-btn btn red" href="{% url 'item_move_all' %}">Contract All Your Items</a>
+        {% endif %}
+        <table>
+            <thead>
+            <th>Location</th>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Estimated Profit</th>
+            <th>Actions</th>
+            <th>Sell</th>
+            </thead>
+            <tbody>
+            {% for loc_items in all_items %}
+            {% has_admin loc_items.loc user as has_item_admin %}
             <tr>
-                <td style="vertical-align: top !important" rowspan="{{loc_items.total_in_loc|add:"3"}}">
+                <td rowspan="{{loc_items.total_in_loc|add:'3'}}" style="vertical-align: top !important">
                 {% if loc_items.loc %}
                 <a href="{% url 'fleet_shares' loc_items.loc.character.discord_user.pk %}">{{loc_items.loc}}</a>
                 {% else %}
                 {{loc_items.loc}}
                 {% endif %}
-      {% if has_item_admin %}
-      <br/>
-      <a class="waves-btn btn green" href="{% url 'stack_items' loc_items.loc.id %}">Stack</a>
-      <br/>
-      <a class="waves-btn btn orange" href="{% url 'sell_all' loc_items.loc.id %}">Sell @ Estimate</a>
-      <br/>
-      <a class="waves-btn btn blue" href="{% url 'contract_items_in_loc' loc_items.loc.id %}">Contract</a>
-      <br/>
-      <a class="waves-btn btn red" href="{% url 'junk_items' loc_items.loc.id %}">Junk Cheap Items</a>
-      {% endif %}
-                </td>
-          </tr>
-          <tr>
-            <td class="center-align" colspan="4">Stacked Items</td>
-          </tr>
-          {% for stack_id, stack in loc_items.stacks.items %}
-          <tr>
-            <td><a href="{% url 'stack_view' stack.stack_id %}">{{stack.item}}</a></td>
-            <td>{{stack.quantity}}</td>
-                <td>
-                {% if stack.stack.estimated_profit %}
-                  {{stack.stack.estimated_profit}}
-                {% else %}
-                Missing Market Data
+                {% if has_item_admin %}
+                <br/>
+                <a class="waves-btn btn green" href="{% url 'stack_items' loc_items.loc.id %}">Stack</a>
+                <br/>
+                <a class="waves-btn btn orange" href="{% url 'sell_all' loc_items.loc.id %}">Sell @ Estimate</a>
+                <br/>
+                <a class="waves-btn btn blue" href="{% url 'contract_items_in_loc' loc_items.loc.id %}">Contract</a>
+                <br/>
+                <a class="waves-btn btn red" href="{% url 'junk_items' loc_items.loc.id %}">Junk Cheap Items</a>
                 {% endif %}
-                </td>
-            <td>
-      {% if has_item_admin %}
-            <a class="btn waves-btn waves-light" href="{% url 'stack_delete' stack.stack_id %}">UnStack</a>
-      {% if stack.stack.can_edit %}
-                <form action="{% url 'junk_stack' stack.stack_id %}" method="POST">
-        {% csrf_token %}
-
-        <button type="submit" class="btn waves-effect waves-light red" value="Submit">Junk
-            <i class="material-icons right">send</i>
-        </button>
-                </form>
-            {% endif %}
-            {% endif %}
-            </td>
-            <td>
-      {% if has_item_admin %}
-            <a class="waves-btn btn green" href="{% url 'stack_sell' stack.stack_id %}">Sell Stack</a>
-            {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-          <tr>
-            <td class="center-align" colspan="4">UnStacked Items</td>
-          </tr>
-          {% for item in loc_items.unstacked %}
-          <tr>
-                <td>
-                    <a href="{% url 'item_view' item.id %}">
-                  {{item.item}}
-                  </a>
-                </td>
-                <td>
-                  {{item.quantity}}
-                </td>
-                <td>
-                {% if item.estimated_profit_sum != 0%}
-                  {{item.estimated_profit_sum|to_isk}}
-                {% else %}
-                  None
-                {% endif %}
-                </td>
-                <td>
-              {% if has_item_admin %}
-      {% if item.can_edit %}
-      <a class="waves-btn btn orange" href="{% url 'item_edit' item.id %}">Edit Item</a>
-      {% endif %}
-      <br/>
-      {% if item.can_sell %}
-      <a class="waves-btn btn green" href="{% url 'item_sell' item.id %}">Sell Item</a>
-      {% endif %}
-      <br/>
-      {% if item.can_edit %}
-      <a class="waves-btn btn red" href="{% url 'item_delete' item.id %}">Delete Item</a>
-      <br/>
-      <a class="waves-btn btn blue" href="{% url 'item_contract' item.id %}">Contract Item</a>
-                <form action="{% url 'junk_item' item.id %}" method="POST">
-        {% csrf_token %}
-
-        <button type="submit" class="btn waves-effect waves-light" value="Submit">Junk
-            <i class="material-icons right">send</i>
-        </button>
-                </form>
-      {% endif %}
-      {% endif %}
                 </td>
             </tr>
-          {% endfor %}
-        {% endfor %}
-      </tbody>
-    </table>
-    </form>
-  </div>
+            <tr>
+                <td class="center-align" colspan="4">Stacked Items</td>
+            </tr>
+            {% for stack_id, stack in loc_items.stacks.items %}
+            <tr>
+                <td><a href="{% url 'stack_view' stack.stack_id %}">{{stack.item}}</a></td>
+                <td>{{stack.quantity}}</td>
+                <td>
+                    {% if stack.stack.estimated_profit %}
+                    {{stack.stack.estimated_profit}}
+                    {% else %}
+                    Missing Market Data
+                    {% endif %}
+                </td>
+                <td>
+                    {% if has_item_admin %}
+                    <a class="btn waves-btn waves-light" href="{% url 'stack_delete' stack.stack_id %}">UnStack</a>
+                    {% if stack.stack.can_edit %}
+                    <form action="{% url 'junk_stack' stack.stack_id %}" method="POST">
+                        {% csrf_token %}
+
+                        <button class="btn waves-effect waves-light red" type="submit" value="Submit">Junk
+                            <i class="material-icons right">send</i>
+                        </button>
+                    </form>
+                    {% endif %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if has_item_admin %}
+                    <a class="waves-btn btn green" href="{% url 'stack_sell' stack.stack_id %}">Sell Stack</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td class="center-align" colspan="4">UnStacked Items</td>
+            </tr>
+            {% for item in loc_items.unstacked %}
+            <tr>
+                <td>
+                    <a href="{% url 'item_view' item.id %}">
+                        {{item.item}}
+                    </a>
+                </td>
+                <td>
+                    {{item.quantity}}
+                </td>
+                <td>
+                    {% if item.estimated_profit_sum != 0%}
+                    {{item.estimated_profit_sum|to_isk}}
+                    {% else %}
+                    None
+                    {% endif %}
+                </td>
+                <td>
+                    {% if has_item_admin %}
+                    {% if item.can_edit %}
+                    <a class="waves-btn btn orange" href="{% url 'item_edit' item.id %}">Edit Item</a>
+                    {% endif %}
+                    <br/>
+                    {% if item.can_sell %}
+                    <a class="waves-btn btn green" href="{% url 'item_sell' item.id %}">Sell Item</a>
+                    {% endif %}
+                    <br/>
+                    {% if item.can_edit %}
+                    <a class="waves-btn btn red" href="{% url 'item_delete' item.id %}">Delete Item</a>
+                    <br/>
+                    <a class="waves-btn btn blue" href="{% url 'item_contract' item.id %}">Contract Item</a>
+                    <form action="{% url 'junk_item' item.id %}" method="POST">
+                        {% csrf_token %}
+
+                        <button class="btn waves-effect waves-light" type="submit" value="Submit">Junk
+                            <i class="material-icons right">send</i>
+                        </button>
+                    </form>
+                    {% endif %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            {% endfor %}
+            </tbody>
+        </table>
+        </form>
+    </div>
 </div>
 
 {% endblock %}
@@ -180,6 +208,7 @@ Participation will still be tracked and the person receiving the contract will h
        instance.open();
    } 
   });
+
 
 </script>
 

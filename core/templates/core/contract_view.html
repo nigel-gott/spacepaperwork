@@ -2,65 +2,65 @@
 {% load materializecss %}
 {% can_accept_reject user contract as can_admin %}
 <div class="row">
-  <div class="col s12 m12">
-    <h5>Contract {{contract.id}}</h5>
-    <p>
-    <b> From: </b> {{contract.from_user}} <br/>
-    <b> To: </b> {{contract.to_char}} <br/>
-    <b> Created At: </b> {{contract.created}} <br/>
-    <b> In System: </b> {{contract.system}} <br/>
-    <b> Status: </b> {{contract.status}} <br/>
-    </p>
-    
-    {% if can_admin %}
-    <form action="{% url 'reject_contract' contract.id %}" method="post">
-        {% csrf_token %}
-         <button type="submit" class="btn waves-effect waves-light red" value="Submit">
-         Reject
-            <i class="material-icons right">send</i>
-        </button>
-    </form>
-    <form action="{% url 'accept_contract' contract.id %}" method="post">
-        {% csrf_token %}
-         <button type="submit" class="btn waves-effect waves-light green" value="Submit">
-          Accept 
-            <i class="material-icons right">send</i>
-        </button>
-    </form>
-    {% endif %}
-    <div class="row">
-    <table>
-      <thead>
-        <th>Item</th>
-        <th>Quantity</th>
-        <th>Item Status</th>
-        <th>Loot Group</th>
-      </thead>
-      <tbody>
-        {% for item in log %}
-            <tr>
-                <td>
-                    <a href="{% url 'item_view' item.id %}">{{item.item}}</a>
-                </td>
-                <td>
-                  {{item.quantity}}
-                </td>
-                <td>
-                  {{item.status}}
-                </td>
-                <td>
-        {% if item.loot_group_id %}
-          <a href="{% url 'loot_group_view' item.loot_group_id %}">Loot Group {{item.loot_group_id}}</a>
-          {% else %}
-          No Loot Group
-          {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    </form>
-  </div>
-</div>
+    <div class="col s12 m12">
+        <h5>Contract {{contract.id}}</h5>
+        <p>
+            <b> From: </b> {{contract.from_user}} <br/>
+            <b> To: </b> {{contract.to_char}} <br/>
+            <b> Created At: </b> {{contract.created}} <br/>
+            <b> In System: </b> {{contract.system}} <br/>
+            <b> Status: </b> {{contract.status}} <br/>
+        </p>
 
-{% endblock %}
+        {% if can_admin %}
+        <form action="{% url 'reject_contract' contract.id %}" method="post">
+            {% csrf_token %}
+            <button class="btn waves-effect waves-light red" type="submit" value="Submit">
+                Reject
+                <i class="material-icons right">send</i>
+            </button>
+        </form>
+        <form action="{% url 'accept_contract' contract.id %}" method="post">
+            {% csrf_token %}
+            <button class="btn waves-effect waves-light green" type="submit" value="Submit">
+                Accept
+                <i class="material-icons right">send</i>
+            </button>
+        </form>
+        {% endif %}
+        <div class="row">
+            <table>
+                <thead>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Item Status</th>
+                <th>Loot Group</th>
+                </thead>
+                <tbody>
+                {% for item in log %}
+                <tr>
+                    <td>
+                        <a href="{% url 'item_view' item.id %}">{{item.item}}</a>
+                    </td>
+                    <td>
+                        {{item.quantity}}
+                    </td>
+                    <td>
+                        {{item.status}}
+                    </td>
+                    <td>
+                        {% if item.loot_group_id %}
+                        <a href="{% url 'loot_group_view' item.loot_group_id %}">Loot Group {{item.loot_group_id}}</a>
+                        {% else %}
+                        No Loot Group
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            </form>
+        </div>
+    </div>
+
+    {% endblock %}

@@ -1,77 +1,80 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
 {% load materializecss %}
 <div class="row">
-  <div class="col s12 m12">
-<div class ="section">
+    <div class="col s12 m12">
+        <div class="section">
 
-    {% if not user.has_pending_deposit and user.can_deposit %}
-        <a class="waves-effect waves-light btn green lighten-2"
-        href="{% url 'deposit_eggs' %}"><i class="material-icons right">info</i>Deposit Participants Isk to Eggs</a>
-    {% endif %}
-    {% if user.has_pending_deposit%}
-        <a class="waves-effect waves-light btn purple lighten-2"
-        href="{% url 'deposit_approved' %}"><i class="material-icons right">info</i>My Egg Deposit Has Been Approved</a>
+            {% if not user.has_pending_deposit and user.can_deposit %}
+            <a class="waves-effect waves-light btn green lighten-2"
+               href="{% url 'deposit_eggs' %}"><i class="material-icons right">info</i>Deposit Participants Isk to Eggs</a>
+            {% endif %}
+            {% if user.has_pending_deposit%}
+            <a class="waves-effect waves-light btn purple lighten-2"
+               href="{% url 'deposit_approved' %}"><i class="material-icons right">info</i>My Egg Deposit Has Been
+                Approved</a>
 
-    {% endif %}
-    {% if user.has_pending_transfers %}
-        <a class="waves-effect waves-light btn blue lighten-2"
-        href="{% url 'transfer_eggs' %}"><i class="material-icons right">info</i>Transfer Eggs To Participants</a>
-    {% endif %}
-</div>
-<div class="divider"></div>
-<div class="section">
-    <h5>Sold Items</h5>
-    <table>
-      <thead>
-        <th>Location</th>
-        <th>Loot Group</th>
-        <th>Item</th>
-        <th>Sold Via</th>
-        <th>Quantity</th>
-        <th>Profit</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </thead>
-      <tbody>
-        {% for loc_items in all_sold %}
-          {% for item in loc_items.sold %}
-            <tr>
-                {% if forloop.first %}
-                <td rowspan="{{loc_items.sold|length}}">
-                {{loc_items.loc}}
-                </td>
-                {% endif %}
-                <td>
-                  {% if item.item.loot_group %}
-                    <a href="{% url 'loot_group_view' item.item.loot_group.id %}">Loot Group {{item.item.loot_group.id}}</a>
-                    {% else %}
-                    No Loot Group
+            {% endif %}
+            {% if user.has_pending_transfers %}
+            <a class="waves-effect waves-light btn blue lighten-2"
+               href="{% url 'transfer_eggs' %}"><i class="material-icons right">info</i>Transfer Eggs To
+                Participants</a>
+            {% endif %}
+        </div>
+        <div class="divider"></div>
+        <div class="section">
+            <h5>Sold Items</h5>
+            <table>
+                <thead>
+                <th>Location</th>
+                <th>Loot Group</th>
+                <th>Item</th>
+                <th>Sold Via</th>
+                <th>Quantity</th>
+                <th>Profit</th>
+                <th>Status</th>
+                <th>Actions</th>
+                </thead>
+                <tbody>
+                {% for loc_items in all_sold %}
+                {% for item in loc_items.sold %}
+                <tr>
+                    {% if forloop.first %}
+                    <td rowspan="{{loc_items.sold|length}}">
+                        {{loc_items.loc}}
+                    </td>
                     {% endif %}
-                </td>
-                <td>
-                  <a href="{% url 'item_view' item.item.id %}">{{item.item}}</a>
-                </td>
-                <td>
-                  {{item.sold_via}}
-                </td>
-                <td>
-                  {{item.quantity}}
-                </td>
-                <td>
-                  {{item.item.isk_and_eggs_balance}}
-                </td>
-                <td>
-                  {{item.status}}
-                </td>
-                <td>
-                </td>
-            </tr>
-          {% endfor %}
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
+                    <td>
+                        {% if item.item.loot_group %}
+                        <a href="{% url 'loot_group_view' item.item.loot_group.id %}">Loot Group
+                            {{item.item.loot_group.id}}</a>
+                        {% else %}
+                        No Loot Group
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'item_view' item.item.id %}">{{item.item}}</a>
+                    </td>
+                    <td>
+                        {{item.sold_via}}
+                    </td>
+                    <td>
+                        {{item.quantity}}
+                    </td>
+                    <td>
+                        {{item.item.isk_and_eggs_balance}}
+                    </td>
+                    <td>
+                        {{item.status}}
+                    </td>
+                    <td>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 

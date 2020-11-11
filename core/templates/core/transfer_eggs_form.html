@@ -2,10 +2,12 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<h4>{{title}}</h4> 
-<div class ="section">
+<h4>{{title}}</h4>
+<div class="section">
 
-<b class="green-text"> Please send the command below to the <a href="https://discord.com/channels/747575380436713583/754139786679156807/764900253358227506">#general-bot-spam</a> channel on GooseFleet discord. </b>
+    <b class="green-text"> Please send the command below to the <a
+            href="https://discord.com/channels/747575380436713583/754139786679156807/764900253358227506">#general-bot-spam</a>
+        channel on GooseFleet discord. </b>
 </div>
 <div class="divider"></div>
 <div class="section">
@@ -33,11 +35,12 @@
         {% csrf_token %}
         <div class="row">
             <blockquote>
-            {{ command|linebreaks}}
+                {{ command|linebreaks}}
             </blockquote>
         </div>
         <br/>
-        <button type="submit" class="btn waves-effect waves-light" value="Submit">I have sent the transfer command in Discord.
+        <button class="btn waves-effect waves-light" type="submit" value="Submit">I have sent the transfer command in
+            Discord.
             <i class="material-icons right">send</i>
         </button>
     </form>
@@ -48,7 +51,7 @@
 <div class="section">
     <h5>Breakdown of Split</h5>
     <table>
-      <thead>
+        <thead>
         <th>Item</th>
         <th>Discord Username</th>
         <th>Shares</th>
@@ -56,43 +59,43 @@
         <th>Share Isk</th>
         <th>Cut Isk</th>
         <th>Total Isk</th>
-      </thead>
-      <tbody>
+        </thead>
+        <tbody>
         {% for item_id, item_details in explaination.items %}
-          {% for discord_username, details in item_details.participation.items %}
-            <tr>
-                {% if forloop.first %}
-                <td rowspan="{{item_details.participation.values|length}}">
-                    <a href="{% url 'item_view' item_id %}">{{item_details.item}}</a><br/>
-                    Total Profit: {{item_details.total_isk}}<br/>
-                    Total Shares: {{item_details.total_shares}}<br/>
-                    Total Flat Cuts: {{item_details.total_flat_cuts}}%
-                </td>
-                {% endif %}
-                <td>
+        {% for discord_username, details in item_details.participation.items %}
+        <tr>
+            {% if forloop.first %}
+            <td rowspan="{{item_details.participation.values|length}}">
+                <a href="{% url 'item_view' item_id %}">{{item_details.item}}</a><br/>
+                Total Profit: {{item_details.total_isk}}<br/>
+                Total Shares: {{item_details.total_shares}}<br/>
+                Total Flat Cuts: {{item_details.total_flat_cuts}}%
+            </td>
+            {% endif %}
+            <td>
                 {{discord_username}}
-                </td>
-                <td>
+            </td>
+            <td>
                 {{details.shares}}/{{item_details.total_shares}}
-                </td>
-                <td>
+            </td>
+            <td>
                 {{details.flat_cut}}%
-                </td>
-                <td>
+            </td>
+            <td>
                 {{details.share_isk}}
-                </td>
-                <td>
+            </td>
+            <td>
                 {{details.flat_cut_isk}}
-                </td>
-                <td>
+            </td>
+            <td>
                 {{details.total_isk}}
-                </td>
-            </tr>
-            {% endfor %}
+            </td>
+        </tr>
         {% endfor %}
-            
+        {% endfor %}
+
         </tbody>
-        </table>
+    </table>
 
 </div>
 

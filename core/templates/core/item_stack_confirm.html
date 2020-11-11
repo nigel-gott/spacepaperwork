@@ -1,56 +1,57 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
 {% load materializecss %}
-    <h5>{{title}}</h5>
+<h5>{{title}}</h5>
 <div class="row">
-  <div class="col s12 m12">
-        <form action="" method="post" class="col s12">
+    <div class="col s12 m12">
+        <form action="" class="col s12" method="post">
             {% csrf_token %}
-            <button type="submit" class="btn waves-effect waves-light green" value="Submit">Confirm Stacking of Below Items:
+            <button class="btn waves-effect waves-light green" type="submit" value="Submit">Confirm Stacking of Below
+                Items:
                 <i class="material-icons right">send</i>
             </button>
         </form>
-  </div>
-  <div class="col s12 m12">
-    <table>
-      <thead>
-        <th>Location</th>
-        <th>Item</th>
-        <th>Quantity</th>
-        <th>Action</th>
-      </thead>
-      <tbody>
+    </div>
+    <div class="col s12 m12">
+        <table>
+            <thead>
+            <th>Location</th>
+            <th>Item</th>
+            <th>Quantity</th>
+            <th>Action</th>
+            </thead>
+            <tbody>
             <tr>
-                <td rowspan="{{items.total_in_loc|add:"2"}}">
+                <td rowspan="{{items.total_in_loc|add:'2'}}">
                 {{items.loc}}
                 </td>
-            <td colspan="3">Stacked Items:</td>
-          </tr>
-          {% for stack_id, stack in items.stacks.items %}
-          <tr>
-            <td>{{stack.item}}</td>
-            <td>{{stack.quantity}}</td>
-            <td>{{stack.stack_id}}</td>
-          </tr>
-          {% endfor %}
-          <tr>
-            <td colspan="3">UnStacked Items:</td>
-          </tr>
-          {% for item in items.unstacked %}
-          <tr>
+                <td colspan="3">Stacked Items:</td>
+            </tr>
+            {% for stack_id, stack in items.stacks.items %}
+            <tr>
+                <td>{{stack.item}}</td>
+                <td>{{stack.quantity}}</td>
+                <td>{{stack.stack_id}}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td colspan="3">UnStacked Items:</td>
+            </tr>
+            {% for item in items.unstacked %}
+            <tr>
                 <td>
                     <a href="{% url 'item_view' item.id %}">
-                  {{item.item}}
-                  </a>
+                        {{item.item}}
+                    </a>
                 </td>
                 <td>
-                  {{item.quantity}}
+                    {{item.quantity}}
                 </td>
             </tr>
-          {% endfor %}
-      </tbody>
-    </table>
-    </form>
-  </div>
+            {% endfor %}
+            </tbody>
+        </table>
+        </form>
+    </div>
 </div>
 
 {% endblock %}

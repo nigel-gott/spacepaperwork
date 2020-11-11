@@ -1,72 +1,73 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
 {% load materializecss %}
 <div class="row">
-  <div class="col s12 m12">
+    <div class="col s12 m12">
 
-<div class="divider"></div>
-<div class="section">
-    <table>
-      <thead>
-        <th>Location</th>
-        <th>Loot Group</th>
-        <th>Item</th>
-        <th>Sold Via</th>
-        <th>Quantity</th>
-        <th>Profit</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </thead>
-      <tbody>
-        {% for loc_items in all_sold %}
-          {% for item in loc_items.done %}
-            <tr>
-                {% if forloop.first %}
-                <td rowspan="{{loc_items.done|length}}">
-                {{loc_items.loc}}
-                </td>
-                {% endif %}
-                <td>
-                  {% if item.item.loot_group %}
-                    <a href="{% url 'loot_group_view' item.item.loot_group.id %}">Loot Group {{item.item.loot_group.id}}</a>
-                    {% else %}
-                    No Loot Group
+        <div class="divider"></div>
+        <div class="section">
+            <table>
+                <thead>
+                <th>Location</th>
+                <th>Loot Group</th>
+                <th>Item</th>
+                <th>Sold Via</th>
+                <th>Quantity</th>
+                <th>Profit</th>
+                <th>Status</th>
+                <th>Actions</th>
+                </thead>
+                <tbody>
+                {% for loc_items in all_sold %}
+                {% for item in loc_items.done %}
+                <tr>
+                    {% if forloop.first %}
+                    <td rowspan="{{loc_items.done|length}}">
+                        {{loc_items.loc}}
+                    </td>
                     {% endif %}
-                </td>
-                <td>
-                  <a href="{% url 'item_view' item.item.id %}">{{item.item}}</a>
-                </td>
-                <td>
-                  {{item.sold_via}}
-                </td>
-                <td>
-                  {{item.quantity}}
-                </td>
-                <td>
-                  {{item.item.isk_and_eggs_balance}}
-                </td>
-                <td>
-                  {% if item.transfered_to_participants %}
-                  Transfered to participants, all done!
-                  {% elif item.deposited_into_eggs %}
-                  {% if item.deposit_approved %}
-                  Egg Deposit Approved, pending transfer to participants.
-                  {% else %}
-                  Deposited into eggs. Awaiting Confirmation of Deposit.
-                  {% endif %}
-                  {% else %}
-                  Awaiting Egg deposit.
-                  {% endif %}
-                </td>
-                <td>
-                </td>
-                <td></td>
-            </tr>
-          {% endfor %}
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
+                    <td>
+                        {% if item.item.loot_group %}
+                        <a href="{% url 'loot_group_view' item.item.loot_group.id %}">Loot Group
+                            {{item.item.loot_group.id}}</a>
+                        {% else %}
+                        No Loot Group
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'item_view' item.item.id %}">{{item.item}}</a>
+                    </td>
+                    <td>
+                        {{item.sold_via}}
+                    </td>
+                    <td>
+                        {{item.quantity}}
+                    </td>
+                    <td>
+                        {{item.item.isk_and_eggs_balance}}
+                    </td>
+                    <td>
+                        {% if item.transfered_to_participants %}
+                        Transfered to participants, all done!
+                        {% elif item.deposited_into_eggs %}
+                        {% if item.deposit_approved %}
+                        Egg Deposit Approved, pending transfer to participants.
+                        {% else %}
+                        Deposited into eggs. Awaiting Confirmation of Deposit.
+                        {% endif %}
+                        {% else %}
+                        Awaiting Egg deposit.
+                        {% endif %}
+                    </td>
+                    <td>
+                    </td>
+                    <td></td>
+                </tr>
+                {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 {% endblock %}

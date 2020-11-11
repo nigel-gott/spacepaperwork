@@ -2,11 +2,13 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<h4>{{title}}</h4> 
-<div class ="section">
+<h4>{{title}}</h4>
+<div class="section">
 
-<b class="green-text">Has your deposit of {{total}} for {{count}} sold items been approved? Use the $balance command in the
-<a href="https://discord.com/channels/747575380436713583/754139786679156807/764900253358227506">#general-bot-spam</a> channel on GooseFleet discord to check if it has been added to your balance.. </b>
+    <b class="green-text">Has your deposit of {{total}} for {{count}} sold items been approved? Use the $balance command
+        in the
+        <a href="https://discord.com/channels/747575380436713583/754139786679156807/764900253358227506">#general-bot-spam</a>
+        channel on GooseFleet discord to check if it has been added to your balance.. </b>
 </div>
 <div class="divider"></div>
 <div class="section">
@@ -32,7 +34,8 @@
     <form action="" method="post">
         {% csrf_token %}
         <br/>
-        <button type="submit" class="btn waves-effect waves-light" value="Submit">Yes my deposit has been approved and now appears in my egg balance.
+        <button class="btn waves-effect waves-light" type="submit" value="Submit">Yes my deposit has been approved and
+            now appears in my egg balance.
             <i class="material-icons right">send</i>
         </button>
     </form>
