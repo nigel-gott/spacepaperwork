@@ -181,10 +181,12 @@
                         <span class="card-title">Bucket {{ bucket.id }}</span>
                     </div>
                     <div class="col s12 m6 right-align">
+                        {% if admin %}
                         <a class="btn "
                            href="{% url 'loot_group_add' fleet.id bucket.id %}"><i
                                 class='material-icons right'>add_circle</i>
                             Add Anom</a>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -199,12 +201,14 @@
         </div>
         {% endfor %}
 
+        {% if admin %}
         <div class="right-align">
             <a class="waves-effect waves-light btn deep-orange lighten-2"
                href="{% url 'loot_group_create' fleet.id %}"><i class='material-icons right'>add_circle</i>Add
 
                 Bucket</a>
         </div>
+        {% endif %}
 
     </div>
 
@@ -219,12 +223,12 @@
 
 
 <script>
-var clipboard = new ClipboardJS('.btn');
+    var clipboard = new ClipboardJS('.btn');
 
-  document.addEventListener('DOMContentLoaded', function() {
-    var elems = document.querySelectorAll('.collapsible');
-    var instances = M.Collapsible.init(elems);
-  });
+    document.addEventListener('DOMContentLoaded', function () {
+        var elems = document.querySelectorAll('.collapsible');
+        var instances = M.Collapsible.init(elems);
+    });
 
 
 </script>
