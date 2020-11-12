@@ -50,7 +50,7 @@ class DiscordUser(models.Model):
         return self.avatar_hash and self.uid and not self.has_default_avatar()
 
     def _construct_avatar_url(self):
-        if self.has_default_avatar:
+        if self.has_default_avatar():
             avatar_number = int(self.username.split('#')[1]) % 5
             return f"https://cdn.discordapp.com/embed/avatars/{avatar_number}.png"
         return f"https://cdn.discordapp.com/avatars/{self.uid}/{self.avatar_hash}.png"
