@@ -39,7 +39,7 @@ class DiscordUser(models.Model):
     unknown = models.BooleanField(default=False)
 
     def avatar_url(self) -> Union[bool, str]:
-        return self.has_custom_avatar() and self._construct_avatar_url()
+        return self._construct_avatar_url()
 
     # default avatars look like this: https://cdn.discordapp.com/embed/avatars/3.png
     # there is a bug with discord's size selecting mechanism for these, doing 3.png?size=16 still returns a full size default avatar.
@@ -50,6 +50,9 @@ class DiscordUser(models.Model):
         return self.avatar_hash and self.uid and not self.has_default_avatar()
 
     def _construct_avatar_url(self):
+        if self.has_default_avatar:
+            avatar_number = int(self.username.split('#')[1]) % 5
+            return f"https://cdn.discordapp.com/embed/avatars/{avatar_number}.png"
         return f"https://cdn.discordapp.com/avatars/{self.uid}/{self.avatar_hash}.png"
 
     def __str__(self):
@@ -219,7 +222,7 @@ class System(models.Model):
     security = models.TextField()
 
     def __str__(self):
-        return f"{self.name} ({self.region} , {self.security})"
+        return f"{self.name} ({self.region})"
 
 
 class FleetType(models.Model):
