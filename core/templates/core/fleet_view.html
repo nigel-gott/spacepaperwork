@@ -11,7 +11,7 @@
             <div class="card-content white-text">
           <span class="card-title">
             {% if fleet.fc.discord_avatar_url %}
-            <img alt="" class="circle" src="{{ fleet.fc.discord_avatar_url }}?size=64">
+            <img alt="" class="avatar" src="{{ fleet.fc.discord_avatar_url }}?size=64" style="width: 64px">
             {% else %}
             <i class="circle material-icons">error</i>
             {% endif %}
@@ -130,8 +130,8 @@
                     <b>Fleet Admin</b><br/>
                     {% endif %}
                     {% if member.character.discord_avatar_url %}
-                    <img alt="" class="circle"
-                         src="{{ member.character.discord_avatar_url }}?size=32">
+                    <img alt="" class="avatar"
+                         src="{{ member.character.discord_avatar_url }}?size=32" style="width: 32px">
                     {% endif %}
                     {{member.character.discord_username}}
                 </td>
@@ -192,9 +192,19 @@
 
                 <div class="collection">
                     {% for lootgroup in bucket.lootgroup_set.all %}
+                    {% has_share lootgroup user as has_share_already %}
+                    {% if has_share_already %}
+                    <a title="You have shares in this loot group" href="{% url 'loot_group_view' lootgroup.id %}" class="collection-item">
+                        <span class="badge">
+                            <img class="avatar" src="{{ user.discord_user.avatar_url }}?size=16" style="width: 16px"/>
+                        </span>
+                        {{lootgroup.fleet_anom.anom_type}} - {{lootgroup.fleet_anom.system}}
+                    </a>
+                    {% else %}
                     <a href="{% url 'loot_group_view' lootgroup.id %}" class="collection-item">
                         {{lootgroup.fleet_anom.anom_type}} - {{lootgroup.fleet_anom.system}}
                     </a>
+                    {% endif %}
                     {% endfor %}
                 </div>
             </div>

@@ -162,8 +162,8 @@
                     {% if forloop.first %}
                     <td rowspan="{{loot_shares|length}}">
                         {% if share.character.discord_avatar_url %}
-                        <img alt="" class="circle"
-                             src="{{ share.character.discord_avatar_url }}?size=32">
+                        <img alt="" class="avatar"
+                             src="{{ share.character.discord_avatar_url }}?size=32" style="width: 32px">
                         {% endif %}
                         {{share.character.discord_username}}
                     </td>

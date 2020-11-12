@@ -18,7 +18,7 @@
             {% has_fleet_member fleet user as is_member %}
             {% can_join fleet user as can_join_fleet %}
             {% if fleet.fc.discord_user.avatar_url %}
-            <img alt="" class="circle" src="{{ fleet.fc.discord_user.avatar_url }}">
+            <img alt="" class="avatar" src="{{ fleet.fc.discord_user.avatar_url }}">
             {% else %}
             <i class="circle material-icons">error</i>
             {% endif %}
