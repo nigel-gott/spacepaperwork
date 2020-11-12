@@ -210,13 +210,17 @@ class LootGroupForm(forms.Form):
             (10, 10),
         ],
         required=False,
-        initial=6
+        initial=6,
     )
-    anom_type = forms.ChoiceField(choices=ItemFilterGroup.TYPE_CHOICES, required=False, initial='Inquisitor')
-    anom_faction = forms.ChoiceField(choices=ItemFilterGroup.FACTIONS, required=False, initial='Serpentis')
+    anom_type = forms.ChoiceField(
+        choices=ItemFilterGroup.TYPE_CHOICES, required=False, initial="Inquisitor"
+    )
+    anom_faction = forms.ChoiceField(
+        choices=ItemFilterGroup.FACTIONS, required=False, initial="Serpentis"
+    )
     anom_system = forms.ModelChoiceField(
         queryset=System.objects.all(),
-        initial='98Q-8O',
+        initial="98Q-8O",
         widget=autocomplete.ModelSelect2(url="system-autocomplete"),
     )
 
@@ -334,8 +338,13 @@ class EditOrderPriceForm(forms.Form):
         max_digits=5, decimal_places=2, label="Broker Fee %"
     )
 
+
 class JunkItemsForm(forms.Form):
-    max_price = forms.DecimalField(max_digits=20, decimal_places=2, help_text="Items with an estimated price under this value will be moved to the junked items page where you can unjunk them afterwards if so desired.")
+    max_price = forms.DecimalField(
+        max_digits=20,
+        decimal_places=2,
+        help_text="Items with an estimated price under this value will be moved to the junked items page where you can unjunk them afterwards if so desired.",
+    )
 
 
 class SellItemForm(forms.Form):

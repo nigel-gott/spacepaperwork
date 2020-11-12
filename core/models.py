@@ -360,7 +360,7 @@ class Fleet(models.Model):
             return f"Starts in {human_delta}"
         else:
             return f"Started {human_delta} ago"
-    
+
     def auto_end(self):
         now = timezone.now()
         if not self.end:
@@ -829,7 +829,6 @@ class LootGroup(models.Model):
 
     def fleet(self):
         return self.fleet_anom.fleet
-    
 
     def has_admin(self, user):
         return self.fleet().has_admin(user)
@@ -921,11 +920,11 @@ class StackedInventoryItem(models.Model):
             return self.inventoryitem_set.first()
         else:
             return False
-    
+
     def junk(self):
         for item in self.inventoryitem_set.all():
             item.junk()
-    
+
     def unjunk(self):
         for item in self.inventoryitem_set.all():
             item.junkeditem.unjunk()
@@ -1129,7 +1128,8 @@ class InventoryItem(models.Model):
     def estimated_profit(self):
         lowest_sell = self.item.lowest_sell()
         return lowest_sell and to_isk(
-            (self.quantity + self.order_quantity() + self.junked_quantity()) * lowest_sell
+            (self.quantity + self.order_quantity() + self.junked_quantity())
+            * lowest_sell
         )
 
     def status(self):

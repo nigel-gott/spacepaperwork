@@ -6,13 +6,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0071_fleet_loottype'),
+        ("core", "0071_fleet_loottype"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='contract',
-            name='status',
-            field=models.TextField(choices=[('pending', 'pending'), ('rejected', 'rejected'), ('accepted', 'accepted'), ('cancelled', 'cancelled')]),
+            model_name="contract",
+            name="status",
+            field=models.TextField(
+                choices=[
+                    ("pending", "pending"),
+                    ("rejected", "rejected"),
+                    ("accepted", "accepted"),
+                    ("cancelled", "cancelled"),
+                ]
+            ),
         ),
     ]

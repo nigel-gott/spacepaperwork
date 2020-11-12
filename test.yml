@@ -1,0 +1,32 @@
+version: '3'
+
+# Test version of local.yml without volumes as we don't want to persist the test database between runs and using a different django port not to clash.
+
+services:
+  django:
+    build:
+      context: .
+      dockerfile: ./compose/local/django/Dockerfile
+    image: goosetools_local_django
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    # ports:
+    #   - "9000:8000"
+    command: /start
+
+  postgres:
+    image: postgres:12
+    env_file:
+      - ./.envs/.local/.postgres
+    
+  firefox:
+    image: selenium/standalone-firefox:4.0.0-alpha-7-prerelease-20201009
+    volumes:
+      - /dev/shm:/dev/shm
+    # ports:
+    #   - "4444:4444"

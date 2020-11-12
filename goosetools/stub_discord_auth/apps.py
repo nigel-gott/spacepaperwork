@@ -10,7 +10,7 @@ class StubDiscordAuthConfig(AppConfig):
         from allauth.socialaccount.providers.discord.views import DiscordOAuth2Adapter
 
         DiscordOAuth2Adapter.access_token_url = self.get_url("access_token_url")
-        DiscordOAuth2Adapter.authorize_url = self.get_url("authorize_url")
+        DiscordOAuth2Adapter.authorize_url = reverse("authorize_url")
         DiscordOAuth2Adapter.profile_url = self.get_url("profile_url")
 
     def get_url(self, url):

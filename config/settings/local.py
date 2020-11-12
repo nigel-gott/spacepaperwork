@@ -9,7 +9,7 @@ INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
-ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "django"]
 
 GRAPH_MODELS = {
     "all_applications": True,
