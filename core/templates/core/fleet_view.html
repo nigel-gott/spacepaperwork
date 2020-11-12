@@ -171,53 +171,45 @@
     </div>
     <div class="col s12 m6">
         <h5>Loot Buckets</h5>
-        <p><i>Loot and Participation between Anoms in the same Loot Bucket are shared.</i></p>
-        <table>
-            <thead>
-            <th>Bucket</th>
-            <th>Anom</th>
-            <th>Actions</th>
-            </thead>
-            <tbody>
-            {% for bucket in loot_buckets %}
-            {% for lootgroup in bucket.lootgroup_set.all %}
-            <tr>
+        <p><i>Loot and Participation between Anoms in the same Loot Bucket are shared</i></p>
 
-                {% if forloop.first %}
-                <td rowspan="{{bucket.lootgroup_set.all|length|add:'1'}}">
-                {{bucket.id}}
-                </td>
-                {% endif %}
-                <td>{{lootgroup.fleet_anom.anom_type}} - {{lootgroup.fleet_anom.system}}
-                </td>
-                <td>
-                    <a href="{% url 'loot_group_view' lootgroup.id %}"><i class='material-icons right'>info</i>View Loot</a>
-                </td>
-            </tr>
-            {% endfor %}
-            {% if admin %}
-            <tr>
-                <td colspan="2">
-                    <a class="waves-effect waves-light btn yellow darken-2"
-                       href="{% url 'loot_group_add' fleet.id bucket.id %}"><i
-                            class='material-icons right'>add_circle</i>
-                        Add Anom To This Bucket</a>
-                </td>
-            </tr>
-            {% endif %}
-            {% endfor %}
-            {% if admin %}
-            <tr>
-                <td colspan="3">
-                    <a class="waves-effect waves-light btn deep-orange lighten-2"
-                       href="{% url 'loot_group_create' fleet.id %}"><i class='material-icons right'>add_circle</i>New
-                        Loot
-                        Bucket</a>
-                </td>
-            </tr>
-            {% endif %}
-            </tbody>
-        </table>
+        {% for bucket in loot_buckets %}
+        <div class="card">
+            <div class="card-content">
+                <div class="row">
+                    <div class="col s12 m6">
+                        <span class="card-title">Bucket {{ bucket.id }}</span>
+                    </div>
+                    <div class="col s12 m6 right-align">
+                        {% if admin %}
+                        <a class="btn "
+                           href="{% url 'loot_group_add' fleet.id bucket.id %}"><i
+                                class='material-icons right'>add_circle</i>
+                            Add Anom</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="collection">
+                    {% for lootgroup in bucket.lootgroup_set.all %}
+                    <a href="{% url 'loot_group_view' lootgroup.id %}" class="collection-item">
+                        {{lootgroup.fleet_anom.anom_type}} - {{lootgroup.fleet_anom.system}}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if admin %}
+        <div class="right-align">
+            <a class="waves-effect waves-light btn deep-orange lighten-2"
+               href="{% url 'loot_group_create' fleet.id %}"><i class='material-icons right'>add_circle</i>Add
+
+                Bucket</a>
+        </div>
+        {% endif %}
+
     </div>
 
 </div>
@@ -231,12 +223,12 @@
 
 
 <script>
-var clipboard = new ClipboardJS('.btn');
+    var clipboard = new ClipboardJS('.btn');
 
-  document.addEventListener('DOMContentLoaded', function() {
-    var elems = document.querySelectorAll('.collapsible');
-    var instances = M.Collapsible.init(elems);
-  });
+    document.addEventListener('DOMContentLoaded', function () {
+        var elems = document.querySelectorAll('.collapsible');
+        var instances = M.Collapsible.init(elems);
+    });
 
 
 </script>
