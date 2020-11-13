@@ -14,7 +14,7 @@
             <h5>{{header}}</h5>
         </li>
         {% for fleet in fleets %}
-        <li class="collection-item avatar">
+        <li class="collection-item">
             {% has_fleet_member fleet user as is_member %}
             {% can_join fleet user as can_join_fleet %}
             {% if fleet.fc.discord_user.avatar_url %}
