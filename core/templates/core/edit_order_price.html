@@ -70,12 +70,18 @@ For Existing Market Order:
 
 function calc_fee(){
     new_price_str = $("#id_new_price").val();
-    if (new_price_str){
+    broker_fee_str = $("#id_broker_fee").val();
+    if (new_price_str && broker_fee_str){
 
         new_price = new Decimal(new_price_str);
         
         const order_data = JSON.parse(document.getElementById('order-data').textContent);
-        broker_fee = new Decimal(order_data['broker_fee']).dividedBy(100);
+        broker_fee = new Decimal(broker_fee_str).dividedBy(100);
+        if(broker_fee.lessThan(0) || broker_fee.greaterThan(1)){
+            $("#fee_display").text("You must enter a valid broker fee between 0 and 100.");
+            $("#submit_btn").prop('disabled', true)
+            return
+        }
         old_price = new Decimal(order_data['old_price']);
         quantity = new Decimal(order_data['quantity']);
 
@@ -103,6 +109,7 @@ function calc_fee(){
 (function($) {
 
     $("#id_new_price").on("change paste keyup", calc_fee);
+    $("#id_broker_fee").on("change paste keyup", calc_fee);
     calc_fee();
 
 })($)
