@@ -2282,7 +2282,7 @@ def valid_transfer(to_transfer, request):
 
     for sold_item in to_transfer:
         total_isk = sold_item.item.isk_and_eggs_balance()
-        if total_isk.amount <= 0:
+        if total_isk.amount < 0:
             error_message = (
                 "You are trying to transfer an item which has made a negative profit, something has probably gone wrong please PM @thejanitor immediately."
                 + f"<br/> *  <a href='{reverse('item_view', args=[sold_item.item.pk])}'>{sold_item}</a> "
