@@ -9,6 +9,42 @@
     <b>At:</b> {{log.time}}<br/>
     <b>Number of Items worth of Profit Transfered:</b> {{log.count}}<br/>
     <b>Total isk Transfered:</b> {{log.total}}<br/>
+</div>
+<div class="section">
+    {% if not log.legacy_transfer %}
+    <h5>Commands</h5>
+        {% if not log.all_done %}
+            <form action="{% url 'mark_transfer_as_done' log.id %}" method="POST">
+                {% csrf_token %}
+                <button class="waves-effect waves-light btn" type="submit">Mark Deposit and Transfer As All Done</button>
+            </form>
+            <br/>
+            <b class="green-text"> Please send the command below to the <a
+                href="https://discord.com/channels/747575380436713583/754139786679156807/764900253358227506">#general-bot-spam</a>
+            channel on GooseFleet discord. </b>
+            <br/>
+        {% else %}
+            <b class="red-text"> Commands Already Sent </b>
+            <br/>
+        {% endif %}
+
+        {% if log.own_share_in_eggs %}
+            First Deposit {{log.egg_deposit_amount}} which includes {{log.safe_own_share}} of your own share and {{log.other_peoples_share}} of other peoples share: 
+            <blockquote>
+                {{log.deposit_command|linebreaks}}
+            </blockquote>
+        {% else %}
+            First Deposit {{log.egg_deposit_amount}} which is entirely other peoples share's (you have opted to keep your share of {{log.own_share}} in ISK and not deposit it into eggs):
+            <blockquote>
+                {{log.deposit_command|linebreaks}}
+            </blockquote>
+        {% endif %}
+        Then transfer the deposited eggs to the participants:
+        <blockquote>
+            {{log.transfer_command|linebreaks}}
+        </blockquote>
+        Finally click the "Mark Deposit and Transfer As All Done" button above
+    {% endif %}
 
 </div>
 <div class="divider"></div>

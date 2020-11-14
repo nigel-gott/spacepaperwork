@@ -1,0 +1,36 @@
+{% extends "core/base.html" %} {% load base_extras %} {% block body %}
+{% load materializecss %}
+<div class="row">
+    <div class="col s12 m12">
+        <h5>Completed Egg Transfers</h5>
+        <table>
+            <thead>
+            <th>Time</th>
+            <th>Transfer</th>
+            <th>Count</th>
+            <th>Total Eggs</th>
+            </thead>
+            <tbody>
+            {% for transfer_log in transfer_logs %}
+            <tr>
+                <td>
+                    {{transfer_log.time}}
+                </td>
+                <td>
+                    <a href="{% url 'view_transfer_log' transfer_log.id %}">View Transfer Details</a>
+                </td>
+                <td>
+                    {{transfer_log.count}}
+                </td>
+                <td>
+                    {{transfer_log.total}}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+{% endblock %}

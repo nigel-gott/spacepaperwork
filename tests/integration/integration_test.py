@@ -3,7 +3,6 @@ import requests
 from splinter import Browser
 
 
-
 def snapshot(browser, name):
     working_dir = Path().absolute()
     snapshot_path = working_dir / "misc_data" / f"{name}.html"

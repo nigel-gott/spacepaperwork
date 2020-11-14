@@ -51,7 +51,7 @@ class DiscordUser(models.Model):
 
     def _construct_avatar_url(self):
         if self.has_default_avatar():
-            avatar_number = int(self.username.split('#')[1]) % 5
+            avatar_number = int(self.username.split("#")[1]) % 5
             return f"https://cdn.discordapp.com/embed/avatars/{avatar_number}.png"
         return f"https://cdn.discordapp.com/avatars/{self.uid}/{self.avatar_hash}.png"
 
@@ -140,32 +140,10 @@ class GooseUser(AbstractUser):
         return (
             SoldItem.objects.filter(
                 item__location__character_location__character__discord_user=self.discord_user,
-                deposited_into_eggs=False,
-                deposit_approved=False,
+                transfered=False,
             ).count()
             > 0
         )
-
-    def pending_deposits(self):
-        return SoldItem.objects.filter(
-            item__location__character_location__character__discord_user=self.discord_user,
-            deposited_into_eggs=True,
-            deposit_approved=False,
-        )
-
-    def pending_transfers(self):
-        return SoldItem.objects.filter(
-            item__location__character_location__character__discord_user=self.discord_user,
-            deposited_into_eggs=True,
-            deposit_approved=True,
-            transfered_to_participants=False,
-        )
-
-    def has_pending_deposit(self):
-        return self.pending_deposits().count() > 0
-
-    def has_pending_transfers(self):
-        return self.pending_transfers().count() > 0
 
     def isk_transactions(self):
         return IskTransaction.objects.filter(
@@ -1190,6 +1168,7 @@ class IskTransaction(models.Model):
             ),
             ("external_market_gross_profit", "InGame Market Gross Profit"),
             ("egg_deposit", "Egg Deposit"),
+            ("fractional_remains", "Fractional Remains"),
             ("buyback", "Buy Back"),
         ]
     )
@@ -1275,6 +1254,29 @@ class TransferLog(models.Model):
     explaination = models.JSONField()
     count = models.PositiveIntegerField()
     total = MoneyField(max_digits=20, decimal_places=2, default_currency="EEI")
+    own_share = MoneyField(
+        max_digits=20, decimal_places=2, default_currency="EEI", blank=True, null=True
+    )
+    deposit_command = models.TextField(default="")
+    transfer_command = models.TextField(default="")
+    own_share_in_eggs = models.BooleanField(default=True)
+    all_done = models.BooleanField(default=True)
+    legacy_transfer = models.BooleanField(default=True)
+
+    def other_peoples_share(self):
+        return self.total - self.own_share
+
+    def safe_own_share(self):
+        if self.own_share is None:
+            return 0
+        else:
+            return self.own_share
+
+    def egg_deposit_amount(self):
+        if self.own_share_in_eggs:
+            return self.total
+        else:
+            return self.total - self.safe_own_share()
 
 
 class SoldItem(models.Model):
@@ -1290,6 +1292,7 @@ class SoldItem(models.Model):
     deposited_into_eggs = BooleanField(default=False)
     deposit_approved = BooleanField(default=False)
     transfered_to_participants = BooleanField(default=False)
+    transfered = BooleanField(default=False)
     transfer_log = models.ForeignKey(
         TransferLog, on_delete=models.SET_NULL, null=True, blank=True
     )
@@ -1301,15 +1304,10 @@ class SoldItem(models.Model):
         return self.item.isk_and_eggs_balance()
 
     def status(self):
-        if self.transfered_to_participants:
+        if self.transfered:
             return "Transfered!"
-        elif self.deposited_into_eggs:
-            if self.deposit_approved:
-                return "Deposit Approved, Pending Transfer"
-            else:
-                return "Deposited Pending Approval"
         else:
-            return "Pending Deposit"
+            return "Pending Egg Transfer!"
 
     def __str__(self):
         return f"{self.item} x {self.quantity} - sold via: {self.sold_via}, status: {self.status()}"

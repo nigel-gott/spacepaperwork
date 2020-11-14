@@ -39,25 +39,26 @@ def wait_for_url(url):
     except WaitTimeoutException:
         pytest.fail(f"Test timed out after {timeout_seconds}s waiting for {url}.")
 
+
 @pytest.fixture(scope="session")
 def browser():
     """Ensure that HTTP service is up and responsive."""
-    remote_server_url = 'http://firefox:4444/wd/hub'
+    remote_server_url = "http://firefox:4444/wd/hub"
     # wait_for_url(remote_server_url)
 
     return Browser(
         driver_name="remote",
-        browser='firefox',
+        browser="firefox",
         command_executor=remote_server_url,
-        desired_capabilities = {
-        },
-        keep_alive=True)
+        desired_capabilities={},
+        keep_alive=True,
+    )
 
 
 @pytest.fixture(scope="session")
 def http_service():
     """Ensure that HTTP service is up and responsive."""
-    url = "http://{}:{}/goosetools/".format("django",8000)
+    url = "http://{}:{}/goosetools/".format("django", 8000)
     wait_for_url(url)
 
     return url

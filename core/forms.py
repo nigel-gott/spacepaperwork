@@ -393,4 +393,8 @@ class SoldItemForm(forms.Form):
 
 
 class DepositEggsForm(forms.Form):
-    deposit_command = forms.CharField(disabled=True, required=False)
+    own_share_in_eggs = forms.BooleanField(
+        required=False,
+        initial=False,
+        help_text="Tick if you want to deposit your isk as eggs instead of just keeping the isk.",
+    )

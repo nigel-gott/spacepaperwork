@@ -46,14 +46,8 @@
                         {{item.item.isk_and_eggs_balance}}
                     </td>
                     <td>
-                        {% if item.transfered_to_participants %}
+                        {% if item.transfered %}
                         Transfered to participants, all done!
-                        {% elif item.deposited_into_eggs %}
-                        {% if item.deposit_approved %}
-                        Egg Deposit Approved, pending transfer to participants.
-                        {% else %}
-                        Deposited into eggs. Awaiting Confirmation of Deposit.
-                        {% endif %}
                         {% else %}
                         Awaiting Egg deposit.
                         {% endif %}

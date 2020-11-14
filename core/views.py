@@ -1340,9 +1340,7 @@ def transfered_items(request):
             loc = ItemLocation.objects.get(
                 character_location=char_loc, corp_hanger=None
             )
-            done = SoldItem.objects.filter(
-                item__location=loc, transfered_to_participants=True
-            )
+            done = SoldItem.objects.filter(item__location=loc, transfered=True)
             all_sold.append({"loc": loc, "done": done})
 
     return render(request, "core/transfered_items.html", {"all_sold": all_sold})
@@ -1358,9 +1356,7 @@ def sold(request):
             loc = ItemLocation.objects.get(
                 character_location=char_loc, corp_hanger=None
             )
-            sold = SoldItem.objects.filter(
-                item__location=loc, transfered_to_participants=False
-            )
+            sold = SoldItem.objects.filter(item__location=loc, transfered=False)
             all_sold.append(
                 {
                     "loc": loc,
@@ -1368,7 +1364,16 @@ def sold(request):
                 }
             )
 
-    return render(request, "core/sold.html", {"all_sold": all_sold})
+    return render(
+        request,
+        "core/sold.html",
+        {
+            "transfer_logs": request.user.transferlog_set.filter(all_done=False)
+            .order_by("-time")
+            .all(),
+            "all_sold": all_sold,
+        },
+    )
 
 
 @login_required(login_url=login_url)
@@ -1476,6 +1481,19 @@ def own_user_transactions(request):
 
 
 @login_required(login_url=login_url)
+def completed_egg_transfers(request):
+    return render(
+        request,
+        "core/completed_egg_transfers.html",
+        {
+            "transfer_logs": request.user.transferlog_set.filter(all_done=True)
+            .order_by("-time")
+            .all(),
+        },
+    )
+
+
+@login_required(login_url=login_url)
 def user_transactions(request, pk):
     user = get_object_or_404(GooseUser, pk=pk)
     isk_transactions = user.isk_transactions().order_by("time").all()
@@ -1497,7 +1515,6 @@ def user_transactions(request, pk):
         request,
         "core/transactions_view.html",
         {
-            "transfer_logs": user.transferlog_set.order_by("-time").all(),
             "isk_transactions": isk_transactions,
             "egg_transactions": egg_transactions,
         },
@@ -2106,123 +2123,6 @@ def order_sold(request, pk):
     )
 
 
-@login_required(login_url=login_url)
-@transaction.atomic
-def deposit_eggs(request):
-    if request.user.has_pending_deposit():
-        messages.error(
-            request,
-            f"Cannot deposit again until previously deposited items have been approved.",
-        )
-        return forbidden(request)
-
-    if not request.user.can_deposit():
-        messages.error(request, f"Nothing to deposit")
-        return forbidden(request)
-
-    to_deposit_qs = SoldItem.objects.filter(
-        item__location__character_location__character__discord_user=request.user.discord_user,
-        deposited_into_eggs=False,
-    )
-    loot_groups = to_deposit_qs.values("item__loot_group").distinct()
-    invalid_groups = (
-        LootGroup.objects.filter(id__in=loot_groups)
-        .annotate(
-            share_sum=Coalesce(
-                Sum(F("lootshare__share_quantity") + F("lootshare__flat_percent_cut")),
-                0,
-            )
-        )
-        .filter(share_sum__lte=0)
-    )
-    if len(invalid_groups) > 0:
-        error_message = "The following loot groups you are attempting to deposit isk for have no participation at all, you must first setup some participation for these groups before you can deposit isk:"
-        for invalid_group in invalid_groups:
-            error_message = (
-                error_message
-                + f"<br/> *  <a href='{reverse('loot_group_view', args=[invalid_group.pk])}'>{invalid_group}</a> "
-            )
-        messages.error(request, mark_safe(error_message))
-        return HttpResponseRedirect(reverse("sold"))
-    to_deposit_list = list(to_deposit_qs)
-    total = to_deposit_qs.aggregate(result=Sum("item__isktransaction__isk"))["result"]
-    if total < 0:
-        messages.error(
-            request,
-            f"You have somehow lost money to the tune of {total} selling your items. Please PM @thejanitor so we can work this out.",
-        )
-        return HttpResponseRedirect(reverse("sold"))
-    count = to_deposit_qs.count()
-    if request.method == "POST":
-        form = DepositEggsForm(request.POST)
-        if form.is_valid():
-            current_now = timezone.now()
-            for sold_item in to_deposit_list:
-                isk = sold_item.isk_balance()
-                deposit_transaction = IskTransaction(
-                    item=sold_item.item,
-                    quantity=sold_item.quantity,
-                    time=current_now,
-                    isk=-isk,
-                    transaction_type="egg_deposit",
-                )
-                deposit_transaction.full_clean()
-                deposit_transaction.save()
-                egg_transaction = EggTransaction(
-                    item=sold_item.item,
-                    quantity=sold_item.quantity,
-                    time=current_now,
-                    eggs=isk,
-                    debt=True,
-                    counterparty_discord_username=request.user.discord_username(),
-                )
-                egg_transaction.full_clean()
-                egg_transaction.save()
-            to_deposit_qs.update(deposited_into_eggs=True)
-            messages.success(
-                request,
-                f"Marked {count} sold items as deposited into eggs, pending approval.",
-            )
-            return HttpResponseRedirect(reverse("sold"))
-    else:
-        form = DepositEggsForm(initial={"deposit_command": f"$deposit {floor(total)}"})
-    return render(
-        request,
-        "core/deposit_eggs_form.html",
-        {"form": form, "title": "Deposit Eggs", "total": to_isk(total), "count": count},
-    )
-
-
-@login_required(login_url=login_url)
-@transaction.atomic
-def deposit_approved(request):
-    if not request.user.has_pending_deposit():
-        messages.error(
-            request, f"Must have a pending deposit to confirm it has been approved."
-        )
-        return forbidden(request)
-    to_deposit_qs = request.user.pending_deposits()
-    total = to_deposit_qs.aggregate(result=Sum("item__eggtransaction__eggs"))["result"]
-    count = to_deposit_qs.count()
-    if request.method == "POST":
-        form = DepositEggsForm(request.POST)
-        if form.is_valid():
-            request.user.pending_deposits().update(deposit_approved=True)
-            return HttpResponseRedirect(reverse("sold"))
-    else:
-        form = DepositEggsForm()
-    return render(
-        request,
-        "core/eggs_approved.html",
-        {
-            "form": form,
-            "title": "Egg Deposit Approved",
-            "total": to_isk(total),
-            "count": count,
-        },
-    )
-
-
 class ComplexEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Money):
@@ -2233,29 +2133,139 @@ class ComplexEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-@login_required(login_url=login_url)
-@transaction.atomic
-def transfer_eggs(request):
+def make_transfer_command(total_participation, transfering_user):
+    command = "$bulk\n"
+    commands_issued = False
+    deposit_total = 0
+    for discord_username, isk in total_participation.items():
+        floored_isk = floor(isk.amount)
+        if discord_username != transfering_user.discord_username():
+            commands_issued = True
+            command = command + f"@{discord_username} {floored_isk}\n"
+            deposit_total = deposit_total + floored_isk
+    if not commands_issued:
+        command = "no one to transfer to"
+    return command
 
-    if not request.user.has_pending_transfers():
-        messages.error(
-            request, f"Must have a deposited and approved eggs to transfer them."
-        )
-        return forbidden(request)
 
-    if request.method == "POST":
-        form = DepositEggsForm(request.POST)
+def make_deposit_command(others_share, own_share, own_share_in_eggs, left_over):
+    if own_share_in_eggs:
+        deposit = others_share + own_share + left_over
     else:
-        form = None
+        deposit = others_share
+    return f"$deposit {int(deposit.amount)}"
 
+
+def transfer_sold_items(to_transfer, own_share_in_eggs, request):
+    total = 0
+    sellers_isk = 0
+    others_isk = 0
+    left_over = 0
+    count = 0
     total_participation = {}
     explaination = {}
-    to_transfer = SoldItem.objects.filter(
-        item__location__character_location__character__discord_user=request.user.discord_user,
-        deposited_into_eggs=True,
-        deposit_approved=True,
-        transfered_to_participants=False,
+    current_now = timezone.now()
+    for sold_item in to_transfer:
+        bucket = sold_item.item.loot_group.bucket
+        total_isk = sold_item.item.isk_and_eggs_balance()
+        if total_isk.amount <= 0:
+            error_message = (
+                "You are trying to transfer an item which has made a negative profit, something has probably gone wrong please PM @thejanitor immediately."
+                + f"<br/> *  <a href='{reverse('item_view', args=[sold_item.item.pk])}'>{sold_item}</a> "
+            )
+            messages.error(request, mark_safe(error_message))
+            return False
+        participation = bucket.calculate_participation(
+            total_isk, sold_item.item.loot_group
+        )
+        item_id = sold_item.item.id
+        explaination[item_id] = participation
+        explaination[item_id]["item"] = str(sold_item.item)
+        explaination[item_id]["total_isk"] = total_isk.amount
+        total = total + total_isk
+        count = count + 1
+        for discord_username, result in participation["participation"].items():
+            isk = result["total_isk"]
+            floored_isk = to_isk(floor(isk.amount))
+            if request.user.discord_username() == discord_username:
+                sellers_isk = sellers_isk + floored_isk
+            else:
+                others_isk = others_isk + floored_isk
+            left_over = left_over + isk - floored_isk
+
+            deposit_transaction = IskTransaction(
+                item=sold_item.item,
+                quantity=sold_item.quantity,
+                time=current_now,
+                isk=-floored_isk,
+                transaction_type="egg_deposit",
+            )
+            deposit_transaction.full_clean()
+            deposit_transaction.save()
+            egg_transaction = EggTransaction(
+                item=sold_item.item,
+                quantity=sold_item.quantity,
+                time=current_now,
+                eggs=floored_isk,
+                debt=False,
+                counterparty_discord_username=discord_username,
+            )
+            egg_transaction.full_clean()
+            egg_transaction.save()
+            if discord_username in total_participation:
+                total_participation[discord_username] = (
+                    total_participation[discord_username] + floored_isk
+                )
+            else:
+                total_participation[discord_username] = floored_isk
+    left_over = to_isk(floor(left_over.amount))
+    if left_over.amount > 0:
+        item_to_attach_left_overs_onto = to_transfer.first().item
+        IskTransaction.objects.create(
+            item=item_to_attach_left_overs_onto,
+            quantity=0,
+            time=current_now,
+            isk=-left_over,
+            transaction_type="fractional_remains",
+            notes="Fractional leftovers assigned to the loot seller ",
+        )
+        EggTransaction.objects.create(
+            item=item_to_attach_left_overs_onto,
+            quantity=0,
+            time=current_now,
+            eggs=left_over,
+            debt=False,
+            counterparty_discord_username=request.user.discord_username(),
+            notes="Fractional leftovers assigned to the loot seller ",
+        )
+    deposit_command = make_deposit_command(
+        others_isk, sellers_isk, own_share_in_eggs, left_over
     )
+    transfer_command = make_transfer_command(total_participation, request.user)
+    messages.success(
+        request,
+        f"Generated Deposit and Transfer commands for {total} eggs from {count} sold items!.",
+    )
+    log = TransferLog(
+        user=request.user,
+        time=timezone.now(),
+        total=total,
+        own_share=sellers_isk,
+        count=count,
+        explaination=json.dumps(explaination, cls=ComplexEncoder),
+        transfer_command=transfer_command,
+        deposit_command=deposit_command,
+        all_done=False,
+        legacy_transfer=False,
+        own_share_in_eggs=own_share_in_eggs,
+    )
+    log.full_clean()
+    log.save()
+    to_transfer.update(transfered=True, transfer_log=log.id)
+    return log.id
+
+
+def valid_transfer(to_transfer, request):
     loot_groups = to_transfer.values("item__loot_group").distinct()
     invalid_groups = (
         LootGroup.objects.filter(id__in=loot_groups)
@@ -2275,104 +2285,38 @@ def transfer_eggs(request):
                 + f"<br/> *  <a href='{reverse('loot_group_view', args=[invalid_group.pk])}'>{invalid_group}</a> "
             )
         messages.error(request, mark_safe(error_message))
-        return HttpResponseRedirect(reverse("sold"))
-    current_now = timezone.now()
-    total = 0
-    count = 0
-    for sold_item in to_transfer:
-        bucket = sold_item.item.loot_group.bucket
-        total_isk = sold_item.item.isk_and_eggs_balance()
-        participation = bucket.calculate_participation(
-            total_isk, sold_item.item.loot_group
-        )
-        item_id = sold_item.item.id
-        explaination[item_id] = participation
-        explaination[item_id]["item"] = str(sold_item.item)
-        explaination[item_id]["total_isk"] = total_isk.amount
-        total = total + total_isk
-        count = count + 1
-        for discord_username, result in participation["participation"].items():
-            isk = round(result["total_isk"], 2)
-            if form and form.is_valid():
-                egg_transaction = EggTransaction(
-                    item=sold_item.item,
-                    quantity=sold_item.quantity,
-                    time=current_now,
-                    eggs=-isk,
-                    debt=True,
-                    counterparty_discord_username=request.user.discord_username(),
-                )
-                egg_transaction.full_clean()
-                egg_transaction.save()
-                egg_transaction = EggTransaction(
-                    item=sold_item.item,
-                    quantity=sold_item.quantity,
-                    time=current_now,
-                    eggs=isk,
-                    debt=False,
-                    counterparty_discord_username=discord_username,
-                )
-                egg_transaction.full_clean()
-                egg_transaction.save()
-            if discord_username in total_participation:
-                total_participation[discord_username] = (
-                    total_participation[discord_username] + isk
-                )
-            else:
-                total_participation[discord_username] = isk
-
-    if form and form.is_valid():
-        messages.success(
-            request,
-            f"Transfered {total} eggs from {count} sold items to the correct participants.",
-        )
-        log = TransferLog(
-            user=request.user,
-            time=timezone.now(),
-            total=total,
-            count=count,
-            explaination=json.dumps(explaination, cls=ComplexEncoder),
-        )
-        log.full_clean()
-        log.save()
-        to_transfer.update(transfered_to_participants=True, transfer_log=log.id)
-        return HttpResponseRedirect(reverse("sold"))
+        return False
     else:
-        end = ""
-        command = "$bulk\n"
-        commands_issued = False
-        deposit_total = 0
-        keep_total = 0
-        for discord_username, isk in total_participation.items():
-            floored_isk = floor(isk.amount)
-            if discord_username != request.user.discord_username():
-                commands_issued = True
-                command = command + f"@{discord_username} {floored_isk}\n"
-                deposit_total = deposit_total + floored_isk
-            else:
-                end = end + f"Keep {floored_isk} for yourself! \n"
-                keep_total = keep_total + floored_isk
-        if commands_issued:
-            command = (
-                f"You are about to transfer {to_isk(deposit_total)} to other geese and keep {to_isk(keep_total)} for yourself:\n\n"
-                + command
-                + "\n\n"
-                + end
-            )
-        else:
-            command = end
+        return True
 
-        form = DepositEggsForm(initial={"deposit_command": command})
+
+@login_required(login_url=login_url)
+@transaction.atomic
+def transfer_eggs(request):
+    if request.method == "POST":
+        form = DepositEggsForm(request.POST)
+        if form.is_valid():
+            to_transfer = SoldItem.objects.filter(
+                item__location__character_location__character__discord_user=request.user.discord_user,
+                transfered=False,
+            )
+            if not valid_transfer(to_transfer, request):
+                return HttpResponseRedirect(reverse("sold"))
+            log_id = transfer_sold_items(
+                to_transfer, form.cleaned_data["own_share_in_eggs"], request
+            )
+            if log_id:
+                return HttpResponseRedirect(reverse("view_transfer_log", args=[log_id]))
+            else:
+                return HttpResponseRedirect(reverse("sold"))
+    else:
+        form = DepositEggsForm()
     return render(
         request,
         "core/transfer_eggs_form.html",
         {
             "form": form,
             "title": "Transfer Eggs",
-            "total": total,
-            "count": count,
-            "command": command,
-            "explaination": explaination,
         },
     )
 
@@ -2407,6 +2351,23 @@ def sell_item(item, form):
     sell_order.save()
     item.quantity = 0
     item.save()
+
+
+@login_required(login_url=login_url)
+@transaction.atomic
+def mark_transfer_as_done(request, pk):
+    log = get_object_or_404(TransferLog, pk=pk)
+    if request.method == "POST":
+        if log.user != request.user:
+            messages.error(request, "You cannot mark someone else's transfer as done.")
+            return HttpResponseRedirect(reverse("sold"))
+        else:
+            log.all_done = True
+            log.full_clean()
+            log.save()
+            return HttpResponseRedirect(reverse("sold"))
+    else:
+        return HttpResponseNotAllowed("POST")
 
 
 @login_required(login_url=login_url)

@@ -40,7 +40,7 @@ def num_orders(user):
 def num_sold(user):
     return SoldItem.objects.filter(
         item__location__character_location__character__discord_user=user.discord_user,
-        transfered_to_participants=False,
+        transfered=False,
     ).count()
 
 
