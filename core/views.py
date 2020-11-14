@@ -2165,7 +2165,9 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
     total_participation = {}
     explaination = {}
     current_now = timezone.now()
+    last_item = None
     for sold_item in to_transfer:
+        last_item = sold_item.item
         total_isk = to_isk(sold_item.isk_balance)
         bucket = sold_item.item.loot_group.bucket
         participation = bucket.calculate_participation(
@@ -2213,7 +2215,9 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
                 total_participation[discord_username] = floored_isk
     left_over = to_isk(floor(left_over.amount))
     if left_over.amount > 0:
-        item_to_attach_left_overs_onto = to_transfer.first().item
+        if last_item is None:
+            raise Exception("Error trying to transfer 0 sold items somehow so nothing to attach leftovers onto")
+        item_to_attach_left_overs_onto = last_item
         IskTransaction.objects.create(
             item=item_to_attach_left_overs_onto,
             quantity=0,
