@@ -3,6 +3,7 @@ from django.urls.base import reverse
 from django.utils import timezone
 from core.models import *
 from django.test import Client
+from django.contrib.messages import get_messages
 
 
 class MarketOrderTestCase(TestCase):
@@ -13,6 +14,7 @@ class MarketOrderTestCase(TestCase):
             name="sub_sub_type", item_sub_type=sub_type
         )
         self.item = Item.objects.create(name="Tritanium", item_type=sub_sub_type)
+        self.another_item = Item.objects.create(name="Condor", item_type=sub_sub_type)
 
         self.discord_user = DiscordUser.objects.create(username="Test Discord User")
         self.other_discord_user = DiscordUser.objects.create(
@@ -83,13 +85,15 @@ class MarketOrderTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         return LootGroup.objects.filter(fleet_anom__fleet=fleet).last()
 
-    def an_item(self, loot_group: LootGroup, item_quantity: int = 1) -> InventoryItem:
+    def an_item(self, loot_group: LootGroup, item:Item= None, item_quantity: int = 1) -> InventoryItem:
+        if item is None:
+            item = self.item
         num_items_in_loot_group_before = loot_group.inventoryitem_set.count()
         response = self.client.post(
             reverse("item_add", args=[loot_group.pk]),
             {
                 "character": self.char.pk,
-                "form-0-item": self.item.pk,
+                "form-0-item": item.pk,
                 "form-0-quantity": item_quantity,
                 "form-TOTAL_FORMS": 1,
                 "form-INITIAL_FORMS": 1,
@@ -149,6 +153,16 @@ class MarketOrderTestCase(TestCase):
         self.assertEqual(item.quantity, 0)
         self.assertEqual(market_order.quantity, original_item_quantity)
         return market_order
+    
+    def change_market_order_price(self, market_order:MarketOrder, new_price:Decimal, broker_fee:Decimal):
+        response = self.client.post(
+            reverse("edit_order_price", args=[market_order.pk]),
+            {
+                "new_price": new_price,
+                "broker_fee": broker_fee,
+            },
+        )
+        self.assertEqual(response.status_code, 302)
 
     def market_order_sold(self, market_order: MarketOrder) -> SoldItem:
         original_market_order_quantity = market_order.quantity
@@ -206,3 +220,76 @@ class MarketOrderTestCase(TestCase):
         # The seller can later mark the transfer as all done
         # However this is just a graphical display indicator to help sellers track which transfers have been completed, and has no impact on internal balances.
         self.assertEqual(log.all_done, False)
+
+    def test_loot_transfer_doesnt_deposit_sellers_share_if_they_want_to_keep_it_in_isk(self):
+        # Given there is a basic fleet with a single item split between two different people:
+        fleet = self.a_fleet()
+        loot_group = self.a_loot_group(fleet)
+        item = self.an_item(loot_group, item_quantity=1)
+
+        self.a_loot_share(loot_group, self.char, share_quantity=1, flat_percent_cut=5)
+        self.a_loot_share(loot_group, self.other_char, share_quantity=1)
+
+        # When the item gets sold and the profit transfered however with the seller keeping their share in eggs
+        market_order = self.list_item(
+            item, listed_at_price=10000, transaction_tax=10, broker_fee=5
+        )
+        sold_item = self.market_order_sold(market_order)
+
+        self.assertEqual(self.user.isk_balance(), to_isk(8500))
+        self.assertEqual(self.user.egg_balance(), to_isk(0))
+        self.assertEqual(sold_item.transfered, False)
+
+        response = self.client.post(
+            reverse("transfer_eggs"), {"own_share_in_eggs": False}
+        )
+        self.assertEqual(response.status_code, 302)
+
+        # Then the sold_item is marked as transfered and the correct deposit and transfer commands are generated based off the items profit and loot_group participation:
+        #   We Sold an item for 10,000 ISK @ 15% market fees so Z 8500 profit.
+        #   Then the selling using self.char gets a 5% cut of that profit which is Z 425 leaving Z 8075 to be split by shares after.
+        #   Both characters have 1 share so each gets 1*8075/2 = Z 4037.5
+        #   Adding self.char's 1 share and flat % cut gets 4462.5.
+        #   All egg quantitys are floored, however the seller gets any fractional remains hence self.char ends up with 4462 + 1 = Z 4463.
+        sold_item.refresh_from_db()
+        self.assertEqual(sold_item.transfered, True)
+        self.assertEqual(self.user.isk_balance(), self.isk("0"))
+        self.assertEqual(self.user.egg_balance(), self.isk("4463"))
+        self.assertEqual(self.other_user.egg_balance(), self.isk("4037"))
+        log = TransferLog.objects.all()[0]
+        # The seller indicated they wanted their own share in isk so the deposit command only includes the other players shares.
+        self.assertEqual(log.deposit_command, "$deposit 4037")
+        self.assertEqual(log.transfer_command, "$bulk\n@Test Discord User 2 4037\n")
+        # The seller can later mark the transfer as all done
+        # However this is just a graphical display indicator to help sellers track which transfers have been completed, and has no impact on internal balances.
+        self.assertEqual(log.all_done, False)
+    
+    def test_egg_transfer_fails_if_no_participation(self):
+        # Given there is a basic fleet with a single item however without any participation 
+        fleet = self.a_fleet()
+        loot_group = self.a_loot_group(fleet)
+        item = self.an_item(loot_group, item_quantity=1)
+
+        # When the item gets sold and the profit transfered however with the seller keeping their share in eggs
+        market_order = self.list_item(
+            item, listed_at_price=10000, transaction_tax=10, broker_fee=5
+        )
+        sold_item = self.market_order_sold(market_order)
+
+        self.assertEqual(self.user.isk_balance(), to_isk(8500))
+        self.assertEqual(self.user.egg_balance(), to_isk(0))
+        self.assertEqual(sold_item.transfered, False)
+
+        response = self.client.post(
+            reverse("transfer_eggs"), {"own_share_in_eggs": False}
+        )
+        self.assertEqual(response.status_code, 302)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 2, f"Expecting only two messages instead got: {[str(message) for message in messages]}")
+        self.assertEqual(str(messages[0]), "Sold 1 of item Tritanium x 2 @ Space On Test Char(Test Discord User)")
+        self.assertIn("The following loot groups you are attempting to transfer isk for have no participation at all", str(messages[1]))
+
+        # The item fails to be transfered as there is no participation for it
+        self.assertEqual(self.user.isk_balance(), to_isk(8500))
+        self.assertEqual(self.user.egg_balance(), to_isk(0))
+        self.assertEqual(sold_item.transfered, False)
