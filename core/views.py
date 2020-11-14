@@ -2225,7 +2225,7 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
                 )
             else:
                 total_participation[discord_username] = floored_isk
-    left_over = to_isk(floor(left_over.amount))
+    left_over_floored = to_isk(floor(left_over.amount))
     if left_over.amount > 0:
         if last_item is None:
             raise Exception(
@@ -2240,15 +2240,16 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
             transaction_type="fractional_remains",
             notes="Fractional leftovers assigned to the loot seller ",
         )
-        EggTransaction.objects.create(
-            item=item_to_attach_left_overs_onto,
-            quantity=0,
-            time=current_now,
-            eggs=left_over,
-            debt=False,
-            counterparty_discord_username=request.user.discord_username(),
-            notes="Fractional leftovers assigned to the loot seller ",
-        )
+        if left_over_floored.amount > 0:
+            EggTransaction.objects.create(
+                item=item_to_attach_left_overs_onto,
+                quantity=0,
+                time=current_now,
+                eggs=left_over_floored,
+                debt=False,
+                counterparty_discord_username=request.user.discord_username(),
+                notes="Fractional leftovers assigned to the loot seller ",
+            )
     deposit_command = make_deposit_command(
         others_isk, sellers_isk, own_share_in_eggs, left_over
     )

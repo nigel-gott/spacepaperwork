@@ -234,7 +234,7 @@ class MarketOrderTestCase(TestCase):
         loot_group = self.a_loot_group(fleet)
         item = self.an_item(loot_group, item_quantity=1)
 
-        num_users = 80
+        num_users = 81
         for i in range(0, num_users):
             discord_user = DiscordUser.objects.create(
                 username=f"A Test Discord User {i:02d}"
@@ -261,19 +261,13 @@ class MarketOrderTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 302)
 
-        # Then the sold_item is marked as transfered and the correct deposit and transfer commands are generated based off the items profit and loot_group participation:
-        #   We Sold an item for 10,000 ISK @ 15% market fees so Z 8500 profit.
-        #   Then the selling using self.char gets a 5% cut of that profit which is Z 425 leaving Z 8075 to be split by shares after.
-        #   Both characters have 1 share so each gets 1*8075/2 = Z 4037.5
-        #   Adding self.char's 1 share and flat % cut gets 4462.5.
-        #   All egg quantitys are floored, however the seller gets any fractional remains hence self.char ends up with 4462 + 1 = Z 4463.
         sold_item.refresh_from_db()
         self.assertEqual(sold_item.transfered, True)
         self.assertEqual(self.user.isk_balance(), self.isk("0"))
-        self.assertEqual(self.user.egg_balance(), self.isk("20"))
+        self.assertEqual(self.user.egg_balance(), self.isk("75"))
         log = TransferLog.objects.all()[0]
         # The seller indicated they wanted their own share in eggs so the deposit command includes all profit.
-        self.assertEqual(log.deposit_command, "$deposit 8500")
+        self.assertEqual(log.deposit_command, "$deposit 8499")
         self.maxDiff = None
         expected_bulk = "$bulk\n"
         for i in range(0, num_users):
@@ -282,7 +276,7 @@ class MarketOrderTestCase(TestCase):
                     expected_bulk
                     + "\nNEW MESSAGE TO AVOID DISCORD CHARACTER LIMIT:\n$bulk\n"
                 )
-            expected_bulk = expected_bulk + f"@A Test Discord User {i:02d} 106\n"
+            expected_bulk = expected_bulk + f"@A Test Discord User {i:02d} 104\n"
         self.assertEqual(log.transfer_command, expected_bulk)
         # The seller can later mark the transfer as all done
         # However this is just a graphical display indicator to help sellers track which transfers have been completed, and has no impact on internal balances.
