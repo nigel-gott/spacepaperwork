@@ -2166,7 +2166,7 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
     explaination = {}
     current_now = timezone.now()
     for sold_item in to_transfer:
-        total_isk = sold_item.item.isk_and_eggs_balance()
+        total_isk = to_isk(sold_item.isk_balance)
         bucket = sold_item.item.loot_group.bucket
         participation = bucket.calculate_participation(
             total_isk, sold_item.item.loot_group
@@ -2280,15 +2280,13 @@ def valid_transfer(to_transfer, request):
         messages.error(request, mark_safe(error_message))
         return False
 
-    for sold_item in to_transfer:
-        total_isk = sold_item.item.isk_and_eggs_balance()
-        if total_isk.amount < 0:
-            error_message = (
-                "You are trying to transfer an item which has made a negative profit, something has probably gone wrong please PM @thejanitor immediately."
-                + f"<br/> *  <a href='{reverse('item_view', args=[sold_item.item.pk])}'>{sold_item}</a> "
-            )
-            messages.error(request, mark_safe(error_message))
-            return False
+    negative_items = list(to_transfer.filter(isk_balance__lt=0).all())
+    if len(negative_items) > 0:
+        error_message = "You are trying to transfer an item which has made a negative profit, something has probably gone wrong please PM @thejanitor immediately."
+        for sold_item in negative_items:
+            error_message= error_message + f"<br/> *  <a href='{reverse('item_view', args=[sold_item.item.pk])}'>{sold_item}</a> "
+        messages.error(request, mark_safe(error_message))
+        return False
 
     return True
 
@@ -2302,6 +2300,8 @@ def transfer_eggs(request):
             to_transfer = SoldItem.objects.filter(
                 item__location__character_location__character__discord_user=request.user.discord_user,
                 transfered=False,
+            ).annotate(
+                isk_balance=Sum("item__isktransaction__isk")
             )
             if not valid_transfer(to_transfer, request):
                 return HttpResponseRedirect(reverse("sold"))
