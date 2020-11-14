@@ -36,5 +36,5 @@ class Migration(migrations.Migration):
             model_name="transferlog",
             name="own_share_in_eggs",
             field=models.BooleanField(default=True),
-        )
+        ),
     ]

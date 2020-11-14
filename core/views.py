@@ -2135,13 +2135,25 @@ class ComplexEncoder(json.JSONEncoder):
 
 def make_transfer_command(total_participation, transfering_user):
     command = "$bulk\n"
+    length_since_last_bulk = len(command)
     commands_issued = False
     deposit_total = 0
     for discord_username, isk in total_participation.items():
         floored_isk = floor(isk.amount)
         if discord_username != transfering_user.discord_username():
             commands_issued = True
-            command = command + f"@{discord_username} {floored_isk}\n"
+            next_user = f"@{discord_username} {floored_isk}\n"
+            if length_since_last_bulk + len(next_user) > 2000:
+                new_bulk = "$bulk\n"
+                command = (
+                    command
+                    + "\nNEW MESSAGE TO AVOID DISCORD CHARACTER LIMIT:\n"
+                    + new_bulk
+                )
+                length_since_last_bulk = len(new_bulk)
+
+            command = command + next_user
+            length_since_last_bulk = length_since_last_bulk + len(next_user)
             deposit_total = deposit_total + floored_isk
     if not commands_issued:
         command = "no one to transfer to"
@@ -2216,7 +2228,9 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
     left_over = to_isk(floor(left_over.amount))
     if left_over.amount > 0:
         if last_item is None:
-            raise Exception("Error trying to transfer 0 sold items somehow so nothing to attach leftovers onto")
+            raise Exception(
+                "Error trying to transfer 0 sold items somehow so nothing to attach leftovers onto"
+            )
         item_to_attach_left_overs_onto = last_item
         IskTransaction.objects.create(
             item=item_to_attach_left_overs_onto,
@@ -2263,6 +2277,10 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
 
 
 def valid_transfer(to_transfer, request):
+    if to_transfer.count() == 0:
+        messages.error(request, "You cannot transfer 0 items")
+        return False
+
     loot_groups = to_transfer.values("item__loot_group").distinct()
     invalid_groups = (
         LootGroup.objects.filter(id__in=loot_groups)
@@ -2288,7 +2306,10 @@ def valid_transfer(to_transfer, request):
     if len(negative_items) > 0:
         error_message = "You are trying to transfer an item which has made a negative profit, something has probably gone wrong please PM @thejanitor immediately."
         for sold_item in negative_items:
-            error_message= error_message + f"<br/> *  <a href='{reverse('item_view', args=[sold_item.item.pk])}'>{sold_item}</a> "
+            error_message = (
+                error_message
+                + f"<br/> *  <a href='{reverse('item_view', args=[sold_item.item.pk])}'>{sold_item}</a> "
+            )
         messages.error(request, mark_safe(error_message))
         return False
 
@@ -2304,9 +2325,7 @@ def transfer_eggs(request):
             to_transfer = SoldItem.objects.filter(
                 item__location__character_location__character__discord_user=request.user.discord_user,
                 transfered=False,
-            ).annotate(
-                isk_balance=Sum("item__isktransaction__isk")
-            )
+            ).annotate(isk_balance=Sum("item__isktransaction__isk"))
             if not valid_transfer(to_transfer, request):
                 return HttpResponseRedirect(reverse("sold"))
             log_id = transfer_sold_items(

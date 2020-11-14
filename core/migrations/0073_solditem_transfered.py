@@ -3,13 +3,14 @@
 from core.models import SoldItem
 from django.db import migrations, models
 
+
 def set_historical_transfered(apps, schema_editor):
     for sold_item in SoldItem.objects.all():
         sold_item.transfered = sold_item.transfered_to_participants
         sold_item.save()
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
 
     dependencies = [
         ("core", "0072_auto_20201110_1745"),
