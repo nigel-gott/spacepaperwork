@@ -293,3 +293,50 @@ class MarketOrderTestCase(TestCase):
         self.assertEqual(self.user.isk_balance(), to_isk(8500))
         self.assertEqual(self.user.egg_balance(), to_isk(0))
         self.assertEqual(sold_item.transfered, False)
+
+    def test_egg_transfer_fails_if_one_item_has_negative_profit(self):
+        # Given there is a basic fleet with a two items 
+        fleet = self.a_fleet()
+        loot_group = self.a_loot_group(fleet)
+        item = self.an_item(loot_group, item_quantity=1)
+        another_item = self.an_item(loot_group, item=self.another_item, item_quantity=2)
+
+        self.a_loot_share(loot_group, self.char, share_quantity=1, flat_percent_cut=5)
+        self.a_loot_share(loot_group, self.other_char, share_quantity=1)
+
+        # When the first item gets sold for a profit 
+        market_order = self.list_item(
+            item, listed_at_price=10000, transaction_tax=10, broker_fee=5
+        )
+        sold_item = self.market_order_sold(market_order)
+        # However the second item looses money as the price is lowered to something below the fees incurred.
+        # Incurs a total broker fee of 5000*2*0.05 = Z 500
+        another_market_order = self.list_item(
+            another_item, listed_at_price=5000, transaction_tax=10, broker_fee=5
+        )
+        self.change_market_order_price(another_market_order, new_price=1, broker_fee=5)
+        # Sells for Z 2 resulting in a Z -498 profit
+        another_sold_item = self.market_order_sold(another_market_order)
+
+        self.assertEqual(another_item.isk_balance(), to_isk(-498))
+        self.assertEqual(self.user.isk_balance(), to_isk(8002))
+        self.assertEqual(self.user.egg_balance(), to_isk(0))
+        self.assertEqual(sold_item.transfered, False)
+        self.assertEqual(another_sold_item.transfered, False)
+
+        response = self.client.post(
+            reverse("transfer_eggs"), {"own_share_in_eggs": False}
+        )
+        self.assertEqual(response.status_code, 302)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 4, f"Expecting only four messages instead got: {[str(message) for message in messages]}")
+        self.assertEqual(str(messages[0]), "Sold 1 of item Tritanium x 2 @ Space On Test Char(Test Discord User)")
+        self.assertIn("Market Price Was Reduced from 5000.00 to 1", str(messages[1]))
+        self.assertEqual(str(messages[2]), "Sold 2 of item Condor x 4 @ Space On Test Char(Test Discord User)")
+        self.assertIn("You are trying to transfer an item which has made a negative profit", str(messages[3]))
+
+        # Both items fail to be transfered as one has made a negative profit and an admin needs to do something about it
+        self.assertEqual(self.user.isk_balance(), to_isk(8002))
+        self.assertEqual(self.user.egg_balance(), to_isk(0))
+        self.assertEqual(sold_item.transfered, False)
+        self.assertEqual(another_sold_item.transfered, False)

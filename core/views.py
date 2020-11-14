@@ -2166,15 +2166,8 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
     explaination = {}
     current_now = timezone.now()
     for sold_item in to_transfer:
-        bucket = sold_item.item.loot_group.bucket
         total_isk = sold_item.item.isk_and_eggs_balance()
-        if total_isk.amount <= 0:
-            error_message = (
-                "You are trying to transfer an item which has made a negative profit, something has probably gone wrong please PM @thejanitor immediately."
-                + f"<br/> *  <a href='{reverse('item_view', args=[sold_item.item.pk])}'>{sold_item}</a> "
-            )
-            messages.error(request, mark_safe(error_message))
-            return False
+        bucket = sold_item.item.loot_group.bucket
         participation = bucket.calculate_participation(
             total_isk, sold_item.item.loot_group
         )
@@ -2286,8 +2279,18 @@ def valid_transfer(to_transfer, request):
             )
         messages.error(request, mark_safe(error_message))
         return False
-    else:
-        return True
+
+    for sold_item in to_transfer:
+        total_isk = sold_item.item.isk_and_eggs_balance()
+        if total_isk.amount <= 0:
+            error_message = (
+                "You are trying to transfer an item which has made a negative profit, something has probably gone wrong please PM @thejanitor immediately."
+                + f"<br/> *  <a href='{reverse('item_view', args=[sold_item.item.pk])}'>{sold_item}</a> "
+            )
+            messages.error(request, mark_safe(error_message))
+            return False
+
+    return True
 
 
 @login_required(login_url=login_url)
