@@ -4,9 +4,16 @@
 {% block body %}
 <h4>{{title}}</h4>
 Selling Stack:
+{% if stack %}
 <a href="{% url 'stack_view' stack.id %}">
     {{stack}}
 </a>
+{% else %}
+Selling Item:
+<a href="{% url 'item_view' item.id %}">
+    {{item}}
+</a>
+{% endif %}
 <div class="divider"></div>
 <div class="section">
     {% if form %}
@@ -72,6 +79,9 @@ function valid_price_str(price_str){
     var num = price_str.replace(/,/g, '');
     return !isNaN(num) && num > 0
 }
+function valid_quantity_str(num){
+    return !isNaN(num) && num > 0 
+}
 function numberWithCommas(x) {
     var x = x.toString();
     var x = x.replace(/,/g, '');
@@ -83,16 +93,18 @@ function calc_fee(){
     $("#id_listed_at_price").val(numberWithCommas(listed_at_price_str));
     broker_fee_str = $("#id_broker_fee").val();
     transaction_tax_str = $("#id_transaction_tax").val();
-    if (valid_price_str(listed_at_price_str) && broker_fee_str && transaction_tax_str){
+    quantity_str = $("#id_quantity").val();
+    if (valid_price_str(listed_at_price_str) && broker_fee_str && transaction_tax_str && valid_quantity_str(quantity_str)){
         $("#id_listed_at_price")[0].setCustomValidity('')
         listed_at_price = new Decimal(listed_at_price_str.replace(/,/g, ''));
         broker_fee = new Decimal(broker_fee_str.replace(/,/g, ''));
         transaction_tax = new Decimal(transaction_tax_str.replace(/,/g, ''));
         
         const order_data = JSON.parse(document.getElementById('order-data').textContent);
-        quantity = new Decimal(order_data['quantity']);
+        max_quantity = new Decimal(order_data['quantity']);
+        quantity = new Decimal(quantity_str) 
 
-        if(listed_at_price.greaterThan(0) && valid_fee(broker_fee) && valid_fee(transaction_tax)){
+        if(listed_at_price.greaterThan(0) && valid_fee(broker_fee) && valid_fee(transaction_tax) && max_quantity >= quantity){
             total_isk_quantity = quantity.times(listed_at_price)
             result_broker_fee = (((broker_fee.dividedBy(100)).times(total_isk_quantity)).floor())
             result_transaction_tax = (((transaction_tax.dividedBy(100)).times(total_isk_quantity)).floor())
@@ -100,15 +112,21 @@ function calc_fee(){
             $("#fee_display").html(
                 "Broker Fee: <b class='red-text'>" + numberWithCommas(result_broker_fee) + " ISK </b> <br/>Transaction Tax: <b class='red-text'>" + numberWithCommas(result_transaction_tax) + " ISK </b> <br/>Net Profit <b class='green-text'>" + numberWithCommas(net_profit) + " ISK");
             $("#submit_btn").prop('disabled', false)
+            if(quantity < max_quantity){
+                $("#submit_btn").text("Sell only " + quantity + " out of " + max_quantity)
+            } else {
+                $("#submit_btn").text("Sell all!")
+
+            }
         } else {
-            $("#fee_display").html("<b class='red-text'>You must enter a valid non zero price, broker fee and transaction tax.</b>");
+            $("#fee_display").html("<b class='red-text'>You must enter a valid non zero price, quantity, broker fee and transaction tax.</b>");
             $("#submit_btn").prop('disabled', true)
         }
     } else {
         if(!valid_price_str(listed_at_price_str)){
             $("#id_listed_at_price")[0].setCustomValidity('Price must be greater than 0 and a valid number')
         }
-        $("#fee_display").html("<b class='red-text'>You must enter a valid non zero price, broker fee and transaction tax.</b>");
+        $("#fee_display").html("<b class='red-text'>You must enter a valid non zero price, quantity, broker fee and transaction tax.</b>");
         $("#submit_btn").prop('disabled', true)
     }
 }
@@ -117,6 +135,7 @@ function calc_fee(){
     $("#id_listed_at_price").on("change paste keyup", calc_fee);
     $("#id_broker_fee").on("change paste keyup", calc_fee);
     $("#id_transaction_tax").on("change paste keyup", calc_fee);
+    $("#id_quantity").on("change paste keyup", calc_fee);
     calc_fee();
 
 })($)

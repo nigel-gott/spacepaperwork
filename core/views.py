@@ -2426,13 +2426,17 @@ def stack_sell(request, pk):
             else:
                 new_stack = stack
             for item in stack.items():
-                quantity_to_sell = sell_item(item, form, quantity_to_sell, new_stack)
+                if quantity_to_sell > 0:
+                    quantity_to_sell = sell_item(item, form, quantity_to_sell, new_stack)
+                else:
+                    break
             messages.success(request, "Succesfully created market order for stack")
             return HttpResponseRedirect(reverse("items"))
     else:
         form = SellItemForm(
             stack.quantity(),
             initial={
+                "quantity": stack.quantity(),
                 "broker_fee": request.user.broker_fee,
                 "transaction_tax": request.user.transaction_tax,
             }
@@ -2485,7 +2489,7 @@ def item_sell(request, pk):
 
     return render(
         request,
-        "core/sell_item.html",
+        "core/sell_stack.html",
         {"form": form, "title": "Sell Item", "item": item, "order_json": order_json},
     )
 
