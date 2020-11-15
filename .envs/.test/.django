@@ -1,0 +1,8 @@
+IPYTHONDIR=/app/.ipython
+DJANGO_DEBUG=on
+SECRET_KEY=ENTERYOUKEY
+DATABASE_URL=psql://goosetools_user_test:local_dev_password_test@postgres_test/goosetools_test
+STATIC_ROOT=/tmp/goosetools/static/
+SITE_ID=3
+DB_BACKUP_LOCATION=/tmp/goosetools/dbbackup
+USE_DOCKER=True
