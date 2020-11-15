@@ -12,6 +12,11 @@ pytest-sugar==0.9.4  # https://github.com/Frozenball/pytest-sugar
 selenium==3.141.0 
 splinter==0.14.0
 pytest-pythonpath==0.7.3
+# For pytest-watch 
+colorama==0.4.4 
+pathtools==0.1.2 
+pytest-watch-4.2.0 
+watchdog==0.10.3
 
 # Documentation
 # ------------------------------------------------------------------------------

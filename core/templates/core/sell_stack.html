@@ -31,7 +31,8 @@ Selling Stack:
     <form action="" method="post">
         {% csrf_token %}
         <div class="row">
-            {{ form.listed_at_price|materializecss:'s12 m12, icon=directions_boat'}}
+            {{ form.listed_at_price|materializecss:'s12 m6, icon=directions_boat'}}
+            {{ form.quantity|materializecss:'s12 m6, icon=directions_boat'}}
         </div>
         <div class="row">
             {{ form.transaction_tax|materializecss:'s12 m6, icon=format_list_numbered'}}

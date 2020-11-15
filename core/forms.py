@@ -348,6 +348,9 @@ class JunkItemsForm(forms.Form):
 
 
 class SellItemForm(forms.Form):
+    def __init__(self, max_quantity_value, *args, **kwargs):
+        super(SellItemForm, self).__init__(*args, **kwargs)
+        self.fields['quantity'] = forms.IntegerField(min_value=1, max_value=max_quantity_value)
     transaction_tax = forms.DecimalField(
         max_digits=5, decimal_places=2, label="Transaction Tax %"
     )

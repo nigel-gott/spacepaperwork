@@ -1010,6 +1010,26 @@ class InventoryItem(models.Model):
         StackedInventoryItem, on_delete=models.SET_NULL, null=True, blank=True
     )
 
+    def split_off(self, new_quantity, new_stack=None):
+        if self.junked_quantity() + self.order_quantity() + self.sold_quantity() > 0:
+            raise Exception("Cannot split and item that has been junked, sold or listed.")
+        new_item = InventoryItem.objects.create(item=self.item, quantity=new_quantity, created_at=self.created_at, location=self.location, loot_group=self.loot_group, contract=self.contract, stack=new_stack)
+        updated_quantity = self.quantity - new_quantity
+        for isk_tran in self.isktransaction_set.all():
+            isk_tran.isk = (isk_tran.isk/self.quantity)*updated_quantity
+            isk_tran.quantity = updated_quantity
+            isk_tran.save()
+            IskTransaction.objects.create(item=new_item, transaction_type=isk_tran.transaction_type, notes=isk_tran.notes, time=isk_tran.time)
+        for egg_tran in self.eggtransaction_set.all():
+            egg_tran.eggs = (egg_tran.isk/self.quantity)*updated_quantity
+            egg_tran.quantity = updated_quantity
+            egg_tran.save()
+            EggTransaction.objects.create(item=new_item, notes=egg_tran.notes, time=egg_tran.time, debt=egg_tran.debt, counterparty_discord_username=egg_tran.counterparty_discord_username)
+        self.quantity = updated_quantity 
+        self.full_clean()
+        self.save()
+        return new_item
+
     def add_isk_transaction(self, isk, transaction_type, quantity, notes, user):
         if not self.has_admin(user):
             return (

@@ -1868,7 +1868,7 @@ def junk_items(request, pk):
 @transaction.atomic
 def stack_items(request, pk):
     loc = get_object_or_404(ItemLocation, pk=pk)
-    items = get_items_in_location(loc.character_location)
+    items_in_location = get_items_in_location(loc.character_location)
     if request.method == "POST":
         if not loc.has_admin(request.user):
             messages.error(
@@ -1883,7 +1883,7 @@ def stack_items(request, pk):
             messages.error(request, message)
             return HttpResponseRedirect(reverse("stack_items", args=[pk]))
 
-    return render(request, "core/item_stack_confirm.html", {"items": items})
+    return render(request, "core/item_stack_confirm.html", {"items": items_in_location})
 
 
 @login_required(login_url=login_url)
@@ -2348,7 +2348,10 @@ def transfer_eggs(request):
     )
 
 
-def sell_item(item, form):
+def sell_item(item, form, quantity_to_sell, new_stack=None):
+    if item.quantity > quantity_to_sell:
+        item = item.split_off(quantity_to_sell, new_stack)
+    remaining_quantity_to_sell = quantity_to_sell - item.quantity
     price = Decimal(form.cleaned_data["listed_at_price"].replace(",", ""))
     total_isk_listed = item.quantity * price
     broker_fee_percent = form.cleaned_data["broker_fee"] / 100
@@ -2377,7 +2380,9 @@ def sell_item(item, form):
     sell_order.full_clean()
     sell_order.save()
     item.quantity = 0
+    item.stack = new_stack
     item.save()
+    return remaining_quantity_to_sell
 
 
 @login_required(login_url=login_url)
@@ -2413,14 +2418,20 @@ def stack_sell(request, pk):
         return HttpResponseRedirect(reverse("items"))
 
     if request.method == "POST":
-        form = SellItemForm(request.POST)
+        form = SellItemForm(stack.quantity(), request.POST)
         if form.is_valid():
+            quantity_to_sell = form.cleaned_data['quantity']
+            if quantity_to_sell < stack.quantity():
+                new_stack = StackedInventoryItem.objects.create(created_at=stack.created_at)
+            else:
+                new_stack = stack
             for item in stack.items():
-                sell_item(item, form)
-        messages.success(request, "Succesfully created market order forstack")
-        return HttpResponseRedirect(reverse("items"))
+                quantity_to_sell = sell_item(item, form, quantity_to_sell, new_stack)
+            messages.success(request, "Succesfully created market order for stack")
+            return HttpResponseRedirect(reverse("items"))
     else:
         form = SellItemForm(
+            stack.quantity(),
             initial={
                 "broker_fee": request.user.broker_fee,
                 "transaction_tax": request.user.transaction_tax,
@@ -2455,13 +2466,16 @@ def item_sell(request, pk):
         return forbidden(request)
 
     if request.method == "POST":
-        form = SellItemForm(request.POST)
+        form = SellItemForm(item.quantity, request.POST)
         if form.is_valid():
-            sell_item(item, form)
+            form_quantity = form.cleaned_data['quantity']
+            sell_item(item, form, form_quantity)
             return HttpResponseRedirect(reverse("items"))
     else:
         form = SellItemForm(
+            item.quantity,
             initial={
+                "quantity":item.quantity,
                 "broker_fee": request.user.broker_fee,
                 "transaction_tax": request.user.transaction_tax,
             }
