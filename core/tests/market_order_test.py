@@ -6,6 +6,37 @@ from core.tests.goosetools_test_case import GooseToolsTestCase, isk
 
 
 class MarketOrderTestCase(GooseToolsTestCase):
+    def test_anom_loot_when_only_the_seller_has_a_share_and_wants_it_in_isk(self):
+        # Given there is a basic fleet with a single item split between two different people:
+        fleet = self.a_fleet()
+        loot_group = self.a_loot_group(fleet)
+        item = self.an_item(loot_group, item_quantity=1)
+
+        self.a_loot_share(loot_group, self.char, share_quantity=1, flat_percent_cut=5)
+
+        # When the item gets sold and the profit transfered
+        market_order = self.list_item(
+            item, listed_at_price=10000, transaction_tax=10, broker_fee=5
+        )
+        sold_item = self.market_order_sold(market_order)
+
+        self.assertEqual(self.user.isk_balance(), isk(8500))
+        self.assertEqual(self.user.egg_balance(), isk(0))
+        self.assertEqual(sold_item.transfered, False)
+
+        response = self.client.post(
+            reverse("transfer_eggs"), {"own_share_in_eggs": False}
+        )
+        self.assertEqual(response.status_code, 302)
+
+        sold_item.refresh_from_db()
+        self.assertEqual(sold_item.transfered, True)
+        self.assertEqual(self.user.isk_balance(), isk("0"))
+        self.assertEqual(self.user.egg_balance(), isk("8500"))
+        log = TransferLog.objects.all()[0]
+        self.assertEqual(log.deposit_command, "$deposit 0")
+        self.assertEqual(log.transfer_command, "no one to transfer to")
+
     def test_anom_loot_gets_split_correctly_between_two_people_when_sold(self):
         # Given there is a basic fleet with a single item split between two different people:
         fleet = self.a_fleet()

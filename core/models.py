@@ -87,7 +87,7 @@ class Character(models.Model):
 
 @deconstructible
 class UnicodeAndSpacesUsernameValidator(UnicodeUsernameValidator):
-    regex = r"^[\w.@+- ]+\Z"
+    regex = r"^[-\w.@+ ]+\Z"
     message = _(
         "Enter a valid username. This value may contain only letters, "
         "numbers, and @/./+/-/_/space  characters."

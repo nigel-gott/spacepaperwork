@@ -9,8 +9,9 @@ from django.urls import reverse
 from core.models import DiscordUser
 
 
+# pylint: disable=unused-argument
 @receiver(user_logged_in)
-def user_login_handler(_sender, _request, user, **_kwargs):
+def user_login_handler(sender, request, user, **kwargs):
     account = SocialAccount.objects.get(user=user, provider="discord")
     # Keep the easier to use DiscordUser model upto date as the username, discriminator and avatar_hash fields could change between logins.
     discord_user = DiscordUser.objects.get(uid=account.uid)

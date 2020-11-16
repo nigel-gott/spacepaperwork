@@ -2153,8 +2153,8 @@ def make_deposit_command(others_share, own_share, own_share_in_eggs, left_over):
 
 def transfer_sold_items(to_transfer, own_share_in_eggs, request):
     total = 0
-    sellers_isk = 0
-    others_isk = 0
+    sellers_isk = to_isk(0)
+    others_isk = to_isk(0)
     left_over = to_isk(0)
     count = 0
     total_participation: Dict[str, Decimal] = {}
