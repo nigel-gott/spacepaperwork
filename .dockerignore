@@ -2,4 +2,6 @@
 !.coveragerc
 !.env
 !.pylintrc
+!.pre-commit-config.yaml
+!.git/
 .ipython/
