@@ -1,12 +1,14 @@
 """
 Base settings to build other settings files upon.
 """
+from decimal import ROUND_HALF_EVEN
 from pathlib import Path
+from typing import List
 
 import environ
 import moneyed
+from django.urls.resolvers import URLResolver
 from moneyed.localization import _FORMATTER
-from decimal import ROUND_HALF_EVEN
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 APPS_DIR = ROOT_DIR / "goosetools"
@@ -41,7 +43,7 @@ SECRET_KEY = env("SECRET_KEY")
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 DATABASES = {
     # read os.environ['DATABASE_URL'] and raises ImproperlyConfigured exception if not found
-    "default": env.db(),
+    "default": env.db()
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
@@ -54,10 +56,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # APPS
 # ------------------------------------------------------------------------------
-THIRD_PARTY_APPS_REQUIRED_TO_LOAD_BEFORE_DJANGO_CORE = [
-    "dal",
-    "dal_select2",
-]
+THIRD_PARTY_APPS_REQUIRED_TO_LOAD_BEFORE_DJANGO_CORE = ["dal", "dal_select2"]
 
 DJANGO_APPS = [
     "django.contrib.auth",
@@ -184,7 +183,7 @@ STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 ]
 
-ENV_SPECIFIC_URLS = []
+ENV_SPECIFIC_URLS: List[URLResolver] = []
 
 # MEDIA
 # ------------------------------------------------------------------------------

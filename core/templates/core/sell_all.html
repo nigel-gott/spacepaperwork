@@ -126,7 +126,7 @@ function update_total_field(){
   every_is_valid = true
   for (var key in totals) {
     // check if the property/key is defined in the object itself, not in parent
-    if (totals.hasOwnProperty(key)) {           
+    if (totals.hasOwnProperty(key)) {
         if(totals[key]){
           total = total.plus(totals[key])
         } else {
@@ -152,16 +152,16 @@ function calc_fee_for_row(_e){
 
     var _x = $(this).val();
     var _cursor = _e.target && _e.target.selectionStart;
-    
+
 
     var _length = _x.toString().replace(/,/g, "").length;
     var _commas = _x.length - _length;
-    
+
     $(this).val(_x.toString().replace(/,/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ","));
-    
+
     var _newLength = _x.toString().replace(/,/g, "").length;
     var _newCommas = $(this).val().length - _newLength - _commas;
-    
+
     if(_cursor){
 
       if (_newLength == _length && _newCommas == 0) {
@@ -183,10 +183,10 @@ function calc_fee_for_row(_e){
             net_profit = (total_isk_quantity.floor().minus(resulting_cut)).floor()
             totals[$(this).attr('id')] = net_profit;
             next_cell.html(
-                 numberWithCommas(net_profit) + " ISK"); 
+                 numberWithCommas(net_profit) + " ISK");
         } else {
             this.setCustomValidity('Invalid Price');
-            totals[$(this).attr('id')] = false; 
+            totals[$(this).attr('id')] = false;
             $("#submit_btn").prop('disabled', true)
             next_cell.html("<b class='red-text'>Invalid</b>")
         }
@@ -194,11 +194,11 @@ function calc_fee_for_row(_e){
         this.setCustomValidity('Invalid Price');
             next_cell.html("<b class='red-text'>Invalid</b>")
         totals[$(this).attr('id')] = false;
-                 
+
         $("#submit_btn").prop('disabled', true)
     }
     update_total_field();
-        
+
 }
 var totals = {};
 (function($) {
@@ -216,5 +216,3 @@ var totals = {};
 
 </script>
 {% endblock %}
-
-

@@ -1,16 +1,16 @@
-from allauth.account import forms
 from allauth.account.adapter import DefaultAccountAdapter
-from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-from django.core.exceptions import ValidationError
-from django.urls import reverse
-from core.models import Character, DiscordUser
 from allauth.account.signals import user_logged_in
+from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.models import SocialAccount
+from django.core.exceptions import ValidationError
 from django.dispatch import receiver
+from django.urls import reverse
+
+from core.models import DiscordUser
 
 
 @receiver(user_logged_in)
-def user_login_handler(sender, request, user, **kwargs):
+def user_login_handler(_sender, _request, user, **_kwargs):
     account = SocialAccount.objects.get(user=user, provider="discord")
     # Keep the easier to use DiscordUser model upto date as the username, discriminator and avatar_hash fields could change between logins.
     discord_user = DiscordUser.objects.get(uid=account.uid)
@@ -45,10 +45,6 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         the signup form is not available.
         """
         account = sociallogin.account
-        if "avatar" not in account.extra_data:
-            avatar_hash = "2"
-        else:
-            avatar_hash = account.extra_data["avatar"]
 
         existing_user_with_correct_uid = DiscordUser.objects.filter(uid=account.uid)
         if len(existing_user_with_correct_uid) == 1:
@@ -58,7 +54,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
 
         _update_user_from_social_account(discord_user, account)
         sociallogin.user.discord_user = discord_user
-        user = super().save_user(request, sociallogin, form)
+        super().save_user(request, sociallogin, form)
 
     def validate_disconnect(self, account, accounts):
         raise ValidationError("Can not disconnect")

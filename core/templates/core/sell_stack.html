@@ -80,7 +80,7 @@ function valid_price_str(price_str){
     return !isNaN(num) && num > 0
 }
 function valid_quantity_str(num){
-    return !isNaN(num) && num > 0 
+    return !isNaN(num) && num > 0
 }
 function numberWithCommas(x) {
     var x = x.toString();
@@ -99,10 +99,10 @@ function calc_fee(){
         listed_at_price = new Decimal(listed_at_price_str.replace(/,/g, ''));
         broker_fee = new Decimal(broker_fee_str.replace(/,/g, ''));
         transaction_tax = new Decimal(transaction_tax_str.replace(/,/g, ''));
-        
+
         const order_data = JSON.parse(document.getElementById('order-data').textContent);
         max_quantity = new Decimal(order_data['quantity']);
-        quantity = new Decimal(quantity_str) 
+        quantity = new Decimal(quantity_str)
 
         if(listed_at_price.greaterThan(0) && valid_fee(broker_fee) && valid_fee(transaction_tax) && max_quantity >= quantity){
             total_isk_quantity = quantity.times(listed_at_price)

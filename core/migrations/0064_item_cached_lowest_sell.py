@@ -5,9 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0063_auto_20201030_0734"),
-    ]
+    dependencies = [("core", "0063_auto_20201030_0734")]
 
     operations = [
         migrations.AddField(
@@ -16,5 +14,5 @@ class Migration(migrations.Migration):
             field=models.DecimalField(
                 blank=True, decimal_places=2, max_digits=14, null=True
             ),
-        ),
+        )
     ]

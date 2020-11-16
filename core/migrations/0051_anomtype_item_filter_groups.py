@@ -5,9 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0050_auto_20201028_0922"),
-    ]
+    dependencies = [("core", "0050_auto_20201028_0922")]
 
     operations = [
         migrations.AddField(
@@ -16,5 +14,5 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(
                 through="core.ItemFilterLink", to="core.ItemFilterGroup"
             ),
-        ),
+        )
     ]

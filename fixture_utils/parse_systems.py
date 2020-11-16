@@ -1,5 +1,5 @@
 import csv
-import json
+
 import jsonpickle
 
 
@@ -23,9 +23,11 @@ def main():
             region = line[2]
             system = line[4]
             security = line[5]
-            jita = int(line[1])
-            if jita < 0:
-                jita = None
+            jumps_to_jita_where_in_jita_is_negative = int(line[1])
+            if jumps_to_jita_where_in_jita_is_negative < 0:
+                jumps_to_jita = None
+            else:
+                jumps_to_jita = jumps_to_jita_where_in_jita_is_negative
             models.append(
                 {
                     "model": "core.system",
@@ -33,7 +35,7 @@ def main():
                     "fields": {
                         "name": system,
                         "region": region,
-                        "jumps_to_jita": jita,
+                        "jumps_to_jita": jumps_to_jita,
                         "security": security,
                     },
                 }

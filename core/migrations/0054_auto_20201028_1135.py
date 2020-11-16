@@ -5,13 +5,8 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0053_auto_20201028_1134"),
-    ]
+    dependencies = [("core", "0053_auto_20201028_1134")]
 
     operations = [
-        migrations.RenameModel(
-            old_name="ItemFilterGroup2",
-            new_name="ItemFilterGroup",
-        ),
+        migrations.RenameModel(old_name="ItemFilterGroup2", new_name="ItemFilterGroup")
     ]

@@ -1,9 +1,9 @@
-import requests
 import os
 import time
 import timeit
 
 import pytest
+import requests
 from splinter.browser import Browser
 
 
@@ -70,5 +70,27 @@ def is_responsive(url):
         response = requests.get(url)
         if response.status_code == 200:
             return True
-    except Exception:
-        return False
+    except requests.ConnectionError:
+        pass
+    return False
+
+
+# Skip integration tests unless --runslow flag is passed to pytest!
+def pytest_addoption(parser):
+    parser.addoption(
+        "--runslow", action="store_true", default=False, help="run slow tests"
+    )
+
+
+def pytest_configure(config):
+    config.addinivalue_line("markers", "slow: mark test as slow to run")
+
+
+def pytest_collection_modifyitems(config, items):
+    if config.getoption("--runslow"):
+        # --runslow given in cli: do not skip slow tests
+        return
+    skip_slow = pytest.mark.skip(reason="need --runslow option to run")
+    for item in items:
+        if "slow" in item.keywords:
+            item.add_marker(skip_slow)

@@ -1,9 +1,8 @@
 import datetime
-from collections import OrderedDict
 
 import pytz
-from django.core.exceptions import ValidationError
 from django import forms
+from django.core.exceptions import ValidationError
 
 
 class TimeZoneFormField(forms.TypedChoiceField):
@@ -44,4 +43,4 @@ class TimeZoneFormField(forms.TypedChoiceField):
         if "display_GMT_offset" in kwargs:
             del kwargs["display_GMT_offset"]
         defaults.update(kwargs)
-        super(TimeZoneFormField, self).__init__(*args, **defaults)
+        super(TimeZoneFormField, self).__init__(*args, **defaults)  # type: ignore

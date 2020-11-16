@@ -5,15 +5,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0048_auto_20201027_2003"),
-    ]
+    dependencies = [("core", "0048_auto_20201027_2003")]
 
     operations = [
-        migrations.RemoveField(
-            model_name="anomtype",
-            name="item_filter_group",
-        ),
+        migrations.RemoveField(model_name="anomtype", name="item_filter_group"),
         migrations.AddField(
             model_name="itemfiltergroup",
             name="anom_type",

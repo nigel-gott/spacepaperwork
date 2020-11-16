@@ -6,7 +6,6 @@ from core.models import (
     FleetAnom,
     FleetMember,
     Item,
-    ItemFilterGroup,
     ItemSubSubType,
     ItemSubType,
     ItemType,
@@ -147,11 +146,11 @@ class CharacterAutocomplete(autocomplete.Select2QuerySetView):
 
 
 class DiscordUsernameAutocomplete(autocomplete.Select2QuerySetView):
-    def get_result_label(self, item):
-        return item.username
+    def get_result_label(self, result):
+        return result.username
 
-    def get_selected_result_label(self, item):
-        return item.username
+    def get_selected_result_label(self, result):
+        return result.username
 
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !

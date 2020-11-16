@@ -5,14 +5,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0020_auto_20201018_1244"),
-    ]
+    dependencies = [("core", "0020_auto_20201018_1244")]
 
     operations = [
         migrations.AddField(
             model_name="gooseuser",
             name="market_fee",
             field=models.DecimalField(decimal_places=4, default=25.0, max_digits=7),
-        ),
+        )
     ]

@@ -1,20 +1,16 @@
 import debug_toolbar
 from django.conf.urls import include
 from django.urls.conf import path
+
 from .base import *  # noqa
 from .base import env
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
-INTERNAL_IPS = [
-    "127.0.0.1",
-]
+INTERNAL_IPS = ["127.0.0.1"]
 
 ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "django"]
 
-GRAPH_MODELS = {
-    "all_applications": True,
-    "group_models": True,
-}
+GRAPH_MODELS = {"all_applications": True, "group_models": True}
 
 CACHES = {
     "default": {

@@ -1,8 +1,10 @@
-import json
-import jsonpickle
-import glob
-import os
 import csv
+import glob
+import json
+import os
+from typing import Dict
+
+import jsonpickle
 
 
 class Character:
@@ -13,7 +15,10 @@ class Character:
         self.discord_user_pk = discord_user_pk
 
     def __str__(self):
-        return f"pk({self.pk}), ingame_name({self.ingame_name}), corp({self.corp}), discord_user_pk({self.discord_user_pk})"
+        return (
+            f"pk({self.pk}), ingame_name({self.ingame_name}), "
+            "corp({self.corp}), discord_user_pk({self.discord_user_pk})"
+        )
 
     def __eq__(self, obj):
         return (
@@ -36,11 +41,13 @@ class DiscordUser:
     def add_character(self, character):
         if character.ingame_name in self.characters:
             raise Exception("Dup char " + character.ingame_name)
-        else:
-            self.characters[character.ingame_name] = character
+        self.characters[character.ingame_name] = character
 
     def __str__(self):
-        return f"pk({self.pk}), uid({self.uid}), hash({self.avatar_hash}), username({self.username}), chars({self.characters})"
+        return (
+            f"pk({self.pk}), uid({self.uid}), hash({self.avatar_hash}), "
+            "username({self.username}), chars({self.characters})"
+        )
 
     def __eq__(self, obj):
         return (
@@ -68,14 +75,13 @@ def load_existing_models():
                 uid = fields["uid"]
                 if uid in existing_characters:
                     raise Exception("Duplicate " + uid)
-                else:
-                    existing_users[uid] = DiscordUser(
-                        model["pk"],
-                        fields["uid"],
-                        fields["avatar_hash"],
-                        fields["username"],
-                    )
-                    users_by_pk[model["pk"]] = existing_users[uid]
+                existing_users[uid] = DiscordUser(
+                    model["pk"],
+                    fields["uid"],
+                    fields["avatar_hash"],
+                    fields["username"],
+                )
+                users_by_pk[model["pk"]] = existing_users[uid]
                 next_discord_user_pk = max(model["pk"] + 1, next_discord_user_pk)
         for model in existing_models:
             if model["model"] == "core.character":
@@ -83,15 +89,14 @@ def load_existing_models():
                 ingame_name = fields["ingame_name"]
                 if ingame_name in existing_characters:
                     raise Exception("Duplicate " + ingame_name)
-                else:
-                    char = Character(
-                        model["pk"],
-                        fields["ingame_name"],
-                        fields["corp"],
-                        fields["discord_user"],
-                    )
-                    existing_characters[ingame_name] = char
-                    users_by_pk[fields["discord_user"]].add_character(char)
+                char = Character(
+                    model["pk"],
+                    fields["ingame_name"],
+                    fields["corp"],
+                    fields["discord_user"],
+                )
+                existing_characters[ingame_name] = char
+                users_by_pk[fields["discord_user"]].add_character(char)
                 next_character_pk = max(model["pk"] + 1, next_character_pk)
         return (
             existing_characters,
@@ -125,9 +130,42 @@ def load_kris_dump(chars, users, char_pk, user_pk):
     return chars, users, char_pk, user_pk
 
 
-def parse_chat_data():
+def parse_chat_data(chat):
+    discord_id_to_characters: Dict[str, Dict[str, str]] = {}
+    unknown_removes = []
+    author_info = {}
+    for message in chat["messages"]:
+        author_id = message["author"]["id"]
+        author_name = message["author"]["name"]
+        author_discriminator = message["author"]["discriminator"]
+        author_info[author_id] = {
+            "discord_name": f"{author_name}#{author_discriminator}",
+            "avatar_url": message["author"]["avatarUrl"],
+        }
+        content = message["content"]
+        if valid_command(content):
+            words = content.split(" ")
+            user_name = words[1]
+            without_corp_and_command = words[2:]
+            character = " ".join(without_corp_and_command)
+            if content.lower().startswith("!addign"):
+                if author_id not in discord_id_to_characters:
+                    discord_id_to_characters[author_id] = {}
+                discord_id_to_characters[author_id][character] = user_name
+            if content.lower().startswith("!removeign"):
+                if author_id not in discord_id_to_characters:
+                    discord_id_to_characters[author_id] = {}
+                if character not in discord_id_to_characters[author_id]:
+                    unknown_removes.append(f"{author_id}, {message['id']}, {character}")
+                else:
+                    discord_id_to_characters[author_id].pop(character, None)
+    return discord_id_to_characters, author_info
+
+
+def load_and_parse_chat_data():
     chat_filenames = glob.glob(
-        "misc_data/discord_channel_dump/Gooseflock Featheration - stupid Goon chat - general-bot-spam*.json"
+        "misc_data/discord_channel_dump/Gooseflock Featheration - "
+        "stupid Goon chat - general-bot-spam*.json"
     )
     if len(chat_filenames) != 1:
         raise Exception(
@@ -136,39 +174,11 @@ def parse_chat_data():
     chat_filename = chat_filenames[0]
     with open(os.path.join(os.curdir, chat_filename), "r") as json_chat_file:
         chat = json.load(json_chat_file)
-        discord_id_to_characters = {}
-        unknown_removes = []
-        author_info = {}
-        for message in chat["messages"]:
-            author_id = message["author"]["id"]
-            author_info[author_id] = {
-                "discord_name": f"{message['author']['name']}#{message['author']['discriminator']}",
-                "avatar_url": message["author"]["avatarUrl"],
-            }
-            content = message["content"]
-            if valid_command(content):
-                words = content.split(" ")
-                user_name = words[1]
-                without_corp_and_command = words[2:]
-                character = " ".join(without_corp_and_command)
-                if content.lower().startswith("!addign"):
-                    if author_id not in discord_id_to_characters:
-                        discord_id_to_characters[author_id] = {}
-                    discord_id_to_characters[author_id][character] = user_name
-                if content.lower().startswith("!removeign"):
-                    if author_id not in discord_id_to_characters:
-                        discord_id_to_characters[author_id] = {}
-                    if character not in discord_id_to_characters[author_id]:
-                        unknown_removes.append(
-                            f"{author_id}, {message['id']}, {character}"
-                        )
-                    else:
-                        discord_id_to_characters[author_id].pop(character, None)
-    return discord_id_to_characters, author_info
+        return parse_chat_data(chat)
 
 
 def load_chat_data(chars, users, char_pk, user_pk):
-    discord_id_to_characters, author_info = parse_chat_data()
+    discord_id_to_characters, author_info = load_and_parse_chat_data()
     for uid, chat_data in discord_id_to_characters.items():
         if uid not in users:
             new_user = DiscordUser(
@@ -266,14 +276,8 @@ def valid_command(content):
         return False
     if not (split[0] == "!addign" or split[0] == "!removeign"):
         return False
-    if not (
-        split[1] == "mean"
-        or split[1] == "haus"
-        or split[1] == "honk"
-        or split[1] == "xbux"
-    ):
-        return False
-    return True
+    valid_corps = set(["mean", "haus", "honk", "xbux"])
+    return split[1] in valid_corps
 
 
 if __name__ == "__main__":

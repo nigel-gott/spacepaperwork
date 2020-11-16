@@ -25,6 +25,9 @@ RUN chmod +x /entrypoint
 COPY ./compose/local/django/start /start
 RUN sed -i 's/\r$//g' /start
 RUN chmod +x /start
+
+RUN mkdir -p /tmp/goosetools/static
+
 WORKDIR /app
 
 ENTRYPOINT ["/entrypoint"]

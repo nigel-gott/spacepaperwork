@@ -5,9 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0068_auto_20201104_1450"),
-    ]
+    dependencies = [("core", "0068_auto_20201104_1450")]
 
     operations = [
         migrations.AddIndex(

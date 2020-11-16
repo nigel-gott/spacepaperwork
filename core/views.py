@@ -1,19 +1,17 @@
+import datetime
 import json
-import time
-import sys
-from _pydecimal import ROUND_UP
 from decimal import Decimal
-from functools import total_ordering
 from math import floor
+from typing import Any, Dict, List
 
 import django
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.messages.views import SuccessMessageMixin
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Avg, Count, ExpressionWrapper, F, Q, StdDev, Sum
+from django.db.models import Avg, Count, ExpressionWrapper, F, StdDev, Sum
+from django.db.models.fields import FloatField
+from django.db.models.functions import Coalesce, Extract
 from django.forms.forms import Form
 from django.forms.formsets import formset_factory
 from django.http import (
@@ -24,7 +22,8 @@ from django.http import (
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.views.generic.edit import UpdateView
+from django.utils.safestring import mark_safe
+from django.utils.timezone import make_aware
 from djmoney.money import Money
 from moneyed.localization import format_money
 
@@ -64,7 +63,6 @@ from core.models import (
     InventoryItem,
     IskTransaction,
     Item,
-    ItemFilterGroup,
     ItemLocation,
     JunkedItem,
     LootBucket,
@@ -79,12 +77,6 @@ from core.models import (
     past_fleets_query,
     to_isk,
 )
-from django.db.models.fields import FloatField
-from django.db.models.functions import Coalesce, Extract
-from django.db.models.expressions import Func
-from django.utils.timezone import make_aware
-import datetime
-from django.utils.safestring import mark_safe
 
 # Create your views here.
 
@@ -122,7 +114,7 @@ def settings_view(request):
 
 
 @login_required(login_url=login_url)
-def fleet(request):
+def all_fleets_view(request):
     active_fleets = active_fleets_query()
     context = {"fleets": active_fleets, "header": "Active Fleets"}
     return render(request, "core/fleet.html", context)
@@ -150,6 +142,19 @@ def display_time(seconds, granularity=5):
     return ", ".join(result[:granularity])
 
 
+def annotate_with_zscores(members, avg, std_dev):
+    return (
+        members.annotate(
+            z_score=ExpressionWrapper(
+                Extract("joined_at", "epoch") - avg / std_dev,
+                output_field=FloatField(),
+            )
+        )
+        .filter(z_score__gte=1)
+        .order_by("-z_score")
+    )
+
+
 @login_required(login_url=login_url)
 def fleet_late(request):
     if not request.user.is_staff:
@@ -175,16 +180,8 @@ def fleet_late(request):
         )
         stats["human_avg_joined_at"] = str(datetime_obj_with_tz)
         stats["minutes_std_dev"] = display_time(int(stats["std_dev_join_at"]))
-        z_scores = (
-            members.annotate(
-                z_score=ExpressionWrapper(
-                    (Extract("joined_at", "epoch") - stats["avg_join_at"])
-                    / stats["std_dev_join_at"],
-                    output_field=FloatField(),
-                )
-            )
-            .filter(z_score__gte=1)
-            .order_by("-z_score")
+        z_scores = annotate_with_zscores(
+            members, stats["avg_join_at"], stats["std_dev_join_at"]
         )
         for z_score in z_scores:
             username = z_score.character.discord_user.username
@@ -198,12 +195,12 @@ def fleet_late(request):
 
             else:
                 existing = user_total_z[username]
+                count = existing["count"]
                 user_total_z[username] = {
                     "user": z_score.character.discord_user,
-                    "count": existing["count"] + 1,
-                    "total": existing["count"] + z_score.z_score,
-                    "mean": (existing["total"] + z_score.z_score)
-                    / (existing["count"] + 1),
+                    "count": count + 1,
+                    "total": count + z_score.z_score,
+                    "mean": (count + z_score.z_score) / (count + 1),
                 }
         if len(z_scores) > 0:
             outliers.append({"fleet": fleet, "stats": stats, "z_scores": z_scores})
@@ -212,6 +209,7 @@ def fleet_late(request):
         "users": users,
         "Title": "Late Joiners View",
         "outliers": outliers,
+        # pylint: disable=unnecessary-comprehension
         "user_total_z": {
             k: v
             for k, v in sorted(
@@ -236,11 +234,6 @@ def fleet_future(request):
     return render(request, "core/fleet.html", context)
 
 
-# zombie_fleets = Fleet.objects.filter(
-#     Q(start__lte=now_minus_24_hours) & (Q(end__gt=now) | Q(end__isnull=True))).order_by('-start')
-# old_fleets = Fleet.objects.filter(Q(end__lte=now)).order_by('-start')
-# future_fleets = Fleet.objects.filter(
-#     Q(start__gt=now))
 @login_required(login_url=login_url)
 def fleet_leave(request, pk):
     member = get_object_or_404(FleetMember, pk=pk)
@@ -258,7 +251,7 @@ def fleet_leave(request, pk):
 def fleet_view(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     fleet_members = f.fleetmember_set.all()
-    by_discord_user = {}
+    by_discord_user: Dict[int, List[FleetMember]] = {}
     for member in fleet_members:
         if member.character.discord_user.id not in by_discord_user:
             by_discord_user[member.character.discord_user.id] = []
@@ -362,7 +355,8 @@ def fleet_join(request, pk):
             else:
                 messages.error(
                     request,
-                    "You cannot join this fleet with that character. Maybe you are already a member or this fleet doesn't allow alts?",
+                    "You cannot join this fleet with that character. "
+                    "Maybe you are already a member or this fleet doesn't allow alts?",
                 )
                 return HttpResponseRedirect(reverse("fleet_view", args=[pk]))
     else:
@@ -437,7 +431,7 @@ def loot_share_join(request, pk):
         if len(can_still_join) == 0:
             messages.error(
                 request,
-                f"You have no more characters that can join this loot group. Don't worry you have probably already been added check below to make sure!",
+                "You have no more characters that can join this loot group. Don't worry you have probably already been added check below to make sure!",
             )
             return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
         if loot_group.has_share(request.user) and not loot_group.still_can_join_alts(
@@ -445,7 +439,7 @@ def loot_share_join(request, pk):
         ):
             messages.error(
                 request,
-                f"You cannot join with more characters as the fleet doesn't allow alts to have shares.",
+                "You cannot join with more characters as the fleet doesn't allow alts to have shares.",
             )
             return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
         default_char = request.user.default_character
@@ -461,7 +455,7 @@ def loot_share_join(request, pk):
 
 
 def create_manual_user(manual_character, manual_discord_username):
-    user, created = DiscordUser.objects.get_or_create(username=manual_discord_username)
+    user, _ = DiscordUser.objects.get_or_create(username=manual_discord_username)
 
     character = Character(
         discord_user=user,
@@ -553,7 +547,8 @@ def loot_share_edit(request, pk):
 def loot_share_add_fleet_members(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
     if request.method == "POST":
-        for fleet_member in loot_group.fleet_anom.fleet.fleetmember_set.all():
+        # TODO Break coupling of fleet and loot shares
+        for fleet_member in loot_group.fleet_anom.fleet.fleetmember_set.all():  # type: ignore
             LootShare.objects.get_or_create(
                 character=fleet_member.character,
                 loot_group=loot_group,
@@ -569,8 +564,6 @@ def loot_share_add_fleet_members(request, pk):
 @login_required(login_url=login_url)
 def loot_group_add(request, fleet_pk, loot_bucket_pk):
     f = get_object_or_404(Fleet, pk=fleet_pk)
-    if loot_bucket_pk:
-        loot_bucket = get_object_or_404(LootBucket, pk=loot_bucket_pk)
     if request.method == "POST":
         form = LootGroupForm(request.POST)
         if form.is_valid():
@@ -607,12 +600,16 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
                 if not loot_bucket_pk:
                     loot_bucket = LootBucket(fleet=f)
                     loot_bucket.save()
+                else:
+                    loot_bucket = get_object_or_404(LootBucket, pk=loot_bucket_pk)
 
                 new_group = LootGroup(bucket=loot_bucket, fleet_anom=fleet_anom)
                 new_group.full_clean()
                 new_group.save()
 
-            return HttpResponseRedirect(reverse("loot_group_view", args=[new_group.id]))
+                return HttpResponseRedirect(
+                    reverse("loot_group_view", args=[new_group.id])
+                )
 
     else:
         form = LootGroupForm()
@@ -634,14 +631,13 @@ def fleet_create(request):
                     form.cleaned_data["start_date"], form.cleaned_data["start_time"]
                 )
             )
+            combined_end = None
             if form.cleaned_data["end_date"]:
                 combined_end = timezone.make_aware(
                     timezone.datetime.combine(
                         form.cleaned_data["end_date"], form.cleaned_data["end_time"]
                     )
                 )
-            else:
-                combined_end = None
 
             new_fleet = Fleet(
                 fc=request.user,
@@ -699,14 +695,13 @@ def fleet_edit(request, pk):
                     form.cleaned_data["start_date"], form.cleaned_data["start_time"]
                 )
             )
+            combined_end = None
             if form.cleaned_data["end_date"]:
                 combined_end = timezone.make_aware(
                     timezone.datetime.combine(
                         form.cleaned_data["end_date"], form.cleaned_data["end_time"]
                     )
                 )
-            else:
-                combined_end = None
 
             existing_fleet.fc = existing_fleet.fc
             existing_fleet.fleet_type = form.cleaned_data["fleet_type"]
@@ -752,7 +747,7 @@ def fleet_edit(request, pk):
 @login_required(login_url=login_url)
 def loot_group_view(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
-    by_discord_user = {}
+    by_discord_user: Dict[int, List[LootShare]] = {}
     for loot_share in loot_group.lootshare_set.all():
         discord_user = loot_share.character.discord_user.id
         if discord_user not in by_discord_user:
@@ -858,7 +853,7 @@ def create_contract_item(request, pk):
             if item.quantity == 0:
                 messages.error(
                     request,
-                    f"You cannot contract an item which is being or has been sold",
+                    "You cannot contract an item which is being or has been sold",
                 )
                 return forbidden(request)
             system = form.cleaned_data["system"]
@@ -1029,6 +1024,7 @@ def stack_change_price(request, pk):
         form = EditOrderPriceForm(request.POST)
         if form.is_valid():
             success = True
+            message = "No stacks found to change? PM @thejanitor"
             for market_order in stack.marketorders().all():
                 new_price = form.cleaned_data["new_price"]
                 broker_fee = form.cleaned_data["broker_fee"] / 100
@@ -1121,7 +1117,7 @@ def sell_all_items(request, pk):
     if not loc.has_admin(request.user) or not request.user.is_staff:
         return HttpResponseForbidden()
     items = get_items_in_location(loc)
-    BulkSellItemFormSet = formset_factory(BulkSellItemForm, extra=0)
+    BulkSellItemFormSet = formset_factory(BulkSellItemForm, extra=0)  # noqa
     hours = 24 * 7
     if request.method == "POST":
         head_form = BulkSellItemFormHead(request.POST)
@@ -1203,7 +1199,7 @@ def sell_all_items(request, pk):
                     item.full_clean()
                     item.save()
 
-            messages.success(request, f"Items succesfully bought")
+            messages.success(request, "Items succesfully bought")
             return HttpResponseRedirect(reverse("sold"))
         else:
             messages.error(request, f"Invalid {formset.errors} {head_form.errors}")
@@ -1224,13 +1220,15 @@ def sell_all_items(request, pk):
 @login_required(login_url=login_url)
 def item_add(request, lg_pk):
     extra = 10
-    InventoryItemFormset = formset_factory(InventoryItemForm, extra=0)
+    InventoryItemFormset = formset_factory(InventoryItemForm, extra=0)  # noqa
     loot_group = get_object_or_404(LootGroup, pk=lg_pk)
+    if not loot_group.fleet_anom:
+        raise Exception(f"Missing fleet_anom from {loot_group}")
+
     ifg_pk = request.GET.get("item_filter_group", None)
     choice_list = create_ifg_choice_list(loot_group.fleet_anom.id)
     if not ifg_pk:
         ifg_pk = choice_list[0][0]
-    item_filter_group = get_object_or_404(ItemFilterGroup, pk=ifg_pk)
     if not loot_group.fleet().has_admin(request.user):
         return forbidden(request)
     initial = [{"item_filter_group": ifg_pk, "quantity": 1} for x in range(0, extra)]
@@ -1308,24 +1306,17 @@ def junk(request):
             loc = ItemLocation.objects.get(
                 character_location=char_loc, corp_hanger=None
             )
+            sum_query = ExpressionWrapper(
+                Coalesce(F("item__item__cached_lowest_sell"), 0) * F("quantity"),
+                output_field=FloatField(),
+            )
             junked = (
                 JunkedItem.objects.filter(item__location=loc)
-                .annotate(
-                    estimated_profit_sum=ExpressionWrapper(
-                        Coalesce(F("item__item__cached_lowest_sell"), 0)
-                        * F("quantity"),
-                        output_field=FloatField(),
-                    ),
-                )
+                .annotate(estimated_profit_sum=sum_query)
                 .order_by("-estimated_profit_sum")
             )
 
-            all_junked.append(
-                {
-                    "loc": loc,
-                    "junked": junked,
-                }
-            )
+            all_junked.append({"loc": loc, "junked": junked})
 
     return render(request, "core/junk.html", {"all_junked": all_junked})
 
@@ -1356,13 +1347,10 @@ def sold(request):
             loc = ItemLocation.objects.get(
                 character_location=char_loc, corp_hanger=None
             )
-            sold = SoldItem.objects.filter(item__location=loc, transfered=False)
-            all_sold.append(
-                {
-                    "loc": loc,
-                    "sold": sold,
-                }
+            untransfered_sold_items = SoldItem.objects.filter(
+                item__location=loc, transfered=False
             )
+            all_sold.append({"loc": loc, "sold": untransfered_sold_items})
 
     return render(
         request,
@@ -1439,7 +1427,7 @@ def contracts(request):
 
 
 @login_required(login_url=login_url)
-def items(request):
+def items_view(request):
     characters = request.user.characters()
     return render_item_view(
         request,
@@ -1488,7 +1476,7 @@ def completed_egg_transfers(request):
         {
             "transfer_logs": request.user.transferlog_set.filter(all_done=True)
             .order_by("-time")
-            .all(),
+            .all()
         },
     )
 
@@ -1514,10 +1502,7 @@ def user_transactions(request, pk):
     return render(
         request,
         "core/transactions_view.html",
-        {
-            "isk_transactions": isk_transactions,
-            "egg_transactions": egg_transactions,
-        },
+        {"isk_transactions": isk_transactions, "egg_transactions": egg_transactions},
     )
 
 
@@ -1548,8 +1533,9 @@ def fleet_shares(request, pk):
         loot_group = loot_share.loot_group
         if loot_group.id in seen_groups:
             continue
-        else:
-            seen_groups[loot_group.id] = True
+        if not loot_group.fleet_anom:
+            raise Exception(f"Missing fleet_anom from {loot_group}")
+        seen_groups[loot_group.id] = True
 
         my_items = InventoryItem.objects.filter(
             location__character_location__character__discord_user=user,
@@ -1642,7 +1628,7 @@ def get_items_in_location(char_loc, item_source=None):
         stack__isnull=False, contract__isnull=True, location=loc
     ).order_by("-item__cached_lowest_sell")
     stacks = {}
-    stacks_by_item = {}
+    stacks_by_item: Dict[int, List[Any]] = {}
     for item in stacked_items.all():
         if item.stack.id not in stacks:
             stacks[item.stack.id] = {
@@ -1680,18 +1666,18 @@ def get_items_in_location(char_loc, item_source=None):
 
 
 def render_item_view(request, characters, show_contract_all, title):
-    all_items = []
+    all_items_for_characters = []
     for char in characters:
         char_locs = CharacterLocation.objects.filter(character=char)
         for char_loc in char_locs:
             items = get_items_in_location(char_loc)
             if items["total_in_loc"] > 0:
-                all_items.append(items)
+                all_items_for_characters.append(items)
     result = render(
         request,
         "core/items.html",
         {
-            "all_items": all_items,
+            "all_items": all_items_for_characters,
             "show_contract_all": show_contract_all,
             "title": title,
         },
@@ -1764,15 +1750,15 @@ def stack_delete(request, pk):
 @login_required(login_url=login_url)
 @transaction.atomic
 def unjunk_item(request, pk):
-    junk_item = get_object_or_404(JunkedItem, pk=pk)
-    if not junk_item.item.has_admin(request.user):
+    junked_item = get_object_or_404(JunkedItem, pk=pk)
+    if not junked_item.item.has_admin(request.user):
         messages.error(request, "You do not have permission to unjunk this item.")
         return HttpResponseRedirect(reverse("items"))
     if request.method == "POST":
-        if junk_item.item.stack:
-            junk_item.item.stack.unjunk()
+        if junked_item.item.stack:
+            junked_item.item.stack.unjunk()
         else:
-            junk_item.unjunk()
+            junked_item.unjunk()
         return HttpResponseRedirect(reverse("junk"))
     else:
         return HttpResponseNotAllowed("POST")
@@ -1914,6 +1900,8 @@ def item_minus(request, pk):
                 request,
                 "Failed to decrement item, maybe it's in a pending contract or being sold?",
             )
+    if not inventory_item.loot_group:
+        raise Exception("Missing Loot Group")
     return HttpResponseRedirect(
         reverse("loot_group_view", args=[inventory_item.loot_group.id])
     )
@@ -1931,6 +1919,8 @@ def item_plus(request, pk):
                 request,
                 "Failed to increment item, maybe it's in a pending contract or being sold?",
             )
+    if not inventory_item.loot_group:
+        raise Exception("Missing Loot Group")
     return HttpResponseRedirect(
         reverse("loot_group_view", args=[inventory_item.loot_group.id])
     )
@@ -1987,16 +1977,13 @@ def item_edit(request, pk):
             item.quantity = form.cleaned_data["quantity"]
             item.full_clean()
             item.save()
+            if not item.loot_group:
+                raise Exception("Missing Loot Group")
             return HttpResponseRedirect(
                 reverse("loot_group_view", args=[item.loot_group.pk])
             )
     else:
-        form = InventoryItemForm(
-            initial={
-                "item": item.item,
-                "quantity": item.quantity,
-            }
-        )
+        form = InventoryItemForm(initial={"item": item.item, "quantity": item.quantity})
         char_form = CharacterForm(initial={"character": request.user.default_character})
         char_form.fields["character"].queryset = request.user.characters()
     return render(
@@ -2006,7 +1993,7 @@ def item_edit(request, pk):
     )
 
 
-def item_sold(order, form, remaining_quantity_to_sell):
+def item_sold(order, remaining_quantity_to_sell):
     transaction_tax_percent = order.transaction_tax / 100
     quantity_sold = min(order.quantity, remaining_quantity_to_sell)
     quantity_remaining = order.quantity - quantity_sold
@@ -2036,11 +2023,7 @@ def item_sold(order, form, remaining_quantity_to_sell):
     profit_line.full_clean()
     profit_line.save()
     sold_item, sold_item_created = SoldItem.objects.get_or_create(
-        item=item,
-        defaults={
-            "quantity": quantity_sold,
-            "sold_via": "external",
-        },
+        item=item, defaults={"quantity": quantity_sold, "sold_via": "external"}
     )
     if not sold_item_created:
         sold_item.quantity = sold_item.quantity + quantity_sold
@@ -2077,7 +2060,7 @@ def stack_sold(request, pk):
                 for market_order in stack.marketorders():
                     if total_to_sell <= 0:
                         break
-                    total_to_sell = item_sold(market_order, form, total_to_sell)
+                    total_to_sell = item_sold(market_order, total_to_sell)
                 messages.success(request, f"Sold {saved_total} of the stack!")
             return HttpResponseRedirect(reverse("orders"))
     else:
@@ -2104,7 +2087,7 @@ def order_sold(request, pk):
             if quantity_to_sell <= 0:
                 messages.error(request, "Cannot sell 0 or fewer items")
             else:
-                item_sold(order, form, quantity_to_sell)
+                item_sold(order, quantity_to_sell)
                 messages.success(
                     request, f"Sold {quantity_to_sell} of item {order.item}"
                 )
@@ -2124,13 +2107,13 @@ def order_sold(request, pk):
 
 
 class ComplexEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, Money):
-            return format_money(obj, locale=django.utils.translation.get_language())
-        if isinstance(obj, Decimal):
-            return str(floor(obj))
+    def default(self, o):
+        if isinstance(o, Money):
+            return format_money(o, locale=django.utils.translation.get_language())
+        if isinstance(o, Decimal):
+            return str(floor(o))
         # Let the base class default method raise the TypeError
-        return json.JSONEncoder.default(self, obj)
+        return json.JSONEncoder.default(self, o)
 
 
 def make_transfer_command(total_participation, transfering_user):
@@ -2172,9 +2155,9 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
     total = 0
     sellers_isk = 0
     others_isk = 0
-    left_over = 0
+    left_over = to_isk(0)
     count = 0
-    total_participation = {}
+    total_participation: Dict[str, Decimal] = {}
     explaination = {}
     current_now = timezone.now()
     last_item = None
@@ -2341,10 +2324,7 @@ def transfer_eggs(request):
     return render(
         request,
         "core/transfer_eggs_form.html",
-        {
-            "form": form,
-            "title": "Transfer Eggs",
-        },
+        {"form": form, "title": "Transfer Eggs"},
     )
 
 
@@ -2420,14 +2400,18 @@ def stack_sell(request, pk):
     if request.method == "POST":
         form = SellItemForm(stack.quantity(), request.POST)
         if form.is_valid():
-            quantity_to_sell = form.cleaned_data['quantity']
+            quantity_to_sell = form.cleaned_data["quantity"]
             if quantity_to_sell < stack.quantity():
-                new_stack = StackedInventoryItem.objects.create(created_at=stack.created_at)
+                new_stack = StackedInventoryItem.objects.create(
+                    created_at=stack.created_at
+                )
             else:
                 new_stack = stack
             for item in stack.items():
                 if quantity_to_sell > 0:
-                    quantity_to_sell = sell_item(item, form, quantity_to_sell, new_stack)
+                    quantity_to_sell = sell_item(
+                        item, form, quantity_to_sell, new_stack
+                    )
                 else:
                     break
             messages.success(request, "Succesfully created market order for stack")
@@ -2439,12 +2423,10 @@ def stack_sell(request, pk):
                 "quantity": stack.quantity(),
                 "broker_fee": request.user.broker_fee,
                 "transaction_tax": request.user.transaction_tax,
-            }
+            },
         )
 
-    order_json = {
-        "quantity": stack.quantity(),
-    }
+    order_json = {"quantity": stack.quantity()}
 
     return render(
         request,
@@ -2466,23 +2448,23 @@ def item_sell(request, pk):
         return forbidden(request)
 
     if item.quantity == 0:
-        messages.error(request, f"Cannot sell an item with 0 quantity.")
+        messages.error(request, "Cannot sell an item with 0 quantity.")
         return forbidden(request)
 
     if request.method == "POST":
         form = SellItemForm(item.quantity, request.POST)
         if form.is_valid():
-            form_quantity = form.cleaned_data['quantity']
+            form_quantity = form.cleaned_data["quantity"]
             sell_item(item, form, form_quantity)
             return HttpResponseRedirect(reverse("items"))
     else:
         form = SellItemForm(
             item.quantity,
             initial={
-                "quantity":item.quantity,
+                "quantity": item.quantity,
                 "broker_fee": request.user.broker_fee,
                 "transaction_tax": request.user.transaction_tax,
-            }
+            },
         )
 
     order_json = {"quantity": item.quantity}
@@ -2502,7 +2484,8 @@ def item_delete(request, pk):
     if not item.can_edit():
         messages.error(
             request,
-            "Cannot delete an item once market orders have been made for it. PM @thejanitor on discord to make admin edits for you.",
+            "Cannot delete an item once market orders have been made for it. "
+            "PM @thejanitor on discord to make admin edits for you.",
         )
         return forbidden(request)
     if request.method == "POST":

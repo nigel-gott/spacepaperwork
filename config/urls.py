@@ -1,13 +1,13 @@
 """goldengoose URL Configuration
 """
-import debug_toolbar
+from django.conf import settings
+from django.conf.urls import include
 from django.contrib import admin
 from django.urls import path
-from django.conf.urls import include, url
-from django.conf import settings
+from django.urls.conf import re_path
 
 urlpatterns = [
-    url(
+    re_path(
         r"^goosetools/",
         include(
             [
@@ -17,5 +17,5 @@ urlpatterns = [
             ]
             + settings.ENV_SPECIFIC_URLS
         ),
-    ),
+    )
 ]

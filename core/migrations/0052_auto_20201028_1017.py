@@ -5,15 +5,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0051_anomtype_item_filter_groups"),
-    ]
+    dependencies = [("core", "0051_anomtype_item_filter_groups")]
 
     operations = [
-        migrations.RemoveField(
-            model_name="anomtype",
-            name="item_filter_groups",
-        ),
+        migrations.RemoveField(model_name="anomtype", name="item_filter_groups"),
         migrations.AddField(
             model_name="itemfiltergroup",
             name="anom_type",
@@ -58,7 +53,5 @@ class Migration(migrations.Migration):
             name="min_level",
             field=models.PositiveIntegerField(blank=True, null=True),
         ),
-        migrations.DeleteModel(
-            name="ItemFilterLink",
-        ),
+        migrations.DeleteModel(name="ItemFilterLink"),
     ]

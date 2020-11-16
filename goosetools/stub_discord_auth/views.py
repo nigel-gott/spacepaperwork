@@ -1,11 +1,10 @@
+import urllib
+
 from django.http.response import (
     HttpResponseBadRequest,
     HttpResponseRedirect,
     JsonResponse,
 )
-from django.shortcuts import render
-from django.utils.crypto import get_random_string
-import urllib
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -32,13 +31,13 @@ def profile_url(request):
     )
 
 
-# Exempt as OAuth is passing along a state param and access code instead of django's csrf tokens.
+# Exempt as OAuth is passing along a state param and access code instead
+# of django's csrf tokens.
 @csrf_exempt
 def access_token_url(request):
     if request.POST["code"] == "stub_code":
         return JsonResponse({"access_token": "stub_access_code"})
-    else:
-        print(
-            "Code recieved from allauth discord provider didn't match the one saved in the session?"
-        )
-        return HttpResponseBadRequest()
+    print(
+        "Code from allauth discord provider didn't match the one saved in the session?"
+    )
+    return HttpResponseBadRequest()

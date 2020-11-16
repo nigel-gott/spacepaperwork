@@ -1,276 +1,11 @@
-from typing import List
-from django.test import TestCase
-from django.urls.base import reverse
-from django.utils import timezone
-from core.models import *
-from django.test import Client
 from django.contrib.messages import get_messages
-import base64
+from django.urls.base import reverse
+
+from core.models import Character, DiscordUser, TransferLog
+from core.tests.goosetools_test_case import GooseToolsTestCase, isk
 
 
-class MarketOrderTestCase(TestCase):
-    def setUp(self):
-        item_type = ItemType.objects.create(name="item_type")
-        sub_type = ItemSubType.objects.create(name="sub_type", item_type=item_type)
-        sub_sub_type = ItemSubSubType.objects.create(
-            name="sub_sub_type", item_sub_type=sub_type
-        )
-        self.item = Item.objects.create(name="Tritanium", item_type=sub_sub_type)
-        self.another_item = Item.objects.create(name="Condor", item_type=sub_sub_type)
-
-        self.discord_user = DiscordUser.objects.create(username="Test Discord User")
-        self.other_discord_user = DiscordUser.objects.create(
-            username="Test Discord User 2"
-        )
-        self.corp = Corp.objects.create(name="Test Corp")
-        self.char = Character.objects.create(
-            discord_user=self.discord_user, ingame_name="Test Char", corp=self.corp
-        )
-        self.other_char = Character.objects.create(
-            discord_user=self.other_discord_user,
-            ingame_name="Test Char 2",
-            corp=self.corp,
-        )
-        self.user = GooseUser.objects.create(
-            username="Test Goose User",
-            discord_user=self.discord_user,
-            default_character=self.char,
-        )
-        self.other_user = GooseUser.objects.create(
-            username="Test Goose User 2",
-            discord_user=self.other_discord_user,
-            default_character=self.other_char,
-        )
-        self.fleet_type = FleetType.objects.create(
-            type="Test Fleet Type", material_icon="icon", material_colour="colour"
-        )
-        region = Region.objects.create(name="Test Region")
-        self.system = System.objects.create(name="Test System", region=region)
-        ItemFilterGroup.objects.create(name="None")
-        self.client.force_login(self.user)
-
-    def a_fleet(self, fleet_name="Test Fleet") -> Fleet:
-        response = self.client.post(
-            reverse("fleet_create"),
-            {
-                "start_date": "Nov. 13, 2020",
-                "start_time": "01:02 PM",
-                "fleet_type": self.fleet_type.id,
-                "fc_character": self.char.id,
-                "loot_type": "Master Looter",
-                "name": fleet_name,
-                "gives_shares_to_alts": False,
-                "loot_was_stolen": False,
-            },
-        )
-        self.assertEqual(response.status_code, 302)
-        return Fleet.objects.get(name=fleet_name)
-
-    def a_loot_group(self, fleet: Fleet) -> LootGroup:
-        num_loot_groups_for_fleet_before = LootGroup.objects.filter(
-            fleet_anom__fleet=fleet
-        ).count()
-        response = self.client.post(
-            reverse("loot_group_create", args=[fleet.pk]),
-            {
-                "loot_source": "Anom",
-                "anom_level": 6,
-                "anom_type": "Scout",
-                "anom_faction": "Serpentis",
-                "anom_system": self.system.pk,
-            },
-        )
-        num_loot_groups_for_fleet_after = LootGroup.objects.filter(
-            fleet_anom__fleet=fleet
-        ).count()
-        self.assertEqual(
-            num_loot_groups_for_fleet_after, num_loot_groups_for_fleet_before + 1
-        )
-        self.assertEqual(response.status_code, 302)
-        return LootGroup.objects.filter(fleet_anom__fleet=fleet).last()
-
-    def stack_items(self, loc:ItemLocation):
-        response = self.client.post(
-            reverse("stack_items", args=[loc.pk])
-        )
-        self.assertEqual(response.status_code, 302)
-
-
-    def an_item(self, loot_group: LootGroup, item:Item= None, item_quantity: int = 1) -> InventoryItem:
-        if item is None:
-            item = self.item
-        num_items_in_loot_group_before = loot_group.inventoryitem_set.count()
-        response = self.client.post(
-            reverse("item_add", args=[loot_group.pk]),
-            {
-                "character": self.char.pk,
-                "form-0-item": item.pk,
-                "form-0-quantity": item_quantity,
-                "form-TOTAL_FORMS": 1,
-                "form-INITIAL_FORMS": 1,
-            },
-        )
-        self.assertEqual(response.status_code, 302)
-        num_items_in_loot_group_after = loot_group.inventoryitem_set.count()
-
-        self.assertEqual(
-            num_items_in_loot_group_after, num_items_in_loot_group_before + 1
-        )
-        return loot_group.inventoryitem_set.last()
-
-    def a_loot_share(
-        self,
-        loot_group: LootGroup,
-        char: Character,
-        share_quantity=1,
-        flat_percent_cut=0,
-    ) -> LootShare:
-        response = self.client.post(
-            reverse("loot_share_add", args=[loot_group.pk]),
-            {
-                "character": char.pk,
-                "share_quantity": share_quantity,
-                "flat_percent_cut": flat_percent_cut,
-            },
-        )
-        self.assertEqual(response.status_code, 302)
-        return LootShare.objects.get(
-            loot_group=loot_group,
-            character=char,
-            share_quantity=share_quantity,
-            flat_percent_cut=flat_percent_cut,
-        )
-    def list_stack_returning_reponse(
-        self,
-        stack: StackedInventoryItem,
-        listed_at_price: Decimal,
-        transaction_tax: Decimal,
-        broker_fee: Decimal,
-        quantity:int = None,
-    ) -> MarketOrder:
-        original_item_quantity = stack.quantity()
-        if quantity is None:
-            quantity = original_item_quantity
-        return self.client.post(
-            reverse("stack_sell", args=[stack.pk]),
-            {
-                "quantity" : quantity,
-                "transaction_tax": transaction_tax,
-                "broker_fee": broker_fee,
-                "listed_at_price": listed_at_price,
-            },
-        )
-    
-    def list_item_returning_reponse(
-        self,
-        item: InventoryItem,
-        listed_at_price: Decimal,
-        transaction_tax: Decimal,
-        broker_fee: Decimal,
-        quantity:int = None,
-    ) -> MarketOrder:
-        original_item_quantity = item.quantity
-        if quantity is None:
-            quantity = original_item_quantity
-        return self.client.post(
-            reverse("item_sell", args=[item.pk]),
-            {
-                "quantity" : quantity,
-                "transaction_tax": transaction_tax,
-                "broker_fee": broker_fee,
-                "listed_at_price": listed_at_price,
-            },
-        )
-
-    def list_item_stack(
-        self,
-        stack: StackedInventoryItem,
-        listed_at_price: Decimal,
-        transaction_tax: Decimal,
-        broker_fee: Decimal,
-        quantity:int = None,
-    ) -> MarketOrder:
-        original_item_quantity = stack.quantity()
-        if quantity is None:
-            quantity = original_item_quantity
-        stack_a = StackedInventoryItem.objects.last()
-        response = self.list_stack_returning_reponse(stack, listed_at_price, transaction_tax, broker_fee, quantity)
-        stack_b = StackedInventoryItem.objects.last()
-        if stack_a != stack_b:
-            new_stack = stack_b
-        else:
-            new_stack = stack
-        self.assertEqual(response.status_code, 302)
-
-        market_orders = MarketOrder.objects.filter(item__stack=new_stack).all()
-        if new_stack != stack:
-            self.assertEqual(stack.quantity(), original_item_quantity-quantity)
-            self.assertEqual(stack.order_quantity(), 0)
-        self.assertEqual(new_stack.quantity(), 0)
-        self.assertEqual(new_stack.order_quantity(), quantity)
-        return market_orders
-
-    def list_item(
-        self,
-        item: InventoryItem,
-        listed_at_price: Decimal,
-        transaction_tax: Decimal,
-        broker_fee: Decimal,
-        quantity:int = None,
-    ) -> MarketOrder:
-        original_item_quantity = item.quantity
-        if quantity is None:
-            quantity = original_item_quantity
-        response = self.list_item_returning_reponse(item, listed_at_price, transaction_tax, broker_fee, quantity)
-        self.assertEqual(response.status_code, 302)
-
-        if item.quantity == quantity:
-            # We aren't listing a sub quantity so the item wont be split
-            market_order = MarketOrder.objects.get(item=item)
-        else:
-            # We listed a sub quantity so a new item was split off and used to make the market order, search for it this way.
-            market_order = MarketOrder.objects.get(item__item=item.item, quantity=quantity)
-
-        item.refresh_from_db()
-        self.assertEqual(item.quantity, original_item_quantity - quantity)
-        self.assertEqual(market_order.quantity, quantity)
-        return market_order
-
-    def change_market_order_price(
-        self, market_order: MarketOrder, new_price: Decimal, broker_fee: Decimal
-    ):
-        response = self.client.post(
-            reverse("edit_order_price", args=[market_order.pk]),
-            {
-                "new_price": new_price,
-                "broker_fee": broker_fee,
-            },
-        )
-        self.assertEqual(response.status_code, 302)
-
-    def stack_market_order_sold(self, stack:StackedInventoryItem) -> SoldItem:
-        response = self.client.post(
-            reverse("stack_sold", args=[stack.pk]),
-            {
-                "quantity_remaining":0
-            },
-        )
-        self.assertEqual(response.status_code, 302)
-
-    def market_order_sold(self, market_order: MarketOrder) -> SoldItem:
-        original_market_order_quantity = market_order.quantity
-        response = self.client.post(
-            reverse("order_sold", args=[market_order.pk]), {"quantity_remaining": 0}
-        )
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(MarketOrder.objects.filter(item=market_order.item).count(), 0)
-        sold_item = SoldItem.objects.get(item=market_order.item)
-        self.assertEqual(sold_item.quantity, original_market_order_quantity)
-        return sold_item
-
-    def isk(self, decimal_string: str) -> Money:
-        return Money(amount=Decimal(decimal_string), currency="EEI")
-
+class MarketOrderTestCase(GooseToolsTestCase):
     def test_anom_loot_gets_split_correctly_between_two_people_when_sold(self):
         # Given there is a basic fleet with a single item split between two different people:
         fleet = self.a_fleet()
@@ -286,8 +21,8 @@ class MarketOrderTestCase(TestCase):
         )
         sold_item = self.market_order_sold(market_order)
 
-        self.assertEqual(self.user.isk_balance(), to_isk(8500))
-        self.assertEqual(self.user.egg_balance(), to_isk(0))
+        self.assertEqual(self.user.isk_balance(), isk(8500))
+        self.assertEqual(self.user.egg_balance(), isk(0))
         self.assertEqual(sold_item.transfered, False)
 
         response = self.client.post(
@@ -303,9 +38,9 @@ class MarketOrderTestCase(TestCase):
         #   All egg quantitys are floored, however the seller gets any fractional remains hence self.char ends up with 4462 + 1 = Z 4463.
         sold_item.refresh_from_db()
         self.assertEqual(sold_item.transfered, True)
-        self.assertEqual(self.user.isk_balance(), self.isk("0"))
-        self.assertEqual(self.user.egg_balance(), self.isk("4463"))
-        self.assertEqual(self.other_user.egg_balance(), self.isk("4037"))
+        self.assertEqual(self.user.isk_balance(), isk("0"))
+        self.assertEqual(self.user.egg_balance(), isk("4463"))
+        self.assertEqual(self.other_user.egg_balance(), isk("4037"))
         log = TransferLog.objects.all()[0]
         # The seller indicated they wanted their own share in eggs so the deposit command includes all profit.
         self.assertEqual(log.deposit_command, "$deposit 8500")
@@ -338,8 +73,8 @@ class MarketOrderTestCase(TestCase):
         )
         sold_item = self.market_order_sold(market_order)
 
-        self.assertEqual(self.user.isk_balance(), to_isk(8500))
-        self.assertEqual(self.user.egg_balance(), to_isk(0))
+        self.assertEqual(self.user.isk_balance(), isk(8500))
+        self.assertEqual(self.user.egg_balance(), isk(0))
         self.assertEqual(sold_item.transfered, False)
 
         response = self.client.post(
@@ -349,11 +84,11 @@ class MarketOrderTestCase(TestCase):
 
         sold_item.refresh_from_db()
         self.assertEqual(sold_item.transfered, True)
-        self.assertEqual(self.user.isk_balance(), self.isk("0"))
-        self.assertEqual(self.user.egg_balance(), self.isk("75"))
+        self.assertEqual(self.user.isk_balance(), isk("0"))
+        self.assertEqual(self.user.egg_balance(), isk("75"))
         log = TransferLog.objects.all()[0]
         # The seller indicated they wanted their own share in eggs so the deposit command includes all profit.
-        self.assertEqual(log.deposit_command, "$deposit 8499")
+        self.assertEqual(log.deposit_command, "$deposit 8500")
         self.maxDiff = None
         expected_bulk = "$bulk\n"
         for i in range(0, num_users):
@@ -385,8 +120,8 @@ class MarketOrderTestCase(TestCase):
         )
         sold_item = self.market_order_sold(market_order)
 
-        self.assertEqual(self.user.isk_balance(), to_isk(8500))
-        self.assertEqual(self.user.egg_balance(), to_isk(0))
+        self.assertEqual(self.user.isk_balance(), isk(8500))
+        self.assertEqual(self.user.egg_balance(), isk(0))
         self.assertEqual(sold_item.transfered, False)
 
         response = self.client.post(
@@ -402,9 +137,9 @@ class MarketOrderTestCase(TestCase):
         #   All egg quantitys are floored, however the seller gets any fractional remains hence self.char ends up with 4462 + 1 = Z 4463.
         sold_item.refresh_from_db()
         self.assertEqual(sold_item.transfered, True)
-        self.assertEqual(self.user.isk_balance(), self.isk("0"))
-        self.assertEqual(self.user.egg_balance(), self.isk("4463"))
-        self.assertEqual(self.other_user.egg_balance(), self.isk("4037"))
+        self.assertEqual(self.user.isk_balance(), isk("0"))
+        self.assertEqual(self.user.egg_balance(), isk("4463"))
+        self.assertEqual(self.other_user.egg_balance(), isk("4037"))
         log = TransferLog.objects.all()[0]
         # The seller indicated they wanted their own share in isk so the deposit command only includes the other players shares.
         self.assertEqual(log.deposit_command, "$deposit 4037")
@@ -425,8 +160,8 @@ class MarketOrderTestCase(TestCase):
         )
         sold_item = self.market_order_sold(market_order)
 
-        self.assertEqual(self.user.isk_balance(), to_isk(8500))
-        self.assertEqual(self.user.egg_balance(), to_isk(0))
+        self.assertEqual(self.user.isk_balance(), isk(8500))
+        self.assertEqual(self.user.egg_balance(), isk(0))
         self.assertEqual(sold_item.transfered, False)
 
         response = self.client.post(
@@ -449,8 +184,8 @@ class MarketOrderTestCase(TestCase):
         )
 
         # The item fails to be transfered as there is no participation for it
-        self.assertEqual(self.user.isk_balance(), to_isk(8500))
-        self.assertEqual(self.user.egg_balance(), to_isk(0))
+        self.assertEqual(self.user.isk_balance(), isk(8500))
+        self.assertEqual(self.user.egg_balance(), isk(0))
         self.assertEqual(sold_item.transfered, False)
 
     def test_egg_transfer_fails_if_one_item_has_negative_profit(self):
@@ -477,9 +212,9 @@ class MarketOrderTestCase(TestCase):
         # Sells for Z 2 resulting in a Z -498 profit
         another_sold_item = self.market_order_sold(another_market_order)
 
-        self.assertEqual(another_item.isk_balance(), to_isk(-498))
-        self.assertEqual(self.user.isk_balance(), to_isk(8002))
-        self.assertEqual(self.user.egg_balance(), to_isk(0))
+        self.assertEqual(another_item.isk_balance(), isk(-498))
+        self.assertEqual(self.user.isk_balance(), isk(8002))
+        self.assertEqual(self.user.egg_balance(), isk(0))
         self.assertEqual(sold_item.transfered, False)
         self.assertEqual(another_sold_item.transfered, False)
 
@@ -508,158 +243,7 @@ class MarketOrderTestCase(TestCase):
         )
 
         # Both items fail to be transfered as one has made a negative profit and an admin needs to do something about it
-        self.assertEqual(self.user.isk_balance(), to_isk(8002))
-        self.assertEqual(self.user.egg_balance(), to_isk(0))
+        self.assertEqual(self.user.isk_balance(), isk(8002))
+        self.assertEqual(self.user.egg_balance(), isk(0))
         self.assertEqual(sold_item.transfered, False)
         self.assertEqual(another_sold_item.transfered, False)
-
-    def test_cant_list_a_zero_quantity(self):
-        fleet = self.a_fleet()
-        loot_group = self.a_loot_group(fleet)
-        item = self.an_item(loot_group, item_quantity=10)
-        response = self.list_item_returning_reponse(
-            item, quantity=0, listed_at_price=10000, transaction_tax=10, broker_fee=5
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("Ensure this value is greater than or equal to 1.", str(response.content))
-        self.assertEqual(item.sold_quantity(), 0)
-
-    def test_cant_list_a_quantity_greater_than_item_quantity(self):
-        fleet = self.a_fleet()
-        loot_group = self.a_loot_group(fleet)
-        item = self.an_item(loot_group, item_quantity=10)
-        response = self.list_item_returning_reponse(
-            item, quantity=item.quantity+1, listed_at_price=10000, transaction_tax=10, broker_fee=5
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("Ensure this value is less than or equal to 10.", str(response.content))
-        self.assertEqual(item.sold_quantity(), 0)
-
-    def test_cant_list_a_negative_quantity(self):
-        fleet = self.a_fleet()
-        loot_group = self.a_loot_group(fleet)
-        item = self.an_item(loot_group, item_quantity=10)
-        response = self.list_item_returning_reponse(
-            item, quantity=-1, listed_at_price=10000, transaction_tax=10, broker_fee=5
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("Ensure this value is greater than or equal to 1.", str(response.content))
-        self.assertEqual(item.sold_quantity(), 0)
-
-
-    def test_can_list_a_sub_quantity_of_an_item(self):
-        # Given there is a basic fleet with a two items 
-        fleet = self.a_fleet()
-        loot_group = self.a_loot_group(fleet)
-        item = self.an_item(loot_group, item_quantity=10)
-        market_order = self.list_item(
-            item, quantity=1, listed_at_price=10000, transaction_tax=10, broker_fee=5
-        )
-        self.market_order_sold(market_order)
-        self.assertEqual(self.user.isk_balance(), to_isk(8500))
-        second_market_order = self.list_item(
-            item, quantity=9, listed_at_price=1000, transaction_tax=10, broker_fee=5
-        )
-        self.market_order_sold(second_market_order)
-        self.assertEqual(self.user.isk_balance(), to_isk(8500+850*9))
-
-    def test_cant_list_a_zero_quantity_of_a_stack(self):
-        fleet = self.a_fleet()
-        loot_group = self.a_loot_group(fleet)
-        item = self.an_item(loot_group, item_quantity=10)
-        self.stack_items(item.location)
-        item.refresh_from_db()
-        response = self.list_stack_returning_reponse(
-            item.stack, quantity=0, listed_at_price=10000, transaction_tax=10, broker_fee=5
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("Ensure this value is greater than or equal to 1.", str(response.content))
-        self.assertEqual(item.sold_quantity(), 0)
-
-    def test_cant_list_a_quantity_greater_than_item_quantity_of_a_stack(self):
-        fleet = self.a_fleet()
-        loot_group = self.a_loot_group(fleet)
-        item = self.an_item(loot_group, item_quantity=10)
-        self.stack_items(item.location)
-        item.refresh_from_db()
-        response = self.list_stack_returning_reponse(
-            item.stack, quantity=item.stack.quantity()+1, listed_at_price=10000, transaction_tax=10, broker_fee=5
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("Ensure this value is less than or equal to 10.", str(response.content))
-        self.assertEqual(item.sold_quantity(), 0)
-
-
-    def test_cant_list_a_negative_quantity_of_a_stack(self):
-        fleet = self.a_fleet()
-        loot_group = self.a_loot_group(fleet)
-        item = self.an_item(loot_group, item_quantity=10)
-        self.stack_items(item.location)
-        item.refresh_from_db()
-        response = self.list_stack_returning_reponse(
-            item.stack, quantity=-1, listed_at_price=10000, transaction_tax=10, broker_fee=5
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("Ensure this value is greater than or equal to 1.", str(response.content))
-        self.assertEqual(item.sold_quantity(), 0)
-
-
-    def test_can_list_a_sub_quantity_of_an_item_of_a_stack(self):
-        # Given there is a basic fleet with an item
-        fleet = self.a_fleet()
-        loot_group = self.a_loot_group(fleet)
-        item = self.an_item(loot_group, item_quantity=10)
-        # And it is stacked
-        self.stack_items(item.location)
-
-        item.refresh_from_db()
-        original_stack=item.stack
-        # Sell 1 item in the stack
-        self.list_item_stack(
-            original_stack, quantity=1, listed_at_price=10000, transaction_tax=10, broker_fee=5
-        )
-        # By selling a subquantity of the stack, a new stack is made just for the portion which sold.
-        item.refresh_from_db()
-        split_off_stack=StackedInventoryItem.objects.last()
-        self.stack_market_order_sold(split_off_stack)
-        self.assertEqual(self.user.isk_balance(), to_isk(8500))
-
-        # Sell the rest of the stack at a lower price
-        self.list_item_stack(
-            original_stack, quantity=9, listed_at_price=1000, transaction_tax=10, broker_fee=5
-        )
-        self.stack_market_order_sold(original_stack)
-        self.assertEqual(self.user.isk_balance(), to_isk(8500+850*9))
-
-
-    def test_can_list_a_sub_quantity_of_stack_consuming_all_of_one_sub_item_and_a_bit_of_the_rest(self):
-        # Given there is a basic fleet with a two items 
-        fleet = self.a_fleet()
-        loot_group = self.a_loot_group(fleet)
-        item = self.an_item(loot_group, item_quantity=10)
-        loot_group2 = self.a_loot_group(fleet)
-        item2 = self.an_item(loot_group2, item_quantity=10)
-
-        # And we stack them into a stack of 20
-        self.stack_items(item.location)
-        item.refresh_from_db()
-        original_stack=item.stack
-        # We sell 11 of the stack, which will sell 10 of the first item and 1 of the second
-        self.list_item_stack(
-            original_stack, quantity=11, listed_at_price=10000, transaction_tax=10, broker_fee=5
-        )
-
-        # By selling a subquantity of the stack, a new stack is made just for the portion which sold.
-        item.refresh_from_db()
-        split_off_stack=StackedInventoryItem.objects.last()
-
-        self.stack_market_order_sold(split_off_stack)
-        self.assertEqual(self.user.isk_balance(), to_isk(8500*11))
-
-        # Then we sell the rest of the stack. 
-        self.list_item_stack(
-            original_stack, quantity=9, listed_at_price=1000, transaction_tax=10, broker_fee=5
-        )
-        self.stack_market_order_sold(original_stack)
-        print(IskTransaction.objects.all())
-        self.assertEqual(self.user.isk_balance(), to_isk(8500*11+850*9))

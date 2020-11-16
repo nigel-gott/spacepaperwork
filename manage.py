@@ -2,9 +2,6 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-
-import os
-import sys
 from pathlib import Path
 
 if __name__ == "__main__":

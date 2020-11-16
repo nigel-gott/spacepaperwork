@@ -1,13 +1,13 @@
 # GooseTools
 
-# Pre-Requisites 
+# Pre-Requisites
 1. https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/
 2. https://docs.docker.com/get-docker/
 3. https://docs.docker.com/compose/install/
 
 # Running For Local Development In Docker
 1. ```git clone git@github.com:GROON-Echoes-Dev-Team/goosetools.git && cd goosetools```
-2. 
+2.
     ```
     docker-compose -f local.yml up --build
     ```

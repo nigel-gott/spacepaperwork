@@ -5,9 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0041_auto_20201026_1020"),
-    ]
+    dependencies = [("core", "0041_auto_20201026_1020")]
 
     operations = [
         migrations.AddField(
@@ -15,5 +13,5 @@ class Migration(migrations.Migration):
             name="verified",
             field=models.BooleanField(default=True),
             preserve_default=False,
-        ),
+        )
     ]

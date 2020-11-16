@@ -1,22 +1,13 @@
-from decimal import Decimal
-
 from allauth.socialaccount.forms import SignupForm
 from dal import autocomplete
 from django import forms
 from django.core.exceptions import ValidationError
-from django.db.models.fields import PositiveIntegerField
-from djmoney.forms.fields import MoneyField
 
 from core.models import (
-    Corp,
     DiscordUser,
     InventoryItem,
     Item,
     ItemFilterGroup,
-    ItemSubSubType,
-    ItemSubType,
-    ItemType,
-    LootShare,
     StackedInventoryItem,
 )
 
@@ -117,21 +108,11 @@ class FleetForm(forms.Form):
     description = forms.CharField(required=False)
     location = forms.CharField(required=False)
     start_date = forms.DateField(
-        widget=forms.DateInput(
-            attrs={
-                "class": "datepicker",
-            },
-            format="%b %d, %Y",
-        ),
+        widget=forms.DateInput(attrs={"class": "datepicker"}, format="%b %d, %Y"),
         input_formats=["%b. %d, %Y", "%b %d, %Y"],
     )
     start_time = forms.TimeField(
-        widget=forms.TimeInput(
-            attrs={
-                "class": "timepicker",
-            },
-            format="%I:%M %p",
-        ),
+        widget=forms.TimeInput(attrs={"class": "timepicker"}, format="%I:%M %p"),
         input_formats=["%I:%M %p"],
     )
     expected_duration = forms.CharField(
@@ -141,22 +122,12 @@ class FleetForm(forms.Form):
     )
     end_date = forms.DateField(
         required=False,
-        widget=forms.DateInput(
-            attrs={
-                "class": "datepicker",
-            },
-            format="%b %d, %Y",
-        ),
+        widget=forms.DateInput(attrs={"class": "datepicker"}, format="%b %d, %Y"),
         input_formats=["%b. %d, %Y", "%b %d, %Y"],
     )
     end_time = forms.TimeField(
         required=False,
-        widget=forms.TimeInput(
-            attrs={
-                "class": "timepicker",
-            },
-            format="%I:%M %p",
-        ),
+        widget=forms.TimeInput(attrs={"class": "timepicker"}, format="%I:%M %p"),
         input_formats=["%I:%M %p"],
     )
 
@@ -198,16 +169,16 @@ class LootGroupForm(forms.Form):
 
     anom_level = forms.ChoiceField(
         choices=[
-            (1, 1),
-            (2, 2),
-            (3, 3),
-            (4, 4),
-            (5, 5),
-            (6, 6),
-            (7, 7),
-            (8, 8),
-            (9, 9),
-            (10, 10),
+            (1, "1"),
+            (2, "2"),
+            (3, "3"),
+            (4, "4"),
+            (5, "5"),
+            (6, "6"),
+            (7, "7"),
+            (8, "8"),
+            (9, "9"),
+            (10, "10"),
         ],
         required=False,
         initial=6,
@@ -350,7 +321,10 @@ class JunkItemsForm(forms.Form):
 class SellItemForm(forms.Form):
     def __init__(self, max_quantity_value, *args, **kwargs):
         super(SellItemForm, self).__init__(*args, **kwargs)
-        self.fields['quantity'] = forms.IntegerField(min_value=1, max_value=max_quantity_value)
+        self.fields["quantity"] = forms.IntegerField(
+            min_value=1, max_value=max_quantity_value
+        )
+
     transaction_tax = forms.DecimalField(
         max_digits=5, decimal_places=2, label="Transaction Tax %"
     )
