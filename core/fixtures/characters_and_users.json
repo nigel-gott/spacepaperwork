@@ -5780,6 +5780,326 @@
         }
     },
     {
+        "model": "core.character",
+        "pk": 583,
+        "fields": {
+            "discord_user": 326,
+            "ingame_name": "Turk Shakespeare",
+            "corp": "HAUS",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 584,
+        "fields": {
+            "discord_user": 268,
+            "ingame_name": "Honkbert Hoover",
+            "corp": "MEAN",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 585,
+        "fields": {
+            "discord_user": 223,
+            "ingame_name": "Fedex\u2019ingUrCrap",
+            "corp": "MEAN",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 586,
+        "fields": {
+            "discord_user": 174,
+            "ingame_name": "Clapps Wallethin",
+            "corp": "HAUS",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 587,
+        "fields": {
+            "discord_user": 92,
+            "ingame_name": "Tritan X",
+            "corp": "HONK",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 588,
+        "fields": {
+            "discord_user": 92,
+            "ingame_name": "Tritan Refining",
+            "corp": "MEAN",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 589,
+        "fields": {
+            "discord_user": 92,
+            "ingame_name": "Tritan Mining",
+            "corp": "HAUS",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 590,
+        "fields": {
+            "discord_user": 92,
+            "ingame_name": "Tritan",
+            "corp": "MEAN",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 591,
+        "fields": {
+            "discord_user": 7,
+            "ingame_name": "Elora DeVier",
+            "corp": "XBUX",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 592,
+        "fields": {
+            "discord_user": 285,
+            "ingame_name": "Hooba",
+            "corp": "HAUS",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 593,
+        "fields": {
+            "discord_user": 285,
+            "ingame_name": "Hooba too",
+            "corp": "HAUS",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 594,
+        "fields": {
+            "discord_user": 3,
+            "ingame_name": "Dangly Rangly",
+            "corp": "HAUS",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 595,
+        "fields": {
+            "discord_user": 39,
+            "ingame_name": "Crokite Saucier",
+            "corp": "HAUS",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 596,
+        "fields": {
+            "discord_user": 104,
+            "ingame_name": "HghlndBstrd",
+            "corp": "HONK",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 597,
+        "fields": {
+            "discord_user": 20,
+            "ingame_name": "Bird Mine",
+            "corp": "HAUS",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 598,
+        "fields": {
+            "discord_user": 20,
+            "ingame_name": "Bird Money",
+            "corp": "XBUX",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 599,
+        "fields": {
+            "discord_user": 2,
+            "ingame_name": "Gene64 Jian",
+            "corp": "XBUX",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 600,
+        "fields": {
+            "discord_user": 43,
+            "ingame_name": "Sally Ride",
+            "corp": "XBUX",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 601,
+        "fields": {
+            "discord_user": 327,
+            "ingame_name": "DarkSabaton",
+            "corp": "XBUX",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 602,
+        "fields": {
+            "discord_user": 25,
+            "ingame_name": "Akroma Tano",
+            "corp": "XBUX",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 603,
+        "fields": {
+            "discord_user": 25,
+            "ingame_name": "Ahsoka Maralen",
+            "corp": "MEAN",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 604,
+        "fields": {
+            "discord_user": 327,
+            "ingame_name": "DarkSabatonAlt",
+            "corp": "XBUX",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 605,
+        "fields": {
+            "discord_user": 199,
+            "ingame_name": "Arnold J. Rimmer",
+            "corp": "MEAN",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 606,
+        "fields": {
+            "discord_user": 12,
+            "ingame_name": "Clearing House",
+            "corp": "XBUX",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 607,
+        "fields": {
+            "discord_user": 328,
+            "ingame_name": "Willow Flare",
+            "corp": "HAUS",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 608,
+        "fields": {
+            "discord_user": 2,
+            "ingame_name": "877 Cash Now",
+            "corp": "XBUX",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 609,
+        "fields": {
+            "discord_user": 267,
+            "ingame_name": "Hank Hankerson",
+            "corp": "XBUX",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 610,
+        "fields": {
+            "discord_user": 206,
+            "ingame_name": "MaxieMalone",
+            "corp": "MEAN",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 611,
+        "fields": {
+            "discord_user": 329,
+            "ingame_name": "Tangerines",
+            "corp": "HAUS",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 612,
+        "fields": {
+            "discord_user": 329,
+            "ingame_name": "Grapefruits",
+            "corp": "MEAN",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 613,
+        "fields": {
+            "discord_user": 329,
+            "ingame_name": "Clementines",
+            "corp": "MEAN",
+            "verified": true
+        }
+    },
+    {
+        "model": "core.character",
+        "pk": 614,
+        "fields": {
+            "discord_user": 330,
+            "ingame_name": "purpledad",
+            "corp": "HAUS",
+            "verified": true
+        }
+    },
+    {
         "model": "core.discorduser",
         "pk": 1,
         "fields": {
@@ -7085,7 +7405,7 @@
         "fields": {
             "username": "illBilliam#3547",
             "uid": "132534798395637761",
-            "avatar_hash": "8ee860651429ee98a58fc343dbdf2c39",
+            "avatar_hash": "e2d33d17a1a435363ac35da6161ad0df",
             "unknown": false
         }
     },
@@ -7555,7 +7875,7 @@
         "fields": {
             "username": "Darwin#3841",
             "uid": "554206983331381249",
-            "avatar_hash": "75d64e61aaeb3c28f8e17299024d09e2",
+            "avatar_hash": "5be05170d821d650e22914ff5faebe90",
             "unknown": false
         }
     },
@@ -7605,7 +7925,7 @@
         "fields": {
             "username": "Anshu#0783",
             "uid": "251056484954144771",
-            "avatar_hash": "1661efdcce85b0731e97739154bdd449",
+            "avatar_hash": "d1df55930417a6d1c13b972ab1bc59ac",
             "unknown": false
         }
     },
@@ -8005,7 +8325,7 @@
         "fields": {
             "username": "Mend1cant#1140",
             "uid": "692906177448640533",
-            "avatar_hash": "67bff7d1d4fc83d963d00c691d49c06b",
+            "avatar_hash": "5d694d99168f57d6dea8e44231f899cf",
             "unknown": false
         }
     },
@@ -8083,7 +8403,7 @@
         "model": "core.discorduser",
         "pk": 231,
         "fields": {
-            "username": "fanonist#1337",
+            "username": "salmiakki#1337",
             "uid": "714224580738154516",
             "avatar_hash": "a_7638ee6acdc093a244ba71f7b75a1e72",
             "unknown": false
@@ -8525,7 +8845,7 @@
         "fields": {
             "username": "J-Bone#0812",
             "uid": "214566355662405633",
-            "avatar_hash": "195f17c1aac57d350d19599c98b2387b",
+            "avatar_hash": "afe104ca6528ae748c0ad35f731de99d",
             "unknown": false
         }
     },
@@ -8553,7 +8873,7 @@
         "model": "core.discorduser",
         "pk": 278,
         "fields": {
-            "username": "[XBUX] Kungfu Trader#5526",
+            "username": "Kungfu Trader#5526",
             "uid": "501136961499693097",
             "avatar_hash": "da1bafa03652ecc63bb42c1c4c8992e2",
             "unknown": false
@@ -8703,9 +9023,9 @@
         "model": "core.discorduser",
         "pk": 293,
         "fields": {
-            "username": "micron#0426",
+            "username": "Micron#0426",
             "uid": "365310922354589716",
-            "avatar_hash": "981a827b641bcf44ac7ecf0376fa0102",
+            "avatar_hash": "02dafc34434679b2613db372e6e88e2d",
             "unknown": false
         }
     },
@@ -8835,7 +9155,7 @@
         "fields": {
             "username": "TamagoPapi#8004",
             "uid": "469709873429479426",
-            "avatar_hash": "0b3264eb18bbfbd8aca886cee3ebc7c2",
+            "avatar_hash": "329a4100d66a1904028db72a2d8ccc54",
             "unknown": false
         }
     },
@@ -8873,9 +9193,9 @@
         "model": "core.discorduser",
         "pk": 310,
         "fields": {
-            "username": "WyldKard",
+            "username": "WyldKard#0403",
             "uid": "166307694028914689",
-            "avatar_hash": null,
+            "avatar_hash": "6a8078be9bf7246acd8aa7bd76db0682",
             "unknown": false
         }
     },
@@ -9006,6 +9326,56 @@
             "username": "breaky#8499",
             "uid": "198446596898291712",
             "avatar_hash": "5f8e276e5c0adf248e7f1bf437721d50",
+            "unknown": false
+        }
+    },
+    {
+        "model": "core.discorduser",
+        "pk": 326,
+        "fields": {
+            "username": "Turk#1200",
+            "uid": "141574546405720064",
+            "avatar_hash": "3dbf3fc25ac957f832da293a59ada842",
+            "unknown": false
+        }
+    },
+    {
+        "model": "core.discorduser",
+        "pk": 327,
+        "fields": {
+            "username": "darksabaton#1594",
+            "uid": "339630723008954378",
+            "avatar_hash": "402bd4d9e2259cc6acc213cf9baecbc7",
+            "unknown": false
+        }
+    },
+    {
+        "model": "core.discorduser",
+        "pk": 328,
+        "fields": {
+            "username": "RFC2324#5069",
+            "uid": "343916797818437632",
+            "avatar_hash": "0d3b906f502e2c8d59dd8c6c130c1951",
+            "unknown": false
+        }
+    },
+    {
+        "model": "core.discorduser",
+        "pk": 329,
+        "fields": {
+            "username": "Tangerine#2574",
+            "uid": "204181746453970945",
+            "avatar_hash": "ec32c9fe407d314c71d7ebe3728f3fff",
+            "unknown": false
+        }
+    },
+    {
+        "model": "core.discorduser",
+        "pk": 330,
+        "fields": {
+            "username": "Fojar#5291",
+            "uid": "118039926192340996",
+            "avatar_hash": "73216601619dfede71000936dc8429c8",
             "unknown": false
         }
     }
