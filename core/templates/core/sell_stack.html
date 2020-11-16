@@ -104,7 +104,7 @@ function calc_fee(){
         max_quantity = new Decimal(order_data['quantity']);
         quantity = new Decimal(quantity_str)
 
-        if(listed_at_price.greaterThan(0) && valid_fee(broker_fee) && valid_fee(transaction_tax) && max_quantity >= quantity){
+        if(listed_at_price.greaterThan(0) && valid_fee(broker_fee) && valid_fee(transaction_tax) && max_quantity.greaterThanOrEqualTo(quantity)){
             total_isk_quantity = quantity.times(listed_at_price)
             result_broker_fee = (((broker_fee.dividedBy(100)).times(total_isk_quantity)).floor())
             result_transaction_tax = (((transaction_tax.dividedBy(100)).times(total_isk_quantity)).floor())
@@ -112,7 +112,7 @@ function calc_fee(){
             $("#fee_display").html(
                 "Broker Fee: <b class='red-text'>" + numberWithCommas(result_broker_fee) + " ISK </b> <br/>Transaction Tax: <b class='red-text'>" + numberWithCommas(result_transaction_tax) + " ISK </b> <br/>Net Profit <b class='green-text'>" + numberWithCommas(net_profit) + " ISK");
             $("#submit_btn").prop('disabled', false)
-            if(quantity < max_quantity){
+            if(quantity.lessThan(max_quantity)){
                 $("#submit_btn").text("Sell only " + quantity + " out of " + max_quantity)
             } else {
                 $("#submit_btn").text("Sell all!")
