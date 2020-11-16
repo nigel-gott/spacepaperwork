@@ -159,6 +159,7 @@ class LootGroupForm(forms.Form):
     OTHER_LOOT_GROUP = "Other"
     KILL_MAIL_LOOT_GROUP = "Killmail"
     ANOM_LOOT_GROUP = "Anom"
+    name = forms.CharField(max_length=100, required=False)
     loot_source = forms.ChoiceField(
         choices=[
             (ANOM_LOOT_GROUP, ANOM_LOOT_GROUP),

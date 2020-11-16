@@ -790,6 +790,7 @@ class LootGroup(models.Model):
         KillMail, on_delete=models.CASCADE, null=True, blank=True
     )
     bucket = models.ForeignKey(LootBucket, on_delete=models.CASCADE)
+    name = models.TextField(blank=True, null=True)
     manual = models.BooleanField(default=False)
 
     # TODO Uncouple the fleet requirement from LootGroups

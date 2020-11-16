@@ -1,253 +1,254 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
 {% has_admin loot_group.fleet user as admin %}
-<div class="row">
-    <div class="col s12 m12">
-        <div class="card blue-grey darken-1">
-            <div class="card-content white-text">
-                <span class="card-title"> {{loot_group.fleet_anom.anom_type}} </span>
-                <p>
-                    <b>Run At:</b> {{loot_group.fleet_anom.time}}<br/>
-                    <b>Location:</b> {{loot_group.fleet_anom.system}}<br/>
-                    <b>Total Profit So Far:</b> {{loot_group.isk_and_eggs_balance}}<br/>
-                </p>
-            </div>
-            <div class="card-action">
-                <a class="waves-effect waves-light btn green lighten-2"
-                   href="{% url 'fleet_view' loot_group.fleet_anom.fleet.id %}"><i class="material-icons right">info</i>Back
-                    to Fleet</a>
-            </div>
+<div>
+    <a class="waves-effect waves-light btn"
+       href="{% url 'fleet_view' loot_group.fleet_anom.fleet.id %}"><i class="material-icons left">arrow_back</i>Back
+        to Fleet</a>
+</div>
+
+<div class="card blue-grey darken-1">
+    <div class="card-content white-text">
+        {% loot_group_name loot_group as current_name %}
+        <span class="card-title">
+            {{current_name}}
+        </span>
+        <p>
+            <b>Run At:</b> {{loot_group.fleet_anom.time}}<br/>
+            <b>Location:</b> {{loot_group.fleet_anom.system}}<br/>
+            <b>Total Profit So Far:</b> {{loot_group.isk_and_eggs_balance}}<br/>
+        </p>
+    </div>
+    {% if admin %}
+
+    <div class="card-action right-align">
+        <a class="waves-effect waves-light btn orange darken-2"
+           href="{% url 'loot_group_edit' loot_group.id %}"><i class='material-icons right'>edit</i>Edit</a>
+    </div>
+    {% endif %}
+</div>
+
+<ul class="collapsible">
+    <li>
+        <div class="collapsible-header"><i class="material-icons">add</i>Shareable Participation Invite Link
         </div>
-    </div>
-</div>
-<div class="row">
-    <div class="col m12 s12">
-        <ul class="collapsible">
-            <li>
-                <div class="collapsible-header"><i class="material-icons">add</i>Shareable Participation Invite Link
+        <div class="collapsible-body">
+            <div class="input-field">
+                <i class="material-icons prefix">share</i>
+                <input id="shareurl" type="text" value="{{request.build_absolute_uri}}/join">
+                <label for="shareurl">Shareable Fleet Invite Link</label>
+            </div>
+            <button class="waves-effect waves-light btn" data-clipboard-target="#shareurl" id="share_button">
+                Copy Invite Link
+            </button>
+        </div>
+    </li>
+</ul>
+
+
+<h5>Loot</h5>
+<table class="responsive-table striped">
+    <thead>
+    <th>Item</th>
+    <th>Quantity</th>
+    <th>Location</th>
+    <th>Status</th>
+    <th>Actions</th>
+    </thead>
+    <tbody>
+    {% if admin %}
+    <tr>
+        <td colspan="5">
+            <a class="waves-effect waves-light btn green darken-2"
+               href="{% url 'item_add' loot_group.id %}"><i class="material-icons right">add_circle</i>Add Item</a>
+    </tr>
+    {% endif %}
+    {% for item in loot_group.inventoryitem_set.all %}
+    <tr>
+        <td>
+            <a href="{% url 'item_view' item.id %}">
+                {{item.item}}
+            </a>
+        </td>
+        <td>
+            <div class="row">
+                <div class="col s1 m1 valign-wrapper">
+                    <h6>
+                        {{item.total_quantity}}
+                    </h6>
                 </div>
-                <div class="collapsible-body">
-                    <div class="input-field">
-                        <i class="material-icons prefix">share</i>
-                        <input id="shareurl" type="text" value="{{request.build_absolute_uri}}/join">
-                        <label for="shareurl">Shareable Fleet Invite Link</label>
-                    </div>
-                    <button class="waves-effect waves-light btn" data-clipboard-target="#shareurl" id="share_button">
-                        Copy Invite Link
-                    </button>
+                {% has_item_admin item user as item_admin %}
+                {% if item_admin and item.can_edit %}
+                <div class="col s2 m2">
+                    <form action="{% url 'item_plus' item.id %}" method="post">
+                        {% csrf_token %}
+                        {% if redirect_field_value %}
+                        <input name="{{ redirect_field_name }}" type="hidden"
+                               value="{{ redirect_field_value }}"/>
+                        {% endif %}
+                        <button class="btn-floating blue btn-small" type="submit">
+                            <i class="material-icons">exposure_plus_1</i>
+                        </button>
+                    </form>
                 </div>
-            </li>
-        </ul>
-    </div>
-</div>
-<div class="row">
-    <div class="col s12 m12">
-        <h5>Loot</h5>
-        <table class="responsive-table striped">
-            <thead>
-            <th>Item</th>
-            <th>Quantity</th>
-            <th>Location</th>
-            <th>Status</th>
-            <th>Actions</th>
-            </thead>
-            <tbody>
-            {% if admin %}
-            <tr>
-                <td colspan="5">
-                    <a class="waves-effect waves-light btn green darken-2"
-                       href="{% url 'item_add' loot_group.id %}"><i class="material-icons right">add_circle</i>Add Item</a>
-            </tr>
+                <div class="col s2 m2">
+                    <form action="{% url 'item_minus' item.id %}" method="post">
+                        {% csrf_token %}
+                        {% if redirect_field_value %}
+                        <input name="{{ redirect_field_name }}" type="hidden"
+                               value="{{ redirect_field_value }}"/>
+                        {% endif %}
+                        <button class="inline btn-floating red darken-2 btn-small" type="submit">
+                            <i class="material-icons">exposure_neg_1</i>
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </td>
+        <td>{{item.location}}</td>
+        <td>{{item.status}}</td>
+        <td>
+            {% if item_admin %}
+            {% if item.can_edit %}
+            <a href="{% url 'item_edit' item.id %}">Edit Item</a><br/>
+            <a class="red-text" href="{% url 'item_delete' item.id %}">Delete Item</a>
             {% endif %}
-            {% for item in loot_group.inventoryitem_set.all %}
-            <tr>
-                <td>
-                    <a href="{% url 'item_view' item.id %}">
-                        {{item.item}}
-                    </a>
-                </td>
-                <td>
-                    <div class="row">
-                        <div class="col s1 m1 valign-wrapper">
-                            <h6>
-                                {{item.total_quantity}}
-                            </h6>
-                        </div>
-                        {% has_item_admin item user as item_admin %}
-                        {% if item_admin and item.can_edit %}
-                        <div class="col s2 m2">
-                            <form action="{% url 'item_plus' item.id %}" method="post">
-                                {% csrf_token %}
-                                {% if redirect_field_value %}
-                                <input name="{{ redirect_field_name }}" type="hidden"
-                                       value="{{ redirect_field_value }}"/>
-                                {% endif %}
-                                <button class="btn-floating blue btn-small" type="submit">
-                                    <i class="material-icons">exposure_plus_1</i>
-                                </button>
-                            </form>
-                        </div>
-                        <div class="col s2 m2">
-                            <form action="{% url 'item_minus' item.id %}" method="post">
-                                {% csrf_token %}
-                                {% if redirect_field_value %}
-                                <input name="{{ redirect_field_name }}" type="hidden"
-                                       value="{{ redirect_field_value }}"/>
-                                {% endif %}
-                                <button class="inline btn-floating red darken-2 btn-small" type="submit">
-                                    <i class="material-icons">exposure_neg_1</i>
-                                </button>
-                            </form>
-                        </div>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h5>Participation</h5>
+<table class="responsive-table striped">
+    <thead>
+    <th>Discord User</th>
+    <th>InGame Character</th>
+    <th>Number of Shares</th>
+    <th>% Cut Of This Anom</th>
+    <th>Actions</th>
+    </thead>
+    <tbody>
+    <tr>
+        <td colspan="5">
+            {% has_share loot_group user as has_share_already %}
+            {% loot_group_still_can_join_alts loot_group user as user_can_still_join_alts %}
+            {% if not has_share_already %}
+            <a class="waves-effect waves-light btn green darken-2"
+               href="{% url 'loot_share_join' loot_group.id %}"><i
+                    class="material-icons right">add_circle</i>Join As Participant</a>
+            {% elif user_can_still_join_alts %}
+            <a class="waves-effect waves-light btn purple darken-2"
+               href="{% url 'loot_share_join' loot_group.id %}"><i
+                    class="material-icons right">add_circle</i>Join Another Alt As Participant</a>
+            {% endif %}
+            {% if admin %}
+            <a class="waves-effect waves-light btn green darken-2"
+               href="{% url 'loot_share_add' loot_group.id %}"><i
+                    class="material-icons right">add_circle</i>Add Participant</a>
+            <form action="{% url 'loot_share_add_fleet_members' loot_group.id %}" method="post">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                <input name="{{ redirect_field_name }}" type="hidden" value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <button class="waves-effect waves-light btn" type="submit">Give All Fleet Members 1 Share
+                </button>
+            </form>
+            {% endif %}
+        </td>
+    </tr>
+    {% for loot_shares in loot_shares_by_discord_id.values %}
+    {% for share in loot_shares %}
+    <tr>
+        {% if forloop.first %}
+        <td rowspan="{{loot_shares|length}}">
+            {% if share.character.discord_avatar_url %}
+            <img alt="" class="avatar"
+                 src="{{ share.character.discord_avatar_url }}?size=32" style="width: 32px">
+            {% endif %}
+            {{share.character.discord_username}}
+        </td>
+        {% endif %}
+        <td>{{share.character}}</td>
+        <td>
+            <div class="row">
+                <div class="col s1 m1 valign-wrapper">
+                    <h6 class="font-size:20px;">
+                        {{share.share_quantity}}
+                    </h6>
+                </div>
+                {% if admin %}
+                <div class="col s2 m2">
+                    <form action="{% url 'loot_share_plus' share.id %}" method="post">
+                        {% csrf_token %}
+                        {% if redirect_field_value %}
+                        <input name="{{ redirect_field_name }}" type="hidden"
+                               value="{{ redirect_field_value }}"/>
                         {% endif %}
-                    </div>
-                </td>
-                <td>{{item.location}}</td>
-                <td>{{item.status}}</td>
-                <td>
-                    {% if item_admin %}
-                    {% if item.can_edit %}
-                    <a href="{% url 'item_edit' item.id %}">Edit Item</a><br/>
-                    <a class="red-text" href="{% url 'item_delete' item.id %}">Delete Item</a>
-                    {% endif %}
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div class="row">
-        <div class="col s12 m12">
-            <h5>Participation</h5>
-            <table class="responsive-table striped">
-                <thead>
-                <th>Discord User</th>
-                <th>InGame Character</th>
-                <th>Number of Shares</th>
-                <th>% Cut Of This Anom</th>
-                <th>Actions</th>
-                </thead>
-                <tbody>
-                <tr>
-                    <td colspan="5">
-                        {% has_share loot_group user as has_share_already %}
-                        {% loot_group_still_can_join_alts loot_group user as user_can_still_join_alts %}
-                        {% if not has_share_already %}
-                        <a class="waves-effect waves-light btn green darken-2"
-                           href="{% url 'loot_share_join' loot_group.id %}"><i
-                                class="material-icons right">add_circle</i>Join As Participant</a>
-                        {% elif user_can_still_join_alts %}
-                        <a class="waves-effect waves-light btn purple darken-2"
-                           href="{% url 'loot_share_join' loot_group.id %}"><i
-                                class="material-icons right">add_circle</i>Join Another Alt As Participant</a>
+                        <button class="btn-floating blue btn-small" type="submit">
+                            <i class="material-icons">exposure_plus_1</i>
+                        </button>
+                    </form>
+                </div>
+                <div class="col s2 m2">
+                    <form action="{% url 'loot_share_minus' share.id %}" method="post">
+                        {% csrf_token %}
+                        {% if redirect_field_value %}
+                        <input name="{{ redirect_field_name }}" type="hidden"
+                               value="{{ redirect_field_value }}"/>
                         {% endif %}
-                        {% if admin %}
-                        <a class="waves-effect waves-light btn green darken-2"
-                           href="{% url 'loot_share_add' loot_group.id %}"><i
-                                class="material-icons right">add_circle</i>Add Participant</a>
-                        <form action="{% url 'loot_share_add_fleet_members' loot_group.id %}" method="post">
-                            {% csrf_token %}
-                            {% if redirect_field_value %}
-                            <input name="{{ redirect_field_name }}" type="hidden" value="{{ redirect_field_value }}"/>
-                            {% endif %}
-                            <button class="waves-effect waves-light btn" type="submit">Give All Fleet Members 1 Share
-                            </button>
-                        </form>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% for loot_shares in loot_shares_by_discord_id.values %}
-                {% for share in loot_shares %}
-                <tr>
-                    {% if forloop.first %}
-                    <td rowspan="{{loot_shares|length}}">
-                        {% if share.character.discord_avatar_url %}
-                        <img alt="" class="avatar"
-                             src="{{ share.character.discord_avatar_url }}?size=32" style="width: 32px">
-                        {% endif %}
-                        {{share.character.discord_username}}
-                    </td>
-                    {% endif %}
-                    <td>{{share.character}}</td>
-                    <td>
-                        <div class="row">
-                            <div class="col s1 m1 valign-wrapper">
-                                <h6 class="font-size:20px;">
-                                    {{share.share_quantity}}
-                                </h6>
-                            </div>
-                            {% if admin %}
-                            <div class="col s2 m2">
-                                <form action="{% url 'loot_share_plus' share.id %}" method="post">
-                                    {% csrf_token %}
-                                    {% if redirect_field_value %}
-                                    <input name="{{ redirect_field_name }}" type="hidden"
-                                           value="{{ redirect_field_value }}"/>
-                                    {% endif %}
-                                    <button class="btn-floating blue btn-small" type="submit">
-                                        <i class="material-icons">exposure_plus_1</i>
-                                    </button>
-                                </form>
-                            </div>
-                            <div class="col s2 m2">
-                                <form action="{% url 'loot_share_minus' share.id %}" method="post">
-                                    {% csrf_token %}
-                                    {% if redirect_field_value %}
-                                    <input name="{{ redirect_field_name }}" type="hidden"
-                                           value="{{ redirect_field_value }}"/>
-                                    {% endif %}
-                                    <button class="inline btn-floating red darken-2 btn-small" type="submit">
-                                        <i class="material-icons">exposure_neg_1</i>
-                                    </button>
-                                </form>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </td>
-                    <td>{{share.flat_percent_cut}}%</td>
-                    <td>
-                        {% if admin %}
-                        <a
-                                href="{% url 'loot_share_edit' share.id %}">Edit</a>
-                        <form action="{% url 'loot_share_delete' share.id %}" method="post">
-                            {% csrf_token %}
-                            {% if redirect_field_value %}
-                            <input name="{{ redirect_field_name }}" type="hidden" value="{{ redirect_field_value }}"/>
-                            {% endif %}
-                            <button style="background:none; border-width:0px; color:red; text-decoration:underline;"
-                                    type="submit">Delete
-                            </button>
-                        </form>
+                        <button class="inline btn-floating red darken-2 btn-small" type="submit">
+                            <i class="material-icons">exposure_neg_1</i>
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </td>
+        <td>{{share.flat_percent_cut}}%</td>
+        <td>
+            {% if admin %}
+            <a
+                    href="{% url 'loot_share_edit' share.id %}">Edit</a>
+            <form action="{% url 'loot_share_delete' share.id %}" method="post">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                <input name="{{ redirect_field_name }}" type="hidden" value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <button style="background:none; border-width:0px; color:red; text-decoration:underline;"
+                        type="submit">Delete
+                </button>
+            </form>
 
-                        {% endif %}
+            {% endif %}
 
-                    </td>
-                </tr>
-                {% endfor %}
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    {% endblock %}
+        </td>
+    </tr>
+    {% endfor %}
+    {% endfor %}
+    </tbody>
+</table>
 
 
-    {% block extrafooter %}
-
-    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
+{% endblock %}
 
 
-    <script>
-var clipboard = new ClipboardJS('.btn');
+{% block extrafooter %}
 
-  document.addEventListener('DOMContentLoaded', function() {
-    var elems = document.querySelectorAll('.collapsible');
-    var instances = M.Collapsible.init(elems);
-  });
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
 
 
-    </script>
+<script>
+    var clipboard = new ClipboardJS('.btn');
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var elems = document.querySelectorAll('.collapsible');
+        var instances = M.Collapsible.init(elems);
+    });
 
 
-    {% endblock %}
+</script>
+
+
+{% endblock %}

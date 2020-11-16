@@ -193,16 +193,18 @@
                 <div class="collection">
                     {% for lootgroup in bucket.lootgroup_set.all %}
                     {% has_share lootgroup user as has_share_already %}
+                    {% loot_group_name lootgroup as lootgroup_name %}
                     {% if has_share_already %}
-                    <a title="You have shares in this loot group" href="{% url 'loot_group_view' lootgroup.id %}" class="collection-item">
+                    <a title="You have shares in this loot group" href="{% url 'loot_group_view' lootgroup.id %}"
+                       class="collection-item">
                         <span class="badge">
                             <img class="avatar" src="{{ user.discord_user.avatar_url }}?size=16" style="width: 16px"/>
                         </span>
-                        {{lootgroup.fleet_anom.anom_type}} - {{lootgroup.fleet_anom.system}}
+                        {{lootgroup_name}}
                     </a>
                     {% else %}
                     <a href="{% url 'loot_group_view' lootgroup.id %}" class="collection-item">
-                        {{lootgroup.fleet_anom.anom_type}} - {{lootgroup.fleet_anom.system}}
+                        {{lootgroup_name}}
                     </a>
                     {% endif %}
                     {% endfor %}

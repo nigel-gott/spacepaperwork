@@ -145,6 +145,13 @@ def has_share(loot_group, user):
     return loot_group.has_share(user)
 
 
+@register.simple_tag
+def loot_group_name(loot_group):
+    if loot_group.name:
+        return loot_group.name
+    return loot_group.fleet_anom.anom_type
+
+
 @register.filter
 def index(sequence, position):
     print(position)
