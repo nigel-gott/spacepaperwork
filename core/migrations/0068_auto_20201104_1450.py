@@ -5,9 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0067_auto_20201104_1235"),
-    ]
+    dependencies = [("core", "0067_auto_20201104_1235")]
 
     operations = [
         migrations.AlterField(
@@ -30,5 +28,5 @@ class Migration(migrations.Migration):
                     ("buyback", "Buy Back"),
                 ]
             ),
-        ),
+        )
     ]

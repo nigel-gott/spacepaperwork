@@ -1,9 +1,43 @@
+# mypy: ignore-errors
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import *
-
 # Register your models here.
+from core.models import (
+    AnomType,
+    Character,
+    CharacterLocation,
+    Contract,
+    Corp,
+    CorpHanger,
+    DiscordUser,
+    EggTransaction,
+    Fleet,
+    FleetAnom,
+    FleetMember,
+    FleetType,
+    GooseUser,
+    InventoryItem,
+    IskTransaction,
+    Item,
+    ItemFilter,
+    ItemFilterGroup,
+    ItemLocation,
+    ItemSubSubType,
+    ItemSubType,
+    ItemType,
+    JunkedItem,
+    LootBucket,
+    LootGroup,
+    LootShare,
+    MarketOrder,
+    Region,
+    SoldItem,
+    Station,
+    System,
+    TransferLog,
+)
+
 admin.site.register(Fleet)
 admin.site.register(FleetType)
 admin.site.register(Corp)
@@ -41,6 +75,8 @@ admin.site.register(ItemFilterGroup)
 # broker_fee = models.decimalfield(verbose_name="your broker fee in %", max_digits=5, decimal_places=2, default=8.0)
 # transaction_tax = models.decimalfield(verbose_name="your transaction tax in %", max_digits=5, decimal_places=2, default=15.0)
 # default_character = models.onetoonefield(character, on_delete=models.cascade)
+
+
 class CustomUserAdmin(UserAdmin):
     fieldsets = UserAdmin.fieldsets + (
         (

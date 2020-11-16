@@ -1,9 +1,11 @@
-from django.db.models import Q
-from django.utils import timezone
+import math as m
+import numbers
 
+from django import template
+
+import core
 from core.models import (
     Contract,
-    Fleet,
     FleetMember,
     InventoryItem,
     MarketOrder,
@@ -12,10 +14,6 @@ from core.models import (
     future_fleets_query,
     past_fleets_query,
 )
-from django import template
-import math as m
-import core
-import numbers
 
 register = template.Library()
 
@@ -82,7 +80,7 @@ def formatmoney(value):
 @register.filter()
 def nicemoney(value):
     if isinstance(value, numbers.Number):
-        floored = m.floor(value)
+        floored = m.floor(value)  # type: ignore
     else:
         floored = m.floor(value.amount)
 

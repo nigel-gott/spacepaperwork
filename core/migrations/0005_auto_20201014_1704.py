@@ -5,15 +5,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0004_fleet_expected_duration"),
-    ]
+    dependencies = [("core", "0004_fleet_expected_duration")]
 
     operations = [
-        migrations.RemoveField(
-            model_name="character",
-            name="user",
-        ),
+        migrations.RemoveField(model_name="character", name="user"),
         migrations.AddField(
             model_name="character",
             name="discord_id",

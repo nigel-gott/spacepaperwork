@@ -1,6 +1,7 @@
 from pathlib import Path
+
+import pytest
 import requests
-from splinter import Browser
 
 
 def snapshot(browser, name):
@@ -18,6 +19,7 @@ def wait_and_click(browser, element_id):
     button.click()
 
 
+@pytest.mark.slow
 def test_can_sign_up_and_create_new_fleet(http_service, browser):
     response = requests.get(http_service)
     assert response.status_code == 200

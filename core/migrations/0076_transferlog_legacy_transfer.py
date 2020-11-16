@@ -5,14 +5,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0075_auto_20201113_1714"),
-    ]
+    dependencies = [("core", "0075_auto_20201113_1714")]
 
     operations = [
         migrations.AddField(
             model_name="transferlog",
             name="legacy_transfer",
             field=models.BooleanField(default=True),
-        ),
+        )
     ]

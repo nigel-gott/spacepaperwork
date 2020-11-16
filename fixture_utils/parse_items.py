@@ -1,4 +1,5 @@
 import json
+
 import jsonpickle
 
 
@@ -18,9 +19,7 @@ def main():
                 {
                     "model": "core.itemtype",
                     "pk": item_type_pk,
-                    "fields": {
-                        "name": type_info["name"],
-                    },
+                    "fields": {"name": type_info["name"]},
                 }
             )
             for sub_type in type_info["contents"].values():

@@ -195,18 +195,18 @@
     var elems = document.querySelectorAll('.collapsible');
     var instances = M.Collapsible.init(elems, {
       'onOpenStart': function(li){
-       localStorage['closed_help'] = 'open'; 
+       localStorage['closed_help'] = 'open';
 
       },
       'onCloseStart': function(li){
-       localStorage['closed_help'] = 'closed'; 
+       localStorage['closed_help'] = 'closed';
       },
     });
    if (localStorage.getItem("closed_help") === null || localStorage['closed_help'] == 'open') {
      var elem = document.getElementById("top_level_thingy");
        var instance = M.Collapsible.getInstance(elem);
        instance.open();
-   } 
+   }
   });
 
 

@@ -5,9 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0071_fleet_loottype"),
-    ]
+    dependencies = [("core", "0071_fleet_loottype")]
 
     operations = [
         migrations.AlterField(
@@ -21,5 +19,5 @@ class Migration(migrations.Migration):
                     ("cancelled", "cancelled"),
                 ]
             ),
-        ),
+        )
     ]

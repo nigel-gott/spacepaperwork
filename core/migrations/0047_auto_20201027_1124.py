@@ -5,9 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0046_contract_log"),
-    ]
+    dependencies = [("core", "0046_contract_log")]
 
     operations = [
         migrations.AlterField(

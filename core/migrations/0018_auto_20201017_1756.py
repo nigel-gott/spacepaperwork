@@ -5,13 +5,10 @@ from django.db import migrations
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0017_auto_20201017_1722"),
-    ]
+    dependencies = [("core", "0017_auto_20201017_1722")]
 
     operations = [
         migrations.AlterUniqueTogether(
-            name="lootshare",
-            unique_together={("character", "loot_group")},
-        ),
+            name="lootshare", unique_together={("character", "loot_group")}
+        )
     ]

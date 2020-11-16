@@ -5,9 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0014_auto_20201017_1138"),
-    ]
+    dependencies = [("core", "0014_auto_20201017_1138")]
 
     operations = [
         migrations.RenameField(

@@ -1,4 +1,4 @@
-from core.models import GooseUser, DiscordUser
+from core.models import GooseUser
 
 
 def run(*args):
@@ -8,6 +8,5 @@ def run(*args):
     # Fetch all questions
     user = GooseUser.objects.get(username=args[0])
     user.is_staff = True
-    user.is_admin = True
     user.is_superuser = True
     user.save()

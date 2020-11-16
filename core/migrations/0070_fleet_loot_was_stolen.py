@@ -5,14 +5,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0069_auto_20201104_2101"),
-    ]
+    dependencies = [("core", "0069_auto_20201104_2101")]
 
     operations = [
         migrations.AddField(
             model_name="fleet",
             name="loot_was_stolen",
             field=models.BooleanField(default=False),
-        ),
+        )
     ]

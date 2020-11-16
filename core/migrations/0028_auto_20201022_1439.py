@@ -5,14 +5,12 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0027_auto_20201022_0806"),
-    ]
+    dependencies = [("core", "0027_auto_20201022_0806")]
 
     operations = [
         migrations.AlterField(
             model_name="isktransaction",
             name="notes",
             field=models.TextField(default=""),
-        ),
+        )
     ]

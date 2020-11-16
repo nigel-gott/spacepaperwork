@@ -1,11 +1,13 @@
 [MASTER]
 load-plugins=pylint_django
+init-hook='import sys; sys.path.append("goosetools")'
 
 [FORMAT]
-max-line-length=120
+max-line-length=88
+disable = C0330, C0326, I0011, no-else-return
 
 [MESSAGES CONTROL]
-disable=missing-docstring,invalid-name
+disable=missing-docstring,invalid-name,line-too-long,too-few-public-methods,too-many-lines,fixme,too-many-arguments,too-many-locals,too-many-statements,too-many-nested-blocks,too-many-branches
 
 [DESIGN]
 max-parents=13

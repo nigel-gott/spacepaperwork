@@ -5,9 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("core", "0002_fleettype_material_icon"),
-    ]
+    dependencies = [("core", "0002_fleettype_material_icon")]
 
     operations = [
         migrations.AddField(
@@ -15,5 +13,5 @@ class Migration(migrations.Migration):
             name="material_colour",
             field=models.TextField(default="lime lighten-3"),
             preserve_default=False,
-        ),
+        )
     ]

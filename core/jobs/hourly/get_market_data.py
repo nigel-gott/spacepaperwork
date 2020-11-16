@@ -1,13 +1,13 @@
 import csv
+from decimal import Decimal
 
 import requests
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
+from django.utils.timezone import make_aware
 from django_extensions.management.jobs import HourlyJob
 
 from core.models import Item, ItemMarketDataEvent
-from django.utils.dateparse import parse_datetime
-from decimal import Decimal
-from django.utils.timezone import make_aware
-from django.utils import timezone
 
 
 class Job(HourlyJob):
@@ -21,7 +21,13 @@ class Job(HourlyJob):
         csv_lines = csv.reader(decoded_content.splitlines(), delimiter=",")
         for line in list(csv_lines)[1:]:
             market_id = line[0]
-            time = make_aware(parse_datetime(line[2]), timezone=timezone.utc)
+            datetime_str = line[2]
+            datetime_from_csv = parse_datetime(datetime_str)
+            if datetime_from_csv is None:
+                raise Exception(
+                    f"Invalid datetime recieved from stats.csv: {datetime_str}"
+                )
+            time = make_aware(datetime_from_csv, timezone=timezone.utc)
             item = Item.objects.get(eve_echoes_market_id=market_id)
             lowest_sell = decimal_or_none(line[5])
             event = ItemMarketDataEvent(

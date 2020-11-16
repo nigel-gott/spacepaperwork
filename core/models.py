@@ -1,27 +1,23 @@
+import math as m
 from decimal import Decimal
-from typing import Optional, Union
+from typing import Union
 
-from allauth.socialaccount.models import SocialAccount
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.core import validators
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import DecimalField, F, FloatField, Q
 from django.db.models.aggregates import Min, Sum
-from django.db.models.expressions import Combinable, ExpressionWrapper
 from django.db.models.fields import BooleanField
+from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.deconstruct import deconstructible
-from django.utils.translation import gettext_lazy as _
 from django.utils.translation import gettext_lazy as _
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 from timezone_field import TimeZoneField
-import math as m
-from django.db.models.functions import Coalesce
 
 
 class Corp(models.Model):
@@ -65,6 +61,7 @@ class Character(models.Model):
     corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
     verified = models.BooleanField(null=True, blank=True)
 
+    # pylint: disable=no-member
     def gooseuser_or_false(self):
         return (
             self.discord_user
@@ -90,7 +87,7 @@ class Character(models.Model):
 
 @deconstructible
 class UnicodeAndSpacesUsernameValidator(UnicodeUsernameValidator):
-    regex = r"^[\w.@+- ]+\Z"
+    regex = r"^[-\w.@+ ]+\Z"
     message = _(
         "Enter a valid username. This value may contain only letters, "
         "numbers, and @/./+/-/_/space  characters."
@@ -102,10 +99,8 @@ class GooseUser(AbstractUser):
     username = models.CharField(
         max_length=150,
         unique=True,
-        validators=[UnicodeAndSpacesUsernameValidator],
-        error_messages={
-            "unique": _("A user with that username already exists."),
-        },
+        validators=[UnicodeAndSpacesUsernameValidator()],
+        error_messages={"unique": _("A user with that username already exists.")},
     )
 
     discord_user = models.OneToOneField(DiscordUser, on_delete=models.CASCADE)
@@ -255,10 +250,7 @@ class Fleet(models.Model):
         ("Master Looter", "Master Looter"),
         ("Free For All", "Free For All"),
     ]
-    fc = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-    )
+    fc = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.TextField()
     fleet_type = models.ForeignKey(FleetType, on_delete=models.CASCADE)
     loot_type = models.TextField(choices=LOOT_TYPE_CHOICES, default="Master Looter")
@@ -271,7 +263,6 @@ class Fleet(models.Model):
     loot_was_stolen = models.BooleanField(default=False)
 
     def members_for_user(self, user):
-        uid = user.discord_uid()
         return FleetMember.objects.filter(
             fleet=self, character__discord_user=user.discord_user
         )
@@ -308,7 +299,6 @@ class Fleet(models.Model):
         if self.in_the_past():
             return False
 
-        uid = user.discord_uid()
         num_chars = len(user.characters())
         num_characters_in_fleet = len(self.members_for_user(user))
 
@@ -599,7 +589,7 @@ class Contract(models.Model):
             ("cancelled", "cancelled"),
         ]
     )
-    log = models.JSONField(null=True, blank=True)
+    log = models.JSONField(null=True, blank=True)  # type: ignore
 
     def can_accept_or_reject(self, user):
         return self.status == "pending" and self.to_char.gooseuser_or_false() == user
@@ -704,11 +694,7 @@ class FleetAnom(models.Model):
 class ItemFilter(models.Model):
     group = models.ForeignKey(ItemFilterGroup, on_delete=models.CASCADE)
     filter_type = models.TextField(
-        choices=[
-            ("exclude", "exclude"),
-            ("require", "require"),
-            ("suggest", "suggest"),
-        ]
+        choices=[("exclude", "exclude"), ("require", "require"), ("suggest", "suggest")]
     )
     item = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, blank=True)
     item_sub_sub_type = models.ForeignKey(
@@ -773,22 +759,24 @@ class LootBucket(models.Model):
         for flat_cut in flat_cuts_by_username_qs:
             flat_cuts_by_username[
                 flat_cut["character__discord_user__username"]
-            ] = flat_cut["flat_cut"]
+            ] = Decimal(flat_cut["flat_cut"])
         result = {
             "total_shares": total_shares,
             "total_flat_cuts": total_flat_cuts,
             "participation": {},
         }
-        total_after_cuts = isk * (100 - total_flat_cuts) / 100
+        total_after_cuts = isk * Decimal(100 - total_flat_cuts) / 100
         for group in shares_by_username:
             username = group["character__discord_user__username"]
-            flat_cut = flat_cuts_by_username.get(username, 0)
+            flat_cut = Decimal(flat_cuts_by_username.get(username, 0))
             result["participation"][username] = {
                 "shares": group["num_shares"],
                 "flat_cut": flat_cut,
                 "flat_cut_isk": (flat_cut / 100) * isk,
-                "share_isk": (group["num_shares"] / total_shares) * total_after_cuts,
-                "total_isk": (group["num_shares"] / total_shares) * total_after_cuts
+                "share_isk": (Decimal(group["num_shares"]) / total_shares)
+                * total_after_cuts,
+                "total_isk": (Decimal(group["num_shares"]) / total_shares)
+                * total_after_cuts
                 + (flat_cut / 100) * isk,
             }
         return result
@@ -804,15 +792,12 @@ class LootGroup(models.Model):
     bucket = models.ForeignKey(LootBucket, on_delete=models.CASCADE)
     manual = models.BooleanField(default=False)
 
-    def total_cuts(self):
-        flat_cuts = LootShare.objects.filter(loot_group=self.id)
-        total_flat_cuts = flat_cuts.aggregate(result=Sum("flat_percent_cut"))["result"]
-
+    # TODO Uncouple the fleet requirement from LootGroups
     def fleet(self):
-        return self.fleet_anom.fleet
+        return self.fleet_anom and self.fleet_anom.fleet
 
     def has_admin(self, user):
-        return self.fleet().has_admin(user)
+        return self.fleet() and self.fleet().has_admin(user)
 
     def has_share(self, user):
         return (
@@ -825,7 +810,7 @@ class LootGroup(models.Model):
         )
 
     def alts_allowed(self):
-        return self.fleet_anom.fleet.gives_shares_to_alts
+        return self.fleet_anom and self.fleet_anom.fleet.gives_shares_to_alts
 
     def can_join(self, character):
         return self.still_open() and (
@@ -966,7 +951,7 @@ class StackedInventoryItem(models.Model):
     def loc(self):
         items = self.inventoryitem_set.count()
         if items > 0:
-            return self.inventoryitem_set.first().location
+            return self.inventoryitem_set.first().location  # type: ignore
         else:
             return False
 
@@ -981,7 +966,7 @@ class StackedInventoryItem(models.Model):
     def has_admin(self, user):
         items = self.inventoryitem_set.count()
         if items > 0:
-            return self.inventoryitem_set.first().has_admin(user)
+            return self.inventoryitem_set.first().has_admin(user)  # type: ignore
         else:
             return True
 
@@ -1010,6 +995,47 @@ class InventoryItem(models.Model):
         StackedInventoryItem, on_delete=models.SET_NULL, null=True, blank=True
     )
 
+    def split_off(self, new_quantity, new_stack=None):
+        if self.junked_quantity() + self.order_quantity() + self.sold_quantity() > 0:
+            raise Exception(
+                "Cannot split and item that has been junked, sold or listed."
+            )
+        new_item = InventoryItem.objects.create(
+            item=self.item,
+            quantity=new_quantity,
+            created_at=self.created_at,
+            location=self.location,
+            loot_group=self.loot_group,
+            contract=self.contract,
+            stack=new_stack,
+        )
+        updated_quantity = self.quantity - new_quantity
+        for isk_tran in self.isktransaction_set.all():  # type: ignore
+            isk_tran.isk = (isk_tran.isk / self.quantity) * updated_quantity
+            isk_tran.quantity = updated_quantity
+            isk_tran.save()
+            IskTransaction.objects.create(
+                item=new_item,
+                transaction_type=isk_tran.transaction_type,
+                notes=isk_tran.notes,
+                time=isk_tran.time,
+            )
+        for egg_tran in self.eggtransaction_set.all():  # type: ignore
+            egg_tran.eggs = (egg_tran.isk / self.quantity) * updated_quantity
+            egg_tran.quantity = updated_quantity
+            egg_tran.save()
+            EggTransaction.objects.create(
+                item=new_item,
+                notes=egg_tran.notes,
+                time=egg_tran.time,
+                debt=egg_tran.debt,
+                counterparty_discord_username=egg_tran.counterparty_discord_username,
+            )
+        self.quantity = updated_quantity
+        self.full_clean()
+        self.save()
+        return new_item
+
     def add_isk_transaction(self, isk, transaction_type, quantity, notes, user):
         if not self.has_admin(user):
             return (
@@ -1032,31 +1058,31 @@ class InventoryItem(models.Model):
     def has_admin(self, user):
         return self.location.has_admin(user)
 
-    def status(self):
-        return "Status"
-
     def isk_balance(self):
-        return to_isk(model_sum(self.isktransaction_set, "isk"))
+        return to_isk(model_sum(self.isktransaction_set, "isk"))  # type: ignore
 
     def egg_balance(self):
-        return to_isk(model_sum(self.eggtransaction_set, "eggs"))
+        return to_isk(model_sum(self.eggtransaction_set, "eggs"))  # type: ignore
 
     def isk_and_eggs_balance(self):
         return self.isk_balance() + self.egg_balance()
 
     def order_quantity(self):
+        # pylint: disable=no-member
         if hasattr(self, "marketorder"):
             return self.marketorder.quantity
         else:
             return 0
 
     def sold_quantity(self):
+        # pylint: disable=no-member
         if hasattr(self, "solditem"):
             return self.solditem.quantity
         else:
             return 0
 
     def junked_quantity(self):
+        # pylint: disable=no-member
         if hasattr(self, "junkeditem"):
             return self.junkeditem.quantity
         else:
@@ -1117,16 +1143,17 @@ class InventoryItem(models.Model):
         status = ""
         if self.quantity != 0:
             if self.contract:
-                status = status + f" In Pending Contract"
+                status = status + " In Pending Contract"
             else:
                 status = status + f" {self.quantity} Waiting"
         if self.stack:
-            status = status + f" Stacked"
+            status = status + " Stacked"
         quantity_listed = self.order_quantity()
         if quantity_listed != 0:
             status = status + f" {quantity_listed} Listed"
         quantity_sold = self.sold_quantity()
         if quantity_sold != 0:
+            # pylint: disable=no-member
             status = status + f" {quantity_sold} Sold ({self.solditem.status()})"
         quantity_junked = self.junked_quantity()
         if quantity_junked != 0:
@@ -1223,7 +1250,7 @@ class MarketOrder(models.Model):
         with transaction.atomic():
             old_price = self.listed_at_price.amount
             if new_price == old_price:
-                return False, f"The new price must be different from the old price."
+                return False, "The new price must be different from the old price."
             else:
                 if old_price > new_price:
                     notes = f"Market Price Was Reduced from {old_price} to {new_price}"
@@ -1251,7 +1278,7 @@ class MarketOrder(models.Model):
 class TransferLog(models.Model):
     user = models.ForeignKey(GooseUser, on_delete=models.CASCADE)
     time = models.DateTimeField()
-    explaination = models.JSONField()
+    explaination = models.JSONField()  # type: ignore
     count = models.PositiveIntegerField()
     total = MoneyField(max_digits=20, decimal_places=2, default_currency="EEI")
     own_share = MoneyField(

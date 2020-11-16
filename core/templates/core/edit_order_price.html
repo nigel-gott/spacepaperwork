@@ -74,7 +74,7 @@ function calc_fee(){
     if (new_price_str && broker_fee_str){
 
         new_price = new Decimal(new_price_str);
-        
+
         const order_data = JSON.parse(document.getElementById('order-data').textContent);
         broker_fee = new Decimal(broker_fee_str).dividedBy(100);
         if(broker_fee.lessThan(0) || broker_fee.greaterThan(1)){

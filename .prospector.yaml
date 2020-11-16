@@ -1,0 +1,20 @@
+strictness: high
+test-warnings: true
+
+ignore-paths:
+  - .ipython
+
+ignore-patterns:
+  - (^|/)skip(this)?(/|$)
+
+pep8:
+  disable:
+    - E501
+  enable:
+    - W601
+  options:
+    max-line-length: 88
+
+mccabe:
+  disable:
+  - MC0001
