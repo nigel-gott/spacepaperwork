@@ -632,7 +632,10 @@ def loot_group_edit(request, pk):
             # todo handle more loot sources?
             if form.cleaned_data["loot_source"] == LootGroupForm.ANOM_LOOT_GROUP:
                 try:
-                    loot_group.fleet_anom.style = form.cleaned_data["anom_system"]
+                    loot_group.fleet_anom.system = form.cleaned_data["anom_system"]
+                    loot_group.fleet_anom.full_clean()
+                    loot_group.fleet_anom.save()
+
                     loot_group.fleet_anom.anom_type.level = form.cleaned_data["anom_level"]
                     loot_group.fleet_anom.anom_type.type = form.cleaned_data["anom_type"]
                     loot_group.fleet_anom.anom_type.faction = form.cleaned_data["anom_faction"]
@@ -657,6 +660,7 @@ def loot_group_edit(request, pk):
         form = LootGroupForm(
             initial={
                 "name": loot_group.name,
+                "anom_system": loot_group.fleet_anom.system,
                 "anom_level": loot_group.fleet_anom.anom_type.level,
                 "anom_faction": loot_group.fleet_anom.anom_type.faction,
                 "anom_type": loot_group.fleet_anom.anom_type.type,
