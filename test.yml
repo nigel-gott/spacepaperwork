@@ -9,20 +9,20 @@ services:
       dockerfile: ./compose/local/django/Dockerfile
     image: goosetools_local_django
     depends_on:
-      - postgres
+      - postgres_test
     volumes:
       - .:/app
     env_file:
-      - ./.envs/.local/.django
-      - ./.envs/.local/.postgres
+      - ./.envs/.test/.django
+      - ./.envs/.test/.postgres
     # ports:
     #   - "9000:8000"
     command: /start
 
-  postgres:
+  postgres_test:
     image: postgres:12
     env_file:
-      - ./.envs/.local/.postgres
+      - ./.envs/.test/.postgres
     
   firefox:
     image: selenium/standalone-firefox:4.0.0-alpha-7-prerelease-20201009
