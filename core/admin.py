@@ -52,15 +52,12 @@ admin.site.register(FleetAnom)
 admin.site.register(AnomType)
 admin.site.register(LootGroup)
 admin.site.register(LootBucket)
-admin.site.register(InventoryItem)
 admin.site.register(LootShare)
 admin.site.register(CharacterLocation)
 admin.site.register(ItemLocation)
 admin.site.register(CorpHanger)
 admin.site.register(Station)
 admin.site.register(SoldItem)
-admin.site.register(IskTransaction)
-admin.site.register(EggTransaction)
 admin.site.register(MarketOrder)
 admin.site.register(JunkedItem)
 admin.site.register(TransferLog)
@@ -70,11 +67,14 @@ admin.site.register(Contract)
 admin.site.register(ItemFilter)
 admin.site.register(ItemFilterGroup)
 
-# discord_user = models.onetoonefield(discorduser, on_delete=models.cascade)
-# timezone = timezonefield(default='europe/london')
-# broker_fee = models.decimalfield(verbose_name="your broker fee in %", max_digits=5, decimal_places=2, default=8.0)
-# transaction_tax = models.decimalfield(verbose_name="your transaction tax in %", max_digits=5, decimal_places=2, default=15.0)
-# default_character = models.onetoonefield(character, on_delete=models.cascade)
+
+class RawIdForItemAdmin(admin.ModelAdmin):
+    raw_id_fields = ("item",)
+
+
+admin.site.register(IskTransaction, RawIdForItemAdmin)
+admin.site.register(EggTransaction, RawIdForItemAdmin)
+admin.site.register(InventoryItem, RawIdForItemAdmin)
 
 
 class CustomUserAdmin(UserAdmin):
