@@ -144,6 +144,7 @@ def has_item_admin(item, user):
 def has_share(loot_group, user):
     return loot_group.has_share(user)
 
+
 @register.filter
 def index(sequence, position):
     print(position)

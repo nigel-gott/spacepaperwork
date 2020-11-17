@@ -800,7 +800,10 @@ class LootGroup(models.Model):
     def display_name(self):
         if self.name:
             return self.name
-        return self.fleet_anom.anom_type
+        if self.fleet_anom:
+            return self.fleet_anom.anom_type
+        else:
+            return f"Loot Group {self.id}"
 
     def has_admin(self, user):
         return self.fleet() and self.fleet().has_admin(user)
