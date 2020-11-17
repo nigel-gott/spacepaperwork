@@ -57,9 +57,6 @@ admin.site.register(CharacterLocation)
 admin.site.register(ItemLocation)
 admin.site.register(CorpHanger)
 admin.site.register(Station)
-admin.site.register(SoldItem)
-admin.site.register(MarketOrder)
-admin.site.register(JunkedItem)
 admin.site.register(TransferLog)
 admin.site.register(FleetMember)
 admin.site.register(DiscordUser)
@@ -75,6 +72,9 @@ class RawIdForItemAdmin(admin.ModelAdmin):
 admin.site.register(IskTransaction, RawIdForItemAdmin)
 admin.site.register(EggTransaction, RawIdForItemAdmin)
 admin.site.register(InventoryItem, RawIdForItemAdmin)
+admin.site.register(MarketOrder, RawIdForItemAdmin)
+admin.site.register(SoldItem, RawIdForItemAdmin)
+admin.site.register(JunkedItem, RawIdForItemAdmin)
 
 
 class CustomUserAdmin(UserAdmin):
