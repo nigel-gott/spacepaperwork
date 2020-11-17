@@ -23,10 +23,11 @@ CACHES = {
 # WhiteNoise
 # ------------------------------------------------------------------------------
 # http://whitenoise.evans.io/en/latest/django.html#using-whitenoise-in-development
-INSTALLED_APPS = [
-    "whitenoise.runserver_nostatic",
-    "goosetools.stub_discord_auth.apps.StubDiscordAuthConfig",
-] + INSTALLED_APPS  # noqa F405
+INSTALLED_APPS = (
+    ["whitenoise.runserver_nostatic"]
+    + INSTALLED_APPS  # noqa
+    + ["goosetools.stub_discord_auth.apps.StubDiscordAuthConfig"]
+)
 
 ENV_SPECIFIC_URLS = [
     path("stub_discord_auth/", include("stub_discord_auth.urls")),
