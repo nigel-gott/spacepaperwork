@@ -75,6 +75,7 @@ class GooseToolsTestCase(TestCase):
         self.system = System.objects.create(name="Test System", region=region)
         ItemFilterGroup.objects.create(name="None")
         self.client.force_login(self.user)
+        self.logged_in_user = self.user
 
     def a_fleet(self, fleet_name="Test Fleet") -> Fleet:
         response = self.client.post(

@@ -17,6 +17,8 @@ colorama==0.4.4
 pathtools==0.1.2
 pytest-watch==4.2.0
 watchdog==0.10.3
+# For testing time related features
+freezegun==1.0.0
 
 # Documentation
 # ------------------------------------------------------------------------------
