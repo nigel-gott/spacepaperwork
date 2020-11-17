@@ -2,14 +2,6 @@
 
 from django.db import migrations, models
 
-from core.models import SoldItem
-
-
-def set_historical_transfered(_apps, _schema_editor):
-    for sold_item in SoldItem.objects.all():
-        sold_item.transfered = sold_item.transfered_to_participants
-        sold_item.save()
-
 
 class Migration(migrations.Migration):
 
@@ -20,6 +12,5 @@ class Migration(migrations.Migration):
             model_name="solditem",
             name="transfered",
             field=models.BooleanField(default=False),
-        ),
-        migrations.RunPython(set_historical_transfered),
+        )
     ]

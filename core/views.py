@@ -1331,7 +1331,9 @@ def transfered_items(request):
             loc = ItemLocation.objects.get(
                 character_location=char_loc, corp_hanger=None
             )
-            done = SoldItem.objects.filter(item__location=loc, transfered=True)
+            done = SoldItem.objects.filter(
+                item__location=loc, quantity=F("transfered_quantity")
+            )
             all_sold.append({"loc": loc, "done": done})
 
     return render(request, "core/transfered_items.html", {"all_sold": all_sold})
@@ -1348,7 +1350,7 @@ def sold(request):
                 character_location=char_loc, corp_hanger=None
             )
             untransfered_sold_items = SoldItem.objects.filter(
-                item__location=loc, transfered=False
+                item__location=loc, quantity__gt=F("transfered_quantity")
             )
             all_sold.append({"loc": loc, "sold": untransfered_sold_items})
 
@@ -2163,6 +2165,7 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
     last_item = None
     for sold_item in to_transfer:
         last_item = sold_item.item
+        quantity_to_transfer = sold_item.quantity_to_transfer()
         total_isk = to_isk(sold_item.isk_balance)
         bucket = sold_item.item.loot_group.bucket
         participation = bucket.calculate_participation(
@@ -2172,8 +2175,9 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
         explaination[item_id] = participation
         explaination[item_id]["item"] = str(sold_item.item)
         explaination[item_id]["total_isk"] = total_isk.amount
+        explaination[item_id]["transfered_quantity"] = quantity_to_transfer
         total = total + total_isk
-        count = count + 1
+        count = count + quantity_to_transfer
         for discord_username, result in participation["participation"].items():
             isk = result["total_isk"]
             floored_isk = to_isk(floor(isk.amount))
@@ -2185,7 +2189,7 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
 
             deposit_transaction = IskTransaction(
                 item=sold_item.item,
-                quantity=sold_item.quantity,
+                quantity=quantity_to_transfer,
                 time=current_now,
                 isk=-floored_isk,
                 transaction_type="egg_deposit",
@@ -2194,7 +2198,7 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
             deposit_transaction.save()
             egg_transaction = EggTransaction(
                 item=sold_item.item,
-                quantity=sold_item.quantity,
+                quantity=quantity_to_transfer,
                 time=current_now,
                 eggs=floored_isk,
                 debt=False,
@@ -2208,6 +2212,10 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
                 )
             else:
                 total_participation[discord_username] = floored_isk
+        sold_item.transfered_quantity = sold_item.quantity
+        sold_item.full_clean()
+        sold_item.save()
+
     left_over_floored = to_isk(floor(left_over.amount))
     if left_over.amount > 0:
         if last_item is None:
@@ -2256,7 +2264,7 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
     )
     log.full_clean()
     log.save()
-    to_transfer.update(transfered=True, transfer_log=log.id)
+    to_transfer.update(transfer_log=log.id)
     return log.id
 
 
@@ -2308,7 +2316,7 @@ def transfer_eggs(request):
         if form.is_valid():
             to_transfer = SoldItem.objects.filter(
                 item__location__character_location__character__discord_user=request.user.discord_user,
-                transfered=False,
+                quantity__gt=F("transfered_quantity"),
             ).annotate(isk_balance=Sum("item__isktransaction__isk"))
             if not valid_transfer(to_transfer, request):
                 return HttpResponseRedirect(reverse("sold"))

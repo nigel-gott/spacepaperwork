@@ -67,6 +67,9 @@
             {% if forloop.first %}
             <td rowspan="{{item_details.participation.values|length}}">
                 <a href="{% url 'item_view' item_id %}">{{item_details.item}}</a><br/>
+                {% if item_details.transfered_quantity %}
+                    Quantity Transfered: {{item_details.transfered_quantity}}<br/>
+                {% endif %}
                 Total Profit: {{item_details.total_isk}}<br/>
                 Total Shares: {{item_details.total_shares}}<br/>
                 Total Flat Cuts: {{item_details.total_flat_cuts}}%

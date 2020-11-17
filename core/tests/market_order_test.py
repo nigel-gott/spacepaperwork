@@ -22,7 +22,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         self.assertEqual(self.user.isk_balance(), isk(8500))
         self.assertEqual(self.user.egg_balance(), isk(0))
-        self.assertEqual(sold_item.transfered, False)
+        self.assertEqual(sold_item.transfered_so_far(), False)
 
         response = self.client.post(
             reverse("transfer_eggs"), {"own_share_in_eggs": False}
@@ -30,7 +30,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
         self.assertEqual(response.status_code, 302)
 
         sold_item.refresh_from_db()
-        self.assertEqual(sold_item.transfered, True)
+        self.assertEqual(sold_item.transfered_so_far(), True)
         self.assertEqual(self.user.isk_balance(), isk("0"))
         self.assertEqual(self.user.egg_balance(), isk("8500"))
         log = TransferLog.objects.all()[0]
@@ -54,7 +54,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         self.assertEqual(self.user.isk_balance(), isk(8500))
         self.assertEqual(self.user.egg_balance(), isk(0))
-        self.assertEqual(sold_item.transfered, False)
+        self.assertEqual(sold_item.transfered_so_far(), False)
 
         response = self.client.post(
             reverse("transfer_eggs"), {"own_share_in_eggs": True}
@@ -68,7 +68,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
         #   Adding self.char's 1 share and flat % cut gets 4462.5.
         #   All egg quantitys are floored, however the seller gets any fractional remains hence self.char ends up with 4462 + 1 = Z 4463.
         sold_item.refresh_from_db()
-        self.assertEqual(sold_item.transfered, True)
+        self.assertEqual(sold_item.transfered_so_far(), True)
         self.assertEqual(self.user.isk_balance(), isk("0"))
         self.assertEqual(self.user.egg_balance(), isk("4463"))
         self.assertEqual(self.other_user.egg_balance(), isk("4037"))
@@ -106,7 +106,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         self.assertEqual(self.user.isk_balance(), isk(8500))
         self.assertEqual(self.user.egg_balance(), isk(0))
-        self.assertEqual(sold_item.transfered, False)
+        self.assertEqual(sold_item.transfered_so_far(), False)
 
         response = self.client.post(
             reverse("transfer_eggs"), {"own_share_in_eggs": True}
@@ -114,7 +114,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
         self.assertEqual(response.status_code, 302)
 
         sold_item.refresh_from_db()
-        self.assertEqual(sold_item.transfered, True)
+        self.assertEqual(sold_item.transfered_so_far(), True)
         self.assertEqual(self.user.isk_balance(), isk("0"))
         self.assertEqual(self.user.egg_balance(), isk("75"))
         log = TransferLog.objects.all()[0]
@@ -153,7 +153,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         self.assertEqual(self.user.isk_balance(), isk(8500))
         self.assertEqual(self.user.egg_balance(), isk(0))
-        self.assertEqual(sold_item.transfered, False)
+        self.assertEqual(sold_item.transfered_so_far(), False)
 
         response = self.client.post(
             reverse("transfer_eggs"), {"own_share_in_eggs": False}
@@ -167,7 +167,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
         #   Adding self.char's 1 share and flat % cut gets 4462.5.
         #   All egg quantitys are floored, however the seller gets any fractional remains hence self.char ends up with 4462 + 1 = Z 4463.
         sold_item.refresh_from_db()
-        self.assertEqual(sold_item.transfered, True)
+        self.assertEqual(sold_item.transfered_so_far(), True)
         self.assertEqual(self.user.isk_balance(), isk("0"))
         self.assertEqual(self.user.egg_balance(), isk("4463"))
         self.assertEqual(self.other_user.egg_balance(), isk("4037"))
@@ -193,7 +193,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         self.assertEqual(self.user.isk_balance(), isk(8500))
         self.assertEqual(self.user.egg_balance(), isk(0))
-        self.assertEqual(sold_item.transfered, False)
+        self.assertEqual(sold_item.transfered_so_far(), False)
 
         response = self.client.post(
             reverse("transfer_eggs"), {"own_share_in_eggs": False}
@@ -217,7 +217,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
         # The item fails to be transfered as there is no participation for it
         self.assertEqual(self.user.isk_balance(), isk(8500))
         self.assertEqual(self.user.egg_balance(), isk(0))
-        self.assertEqual(sold_item.transfered, False)
+        self.assertEqual(sold_item.transfered_so_far(), False)
 
     def test_egg_transfer_fails_if_one_item_has_negative_profit(self):
         # Given there is a basic fleet with a two items
@@ -246,8 +246,8 @@ class MarketOrderTestCase(GooseToolsTestCase):
         self.assertEqual(another_item.isk_balance(), isk(-498))
         self.assertEqual(self.user.isk_balance(), isk(8002))
         self.assertEqual(self.user.egg_balance(), isk(0))
-        self.assertEqual(sold_item.transfered, False)
-        self.assertEqual(another_sold_item.transfered, False)
+        self.assertEqual(sold_item.transfered_so_far(), False)
+        self.assertEqual(another_sold_item.transfered_so_far(), False)
 
         response = self.client.post(
             reverse("transfer_eggs"), {"own_share_in_eggs": False}
@@ -276,5 +276,66 @@ class MarketOrderTestCase(GooseToolsTestCase):
         # Both items fail to be transfered as one has made a negative profit and an admin needs to do something about it
         self.assertEqual(self.user.isk_balance(), isk(8002))
         self.assertEqual(self.user.egg_balance(), isk(0))
-        self.assertEqual(sold_item.transfered, False)
-        self.assertEqual(another_sold_item.transfered, False)
+        self.assertEqual(sold_item.transfered_so_far(), False)
+        self.assertEqual(another_sold_item.transfered_so_far(), False)
+
+    def test_transfering_an_item_multiple_times_as_it_sells_one_by_one_works(self):
+        # Given there is a basic fleet with a two items
+        fleet = self.a_fleet()
+        loot_group = self.a_loot_group(fleet)
+        item = self.an_item(loot_group, item_quantity=10)
+
+        self.a_loot_share(loot_group, self.char, share_quantity=1, flat_percent_cut=5)
+        self.a_loot_share(loot_group, self.other_char, share_quantity=1)
+
+        # When the first item gets sold for a profit
+        market_order = self.list_item(
+            item, listed_at_price=10000, transaction_tax=10, broker_fee=5
+        )
+        # Only half the order sells
+        sold_item = self.market_order_sold(market_order, quantity_remaining=5)
+
+        # Half has sold, the other half has an outstanding 5% broker fee.
+        self.assertEqual(self.user.isk_balance(), isk(8500 * 5 - 5 * 500))
+        self.assertEqual(self.user.egg_balance(), isk(0))
+        self.assertEqual(sold_item.transfered_so_far(), False)
+
+        # We transfer only that half sold so far
+        response = self.client.post(
+            reverse("transfer_eggs"), {"own_share_in_eggs": False}
+        )
+        self.assertEqual(response.status_code, 302)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(
+            len(messages),
+            2,
+            f"Expecting only two messages instead got: {[str(message) for message in messages]}",
+        )
+        self.assertEqual(
+            str(messages[0]),
+            "Sold 5 of item Tritanium x 10 @ Space On Test Char(Test Discord User)",
+        )
+        self.assertEqual(
+            "Generated Deposit and Transfer commands for Ƶ 40,000.00 eggs from 5 sold items!.",
+            str(messages[1]),
+        )
+
+        self.assertEqual(self.user.isk_balance(), isk(0))
+        self.assertEqual(self.user.egg_balance(), isk(21000))
+        self.assertEqual(self.other_user.egg_balance(), isk(19000))
+
+        # We sell the other half after a transfer
+        market_order.refresh_from_db()
+        self.market_order_sold(market_order, quantity_remaining=0)
+
+        # The first transfer also included the negative broker fee for all items in the stack hence not including it in this balance.
+        self.assertEqual(self.user.isk_balance(), isk(9000 * 5))
+
+        # We transfer The other half
+        response = self.client.post(
+            reverse("transfer_eggs"), {"own_share_in_eggs": False}
+        )
+
+        self.assertEqual(self.user.isk_balance(), isk(0))
+        self.assertEqual(self.user.egg_balance(), isk(44625))
+        self.assertEqual(self.other_user.egg_balance(), isk(40375))

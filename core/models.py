@@ -135,7 +135,7 @@ class GooseUser(AbstractUser):
         return (
             SoldItem.objects.filter(
                 item__location__character_location__character__discord_user=self.discord_user,
-                transfered=False,
+                quantity__gt=F("transfered_quantity"),
             ).count()
             > 0
         )
@@ -1316,13 +1316,17 @@ class SoldItem(models.Model):
             ("contract", "Contract"),
         ]
     )
-    deposited_into_eggs = BooleanField(default=False)
-    deposit_approved = BooleanField(default=False)
-    transfered_to_participants = BooleanField(default=False)
     transfered = BooleanField(default=False)
+    transfered_quantity = models.PositiveIntegerField(default=0)
     transfer_log = models.ForeignKey(
         TransferLog, on_delete=models.SET_NULL, null=True, blank=True
     )
+
+    def transfered_so_far(self):
+        return self.quantity_to_transfer() == 0
+
+    def quantity_to_transfer(self):
+        return self.quantity - self.transfered_quantity
 
     def isk_balance(self):
         return self.item.isk_balance()
@@ -1331,13 +1335,13 @@ class SoldItem(models.Model):
         return self.item.isk_and_eggs_balance()
 
     def status(self):
-        if self.transfered:
-            return "Transfered!"
+        if self.quantity_to_transfer() == 0:
+            return "All Sold Transfered!"
         else:
-            return "Pending Egg Transfer!"
+            return f"{self.quantity_to_transfer()} Pending, {self.transfered_quantity} Transfered Already!"
 
     def __str__(self):
-        return f"{self.item} x {self.quantity} - sold via: {self.sold_via}, status: {self.status()}"
+        return f"{self.item} x {self.quantity} Sold x {self.transfered_quantity} Transfered - via: {self.sold_via}"
 
 
 class JunkedItem(models.Model):

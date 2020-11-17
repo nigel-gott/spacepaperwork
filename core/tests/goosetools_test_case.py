@@ -308,13 +308,20 @@ class GooseToolsTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 302)
 
-    def market_order_sold(self, market_order: MarketOrder) -> SoldItem:
-        original_market_order_quantity = market_order.quantity
+    def market_order_sold(
+        self, market_order: MarketOrder, quantity_remaining: int = 0
+    ) -> SoldItem:
         response = self.client.post(
-            reverse("order_sold", args=[market_order.pk]), {"quantity_remaining": 0}
+            reverse("order_sold", args=[market_order.pk]),
+            {"quantity_remaining": quantity_remaining},
         )
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(MarketOrder.objects.filter(item=market_order.item).count(), 0)
+        if quantity_remaining == 0:
+            self.assertEqual(
+                MarketOrder.objects.filter(item=market_order.item).count(), 0
+            )
+        else:
+            market_order.refresh_from_db()
+            self.assertEqual(market_order.quantity, quantity_remaining)
         sold_item = SoldItem.objects.get(item=market_order.item)
-        self.assertEqual(sold_item.quantity, original_market_order_quantity)
         return sold_item

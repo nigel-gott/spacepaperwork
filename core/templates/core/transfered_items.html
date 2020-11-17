@@ -46,7 +46,7 @@
                         {{item.item.isk_and_eggs_balance}}
                     </td>
                     <td>
-                        {% if item.transfered %}
+                        {% if item.quantity_to_transfer == 0 %}
                         Transfered to participants, all done!
                         {% else %}
                         Awaiting Egg deposit.
