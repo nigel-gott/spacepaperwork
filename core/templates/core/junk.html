@@ -22,10 +22,16 @@
                 </td>
                 {% endif %}
                 <td>
-                    {{junk.item.stack.id}}
+                    {% if junk.item.stack %}
+                    <a href="{% url 'stack_view' junk.item.stack.id %}">{{junk.item.stack.id}}</a>
+                    {% else %}
+                    Not Stacked.
+                    {% endif %}
                 </td>
                 <td>
-                    {{junk.item.item}}
+                    <a href="{% url 'item_view' junk.item.id %}">
+                        {{junk.item.item}}
+                    </a>
                 </td>
                 <td>
                     {{junk.quantity}}

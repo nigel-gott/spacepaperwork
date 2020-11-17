@@ -198,3 +198,51 @@ class MarketOrderTestCase(GooseToolsTestCase):
         )
         self.stack_market_order_sold(original_stack)
         self.assertEqual(self.user.isk_balance(), isk(8500 * 11 + 850 * 9))
+
+    def test_complex_sub_splitting_example_with_multiple_buckets_and_price_chages(
+        self,
+    ):
+        # Given there is a fleet with a three items
+        fleet = self.a_fleet()
+        loot_group = self.a_loot_group(fleet)
+        loot_group2 = self.a_loot_group(fleet)
+
+        self.a_loot_share(loot_group, self.char, share_quantity=1, flat_percent_cut=5)
+        self.a_loot_share(loot_group, self.other_char, share_quantity=1)
+        self.a_loot_share(loot_group2, self.other_char, share_quantity=1)
+
+        item = self.an_item(loot_group, item_quantity=10)
+        self.an_item(loot_group2, item_quantity=10)
+        # And we stack some of the items
+        self.stack_items(item.location)
+        # And then another item of a different type is added
+        self.an_item(loot_group2, item=self.another_item, item_quantity=10)
+
+        item.refresh_from_db()
+        original_stack = item.stack
+        # We sell 11 of the stack, which will sell 10 of the first item and 1 of the second
+        self.list_item_stack(
+            original_stack,
+            quantity=11,
+            listed_at_price=10000,
+            transaction_tax=10,
+            broker_fee=5,
+        )
+
+        # By selling a subquantity of the stack, a new stack is made just for the portion which sold.
+        item.refresh_from_db()
+        split_off_stack = StackedInventoryItem.objects.last()
+
+        self.stack_market_order_sold(split_off_stack)
+        self.assertEqual(self.user.isk_balance(), isk(8500 * 11))
+
+        # Then we sell the rest of the stack.
+        self.list_item_stack(
+            original_stack,
+            quantity=9,
+            listed_at_price=1000,
+            transaction_tax=10,
+            broker_fee=5,
+        )
+        self.stack_market_order_sold(original_stack)
+        self.assertEqual(self.user.isk_balance(), isk(8500 * 11 + 850 * 9))

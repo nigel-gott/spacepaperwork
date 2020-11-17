@@ -4,6 +4,21 @@
     <div class="col s12 m12">
         <h4>{{item.item}}</h4>
 
+        {% if user.is_superuser %}
+            <ul>
+                <li><a href ="{% url 'admin:core_inventoryitem_change' item.id %}">Admin Edit InventoryItem</a></li>
+            {% if item.order_quantity > 0 %}
+                <li><a href ="{% url 'admin:core_marketorder_change' item.marketorder.id %}">Admin Edit MarketOrder</a></li>
+            {% endif %}
+            {% if item.sold_quantity > 0 %}
+                <li><a href ="{% url 'admin:core_solditem_change' item.solditem.id %}">Admin Edit SoldItem</a></li>
+            {% endif %}
+            {% if item.junked_quantity > 0 %}
+                <li><a href ="{% url 'admin:core_junkeditem_change' item.junkeditem.id %}">Admin Edit JunkItem</a></li>
+            {% endif %}
+            </ul>
+        {% endif %}
+
         <table>
             <tr>
                 <td>Quantity</td>
@@ -111,6 +126,9 @@
                     {{isk_tran.notes}}
                 </td>
                 <td>
+                {% if user.is_superuser %}
+                <a href ="{% url 'admin:core_isktransaction_change' isk_tran.id %}">Admin Edit</a>
+                {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -132,24 +150,27 @@
             <th>Action</th>
             </thead>
             <tbody>
-            {% for isk_tran in item.eggtransaction_set.all %}
+            {% for egg_tran in item.eggtransaction_set.all %}
             <tr>
                 <td>
-                    {{isk_tran.time}}
+                    {{egg_tran.time}}
                 </td>
                 <td>
-                    {{isk_tran.eggs}}
+                    {{egg_tran.eggs}}
                 </td>
                 <td>
-                    {{isk_tran.counterparty_discord_username}}
+                    {{egg_tran.counterparty_discord_username}}
                 </td>
                 <td>
-                    {{isk_tran.quantity}}
+                    {{egg_tran.quantity}}
                 </td>
                 <td>
-                    {{isk_tran.notes}}
+                    {{egg_tran.notes}}
                 </td>
                 <td>
+                {% if user.is_superuser %}
+                <a href ="{% url 'admin:core_eggtransaction_change' egg_tran.id %}">Admin Edit</a>
+                {% endif %}
                 </td>
             </tr>
             {% endfor %}
