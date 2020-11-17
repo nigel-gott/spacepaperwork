@@ -50,6 +50,7 @@ from core.views import (
     junk_items,
     junk_stack,
     loot_group_add,
+    loot_group_edit,
     loot_group_create,
     loot_group_view,
     loot_share_add,
@@ -106,6 +107,11 @@ urlpatterns = [
         name="loot_group_add",
     ),
     path("loot_group/<int:pk>", loot_group_view, name="loot_group_view"),
+    path(
+        "loot_group/<int:pk>/edit",
+        loot_group_edit,
+        name="loot_group_edit",
+    ),
     path("loot_group/<int:pk>/join/", loot_share_join, name="loot_share_join"),
     path("loot_group/<int:pk>/add_share/", loot_share_add, name="loot_share_add"),
     path(

@@ -150,8 +150,8 @@ def annotate_with_zscores(members, avg, std_dev):
                 output_field=FloatField(),
             )
         )
-        .filter(z_score__gte=1)
-        .order_by("-z_score")
+            .filter(z_score__gte=1)
+            .order_by("-z_score")
     )
 
 
@@ -161,8 +161,8 @@ def fleet_late(request):
         return HttpResponseForbidden()
     users = (
         DiscordUser.objects.annotate(shares=Count("character__lootshare"))
-        .filter(shares__gt=0)
-        .order_by("-shares")
+            .filter(shares__gt=0)
+            .order_by("-shares")
     )
     fleets = Fleet.objects.all()
     outliers = []
@@ -238,8 +238,8 @@ def fleet_future(request):
 def fleet_leave(request, pk):
     member = get_object_or_404(FleetMember, pk=pk)
     if (
-        member.character.discord_user == request.user.discord_user
-        or request.user == member.fleet.fc
+            member.character.discord_user == request.user.discord_user
+            or request.user == member.fleet.fc
     ):
         member.delete()
         return HttpResponseRedirect(reverse("fleet_view", args=[member.fleet.pk]))
@@ -435,7 +435,7 @@ def loot_share_join(request, pk):
             )
             return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
         if loot_group.has_share(request.user) and not loot_group.still_can_join_alts(
-            request.user
+                request.user
         ):
             messages.error(
                 request,
@@ -618,6 +618,58 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
         request,
         "core/loot_group_form.html",
         {"form": form, "title": "Start New Loot Group"},
+    )
+
+
+@login_required(login_url=login_url)
+def loot_group_edit(request, pk):
+    loot_group = get_object_or_404(LootGroup, pk=pk)
+    if request.method == "POST":
+        form = LootGroupForm(request.POST)
+        if form.is_valid():
+            loot_group.name = form.cleaned_data["name"]
+
+            # todo handle more loot sources?
+            if form.cleaned_data["loot_source"] == LootGroupForm.ANOM_LOOT_GROUP:
+                try:
+                    loot_group.fleet_anom.anom_type = AnomType.objects.get_or_create(
+                        level=form.cleaned_data["anom_level"],
+                        type=form.cleaned_data["anom_type"],
+                        faction=form.cleaned_data["anom_faction"],
+                    )[0]
+                    loot_group.fleet_anom.system = form.cleaned_data["anom_system"]
+                    loot_group.fleet_anom.full_clean()
+                    loot_group.fleet_anom.save()
+                except ValidationError as e:
+                    form.add_error(None, e)
+                    return render(
+                        request,
+                        "core/loot_group_form.html",
+                        {"form": form, "title": "Edit Loot Group"},
+                    )
+
+            loot_group.full_clean()
+            loot_group.save()
+
+            return HttpResponseRedirect(
+                reverse("loot_group_view", args=[pk])
+            )
+
+    else:
+        form = LootGroupForm(
+            initial={
+                "name": loot_group.name,
+                "anom_system": loot_group.fleet_anom.system,
+                "anom_level": loot_group.fleet_anom.anom_type.level,
+                "anom_faction": loot_group.fleet_anom.anom_type.faction,
+                "anom_type": loot_group.fleet_anom.anom_type.type,
+            }
+        )
+
+    return render(
+        request,
+        "core/loot_group_form.html",
+        {"form": form, "title": "Edit Loot Group"},
     )
 
 
@@ -1186,7 +1238,7 @@ def sell_all_items(request, pk):
                         isk=to_isk(floor(cut_price * item.quantity)),
                         quantity=item.quantity,
                         transaction_type="buyback",
-                        notes=f"Corp Buyback using price {price} and a cut for the corp of {cut*100}% ",
+                        notes=f"Corp Buyback using price {price} and a cut for the corp of {cut * 100}% ",
                     )
                     profit_line.full_clean()
                     profit_line.save()
@@ -1312,8 +1364,8 @@ def junk(request):
             )
             junked = (
                 JunkedItem.objects.filter(item__location=loc)
-                .annotate(estimated_profit_sum=sum_query)
-                .order_by("-estimated_profit_sum")
+                    .annotate(estimated_profit_sum=sum_query)
+                    .order_by("-estimated_profit_sum")
             )
 
             all_junked.append({"loc": loc, "junked": junked})
@@ -1359,8 +1411,8 @@ def sold(request):
         "core/sold.html",
         {
             "transfer_logs": request.user.transferlog_set.filter(all_done=False)
-            .order_by("-time")
-            .all(),
+                .order_by("-time")
+                .all(),
             "all_sold": all_sold,
         },
     )
@@ -1443,8 +1495,8 @@ def items_view(request):
 def items_grouped(request):
     items = (
         Item.objects.annotate(total=Sum("inventoryitem__quantity"))
-        .filter(total__gt=0)
-        .order_by("item_type")
+            .filter(total__gt=0)
+            .order_by("item_type")
     )
     return render(
         request,
@@ -1477,8 +1529,8 @@ def completed_egg_transfers(request):
         "core/completed_egg_transfers.html",
         {
             "transfer_logs": request.user.transferlog_set.filter(all_done=True)
-            .order_by("-time")
-            .all()
+                .order_by("-time")
+                .all()
         },
     )
 
@@ -1583,7 +1635,7 @@ def fleet_shares(request, pk):
             }
         )
         all_your_estimated_share_isk = (
-            all_your_estimated_share_isk + your_group_estimated_profit
+                all_your_estimated_share_isk + your_group_estimated_profit
         )
         all_your_real_share_isk = all_your_real_share_isk + your_real_profit
     items = sorted(items, key=lambda x: x["loot_bucket"])
@@ -1617,14 +1669,14 @@ def get_items_in_location(char_loc, item_source=None):
         item_source = InventoryItem.objects.filter(quantity__gt=0)
     unstacked_items = (
         item_source.filter(stack__isnull=True, contract__isnull=True, location=loc)
-        .annotate(
+            .annotate(
             estimated_profit_sum=ExpressionWrapper(
                 Coalesce(F("item__cached_lowest_sell"), 0)
                 * (F("quantity") + Coalesce(F("marketorder__quantity"), 0)),
                 output_field=FloatField(),
             )
         )
-        .order_by("-estimated_profit_sum")
+            .order_by("-estimated_profit_sum")
     )
     stacked_items = item_source.filter(
         stack__isnull=False, contract__isnull=True, location=loc
@@ -2010,7 +2062,7 @@ def item_sold(order, remaining_quantity_to_sell):
         isk=-transaction_tax,
         quantity=quantity_sold,
         transaction_type="transaction_tax",
-        notes=f" - Gross Profit of {gross_profit} * Tax of {transaction_tax_percent*100}%",
+        notes=f" - Gross Profit of {gross_profit} * Tax of {transaction_tax_percent * 100}%",
     )
     transaction_tax_line.full_clean()
     transaction_tax_line.save()
@@ -2131,9 +2183,9 @@ def make_transfer_command(total_participation, transfering_user):
             if length_since_last_bulk + len(next_user) > 2000:
                 new_bulk = "$bulk\n"
                 command = (
-                    command
-                    + "\nNEW MESSAGE TO AVOID DISCORD CHARACTER LIMIT:\n"
-                    + new_bulk
+                        command
+                        + "\nNEW MESSAGE TO AVOID DISCORD CHARACTER LIMIT:\n"
+                        + new_bulk
                 )
                 length_since_last_bulk = len(new_bulk)
 
@@ -2208,7 +2260,7 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
             egg_transaction.save()
             if discord_username in total_participation:
                 total_participation[discord_username] = (
-                    total_participation[discord_username] + floored_isk
+                        total_participation[discord_username] + floored_isk
                 )
             else:
                 total_participation[discord_username] = floored_isk
@@ -2276,20 +2328,20 @@ def valid_transfer(to_transfer, request):
     loot_groups = to_transfer.values("item__loot_group").distinct()
     invalid_groups = (
         LootGroup.objects.filter(id__in=loot_groups)
-        .annotate(
+            .annotate(
             share_sum=Coalesce(
                 Sum(F("lootshare__share_quantity") + F("lootshare__flat_percent_cut")),
                 0,
             )
         )
-        .filter(share_sum__lte=0)
+            .filter(share_sum__lte=0)
     )
     if len(invalid_groups) > 0:
         error_message = "The following loot groups you are attempting to transfer isk for have no participation at all, you must first setup some participation for these groups before you can deposit isk:"
         for invalid_group in invalid_groups:
             error_message = (
-                error_message
-                + f"<br/> *  <a href='{reverse('loot_group_view', args=[invalid_group.pk])}'>{invalid_group}</a> "
+                    error_message
+                    + f"<br/> *  <a href='{reverse('loot_group_view', args=[invalid_group.pk])}'>{invalid_group}</a> "
             )
         messages.error(request, mark_safe(error_message))
         return False
@@ -2299,8 +2351,8 @@ def valid_transfer(to_transfer, request):
         error_message = "You are trying to transfer an item which has made a negative profit, something has probably gone wrong please PM @thejanitor immediately."
         for sold_item in negative_items:
             error_message = (
-                error_message
-                + f"<br/> *  <a href='{reverse('item_view', args=[sold_item.item.pk])}'>{sold_item}</a> "
+                    error_message
+                    + f"<br/> *  <a href='{reverse('item_view', args=[sold_item.item.pk])}'>{sold_item}</a> "
             )
         messages.error(request, mark_safe(error_message))
         return False
@@ -2352,7 +2404,7 @@ def sell_item(item, form, quantity_to_sell, new_stack=None):
         isk=broker_fee,
         quantity=item.quantity,
         transaction_type="broker_fee",
-        notes=f"- Quantity of {item.quantity} * Listed Price at {price} * Broker Fee of {broker_fee_percent*100}%",
+        notes=f"- Quantity of {item.quantity} * Listed Price at {price} * Broker Fee of {broker_fee_percent * 100}%",
     )
     broker_fee.full_clean()
     broker_fee.save()

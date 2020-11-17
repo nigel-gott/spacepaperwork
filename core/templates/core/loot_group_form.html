@@ -26,9 +26,12 @@
 
     <form action="" method="post">
         {% csrf_token %}
+         <div class="row">
+           {{ form.name|materializecss:'icon=label'}}
+        </div>
         <div class="row">
-            {{ form.loot_source|materializecss:'s12 m6, icon=directions_boat'}}
-            {{ form.anom_system|materializecss:'s12 m6, icon=add_location'}}
+            {{ form.loot_source|materializecss:'s12 l6, icon=directions_boat'}}
+            {{ form.anom_system|materializecss:'s12 l6, icon=add_location'}}
         </div>
         <div class="row">
             {{ form.anom_level|materializecss:'s12 m4, icon=format_list_numbered'}}

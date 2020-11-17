@@ -790,11 +790,17 @@ class LootGroup(models.Model):
         KillMail, on_delete=models.CASCADE, null=True, blank=True
     )
     bucket = models.ForeignKey(LootBucket, on_delete=models.CASCADE)
+    name = models.TextField(blank=True, null=True)
     manual = models.BooleanField(default=False)
 
     # TODO Uncouple the fleet requirement from LootGroups
     def fleet(self):
         return self.fleet_anom and self.fleet_anom.fleet
+
+    def display_name(self):
+        if self.name:
+            return self.name
+        return self.fleet_anom.anom_type
 
     def has_admin(self, user):
         return self.fleet() and self.fleet().has_admin(user)
