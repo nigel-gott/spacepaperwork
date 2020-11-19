@@ -39,3 +39,12 @@ class FleetTest(GooseToolsTestCase):
         self.assertEqual(expected_fleet.description, "My Description")
         self.assertEqual(expected_fleet.location, "My Location")
         self.assertEqual(expected_fleet.expected_duration, "My Expected Duration")
+
+    def test_fc_member_of_fleet_by_default(self):
+        fleet = self.a_fleet()
+        fleet_view = self.client.get(
+            reverse("fleet_view", args=[fleet.id]),
+        )
+        self.assertEqual(fleet.id, fleet_view.context["fleet"].id)
+        self.assertIn(self.discord_user.id, fleet_view.context["fleet_members_by_id"])
+        self.assertIn(self.discord_user.username, str(fleet_view.content))

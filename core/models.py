@@ -40,14 +40,18 @@ class DiscordUser(models.Model):
     # default avatars look like this: https://cdn.discordapp.com/embed/avatars/3.png
     # there is a bug with discord's size selecting mechanism for these, doing 3.png?size=16 still returns a full size default avatar.
     def has_default_avatar(self):
-        return len(str(self.avatar_hash)) == 1
+        return not self.avatar_hash or len(str(self.avatar_hash)) == 1
 
     def has_custom_avatar(self):
         return self.avatar_hash and self.uid and not self.has_default_avatar()
 
     def _construct_avatar_url(self):
         if self.has_default_avatar():
-            avatar_number = int(self.username.split("#")[1]) % 5
+            if "#" in self.username:
+                # TODO add discriminator as a real non null field on DiscordUser and just access it here.
+                avatar_number = int(self.username.split("#")[1]) % 5
+            else:
+                avatar_number = 1
             return f"https://cdn.discordapp.com/embed/avatars/{avatar_number}.png"
         return f"https://cdn.discordapp.com/avatars/{self.uid}/{self.avatar_hash}.png"
 
