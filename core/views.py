@@ -343,7 +343,8 @@ def fleet_join(request, pk):
     if request.method == "POST":
         form = JoinFleetForm(request.POST)
         if form.is_valid():
-            if f.can_join(request.user):
+            can_join, error_message = f.can_join(request.user)
+            if can_join:
                 new_fleet = FleetMember(
                     character=form.cleaned_data["character"],
                     fleet=f,
@@ -353,11 +354,7 @@ def fleet_join(request, pk):
                 new_fleet.save()
                 return HttpResponseRedirect(reverse("fleet_view", args=[pk]))
             else:
-                messages.error(
-                    request,
-                    "You cannot join this fleet with that character. "
-                    "Maybe you are already a member or this fleet doesn't allow alts?",
-                )
+                messages.error(request, f"Error Joining Fleet: {error_message}")
                 return HttpResponseRedirect(reverse("fleet_view", args=[pk]))
     else:
         form = JoinFleetForm(initial={"character": request.user.default_character})

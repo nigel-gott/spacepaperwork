@@ -301,15 +301,25 @@ class Fleet(models.Model):
 
     def can_join(self, user):
         if self.in_the_past():
-            return False
+            return False, "Fleet is Closed"
 
         num_chars = len(user.characters())
-        num_characters_in_fleet = len(self.members_for_user(user))
+        characters_in_fleet = self.members_for_user(user)
+        characters_in_fleet_display_string = ",".join(
+            [fm.character.ingame_name for fm in self.members_for_user(user)]
+        )
+        num_characters_in_fleet = len(characters_in_fleet)
 
         if self.gives_shares_to_alts:
-            return (num_chars - num_characters_in_fleet) > 0
+            return (
+                (num_chars - num_characters_in_fleet) > 0,
+                f"All Your Alts ({characters_in_fleet_display_string}) have already joined",
+            )
         else:
-            return num_characters_in_fleet == 0
+            return (
+                num_characters_in_fleet == 0,
+                f"You already have one character ({characters_in_fleet_display_string}) in the fleet and you cannot join any more as the fleet doesn't allow alts.",
+            )
 
     def member_can_be_added(self, character):
         num_chars = len(Character.objects.filter(discord_user=character.discord_user))

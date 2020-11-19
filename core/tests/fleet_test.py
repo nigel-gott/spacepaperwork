@@ -6,6 +6,9 @@ from core.tests.goosetools_test_case import GooseToolsTestCase
 
 @freeze_time("2012-01-14 12:00:00")
 class FleetTest(GooseToolsTestCase):
+    def an_open_fleet(self):
+        return self.a_fleet(start_date="Jan. 14, 2012", start_time="11:02 AM")
+
     def test_can_make_a_fleet(self):
         response = self.client.post(
             reverse("fleet_create"),
@@ -42,9 +45,62 @@ class FleetTest(GooseToolsTestCase):
 
     def test_fc_member_of_fleet_by_default(self):
         fleet = self.a_fleet()
-        fleet_view = self.client.get(
+        fleet_view = self.get(
             reverse("fleet_view", args=[fleet.id]),
         )
         self.assertEqual(fleet.id, fleet_view.context["fleet"].id)
         self.assertIn(self.discord_user.id, fleet_view.context["fleet_members_by_id"])
         self.assertIn(self.discord_user.username, str(fleet_view.content))
+
+    def test_can_join_fleet(self):
+        fleet = self.an_open_fleet()
+
+        self.client.force_login(self.other_user)
+
+        join_response = self.post(
+            reverse("fleet_join", args=[fleet.id]), {"character": self.other_char.id}
+        )
+        self.assertEqual(join_response.status_code, 302)
+
+        fleet_view = self.get(
+            reverse("fleet_view", args=[fleet.id]),
+        )
+        self.assertEqual(fleet.id, fleet_view.context["fleet"].id)
+        self.assertIn(
+            self.other_discord_user.id, fleet_view.context["fleet_members_by_id"]
+        )
+        self.assertIn(self.other_discord_user.username, str(fleet_view.content))
+        return fleet
+
+    def test_can_leave_fleet(self):
+        fleet = self.test_can_join_fleet()
+        fleet_view_before_leaving = self.get(
+            reverse("fleet_view", args=[fleet.id]),
+        )
+        fleet_member_to_leave = fleet_view_before_leaving.context[
+            "fleet_members_by_id"
+        ][self.other_discord_user.id][0]
+        leave_response = self.post(
+            reverse("fleet_leave", args=[fleet_member_to_leave.id])
+        )
+        self.assertEqual(leave_response.status_code, 302)
+        fleet_view = self.get(
+            reverse("fleet_view", args=[fleet.id]),
+        )
+        self.assertNotIn(
+            self.other_discord_user.id, fleet_view.context["fleet_members_by_id"]
+        )
+
+    @freeze_time("2012-01-14 13:00:01")
+    def test_after_12_hours_a_non_explicitly_closed_fleet_is_automatically_closed(self):
+        an_auto_closed_fleet = self.a_fleet(
+            start_date="Jan. 14, 2012", start_time="1:00 AM"
+        )
+
+        fleet_view = self.get(
+            reverse("fleet_view", args=[an_auto_closed_fleet.id]),
+        )
+        self.assertIn(
+            "End: Jan. 14, 2012, 1 p.m. (Automatically expired after 12 hours)",
+            str(fleet_view.content),
+        )
