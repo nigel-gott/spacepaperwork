@@ -297,7 +297,7 @@ class Fleet(models.Model):
 
     def in_the_past(self):
         now = timezone.now()
-        return self.auto_end() and now < self.auto_end()
+        return self.auto_end() and now > self.auto_end()
 
     def can_join(self, user):
         if self.in_the_past():

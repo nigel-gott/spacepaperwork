@@ -57,10 +57,9 @@ class FleetTest(GooseToolsTestCase):
 
         self.client.force_login(self.other_user)
 
-        join_response = self.post(
+        self.post(
             reverse("fleet_join", args=[fleet.id]), {"character": self.other_char.id}
         )
-        self.assertEqual(join_response.status_code, 302)
 
         fleet_view = self.get(
             reverse("fleet_view", args=[fleet.id]),
@@ -73,23 +72,41 @@ class FleetTest(GooseToolsTestCase):
         return fleet
 
     def test_can_leave_fleet(self):
+        # When someone has joined a fleet
         fleet = self.test_can_join_fleet()
         fleet_view_before_leaving = self.get(
             reverse("fleet_view", args=[fleet.id]),
         )
+
+        # Then a fleet member leaves it
         fleet_member_to_leave = fleet_view_before_leaving.context[
             "fleet_members_by_id"
         ][self.other_discord_user.id][0]
-        leave_response = self.post(
-            reverse("fleet_leave", args=[fleet_member_to_leave.id])
-        )
-        self.assertEqual(leave_response.status_code, 302)
+        self.post(reverse("fleet_leave", args=[fleet_member_to_leave.id]))
+
+        # They no longer are in the fleet as a member
         fleet_view = self.get(
             reverse("fleet_view", args=[fleet.id]),
         )
         self.assertNotIn(
             self.other_discord_user.id, fleet_view.context["fleet_members_by_id"]
         )
+
+    @freeze_time("2012-01-14 03:00:01")
+    def test_cant_join_a_fleet_which_has_ended(self):
+        a_closed_fleet = self.a_fleet(
+            start_date="Jan. 14, 2012",
+            start_time="1:00 AM",
+            end_date="Jan. 14, 2012",
+            end_time="2:00 AM",
+        )
+        self.client.force_login(self.other_user)
+        errors = self.post_expecting_error(
+            reverse("fleet_join", args=[a_closed_fleet.id]),
+            {"character": self.other_char.id},
+        )
+        self.assertTrue(a_closed_fleet.in_the_past())
+        self.assertEqual(errors, ["Error Joining Fleet: Fleet is Closed"])
 
     @freeze_time("2012-01-14 13:00:01")
     def test_after_12_hours_a_non_explicitly_closed_fleet_is_automatically_closed(self):
@@ -104,3 +121,17 @@ class FleetTest(GooseToolsTestCase):
             "End: Jan. 14, 2012, 1 p.m. (Automatically expired after 12 hours)",
             str(fleet_view.content),
         )
+
+    @freeze_time("2012-01-14 13:00:01")
+    def test_cant_join_a_fleet_which_has_automatically_ended(self):
+        an_auto_closed_fleet = self.a_fleet(
+            start_date="Jan. 14, 2012",
+            start_time="1:00 AM",
+        )
+        self.client.force_login(self.other_user)
+        errors = self.post_expecting_error(
+            reverse("fleet_join", args=[an_auto_closed_fleet.id]),
+            {"character": self.other_char.id},
+        )
+        self.assertTrue(an_auto_closed_fleet.in_the_past())
+        self.assertEqual(errors, ["Error Joining Fleet: Fleet is Closed"])

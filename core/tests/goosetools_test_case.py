@@ -1,9 +1,7 @@
 from decimal import Decimal
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
 
-from django.contrib.messages.api import get_messages
 from django.http.response import HttpResponse
-from django.test import TestCase
 from django.urls.base import reverse
 from djmoney.money import Money
 
@@ -29,6 +27,7 @@ from core.models import (
     StackedInventoryItem,
     System,
 )
+from core.tests.django_test_case import DjangoTestCase
 
 
 def isk(number_str: Union[str, int]):
@@ -36,7 +35,7 @@ def isk(number_str: Union[str, int]):
 
 
 # pylint: disable=too-many-instance-attributes
-class GooseToolsTestCase(TestCase):
+class GooseToolsTestCase(DjangoTestCase):
     def setUp(self):
         item_type = ItemType.objects.create(name="item_type")
         sub_type = ItemSubType.objects.create(name="sub_type", item_type=item_type)
@@ -78,42 +77,28 @@ class GooseToolsTestCase(TestCase):
         self.client.force_login(self.user)
         self.logged_in_user = self.user
 
-    def assert_no_error_messages(self, response: HttpResponse):
-        error_messages = [
-            m.message
-            for m in list(get_messages(response.wsgi_request))
-            if m.level_tag == "error"
-        ]
-        self.assertEqual(error_messages, [])
-
-    def get(self, url: str) -> HttpResponse:
-        response = self.client.get(url)
-        self.assert_no_error_messages(response)
-        self.assertIn(response.status_code, [302, 200])
-        return response
-
-    def post(self, url: str, args: Dict[str, Any] = None) -> HttpResponse:
-        response = self.client.post(url, args)
-        self.assert_no_error_messages(response)
-        self.assertIn(response.status_code, [302, 200])
-        return response
-
     def a_fleet(
-        self, fleet_name="Test Fleet", start_date="Nov. 13, 2020", start_time="01:02 PM"
+        self,
+        fleet_name="Test Fleet",
+        start_date="Nov. 13, 2020",
+        start_time="01:02 PM",
+        end_date=None,
+        end_time=None,
     ) -> Fleet:
-        response = self.client.post(
-            reverse("fleet_create"),
-            {
-                "start_date": start_date,
-                "start_time": start_time,
-                "fleet_type": self.fleet_type.id,
-                "fc_character": self.char.id,
-                "loot_type": "Master Looter",
-                "name": fleet_name,
-                "gives_shares_to_alts": False,
-                "loot_was_stolen": False,
-            },
-        )
+        args = {
+            "start_date": start_date,
+            "start_time": start_time,
+            "fleet_type": self.fleet_type.id,
+            "fc_character": self.char.id,
+            "loot_type": "Master Looter",
+            "name": fleet_name,
+            "gives_shares_to_alts": False,
+            "loot_was_stolen": False,
+        }
+        if end_date:
+            args["end_date"] = end_date
+            args["end_time"] = end_time
+        response = self.post(reverse("fleet_create"), args)
         self.assertEqual(response.status_code, 302)
         return Fleet.objects.get(name=fleet_name)
 
