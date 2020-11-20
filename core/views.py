@@ -1,4 +1,3 @@
-import datetime
 import json
 from decimal import Decimal
 from math import floor
@@ -9,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Avg, Count, ExpressionWrapper, F, StdDev, Sum
+from django.db.models import ExpressionWrapper, F, Sum
 from django.db.models.fields import FloatField
 from django.db.models.functions import Coalesce, Extract
 from django.forms.forms import Form
@@ -23,7 +22,6 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.utils.safestring import mark_safe
-from django.utils.timezone import make_aware
 from djmoney.money import Money
 from moneyed.localization import format_money
 
@@ -156,71 +154,6 @@ def annotate_with_zscores(members, avg, std_dev):
 
 
 @login_required(login_url=login_url)
-def fleet_late(request):
-    if not request.user.is_staff:
-        return HttpResponseForbidden()
-    users = (
-        DiscordUser.objects.annotate(shares=Count("character__lootshare"))
-        .filter(shares__gt=0)
-        .order_by("-shares")
-    )
-    fleets = Fleet.objects.all()
-    outliers = []
-    user_total_z = {}
-    for fleet in fleets:
-        members = fleet.fleetmember_set
-        stats = members.aggregate(
-            avg_join_at=Avg(Extract("joined_at", "epoch")),
-            std_dev_join_at=StdDev(Extract("joined_at", "epoch")),
-        )
-        if stats["std_dev_join_at"] == 0:
-            continue
-        datetime_obj_with_tz = make_aware(
-            datetime.datetime.fromtimestamp(int(stats["avg_join_at"]))
-        )
-        stats["human_avg_joined_at"] = str(datetime_obj_with_tz)
-        stats["minutes_std_dev"] = display_time(int(stats["std_dev_join_at"]))
-        z_scores = annotate_with_zscores(
-            members, stats["avg_join_at"], stats["std_dev_join_at"]
-        )
-        for z_score in z_scores:
-            username = z_score.character.discord_user.username
-            if username not in user_total_z:
-                user_total_z[username] = {
-                    "user": z_score.character.discord_user,
-                    "count": 1,
-                    "total": z_score.z_score,
-                    "mean": z_score.z_score,
-                }
-
-            else:
-                existing = user_total_z[username]
-                count = existing["count"]
-                user_total_z[username] = {
-                    "user": z_score.character.discord_user,
-                    "count": count + 1,
-                    "total": count + z_score.z_score,
-                    "mean": (count + z_score.z_score) / (count + 1),
-                }
-        if len(z_scores) > 0:
-            outliers.append({"fleet": fleet, "stats": stats, "z_scores": z_scores})
-
-    context = {
-        "users": users,
-        "Title": "Late Joiners View",
-        "outliers": outliers,
-        # pylint: disable=unnecessary-comprehension
-        "user_total_z": {
-            k: v
-            for k, v in sorted(
-                user_total_z.items(), key=lambda item: item[1]["total"], reverse=True
-            )
-        },
-    }
-    return render(request, "core/fleet_late.html", context)
-
-
-@login_required(login_url=login_url)
 def fleet_past(request):
     past_fleets = past_fleets_query()
     context = {"fleets": past_fleets, "header": "Past Fleets"}
@@ -315,11 +248,6 @@ def fleet_add(request, pk):
         form = FleetAddMemberForm(request.POST)
         if form.is_valid():
             character = form.cleaned_data["character"]
-            manual_character = form.cleaned_data["manual_character"]
-            if manual_character and not character:
-                character = create_manual_user(
-                    manual_character, form.cleaned_data["manual_discord_username"]
-                )
             if f.member_can_be_added(character):
                 new_fleet_member = FleetMember(
                     character=character, fleet=f, joined_at=timezone.now()
@@ -453,20 +381,6 @@ def loot_share_join(request, pk):
     )
 
 
-def create_manual_user(manual_character, manual_discord_username):
-    user, _ = DiscordUser.objects.get_or_create(username=manual_discord_username)
-
-    character = Character(
-        discord_user=user,
-        ingame_name=manual_character,
-        corp_id="UNKNOWN",
-        verified=False,
-    )
-    character.full_clean()
-    character.save()
-    return character
-
-
 @login_required(login_url=login_url)
 def loot_share_add(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
@@ -476,11 +390,6 @@ def loot_share_add(request, pk):
         form = LootShareForm(request.POST)
         if form.is_valid():
             character = form.cleaned_data["character"]
-            manual_character = form.cleaned_data["manual_character"]
-            if manual_character and not character:
-                character = create_manual_user(
-                    manual_character, form.cleaned_data["manual_discord_username"]
-                )
             ls = LootShare(
                 character=character,
                 loot_group=loot_group,

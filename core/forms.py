@@ -60,33 +60,6 @@ class FleetAddMemberForm(forms.Form):
             url="character-autocomplete", forward=["discord_username", "fleet"]
         ),
     )
-    manual_discord_username = forms.CharField(
-        required=False,
-        help_text="Enter their Discord Username or if that is unknown use a sensible name which is the same between all this persons characters.",
-    )
-    manual_character = forms.CharField(required=False)
-
-    def clean(self):
-        cleaned_data = super().clean()
-
-        character = cleaned_data["character"]
-        manual_character = cleaned_data["manual_character"]
-
-        if manual_character and character:
-            raise forms.ValidationError("Fill in one of character or manual character")
-
-        if not manual_character and not character:
-            raise forms.ValidationError("Fill in one of character or manual character")
-
-        if (
-            cleaned_data["manual_character"]
-            and not cleaned_data["manual_discord_username"]
-        ):
-            raise forms.ValidationError(
-                "You must fill in Manual Discord Username if you are adding a Manual Character"
-            )
-
-        return cleaned_data
 
     class Meta:
         exclude = ("discord_username",)
@@ -214,32 +187,6 @@ class LootShareForm(forms.Form):
         max_value=100,
         help_text="This % cut only applies to loot from this anom and not from the entire bucket.",
     )
-
-    manual_discord_username = forms.CharField(
-        required=False,
-        help_text="Enter their Discord Username or if that is unknown use a sensible name which is the same between all this persons characters.",
-    )
-    manual_character = forms.CharField(required=False)
-
-    def clean(self):
-        cleaned_data = super().clean()
-
-        character = cleaned_data["character"]
-        manual_character = cleaned_data["manual_character"]
-
-        if manual_character and character:
-            raise forms.ValidationError("Fill in one of character or manual character")
-
-        if not manual_character and not character:
-            raise forms.ValidationError("Fill in one of character or manual character")
-
-        if (
-            cleaned_data["manual_character"]
-            and not cleaned_data["manual_discord_username"]
-        ):
-            raise forms.ValidationError(
-                "You must fill in Manual Discord Username if you are adding a Manual Character"
-            )
 
 
 class ItemMoveAllForm(forms.Form):

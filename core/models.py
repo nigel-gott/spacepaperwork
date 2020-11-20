@@ -32,7 +32,6 @@ class DiscordUser(models.Model):
     username = models.TextField(unique=True)
     uid = models.TextField(unique=True, blank=True, null=True)
     avatar_hash = models.TextField(blank=True, null=True)
-    unknown = models.BooleanField(default=False)
 
     def avatar_url(self) -> Union[bool, str]:
         return self._construct_avatar_url()
@@ -63,7 +62,6 @@ class Character(models.Model):
     discord_user = models.ForeignKey(DiscordUser, on_delete=models.CASCADE)
     ingame_name = models.TextField(unique=True)
     corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
-    verified = models.BooleanField(null=True, blank=True)
 
     # pylint: disable=no-member
     def gooseuser_or_false(self):

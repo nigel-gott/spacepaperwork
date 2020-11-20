@@ -241,7 +241,6 @@ def output_models(chars, users):
                         "discord_user": char.discord_user_pk,
                         "ingame_name": char.ingame_name,
                         "corp": char.corp.upper(),
-                        "verified": True,
                     },
                 }
             )
@@ -254,7 +253,6 @@ def output_models(chars, users):
                         "username": user.username,
                         "uid": user.uid,
                         "avatar_hash": user.avatar_hash,
-                        "unknown": False,
                     },
                 }
             )
