@@ -37,6 +37,7 @@ def isk(number_str: Union[str, int]):
 # pylint: disable=too-many-instance-attributes
 class GooseToolsTestCase(DjangoTestCase):
     def setUp(self):
+        super().setUp()
         item_type = ItemType.objects.create(name="item_type")
         sub_type = ItemSubType.objects.create(name="sub_type", item_type=item_type)
         sub_sub_type = ItemSubSubType.objects.create(
@@ -56,6 +57,11 @@ class GooseToolsTestCase(DjangoTestCase):
         self.other_char = Character.objects.create(
             discord_user=self.other_discord_user,
             ingame_name="Test Char 2",
+            corp=self.corp,
+        )
+        self.other_alt_char = Character.objects.create(
+            discord_user=self.other_discord_user,
+            ingame_name="Test Alt Char 2",
             corp=self.corp,
         )
         self.user = GooseUser.objects.create(
@@ -84,6 +90,7 @@ class GooseToolsTestCase(DjangoTestCase):
         start_time="01:02 PM",
         end_date=None,
         end_time=None,
+        gives_shares_to_alts=False,
     ) -> Fleet:
         args = {
             "start_date": start_date,
@@ -92,7 +99,7 @@ class GooseToolsTestCase(DjangoTestCase):
             "fc_character": self.char.id,
             "loot_type": "Master Looter",
             "name": fleet_name,
-            "gives_shares_to_alts": False,
+            "gives_shares_to_alts": gives_shares_to_alts,
             "loot_was_stolen": False,
         }
         if end_date:

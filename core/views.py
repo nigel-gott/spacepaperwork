@@ -237,14 +237,16 @@ def fleet_future(request):
 @login_required(login_url=login_url)
 def fleet_leave(request, pk):
     member = get_object_or_404(FleetMember, pk=pk)
-    if (
-        member.character.discord_user == request.user.discord_user
-        or request.user == member.fleet.fc
+    fleet = member.fleet
+    if member.character.discord_user == request.user.discord_user or fleet.has_admin(
+        request.user
     ):
         member.delete()
-        return HttpResponseRedirect(reverse("fleet_view", args=[member.fleet.pk]))
     else:
-        return forbidden(request)
+        messages.error(
+            request, "You do not have permissions to remove that member from the fleet"
+        )
+    return HttpResponseRedirect(reverse("fleet_view", args=[fleet.pk]))
 
 
 @login_required(login_url=login_url)
@@ -324,10 +326,9 @@ def fleet_add(request, pk):
                 )
                 new_fleet_member.full_clean()
                 new_fleet_member.save()
-                return HttpResponseRedirect(reverse("fleet_view", args=[pk]))
             else:
                 messages.error(request, "You cannot add an alt to this fleet")
-                return forbidden(request)
+            return HttpResponseRedirect(reverse("fleet_view", args=[pk]))
     else:
         form = FleetAddMemberForm(initial={"fleet": f.id})
     existing_members = f.fleetmember_set.values("character__id")
@@ -390,7 +391,8 @@ def non_participation_chars(loot_group, user):
 
 
 def forbidden(request):
-    return HttpResponseForbidden(render(request, "core/403.html"))
+    messages.error(request, "You are forbidden to access this.")
+    return render(request, "core/403.html")
 
 
 @login_required(login_url=login_url)

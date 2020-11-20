@@ -297,7 +297,7 @@ class Fleet(models.Model):
 
     def in_the_past(self):
         now = timezone.now()
-        return self.auto_end() and now > self.auto_end()
+        return self.auto_end() and now >= self.auto_end()
 
     def can_join(self, user):
         if self.in_the_past():
@@ -322,12 +322,12 @@ class Fleet(models.Model):
             )
 
     def member_can_be_added(self, character):
-        num_chars = len(Character.objects.filter(discord_user=character.discord_user))
-        num_characters_in_fleet = len(
-            FleetMember.objects.filter(
-                fleet=self, character__discord_user=character.discord_user
-            )
-        )
+        num_chars = Character.objects.filter(
+            discord_user=character.discord_user
+        ).count()
+        num_characters_in_fleet = self.fleetmember_set.filter(
+            character__discord_user=character.discord_user
+        ).count()
         if self.gives_shares_to_alts:
             return (num_chars - num_characters_in_fleet) > 0
         else:
