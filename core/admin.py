@@ -15,7 +15,6 @@ from core.models import (
     Fleet,
     FleetAnom,
     FleetMember,
-    FleetType,
     GooseUser,
     InventoryItem,
     IskTransaction,
@@ -39,7 +38,6 @@ from core.models import (
 )
 
 admin.site.register(Fleet)
-admin.site.register(FleetType)
 admin.site.register(Corp)
 admin.site.register(Character)
 admin.site.register(System)

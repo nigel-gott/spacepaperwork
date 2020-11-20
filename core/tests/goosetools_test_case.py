@@ -10,7 +10,6 @@ from core.models import (
     Corp,
     DiscordUser,
     Fleet,
-    FleetType,
     GooseUser,
     InventoryItem,
     Item,
@@ -74,9 +73,6 @@ class GooseToolsTestCase(DjangoTestCase):
             discord_user=self.other_discord_user,
             default_character=self.other_char,
         )
-        self.fleet_type = FleetType.objects.create(
-            type="Test Fleet Type", material_icon="icon", material_colour="colour"
-        )
         region = Region.objects.create(name="Test Region")
         self.system = System.objects.create(name="Test System", region=region)
         ItemFilterGroup.objects.create(name="None")
@@ -95,12 +91,10 @@ class GooseToolsTestCase(DjangoTestCase):
         args = {
             "start_date": start_date,
             "start_time": start_time,
-            "fleet_type": self.fleet_type.id,
             "fc_character": self.char.id,
             "loot_type": "Master Looter",
             "name": fleet_name,
             "gives_shares_to_alts": gives_shares_to_alts,
-            "loot_was_stolen": False,
         }
         if end_date:
             args["end_date"] = end_date

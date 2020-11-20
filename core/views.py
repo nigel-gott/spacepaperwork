@@ -601,7 +601,6 @@ def fleet_create(request):
 
             new_fleet = Fleet(
                 fc=request.user,
-                fleet_type=form.cleaned_data["fleet_type"],
                 loot_type=form.cleaned_data["loot_type"],
                 name=form.cleaned_data["name"],
                 description=form.cleaned_data["description"],
@@ -610,7 +609,6 @@ def fleet_create(request):
                 gives_shares_to_alts=form.cleaned_data["gives_shares_to_alts"],
                 start=combined_start,
                 end=combined_end,
-                loot_was_stolen=form.cleaned_data["loot_was_stolen"],
             )
             new_fleet.full_clean()
             new_fleet.save()
@@ -664,7 +662,6 @@ def fleet_edit(request, pk):
                 )
 
             existing_fleet.fc = existing_fleet.fc
-            existing_fleet.fleet_type = form.cleaned_data["fleet_type"]
             existing_fleet.loot_type = form.cleaned_data["loot_type"]
             existing_fleet.name = form.cleaned_data["name"]
             existing_fleet.description = form.cleaned_data["description"]
@@ -675,7 +672,6 @@ def fleet_edit(request, pk):
             existing_fleet.gives_shares_to_alts = form.cleaned_data[
                 "gives_shares_to_alts"
             ]
-            existing_fleet.loot_was_stolen = form.cleaned_data["loot_was_stolen"]
             existing_fleet.full_clean()
             existing_fleet.save()
             return HttpResponseRedirect(reverse("fleet_view", args=[pk]))
@@ -687,14 +683,12 @@ def fleet_edit(request, pk):
                 "start_time": existing_fleet.start.time(),
                 "end_date": existing_fleet.end and existing_fleet.end.date(),
                 "end_time": existing_fleet.end and existing_fleet.end.time(),
-                "fleet_type": existing_fleet.fleet_type,
                 "loot_type": existing_fleet.loot_type,
                 "name": existing_fleet.name,
                 "description": existing_fleet.description,
                 "location": existing_fleet.location,
                 "expected_duration": existing_fleet.expected_duration,
                 "gives_shares_to_alts": existing_fleet.gives_shares_to_alts,
-                "loot_was_stolen": existing_fleet.loot_was_stolen,
             }
         )
         form.fields["fc_character"].queryset = existing_fleet.fc.characters()

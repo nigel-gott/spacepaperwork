@@ -1,7 +1,7 @@
 from django.urls.base import reverse
 from freezegun import freeze_time
 
-from core.models import Character, DiscordUser, FleetType
+from core.models import Character, DiscordUser
 from core.tests.goosetools_test_case import GooseToolsTestCase
 
 
@@ -20,7 +20,6 @@ class FleetTest(GooseToolsTestCase):
             {
                 "start_date": "Jan. 14, 2012",
                 "start_time": "11:02 AM",
-                "fleet_type": self.fleet_type.id,
                 "fc_character": self.char.id,
                 "loot_type": "Master Looter",
                 "name": "My Fleet Name",
@@ -28,7 +27,6 @@ class FleetTest(GooseToolsTestCase):
                 "location": "My Location",
                 "expected_duration": "My Expected Duration",
                 "gives_shares_to_alts": False,
-                "loot_was_stolen": False,
             },
         )
         self.assertEqual(response.status_code, 302)
@@ -38,10 +36,8 @@ class FleetTest(GooseToolsTestCase):
         expected_fleet = fleets_view.context["fleets"].get()
         self.assertEqual(expected_fleet.name, "My Fleet Name")
         self.assertEqual(expected_fleet.fc, self.logged_in_user)
-        self.assertEqual(expected_fleet.fleet_type, self.fleet_type)
         self.assertEqual(expected_fleet.loot_type, "Master Looter")
         self.assertEqual(expected_fleet.gives_shares_to_alts, False)
-        self.assertEqual(expected_fleet.loot_was_stolen, False)
         self.assertEqual(str(expected_fleet.start), "2012-01-14 11:02:00+00:00")
         self.assertIsNone(expected_fleet.end)
         self.assertEqual(expected_fleet.description, "My Description")
@@ -50,11 +46,6 @@ class FleetTest(GooseToolsTestCase):
 
     def test_can_edit_a_fleet(self):
         fleet = self.a_fleet()
-        new_fleet_type = FleetType.objects.create(
-            type="Another Fleet Type",
-            material_icon="Another Icon",
-            material_colour="Another Colour",
-        )
         response = self.post(
             reverse("fleet_edit", args=[fleet.pk]),
             {
@@ -63,14 +54,12 @@ class FleetTest(GooseToolsTestCase):
                 "end_date": "Jan. 14, 1900",
                 "fc_character": self.char.id,
                 "end_time": "10:02 PM",
-                "fleet_type": new_fleet_type.id,
                 "loot_type": "Free For All",
                 "name": "Another Fleet Name",
                 "description": "Another My Description",
                 "location": "Another My Location",
                 "expected_duration": "Another My Expected Duration",
                 "gives_shares_to_alts": True,
-                "loot_was_stolen": True,
             },
         )
         self.assertEqual(response.status_code, 302)
@@ -78,10 +67,8 @@ class FleetTest(GooseToolsTestCase):
         fleet.refresh_from_db()
         self.assertEqual(fleet.name, "Another Fleet Name")
         self.assertEqual(fleet.fc, self.logged_in_user)
-        self.assertEqual(fleet.fleet_type, new_fleet_type)
         self.assertEqual(fleet.loot_type, "Free For All")
         self.assertEqual(fleet.gives_shares_to_alts, True)
-        self.assertEqual(fleet.loot_was_stolen, True)
         self.assertEqual(str(fleet.start), "1900-01-14 20:03:00+00:00")
         self.assertEqual(str(fleet.end), "1900-01-14 22:03:00+00:00")
         self.assertEqual(fleet.description, "Another My Description")

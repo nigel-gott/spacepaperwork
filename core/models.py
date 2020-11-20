@@ -200,15 +200,6 @@ class System(models.Model):
         return f"{self.name} ({self.region})"
 
 
-class FleetType(models.Model):
-    type = models.TextField()
-    material_icon = models.TextField()
-    material_colour = models.TextField()
-
-    def __str__(self):
-        return str(self.type)
-
-
 def human_readable_relativedelta(delta):
     attrs = ["years", "months", "days", "hours", "minutes"]
     return ", ".join(
@@ -254,7 +245,6 @@ class Fleet(models.Model):
     ]
     fc = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.TextField()
-    fleet_type = models.ForeignKey(FleetType, on_delete=models.CASCADE)
     loot_type = models.TextField(choices=LOOT_TYPE_CHOICES, default="Master Looter")
     gives_shares_to_alts = models.BooleanField(default=False)
     start = models.DateTimeField()
@@ -262,7 +252,6 @@ class Fleet(models.Model):
     description = models.TextField(blank=True, null=True)
     location = models.TextField(blank=True, null=True)
     expected_duration = models.TextField(blank=True, null=True)
-    loot_was_stolen = models.BooleanField(default=False)
 
     def members_for_user(self, user):
         return FleetMember.objects.filter(

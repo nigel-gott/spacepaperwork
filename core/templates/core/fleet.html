@@ -23,8 +23,7 @@
             <i class="circle material-icons">error</i>
             {% endif %}
             <span class="title">
-                <a href="{% url 'fleet_view' fleet.id %}"><i
-                        class="material-icons {{fleet.fleet_type.material_colour}}">{{fleet.fleet_type.material_icon}}</i>
+                <a href="{% url 'fleet_view' fleet.id %}">
                     {{ fleet.name }} run by {{fleet.fc.username}}
                     - {% num_fleet_members fleet.id %} Members
                     {% if is_member %}
