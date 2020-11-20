@@ -30,18 +30,16 @@ class FleetTest(GooseToolsTestCase):
             },
         )
 
-        fleets_view = self.get(response.url)
-
-        expected_fleet = fleets_view.context["fleets"].get()
-        self.assertEqual(expected_fleet.name, "My Fleet Name")
-        self.assertEqual(expected_fleet.fc, self.logged_in_user)
-        self.assertEqual(expected_fleet.loot_type, "Master Looter")
-        self.assertEqual(expected_fleet.gives_shares_to_alts, False)
-        self.assertEqual(str(expected_fleet.start), "2012-01-14 11:02:00+00:00")
-        self.assertIsNone(expected_fleet.end)
-        self.assertEqual(expected_fleet.description, "My Description")
-        self.assertEqual(expected_fleet.location, "My Location")
-        self.assertEqual(expected_fleet.expected_duration, "My Expected Duration")
+        created_fleet = self.get(response.url).context["fleet"]
+        self.assertEqual(created_fleet.name, "My Fleet Name")
+        self.assertEqual(created_fleet.fc, self.logged_in_user)
+        self.assertEqual(created_fleet.loot_type, "Master Looter")
+        self.assertEqual(created_fleet.gives_shares_to_alts, False)
+        self.assertEqual(str(created_fleet.start), "2012-01-14 11:02:00+00:00")
+        self.assertIsNone(created_fleet.end)
+        self.assertEqual(created_fleet.description, "My Description")
+        self.assertEqual(created_fleet.location, "My Location")
+        self.assertEqual(created_fleet.expected_duration, "My Expected Duration")
 
     def test_cant_make_a_fleet_where_end_is_less_than_start(self):
         error = self.post_expecting_error(
