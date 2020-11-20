@@ -12,9 +12,7 @@ from core.models import (
     CorpHanger,
     DiscordUser,
     EggTransaction,
-    Fleet,
     FleetAnom,
-    FleetMember,
     GooseUser,
     InventoryItem,
     IskTransaction,
@@ -37,7 +35,6 @@ from core.models import (
     TransferLog,
 )
 
-admin.site.register(Fleet)
 admin.site.register(Corp)
 admin.site.register(Character)
 admin.site.register(System)
@@ -56,7 +53,6 @@ admin.site.register(ItemLocation)
 admin.site.register(CorpHanger)
 admin.site.register(Station)
 admin.site.register(TransferLog)
-admin.site.register(FleetMember)
 admin.site.register(DiscordUser)
 admin.site.register(Contract)
 admin.site.register(ItemFilter)

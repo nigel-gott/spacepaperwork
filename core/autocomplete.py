@@ -4,7 +4,6 @@ from core.models import (
     Character,
     DiscordUser,
     FleetAnom,
-    FleetMember,
     Item,
     ItemSubSubType,
     ItemSubType,
@@ -130,7 +129,7 @@ class CharacterAutocomplete(autocomplete.Select2QuerySetView):
         fleet = self.forwarded.get("fleet", None)
 
         if fleet:
-            chars = FleetMember.objects.filter(fleet=fleet).values("character__id")
+            chars = fleet.fleetmember_set.values("character__id")
             qs = qs.exclude(pk__in=chars)
 
         discord_username = self.forwarded.get("discord_username", None)

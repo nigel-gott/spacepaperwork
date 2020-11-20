@@ -15,7 +15,6 @@ def wait_and_click(browser, element_id):
         snapshot(browser, f"cant_find_{element_id}")
         assert False
     button = browser.find_by_id(element_id).first
-    print(button.outer_html)
     button.click()
 
 
@@ -32,5 +31,4 @@ def test_can_sign_up_and_create_new_fleet(http_service, browser):
     browser.find_by_id("id_name").first.fill("Test Fleet Name")
     wait_and_click(browser, "create_fleet_button")
 
-    assert browser.is_text_present("Active Fleets", wait_time=10)
     assert browser.is_text_present("Test Fleet Name", wait_time=10)

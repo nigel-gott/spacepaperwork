@@ -13,6 +13,7 @@ urlpatterns = [
             [
                 path("admin/", admin.site.urls),
                 path("", include("core.urls")),
+                path("", include("fleets.urls")),
                 path("accounts/", include("allauth.urls")),
             ]
             + settings.ENV_SPECIFIC_URLS

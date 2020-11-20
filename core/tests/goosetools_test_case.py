@@ -9,7 +9,6 @@ from core.models import (
     Character,
     Corp,
     DiscordUser,
-    Fleet,
     GooseUser,
     InventoryItem,
     Item,
@@ -27,6 +26,7 @@ from core.models import (
     System,
 )
 from core.tests.django_test_case import DjangoTestCase
+from goosetools.fleets.models import Fleet
 
 
 def isk(number_str: Union[str, int]):

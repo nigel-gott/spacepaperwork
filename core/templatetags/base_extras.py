@@ -4,12 +4,9 @@ import numbers
 from django import template
 
 import core
-from core.models import (
-    Contract,
+from core.models import Contract, InventoryItem, MarketOrder, SoldItem
+from goosetools.fleets.models import (
     FleetMember,
-    InventoryItem,
-    MarketOrder,
-    SoldItem,
     active_fleets_query,
     future_fleets_query,
     past_fleets_query,
@@ -81,6 +78,8 @@ def formatmoney(value):
 def nicemoney(value):
     if isinstance(value, numbers.Number):
         floored = m.floor(value)  # type: ignore
+    elif value is None:
+        floored = 0
     else:
         floored = m.floor(value.amount)
 

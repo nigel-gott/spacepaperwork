@@ -13,7 +13,6 @@ from core.autocomplete import (
 from core.views import (
     accept_contract,
     all_fleet_shares,
-    all_fleets_view,
     all_items,
     cancel_contract,
     completed_egg_transfers,
@@ -22,18 +21,7 @@ from core.views import (
     create_contract_for_loc,
     create_contract_item,
     edit_order_price,
-    fleet_add,
-    fleet_create,
-    fleet_edit,
-    fleet_end,
-    fleet_future,
-    fleet_join,
-    fleet_leave,
-    fleet_make_admin,
-    fleet_past,
-    fleet_remove_admin,
     fleet_shares,
-    fleet_view,
     item_add,
     item_delete,
     item_edit,
@@ -82,20 +70,7 @@ from core.views import (
 )
 
 urlpatterns = [
-    path("", all_fleets_view, name="home"),
-    path("fleet/", all_fleets_view, name="fleet"),
-    path("fleet/past", fleet_past, name="fleet_past"),
-    path("fleet/future", fleet_future, name="fleet_future"),
     path("settings/", settings_view, name="settings"),
-    path("fleet/create/", fleet_create, name="fleet_create"),
-    path("fleet/<int:pk>/", fleet_view, name="fleet_view"),
-    path("fleet/<int:pk>/join/", fleet_join, name="fleet_join"),
-    path("fleet/add/<int:pk>/", fleet_add, name="fleet_add"),
-    path("fleet/make_admin/<int:pk>/", fleet_make_admin, name="fleet_make_admin"),
-    path("fleet/remove_admin/<int:pk>/", fleet_remove_admin, name="fleet_remove_admin"),
-    path("fleet/leave/<int:pk>/", fleet_leave, name="fleet_leave"),
-    path("fleet/end/<int:pk>/", fleet_end, name="fleet_end"),
-    path("fleet/edit/<int:pk>/", fleet_edit, name="fleet_edit"),
     path(
         "fleet/<int:pk>/loot_group/create/", loot_group_create, name="loot_group_create"
     ),
