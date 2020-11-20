@@ -126,7 +126,8 @@ def loot_group_still_can_join_alts(loot_group, user):
 
 @register.simple_tag
 def can_join(fleet, user):
-    return fleet.can_join(user)
+    can_join_fleet, _ = fleet.can_join(user)
+    return can_join_fleet
 
 
 @register.simple_tag
