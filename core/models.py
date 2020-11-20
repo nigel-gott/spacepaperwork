@@ -282,6 +282,10 @@ class Fleet(models.Model):
             and (num_chars - num_characters_in_fleet) > 0
         )
 
+    def is_open(self):
+        now = timezone.now()
+        return self.start <= now and not self.in_the_past()
+
     def in_the_past(self):
         now = timezone.now()
         return self.auto_end() and now >= self.auto_end()

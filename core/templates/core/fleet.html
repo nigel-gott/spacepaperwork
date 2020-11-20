@@ -17,14 +17,9 @@
         <li class="collection-item">
             {% has_fleet_member fleet user as is_member %}
             {% can_join fleet user as can_join_fleet %}
-            {% if fleet.fc.discord_user.avatar_url %}
             <img alt="" class="avatar" src="{{ fleet.fc.discord_user.avatar_url }}" style="width: 42px">
-            {% else %}
-            <i class="circle material-icons">error</i>
-            {% endif %}
             <span class="title">
-                <a href="{% url 'fleet_view' fleet.id %}">
-                    {{ fleet.name }} run by {{fleet.fc.username}}
+                <a href="{% url 'fleet_view' fleet.id %}">{{ fleet.name }} run by {{fleet.fc.username}}
                     - {% num_fleet_members fleet.id %} Members
                     {% if is_member %}
                     (including you!)

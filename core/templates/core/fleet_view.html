@@ -42,19 +42,22 @@
 
                 {% can_join fleet user as can_join_fleet %}
                 {% if can_join_fleet %}
-                {% if can_join_alts %}
-                <a class="waves-effect waves-light btn purple lighten-2"
-                   href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Add Another Alt</a>
-                {% else %}
-                <a class="waves-effect waves-light btn purple lighten-2"
-                   href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Join Fleet</a>
-                {% endif %}
+                    {% if can_join_alts %}
+                        <a class="waves-effect waves-light btn purple lighten-2"
+                        href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Add Another Alt</a>
+                    {% else %}
+                        <a class="waves-effect waves-light btn purple lighten-2"
+                        href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Join Fleet</a>
+                    {% endif %}
                 {% endif %}
                 {% if admin %}
-                <a class="waves-effect waves-light btn orange darken-2"
-                   href="{% url 'fleet_edit' fleet.id %}"><i class='material-icons right'>edit</i>Edit Fleet</a>
-                <a class="waves-effect waves-light btn red darken-2"
-                   href="{% url 'fleet_end' fleet.id %}"><i class='material-icons right'>close</i>End Fleet</a>
+                    <a class="waves-effect waves-light btn orange darken-2"
+                    href="{% url 'fleet_edit' fleet.id %}"><i class='material-icons right'>edit</i>Edit Fleet</a>
+
+                    {% if fleet.is_open %}
+                    <a class="waves-effect waves-light btn red darken-2"
+                    href="{% url 'fleet_end' fleet.id %}"><i class='material-icons right'>close</i>End Fleet</a>
+                    {% endif %}
 
                 {% endif %}
             </div>

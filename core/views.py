@@ -207,9 +207,14 @@ def fleet_view(request, pk):
 def fleet_end(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     if f.has_admin(request.user):
-        f.end = timezone.now()
-        f.full_clean()
-        f.save()
+        if f.is_open():
+            f.end = timezone.now()
+            f.full_clean()
+            f.save()
+        else:
+            messages.error(
+                request, "You cannot end a future fleet or one that is already closed."
+            )
     else:
         return forbidden(request)
     return HttpResponseRedirect(reverse("fleet"))
@@ -599,29 +604,35 @@ def fleet_create(request):
                     )
                 )
 
-            new_fleet = Fleet(
-                fc=request.user,
-                loot_type=form.cleaned_data["loot_type"],
-                name=form.cleaned_data["name"],
-                description=form.cleaned_data["description"],
-                location=form.cleaned_data["location"],
-                expected_duration=form.cleaned_data["expected_duration"],
-                gives_shares_to_alts=form.cleaned_data["gives_shares_to_alts"],
-                start=combined_start,
-                end=combined_end,
-            )
-            new_fleet.full_clean()
-            new_fleet.save()
+            if combined_end and combined_end <= combined_start:
+                messages.error(
+                    request,
+                    "The fleet start time must be before the fleet end time!",
+                )
+            else:
+                new_fleet = Fleet(
+                    fc=request.user,
+                    loot_type=form.cleaned_data["loot_type"],
+                    name=form.cleaned_data["name"],
+                    description=form.cleaned_data["description"],
+                    location=form.cleaned_data["location"],
+                    expected_duration=form.cleaned_data["expected_duration"],
+                    gives_shares_to_alts=form.cleaned_data["gives_shares_to_alts"],
+                    start=combined_start,
+                    end=combined_end,
+                )
+                new_fleet.full_clean()
+                new_fleet.save()
 
-            fc_member = FleetMember(
-                character=form.cleaned_data["fc_character"],
-                fleet=new_fleet,
-                joined_at=timezone.now(),
-                admin_permissions=True,
-            )
-            fc_member.full_clean()
-            fc_member.save()
-            return HttpResponseRedirect(reverse("fleet"))
+                fc_member = FleetMember(
+                    character=form.cleaned_data["fc_character"],
+                    fleet=new_fleet,
+                    joined_at=timezone.now(),
+                    admin_permissions=True,
+                )
+                fc_member.full_clean()
+                fc_member.save()
+                return HttpResponseRedirect(reverse("fleet_view", args=[new_fleet.pk]))
 
     else:
         now = timezone.localtime(timezone.now())
@@ -661,20 +672,28 @@ def fleet_edit(request, pk):
                     )
                 )
 
-            existing_fleet.fc = existing_fleet.fc
-            existing_fleet.loot_type = form.cleaned_data["loot_type"]
-            existing_fleet.name = form.cleaned_data["name"]
-            existing_fleet.description = form.cleaned_data["description"]
-            existing_fleet.location = form.cleaned_data["location"]
-            existing_fleet.start = combined_start
-            existing_fleet.end = combined_end
-            existing_fleet.expected_duration = form.cleaned_data["expected_duration"]
-            existing_fleet.gives_shares_to_alts = form.cleaned_data[
-                "gives_shares_to_alts"
-            ]
-            existing_fleet.full_clean()
-            existing_fleet.save()
-            return HttpResponseRedirect(reverse("fleet_view", args=[pk]))
+            if combined_end and combined_end <= combined_start:
+                messages.error(
+                    request,
+                    "The fleet start time must be before the fleet end time!",
+                )
+            else:
+                existing_fleet.fc = existing_fleet.fc
+                existing_fleet.loot_type = form.cleaned_data["loot_type"]
+                existing_fleet.name = form.cleaned_data["name"]
+                existing_fleet.description = form.cleaned_data["description"]
+                existing_fleet.location = form.cleaned_data["location"]
+                existing_fleet.start = combined_start
+                existing_fleet.end = combined_end
+                existing_fleet.expected_duration = form.cleaned_data[
+                    "expected_duration"
+                ]
+                existing_fleet.gives_shares_to_alts = form.cleaned_data[
+                    "gives_shares_to_alts"
+                ]
+                existing_fleet.full_clean()
+                existing_fleet.save()
+                return HttpResponseRedirect(reverse("fleet_view", args=[pk]))
 
     else:
         form = FleetForm(

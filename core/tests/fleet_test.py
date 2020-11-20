@@ -29,7 +29,6 @@ class FleetTest(GooseToolsTestCase):
                 "gives_shares_to_alts": False,
             },
         )
-        self.assertEqual(response.status_code, 302)
 
         fleets_view = self.get(response.url)
 
@@ -43,6 +42,51 @@ class FleetTest(GooseToolsTestCase):
         self.assertEqual(expected_fleet.description, "My Description")
         self.assertEqual(expected_fleet.location, "My Location")
         self.assertEqual(expected_fleet.expected_duration, "My Expected Duration")
+
+    def test_cant_make_a_fleet_where_end_is_less_than_start(self):
+        error = self.post_expecting_error(
+            reverse("fleet_create"),
+            {
+                "start_date": "Jan. 14, 2012",
+                "start_time": "11:02 AM",
+                "end_date": "Jan. 13, 2012",
+                "end_time": "11:02 AM",
+                "fc_character": self.char.id,
+                "loot_type": "Master Looter",
+                "name": "My Fleet Name",
+                "description": "My Description",
+                "location": "My Location",
+                "expected_duration": "My Expected Duration",
+                "gives_shares_to_alts": False,
+            },
+        )
+        self.assertEqual(
+            error,
+            ["The fleet start time must be before the fleet end time!"],
+        )
+
+    def test_cant_edit_a_fleet_so_that_end_is_less_than_start(self):
+        fleet = self.a_fleet()
+        error = self.post_expecting_error(
+            reverse("fleet_edit", args=[fleet.pk]),
+            {
+                "start_date": "Jan. 14, 2012",
+                "start_time": "11:02 AM",
+                "end_date": "Jan. 13, 2012",
+                "end_time": "11:02 AM",
+                "fc_character": self.char.id,
+                "loot_type": "Master Looter",
+                "name": "My Fleet Name",
+                "description": "My Description",
+                "location": "My Location",
+                "expected_duration": "My Expected Duration",
+                "gives_shares_to_alts": False,
+            },
+        )
+        self.assertEqual(
+            error,
+            ["The fleet start time must be before the fleet end time!"],
+        )
 
     def test_can_edit_a_fleet(self):
         fleet = self.a_fleet()
@@ -180,6 +224,34 @@ class FleetTest(GooseToolsTestCase):
         self.assertIn(
             "End: Jan. 14, 2012, noon (Ends Now)",
             str(fleet_view.content),
+        )
+
+    @freeze_time("2012-01-14 12:00:00")
+    def test_cant_end_a_future_fleet(self):
+        a_future_fleet = self.a_fleet(
+            start_date="Jan. 15, 2012",
+            start_time="1:00 AM",
+        )
+
+        errors = self.post_expecting_error(
+            reverse("fleet_end", args=[a_future_fleet.id])
+        )
+        self.assertEqual(
+            errors, ["You cannot end a future fleet or one that is already closed."]
+        )
+
+    @freeze_time("2012-01-14 12:00:00")
+    def test_cant_end_a_past_fleet(self):
+        a_future_fleet = self.a_fleet(
+            start_date="Jan. 11, 2012",
+            start_time="1:00 AM",
+        )
+
+        errors = self.post_expecting_error(
+            reverse("fleet_end", args=[a_future_fleet.id])
+        )
+        self.assertEqual(
+            errors, ["You cannot end a future fleet or one that is already closed."]
         )
 
     def test_cant_join_fleet_not_accepting_alts_with_two_characters(self):
