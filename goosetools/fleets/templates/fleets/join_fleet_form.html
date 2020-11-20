@@ -1,0 +1,75 @@
+{% extends "core/base.html" %}
+{% block body %}
+<h4>Join fleet: {{fleet.name}}</h4>
+<div class="divider"></div>
+<div class="section">
+    {% if form %}
+    <!-- Form Errors -->
+    {% if form.non_field_errors %}
+    <div class="row">
+        <div class="col s12 m5">
+            <div class="card-panel red darken-1">
+                <span class="white-text">
+                    <b>Errors with form:</b>
+                <ul class="errors">
+                    {% for error in form.non_field_errors%}
+                    <li>{{ error|escape }}</li>
+                    {% endfor %}
+                </ul>
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Display Form -->
+        <form action="" class="col s12" method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="row">
+                <div class="input-field col s12">
+                    {{ field.errors }}
+                    {{ field }}
+                    {{ field.label_tag }}
+                    {% if field.help_text %}
+                    <span class="helper-text" data-error="wrong" data-success="right">
+                        {{ field.help_text|safe }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% endfor %}
+
+            {% if fleet.is_master_looter %}
+            <div class="row">
+                <div class="col s12 m12">
+                    <div class="card blue-grey lighten-2">
+                        <div class="card-content white-text">
+                            <span class="card-title">
+                               <i class="material-icons">attach_money</i> Master Looting
+                            </span>
+                            <p>
+                                All wrecks, containers, and loot created by this fleet will be gathered by a designated
+                                looter.
+                            </p>
+                            <p>
+                                <strong>Do not loot unless given permission to do so by the fleet commander.</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <button class="btn waves-effect waves-light green" type="submit" value="Submit">Join
+                <i class="material-icons right">send</i>
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+
+
+{% endblock %}
