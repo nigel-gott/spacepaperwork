@@ -2,8 +2,8 @@ from dal import autocomplete
 from django import forms
 from django.core.exceptions import ValidationError
 
-from core.models import Character, DiscordUser
 from goosetools.fleets.models import Fleet
+from goosetools.users.models import Character, DiscordUser
 
 
 def get_discord_names():

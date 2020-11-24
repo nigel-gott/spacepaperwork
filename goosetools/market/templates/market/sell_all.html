@@ -1,0 +1,218 @@
+{% extends "core/base.html" %} {% load base_extras %} {% block body %}
+{% load materializecss %}
+{% load static %}
+<div class="section">
+    <form action="" method="post">
+        <div class="section">
+            {% if head_form.non_field_errors %}
+            <div class="row">
+                <div class="col s12 m5">
+                    <div class="card-panel red darken-1">
+                    <span class="white-text">
+                        <b>Errors with form:</b>
+                    <ul class="errors">
+                        {% for error in head_form.non_field_errors%}
+                        <li>{{ error|escape }}</li>
+                        {% endfor %}
+                    </ul>
+                    </span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            <div class="row">
+                <button class="btn waves-effect waves-light" id="submit_btn" type="submit" value="Submit">
+                    Buy Back All
+                    <i class="material-icons right">send</i>
+                </button>
+            </div>
+            <div class="row">
+                {{ head_form.overall_cut|materializecss:'s12 m12, icon=person'}}
+            </div>
+            {{ formset.management_form }}
+            {% csrf_token %}
+            <h5>Items</h5>
+            <table>
+                <thead>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Estimate Price</th>
+                <th>Estimate Price Quality</th>
+                <th>Actual Buy Back Price</th>
+                <th>Total Buy Back Isk After Cut</th>
+                </thead>
+                <tbody>
+                <tr>
+                    <td class="right-align" colspan="5">
+                        Total Buy Back in Isk:
+                    </td>
+                    <td id="total">
+                    </td>
+                </tr>
+                {% for form in formset %}
+                {% if form.non_field_errors %}
+                <tr>
+                    <td colspan="6">
+            <span class="white-text">
+                <b>Errors with form:</b>
+            <ul class="errors">
+                {% for error in form.non_field_errors%}
+                <li>{{ error|escape }}</li>
+                {% endfor %}
+            </ul>
+            </span>
+                    </td>
+                </tr>
+                {% endif %}
+                <tr>
+                    <td>
+                        {{form.item.value}}
+                        {{form.inv_item}}
+                        {{form.stack}}
+                    </td>
+                    <td class="quantity">
+                        {{form.quantity.value}}
+                    </td>
+                    <td>
+                        {% if form.estimate_price.value > 0 %}
+                        {{form.estimate_price.value|nicemoney}}
+                        {% else %}
+                        Missing Market Data
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{form.quality.value}}
+                    </td>
+                    <td>
+                        {{form.listed_at_price|materializecss}}
+                    </td>
+                    <td id="total_{{forloop.counter}}">
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+    </form>
+</div>
+</div>
+</div>
+
+
+{% endblock %}
+
+{% block extrafooter %}
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
+<script crossorigin="anonymous"
+        integrity="sha512-zPQm8HS4Phjo9pUbbk+HPH3rSWu5H03NFvBpPf6D9EU2xasj0ZxhYAc/lvv/HVDWMSE1Autj19i6nZOfiVQbFQ=="
+        src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/9.0.0/decimal.min.js"></script>
+{{ order_json|json_script:"order-data" }}
+<script>
+
+function valid_fee(fee){
+    return fee && fee.greaterThanOrEqualTo(0) && fee.lessThanOrEqualTo(100)
+}
+
+function valid_price_str(price_str){
+    var num = price_str.replace(/,/g, '');
+    return !isNaN(num) && num > 0
+}
+function numberWithCommas(x) {
+    var x = x.toString();
+    var x = x.replace(/,/g, '');
+    return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+function update_total_field(){
+  total = Decimal(0)
+  every_is_valid = true
+  for (var key in totals) {
+    // check if the property/key is defined in the object itself, not in parent
+    if (totals.hasOwnProperty(key)) {
+        if(totals[key]){
+          total = total.plus(totals[key])
+        } else {
+          every_is_valid = false
+
+        }
+    }
+  }
+  if(every_is_valid){
+        $("#submit_btn").prop('disabled', false)
+
+  }
+  $("#total").html(numberWithCommas(total) + " ISK")
+}
+
+function calc_fee_for_row(_e){
+    listed_at_price_str = $(this).val()
+    td = $(this).parent().parent()
+    quantity_str = td.prevAll('.quantity').first().html()
+    next_cell = td.next()
+
+
+
+    var _x = $(this).val();
+    var _cursor = _e.target && _e.target.selectionStart;
+
+
+    var _length = _x.toString().replace(/,/g, "").length;
+    var _commas = _x.length - _length;
+
+    $(this).val(_x.toString().replace(/,/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ","));
+
+    var _newLength = _x.toString().replace(/,/g, "").length;
+    var _newCommas = $(this).val().length - _newLength - _commas;
+
+    if(_cursor){
+
+      if (_newLength == _length && _newCommas == 0) {
+          _e.target.setSelectionRange(_cursor, _cursor);
+      }else{
+          _e.target.setSelectionRange(_cursor - (_newLength - _length) + _newCommas, _cursor - (_newLength - _length) + _newCommas);
+      }
+    }
+    overall_cut_str = $("#id_overall_cut").val();
+    if (valid_price_str(listed_at_price_str) && overall_cut_str && quantity_str){
+        listed_at_price = new Decimal(listed_at_price_str.replace(/,/g, '').trim());
+        overall_cut = new Decimal(overall_cut_str.replace(/,/g, ''));
+        quantity = new Decimal(quantity_str.trim());
+
+        if(listed_at_price.greaterThan(0) && valid_fee(overall_cut)){
+            this.setCustomValidity('');
+            total_isk_quantity = quantity.times(listed_at_price)
+            resulting_cut = (((overall_cut.dividedBy(100)).times(total_isk_quantity)).floor())
+            net_profit = (total_isk_quantity.floor().minus(resulting_cut)).floor()
+            totals[$(this).attr('id')] = net_profit;
+            next_cell.html(
+                 numberWithCommas(net_profit) + " ISK");
+        } else {
+            this.setCustomValidity('Invalid Price');
+            totals[$(this).attr('id')] = false;
+            $("#submit_btn").prop('disabled', true)
+            next_cell.html("<b class='red-text'>Invalid</b>")
+        }
+    } else {
+        this.setCustomValidity('Invalid Price');
+            next_cell.html("<b class='red-text'>Invalid</b>")
+        totals[$(this).attr('id')] = false;
+
+        $("#submit_btn").prop('disabled', true)
+    }
+    update_total_field();
+
+}
+var totals = {};
+(function($) {
+
+
+    $("input[id$='listed_at_price']").on("change paste keyup", calc_fee_for_row);
+    $("input[id$='listed_at_price']").each(calc_fee_for_row);
+    update_total_field();
+    $("#id_overall_cut").on("change paste keyup", function(){
+      $("input[id$='listed_at_price']").each(calc_fee_for_row);
+      update_total_field();
+    });
+
+})($)
+
+</script>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends "core/base.html" %} {% load base_extras %} {% block body %}
+{% load materializecss %}
+<div class="row">
+    <div class="col s12 m12">
+        <h5>All Isk Transactions</h5>
+        <table>
+            <thead>
+            <th>Item</th>
+            <th>Time</th>
+            <th>Isk</th>
+            <th>Type</th>
+            <th>Associated Quantity</th>
+            <th>Notes</th>
+            <th>Balance</th>
+            </thead>
+            <tbody>
+            {% for isk_tran in isk_transactions %}
+            <tr>
+                <td>
+                    <a href="{% url 'item_view' isk_tran.item.id %}">
+                        {{isk_tran.item}}
+                    </a>
+                </td>
+                <td>
+                    {{isk_tran.time}}
+                </td>
+                <td>
+                    {{isk_tran.isk}}
+                </td>
+                <td>
+                    {{isk_tran.transaction_type}}
+                </td>
+                <td>
+                    {{isk_tran.quantity}}
+                </td>
+                <td>
+                    {{isk_tran.notes}}
+                </td>
+                <td>
+                    {{isk_tran.so_far}}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </form>
+    </div>
+</div>
+<div class="row">
+    <div class="col s12 m12">
+        <h5>All Egg Transactions</h5>
+        <table>
+            <thead>
+            <th>Item</th>
+            <th>Time</th>
+            <th>Isk</th>
+            <th>Counterparty</th>
+            <th>Associated Quantity</th>
+            <th>Notes</th>
+            <th>Balance</th>
+            </thead>
+            <tbody>
+            {% for isk_tran in egg_transactions %}
+            <tr>
+                <td>
+                    <a href="{% url 'item_view' isk_tran.item.id %}">
+                        {{isk_tran.item}}
+                    </a>
+                </td>
+                <td>
+                    {{isk_tran.time}}
+                </td>
+                <td>
+                    {{isk_tran.eggs}}
+                </td>
+                <td>
+                    {{isk_tran.counterparty_discord_username}}
+                </td>
+                <td>
+                    {{isk_tran.quantity}}
+                </td>
+                <td>
+                    {{isk_tran.notes}}
+                </td>
+                <td>
+                    {{isk_tran.so_far}}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </form>
+    </div>
+</div>
+
+
+{% endblock %}

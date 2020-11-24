@@ -1,8 +1,12 @@
 from dateutil.relativedelta import relativedelta
+from django import forms
 from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
+
+from goosetools.core.models import System
+from goosetools.users.models import Character
 
 
 def human_readable_relativedelta(delta):
@@ -177,7 +181,7 @@ class Fleet(models.Model):
 
 class FleetMember(models.Model):
     fleet = models.ForeignKey(Fleet, on_delete=models.CASCADE)
-    character = models.ForeignKey("core.Character", on_delete=models.CASCADE)
+    character = models.ForeignKey(Character, on_delete=models.CASCADE)
     joined_at = models.DateTimeField(blank=True, null=True)
     left_at = models.DateTimeField(blank=True, null=True)
     admin_permissions = models.BooleanField(default=False)
@@ -191,3 +195,59 @@ class FleetMember(models.Model):
 
     class Meta:
         unique_together = (("character", "fleet"),)
+
+
+class AnomType(models.Model):
+    FACTIONS = [
+        ("Guristas", "Guritas"),
+        ("Angel", "Angel"),
+        ("Blood", "Blood"),
+        ("Sansha", "Sansha"),
+        ("Serpentis", "Serpentis"),
+        ("Asteroids", "Asteroids"),
+        ("PvP", "PvP"),
+    ]
+    TYPE_CHOICES = [
+        ("PvP Roam", "PvP Roam"),
+        ("PvP Gatecamp", "PvP Gatecamp"),
+        ("Deadspace", "Deadspace"),
+        ("Scout", "Scout"),
+        ("Inquisitor", "Inquisitor"),
+        ("Condensed Belt", "Condensed Belt"),
+        ("Condensed Cluster", "Condensed Cluster"),
+    ]
+    level = models.PositiveIntegerField()
+    type = models.TextField(choices=TYPE_CHOICES)
+    faction = models.TextField(choices=FACTIONS)
+
+    def clean(self):
+        if self.level < 6 and self.type == "Deadspace":
+            raise forms.ValidationError("Deadspaces cannot be lower than level 6")
+        if self.level < 6 and self.type.startswith("Condensed"):
+            raise forms.ValidationError("Condenesed Belts cannot be lower than level 6")
+        if self.type.startswith("Condensed") and self.faction != "Asteroids":
+            raise forms.ValidationError("A Belt must be in the Asteroids Faction")
+        if self.type.startswith("PvP") and self.faction != "PvP":
+            raise forms.ValidationError("A PvP type must be in the PvP Faction")
+
+    def __str__(self):
+        return f"{self.faction} {self.type} Level {self.level}"
+
+
+class FleetAnom(models.Model):
+    fleet = models.ForeignKey(Fleet, on_delete=models.CASCADE)
+    anom_type = models.ForeignKey(AnomType, on_delete=models.CASCADE)
+    time = models.DateTimeField()
+    system = models.ForeignKey(System, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.anom_type} @ {self.time} in {self.system}"
+
+
+class KillMail(models.Model):
+    fleet = models.ForeignKey(Fleet, on_delete=models.CASCADE)
+    killed_ship = models.TextField()
+    description = models.TextField()
+    looter = models.ForeignKey(
+        Character, on_delete=models.CASCADE, blank=True, null=True
+    )

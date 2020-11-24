@@ -15,8 +15,6 @@ services:
     env_file:
       - ./.envs/.test/.django
       - ./.envs/.test/.postgres
-    # ports:
-    #   - "9000:8000"
     command: /start
 
   postgres_test:
@@ -28,5 +26,3 @@ services:
     image: selenium/standalone-firefox:4.0.0-alpha-7-prerelease-20201009
     volumes:
       - /dev/shm:/dev/shm
-    # ports:
-    #   - "4444:4444"

@@ -70,7 +70,7 @@ def load_existing_models():
         next_character_pk = 1
         next_discord_user_pk = 0
         for model in existing_models:
-            if model["model"] == "core.discorduser":
+            if model["model"] == "users.DiscordUser":
                 fields = model["fields"]
                 uid = fields["uid"]
                 if uid in existing_characters:
@@ -84,7 +84,7 @@ def load_existing_models():
                 users_by_pk[model["pk"]] = existing_users[uid]
                 next_discord_user_pk = max(model["pk"] + 1, next_discord_user_pk)
         for model in existing_models:
-            if model["model"] == "core.character":
+            if model["model"] == "users.Character":
                 fields = model["fields"]
                 ingame_name = fields["ingame_name"]
                 if ingame_name in existing_characters:
@@ -235,7 +235,7 @@ def output_models(chars, users):
         for char in chars.values():
             models.append(
                 {
-                    "model": "core.character",
+                    "model": "users.Character",
                     "pk": char.pk,
                     "fields": {
                         "discord_user": char.discord_user_pk,
@@ -247,7 +247,7 @@ def output_models(chars, users):
         for user in users.values():
             models.append(
                 {
-                    "model": "core.discorduser",
+                    "model": "users.DiscordUser",
                     "pk": user.pk,
                     "fields": {
                         "username": user.username,

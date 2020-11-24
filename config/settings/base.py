@@ -82,8 +82,15 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
-    "core",
-    "goosetools.fleets.apps.FleetsConfig"
+    "goosetools.users.apps.UsersConfig",
+    "goosetools.items.apps.ItemsConfig",
+    "goosetools.fleets.apps.FleetsConfig",
+    "goosetools.bank.apps.BankConfig",
+    "goosetools.market.apps.MarketConfig",
+    "goosetools.pricing.apps.PricingConfig",
+    "goosetools.contracts.apps.ContractsConfig",
+    "goosetools.ownership.apps.OwnershipConfig",
+    "goosetools.core.apps.CoreConfig",
     # Goosetools apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -104,13 +111,13 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
-AUTH_USER_MODEL = "core.GooseUser"
+AUTH_USER_MODEL = "users.GooseUser"
 
 # django-allauth
 # ------------------------------------------------------------------------------
 # All Auth Social Login Config
 # Replace the standard sign in form with our own with custom fields
-SOCIALACCOUNT_FORMS = {"signup": "core.forms.SignupFormWithTimezone"}
+SOCIALACCOUNT_FORMS = {"signup": "goosetools.users.forms.SignupFormWithTimezone"}
 # We are identifying users based off their discord id soley so we don't need email
 ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = "username"
@@ -167,7 +174,7 @@ MIDDLEWARE = [
     # TODO Setup email and enable this to notify admins when there are broken links.
     # "django.middleware.common.BrokenLinkEmailsMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "core.middleware.TimezoneMiddleware",
+    "config.middleware.TimezoneMiddleware",
 ]
 
 # STATIC
@@ -176,8 +183,6 @@ MIDDLEWARE = [
 STATIC_ROOT = env("STATIC_ROOT")
 # https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 STATIC_URL = "/static/"
-# https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
-STATICFILES_DIRS = [str(APPS_DIR / "static")]
 # https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#staticfiles-finders
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",

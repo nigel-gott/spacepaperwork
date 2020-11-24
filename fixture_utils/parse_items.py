@@ -17,7 +17,7 @@ def main():
         for type_info in groups.values():
             models.append(
                 {
-                    "model": "core.itemtype",
+                    "model": "items.itemtype",
                     "pk": item_type_pk,
                     "fields": {"name": type_info["name"]},
                 }
@@ -25,7 +25,7 @@ def main():
             for sub_type in type_info["contents"].values():
                 models.append(
                     {
-                        "model": "core.itemsubtype",
+                        "model": "items.itemsubtype",
                         "pk": item_sub_type_pk,
                         "fields": {"name": sub_type["name"], "item_type": item_type_pk},
                     }
@@ -33,7 +33,7 @@ def main():
                 for sub_sub_type in sub_type["contents"].values():
                     models.append(
                         {
-                            "model": "core.itemsubsubtype",
+                            "model": "items.itemsubsubtype",
                             "pk": item_sub_sub_type_pk,
                             "fields": {
                                 "name": sub_sub_type["name"],
@@ -44,7 +44,7 @@ def main():
                     for item in sub_sub_type["contents"].values():
                         models.append(
                             {
-                                "model": "core.item",
+                                "model": "items.item",
                                 "pk": item_pk,
                                 "fields": {
                                     "name": item["name"],
@@ -61,7 +61,7 @@ def main():
 
             item_type_pk = item_type_pk + 1
 
-        with open("../core/fixtures/items.json", "w") as out_file:
+        with open("../goosetools/items/fixtures/items.json", "w") as out_file:
             out_file.write(jsonpickle.encode(models, indent=4))
 
 

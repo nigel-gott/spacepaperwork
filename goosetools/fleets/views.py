@@ -8,7 +8,6 @@ from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse, reverse_lazy
 from django.utils import timezone
 
-from core.models import Character
 from goosetools.fleets.models import (
     Fleet,
     FleetMember,
@@ -16,6 +15,7 @@ from goosetools.fleets.models import (
     future_fleets_query,
     past_fleets_query,
 )
+from goosetools.users.models import Character
 
 from .forms import FleetAddMemberForm, FleetForm, JoinFleetForm
 

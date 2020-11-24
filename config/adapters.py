@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.urls import reverse
 
-from core.models import DiscordUser
+from goosetools.users.models import DiscordUser
 
 
 # pylint: disable=unused-argument

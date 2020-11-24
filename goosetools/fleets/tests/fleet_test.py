@@ -1,8 +1,8 @@
 from django.urls.base import reverse
 from freezegun import freeze_time
 
-from core.models import Character, DiscordUser
-from core.tests.goosetools_test_case import GooseToolsTestCase
+from goosetools.tests.goosetools_test_case import GooseToolsTestCase
+from goosetools.users.models import Character, DiscordUser
 
 
 @freeze_time("2012-01-14 12:00:00")
