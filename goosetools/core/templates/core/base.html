@@ -64,18 +64,25 @@
         {% if user.is_authenticated %}
         <ul class="left hide-on-med-and-down valign-wrapper">
 
-            <li><a class="dropdown-trigger valign-wrapper" data-target="dropdown_fleets" href="#!">Fleets<i
-                    class="material-icons right">arrow_drop_down</i></a></li>
+            <li><a class="dropdown-trigger valign-wrapper" data-target="dropdown_fleets" href="#!">
+                <i class="material-icons left">star</i>Fleets
+                <i class="material-icons right">arrow_drop_down</i>
+                </a></li>
             {% all_sales user as all_sales_num %}
             {% num_contracts user as contracts %}
-            <li><a class="dropdown-trigger valign-wrapper" data-target="dropdown_sales" href="#!">Sales ({{all_sales_num}})
-                <i class="material-icons right">arrow_drop_down</i></a></li>
-            <li><a href="{% url 'contracts' %}">Contracts ({{contracts}})</a></li>
+            <li><a class="dropdown-trigger valign-wrapper" data-target="dropdown_sales" href="#!">
+                <i class="material-icons left" style="margin-right:0px;">attach_money</i>Sales ({{all_sales_num}})
+                <i class="material-icons right">arrow_drop_down</i>
+                </a></li>
+            <li><a href="{% url 'contracts' %}">Contracts ({{contracts}})<i class="material-icons left">compare_arrows</i></a></li>
             <li>
 
 
-                <a class="tab" href="{% url 'own_user_transactions' %}">Transactions</a></li>
-            <a class="tab" href="{% url 'settings' %}">Settings</a></li>
+            <a class="tab" href="{% url 'own_user_transactions' %}">Transactions<i class="material-icons left">toc</i></a></li>
+            <a class="tab" href="{% url 'industry:shiporders_view' %}">Ship Orders <i class="material-icons left">directions_boat</i>
+              <span class="new badge"></span>
+            </a></li>
+            <a class="tab" href="{% url 'settings' %}">Settings<i class="material-icons left">settings</i></a></li>
             <li>
         </ul>
         {% endif %}
@@ -99,6 +106,8 @@
 </nav>
 <ul class="sidenav" id="mobile-demo">
     {% if user.is_authenticated %}
+    <li class="tab"><a href="{% url 'industry:shiporders_view' %}">Ship Orders
+    </a>
     <li class="tab"><a href="{% url 'fleet' %}">Active Fleets
         ({% num_active_fleets %})
     </a>

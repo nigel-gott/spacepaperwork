@@ -107,3 +107,16 @@ class ItemAutocomplete(autocomplete.Select2QuerySetView):
             qs = qs.filter(name__icontains=self.q)
 
         return qs
+
+
+class ShipAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_authenticated:
+            return Item.objects.none()
+
+        qs = Item.all_ships()
+
+        if self.q:
+            qs = qs.filter(name__icontains=self.q)
+
+        return qs

@@ -1,0 +1,40 @@
+{% extends "core/base.html" %}
+{% load base_extras %}
+{% load static %}
+{% load materializecss %}
+{% block body %}
+<div class="row">
+    <div class="col s12 m12">
+    <a class="btn waves-btn green" href="{% url 'industry:shiporders_create' %}">Order A Ship!</a>
+    <table id="ship_orders_table"></table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrafooter %}
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/jquery.dataTables.min.css" integrity="sha512-1k7mWiTNoyx2XtmI96o+hdjP8nn0f3Z2N4oF/9ZZRgijyV4omsKOXEnqL1gKQNPy2MTSP9rIEWGcH/CInulptA==" crossorigin="anonymous" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js" integrity="sha512-BkpSL20WETFylMrcirBahHfSnY++H2O1W+UnEEO4yNIl+jI2+zowyoGJpbtk6bx97fBXf++WJHSSK2MV4ghPcg==" crossorigin="anonymous"></script>
+{{ ship_orders|json_script:"ship_orders" }}
+
+<script>
+$(function() {
+    const ship_orders_text = document.getElementById('ship_orders').textContent;
+    if(ship_orders_text){
+        const ship_orders = JSON.parse(ship_orders_text);
+        $('#ship_orders_table').DataTable( {
+            data: ship_orders ,
+            "columns": [
+                { "data": "created_at", "title": "Created At"},
+                { "data": "assignee", "title" : "Assignee"},
+                { "data": "recipient_character", "title":"Recipient" },
+                { "data": "ship", "title":"Ship"},
+                { "data": "quantity", "title":"Quantity"},
+                { "data": "payment_method", "title":"Payment Method"},
+                { "data": "state", "title": "Status"}
+            ]
+        } );
+    }
+});
+</script>
+{% endblock %}

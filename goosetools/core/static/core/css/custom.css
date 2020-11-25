@@ -43,3 +43,7 @@ main {
     z-index: 1;
     overflow: visible;
 }
+
+.nav-wrapper i{
+    margin-right: 2px
+}

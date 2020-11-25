@@ -79,6 +79,12 @@ class Item(models.Model):
             self.cached_lowest_sell = result
         return self.cached_lowest_sell
 
+    @staticmethod
+    def all_ships():
+        return Item.objects.filter(
+            item_type__item_sub_type__item_type__name="Ships"
+        ).all()
+
     class Meta:
         indexes = [models.Index(fields=["-cached_lowest_sell"])]
 

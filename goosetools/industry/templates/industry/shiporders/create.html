@@ -1,0 +1,37 @@
+{% extends "core/base.html" %}
+{% load materializecss %}
+{% load static %}
+{% block body %}
+<div class="section">
+    <h4>Place A Ship Order</h4>
+</div>
+<div class="divider"></div>
+<div class="section">
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="row">
+            {{ form.recipient_character|materializecss:'s12 m12, icon=user'}}
+        </div>
+        <div class="row">
+            {{ form.ship|materializecss:'s12 m6, icon=directions_boat'}}
+            {{ form.quantity|materializecss:'s12 m6, icon=filter_1'}}
+        </div>
+        <div class="row">
+            {{ form.payment_method|materializecss:'s12 m6, icon=attach_money'}}
+            {{ form.notes|materializecss:'s12 m6, icon=comment'}}
+        </div>
+        <button class="btn waves-effect waves-light green" type="submit" value="Submit">
+            Place Ship Order
+            <i class="material-icons right">send</i>
+        </button>
+    </form>
+
+</div>
+
+
+{% endblock %}
+{% block extrafooter %}
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
+{{form.media}}
+
+{% endblock %}

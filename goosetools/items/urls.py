@@ -5,6 +5,7 @@ from goosetools.items.autocomplete import (
     ItemSubSubTypeAutocomplete,
     ItemSubTypeAutocomplete,
     ItemTypeAutocomplete,
+    ShipAutocomplete,
     SystemAutocomplete,
 )
 from goosetools.items.views import (
@@ -64,4 +65,5 @@ urlpatterns = [
         name="item-sub-sub-type-autocomplete",
     ),
     path(r"item-autocomplete/", ItemAutocomplete.as_view(), name="item-autocomplete"),
+    path(r"ship-autocomplete/", ShipAutocomplete.as_view(), name="ship-autocomplete"),
 ]

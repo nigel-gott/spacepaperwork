@@ -20,6 +20,7 @@ urlpatterns = [
                 path("", include("contracts.urls")),
                 path("", include("market.urls")),
                 path("", include("ownership.urls")),
+                path("", include("industry.urls")),
                 path("accounts/", include("allauth.urls")),
             ]
             + settings.ENV_SPECIFIC_URLS
