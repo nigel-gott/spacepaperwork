@@ -5,7 +5,6 @@ from django.db import models
 from django.db.models.aggregates import Sum
 from django.db.models.expressions import F
 from django.db.models.functions import Coalesce
-from django.forms.fields import FloatField
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 
@@ -164,7 +163,7 @@ class LootGroup(models.Model):
                 estimated_profit_sum=Sum(
                     Coalesce(F("item__cached_lowest_sell"), 0)
                     * (F("quantity") + Coalesce(F("marketorder__quantity"), 0)),
-                    output_field=FloatField(),
+                    output_field=models.FloatField(),
                 )
             )["estimated_profit_sum"]
             or 0
