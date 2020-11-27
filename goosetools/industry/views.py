@@ -5,7 +5,7 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from rest_framework import mixins, permissions
+from rest_framework import mixins, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -74,6 +74,22 @@ class ShipOrderViewSet(
                 "assignee_name": ship_order.assignee.discord_username(),
             }
         )
+
+    @action(detail=True, methods=["PUT"])
+    @transaction.atomic
+    # pylint: disable=unused-argument
+    def unclaim(self, request, pk=None):
+        ship_order = self.get_object()
+        if ship_order.assignee is None:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        else:
+            ship_order.assignee = None
+            ship_order.save()
+            return Response(
+                {
+                    "status": "unclaimed",
+                }
+            )
 
 
 @login_required(login_url=login_url)

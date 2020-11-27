@@ -23,7 +23,18 @@ $(function() {
     columns = [
             { "data": "id", "visible": false, "searchable": false },
             { "data": "created_at", "title": "Created At"},
-            { "data": "assignee_name", "title" : "Assignee", "defaultContent": "Nobody"},
+            { "data": "assignee_name", "title" : "Assignee", "defaultContent": "Nobody",
+                render: function ( data, type, row ) {
+                    if(page_data["has_industry_permission"]){
+                        if(!row["assignee_name"]){
+                            return '<button class="claim-btn waves-btn btn green">Claim</button>';
+                        } else if(row["assignee"]===page_data["request_user_pk"]){
+                            return '<button class="unclaim-btn waves-btn btn red">UnClaim</button>';
+                        }
+                    }
+                    return row['assignee_name'];
+                }
+            },
             { "data": "recipient_character_name", "title":"Recipient" },
             { "data": "ship", "title":"Ship"},
             { "data": "quantity", "title":"Quantity"},
@@ -37,11 +48,7 @@ $(function() {
             "title": "Action",
             "data": null,
             render: function ( data, type, row ) {
-                if(!row["assignee_name"]){
-                    return '<button class="claim-btn waves-btn btn green">Claim</button>';
-                } else {
-                    return '';
-                }
+                return '';
             }
         });
     }
@@ -53,20 +60,30 @@ $(function() {
         "columns": columns
     } );
 
-    $('#ship_orders_table').on( 'click', 'button', function () {
+    $('#ship_orders_table').on( 'click', '.claim-btn', function () {
         const row = table.row( $(this).parents('tr') );
         var data = row.data();
-        claim(row, page_data);
+        claim(row);
+    });
+
+    $('#ship_orders_table').on( 'click', '.unclaim-btn', function () {
+        const row = table.row( $(this).parents('tr') );
+        var data = row.data();
+        unclaim(row);
     });
 });
 
-function claim(row){
-    const id = row.data()['id'];
+function django_request(url){
     const csrftoken = Cookies.get('csrftoken');
-    const request = new Request(
-        "shiporder/" + id + "/claim/",
+    return new Request(
+        url,
         {headers: {'X-CSRFToken': csrftoken}}
     );
+}
+
+function claim(row){
+    const id = row.data()['id'];
+    const request = django_request("shiporder/" + id + "/claim/");
     fetch(request, {
         method: 'PUT',
         mode: 'same-origin'
@@ -75,8 +92,26 @@ function claim(row){
     .then(response_data => {
         const row_data = row.data();
         row_data['assignee_name'] = response_data["assignee_name"];
-        row_data['assignee'] = response_data["assignee_name"];
+        row_data['assignee'] = response_data["assignee"];
         row.data(row_data);
+    });
+}
+
+function unclaim(row){
+    const id = row.data()['id'];
+    const request = django_request("shiporder/" + id + "/unclaim/");
+    fetch(request, {
+        method: 'PUT',
+        mode: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(response_data => {
+        if(response_data["status"] === "unclaimed"){
+            const row_data = row.data();
+            row_data['assignee_name'] = null;
+            row_data['assignee'] = null;
+            row.data(row_data);
+        }
     });
 }
 </script>

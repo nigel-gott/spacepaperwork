@@ -99,7 +99,7 @@ class ShipOrderTest(GooseToolsTestCase):
         )
         self.assertEqual(
             str(response.content, encoding="utf-8"),
-            '{"status":"claimed","assignee":55,"assignee_name":"Test Discord User"}',
+            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Discord User"}}',
         )
         self.client.force_login(self.other_user)
         response = self.client.put(
@@ -123,4 +123,23 @@ class ShipOrderTest(GooseToolsTestCase):
         self.assertEqual(
             str(response.content, encoding="utf-8"),
             f'[{{"id":{ship_order.id},"created_at":"2012-01-14 12:00","ship":"Thorax","quantity":1,"assignee":{self.user.pk},"recipient_character":{self.char.pk},"payment_method":"eggs","state":"not_started","notes":"","recipient_character_name":"{self.char.ingame_name}","assignee_name":"{self.user.discord_username()}"}}]',
+        )
+
+    def test_can_unassign_yourself_from_a_ship_order(self):
+        ship_order = self.a_ship_order()
+        group = Group.objects.get(name="industry")
+        self.user.groups.add(group)
+
+        response = self.put(
+            reverse("industry:shiporder-claim", args=[ship_order.pk]),
+        )
+        self.assertEqual(
+            str(response.content, encoding="utf-8"),
+            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Discord User"}}',
+        )
+        response = self.put(
+            reverse("industry:shiporder-unclaim", args=[ship_order.pk]),
+        )
+        self.assertEqual(
+            str(response.content, encoding="utf-8"), '{"status":"unclaimed"}'
         )
