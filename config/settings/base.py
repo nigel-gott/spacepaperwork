@@ -79,6 +79,7 @@ THIRD_PARTY_APPS = [
     "timezone_field",
     "materializecssform",
     "dbbackup",
+    "rest_framework",
 ]
 
 LOCAL_APPS = [
@@ -292,3 +293,7 @@ CURRENCIES = ["EEI"]
 # DB Backup
 DBBACKUP_STORAGE = "django.core.files.storage.FileSystemStorage"
 DBBACKUP_STORAGE_OPTIONS = {"location": env("DB_BACKUP_LOCATION")}
+
+REST_FRAMEWORK = {
+    "DATETIME_FORMAT": "%Y-%m-%d %H:%M",
+}

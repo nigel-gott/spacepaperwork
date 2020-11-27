@@ -20,8 +20,11 @@ urlpatterns = [
                 path("", include("contracts.urls")),
                 path("", include("market.urls")),
                 path("", include("ownership.urls")),
-                path("", include("industry.urls")),
+                path("industry/", include("industry.urls")),
                 path("accounts/", include("allauth.urls")),
+                path(
+                    "api/", include("rest_framework.urls", namespace="rest_framework")
+                ),
             ]
             + settings.ENV_SPECIFIC_URLS
         ),

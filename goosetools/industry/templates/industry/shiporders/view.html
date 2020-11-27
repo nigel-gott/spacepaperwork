@@ -15,26 +15,69 @@
 <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/jquery.dataTables.min.css" integrity="sha512-1k7mWiTNoyx2XtmI96o+hdjP8nn0f3Z2N4oF/9ZZRgijyV4omsKOXEnqL1gKQNPy2MTSP9rIEWGcH/CInulptA==" crossorigin="anonymous" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js" integrity="sha512-BkpSL20WETFylMrcirBahHfSnY++H2O1W+UnEEO4yNIl+jI2+zowyoGJpbtk6bx97fBXf++WJHSSK2MV4ghPcg==" crossorigin="anonymous"></script>
-{{ ship_orders|json_script:"ship_orders" }}
-
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+{{ page_data|json_script:"page-data" }}
 <script>
 $(function() {
-    const ship_orders_text = document.getElementById('ship_orders').textContent;
-    if(ship_orders_text){
-        const ship_orders = JSON.parse(ship_orders_text);
-        $('#ship_orders_table').DataTable( {
-            data: ship_orders ,
-            "columns": [
-                { "data": "created_at", "title": "Created At"},
-                { "data": "assignee", "title" : "Assignee"},
-                { "data": "recipient_character", "title":"Recipient" },
-                { "data": "ship", "title":"Ship"},
-                { "data": "quantity", "title":"Quantity"},
-                { "data": "payment_method", "title":"Payment Method"},
-                { "data": "state", "title": "Status"}
-            ]
-        } );
+    const page_data = JSON.parse(document.getElementById('page-data').textContent);
+    columns = [
+            { "data": "id", "visible": false, "searchable": false },
+            { "data": "created_at", "title": "Created At"},
+            { "data": "assignee_name", "title" : "Assignee", "defaultContent": "Nobody"},
+            { "data": "recipient_character_name", "title":"Recipient" },
+            { "data": "ship", "title":"Ship"},
+            { "data": "quantity", "title":"Quantity"},
+            { "data": "payment_method", "title":"Payment Method"},
+            { "data": "state", "title": "Status"},
+            { "data": "recipient_character", "visible": false, "searchable": false},
+            { "data": "assignee", "visible": false, "searchable": false},
+    ];
+    if(page_data["has_industry_permission"]){
+        columns.push({
+            "title": "Action",
+            "data": null,
+            render: function ( data, type, row ) {
+                if(!row["assignee_name"]){
+                    return '<button class="claim-btn waves-btn btn green">Claim</button>';
+                } else {
+                    return '';
+                }
+            }
+        });
     }
+    table = $('#ship_orders_table').DataTable( {
+        ajax: {
+            url: "{% url 'industry:shiporder-list' %}",
+            dataSrc: '',
+        },
+        "columns": columns
+    } );
+
+    $('#ship_orders_table').on( 'click', 'button', function () {
+        const row = table.row( $(this).parents('tr') );
+        var data = row.data();
+        claim(row, page_data);
+    });
 });
+
+function claim(row){
+    const id = row.data()['id'];
+    const csrftoken = Cookies.get('csrftoken');
+    const request = new Request(
+        "shiporder/" + id + "/claim/",
+        {headers: {'X-CSRFToken': csrftoken}}
+    );
+    fetch(request, {
+        method: 'PUT',
+        mode: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(response_data => {
+        const row_data = row.data();
+        row_data['assignee_name'] = response_data["assignee_name"];
+        row_data['assignee'] = response_data["assignee_name"];
+        row.data(row_data);
+    });
+}
 </script>
 {% endblock %}
