@@ -1,6 +1,13 @@
 from dal import autocomplete
 
-from goosetools.items.models import Item, ItemSubSubType, ItemSubType, ItemType, System
+from goosetools.items.models import (
+    Item,
+    ItemSubSubType,
+    ItemSubType,
+    ItemType,
+    Ship,
+    System,
+)
 
 
 class SystemAutocomplete(autocomplete.Select2QuerySetView):
@@ -112,9 +119,9 @@ class ItemAutocomplete(autocomplete.Select2QuerySetView):
 class ShipAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         if not self.request.user.is_authenticated:
-            return Item.objects.none()
+            return Ship.objects.none()
 
-        qs = Item.all_ships()
+        qs = Ship.objects.all()
 
         if self.q:
             qs = qs.filter(name__icontains=self.q)

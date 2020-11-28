@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.db import models
+from django_fsm import FSMField, transition
 
-from goosetools.items.models import Item
+from goosetools.items.models import Ship
 from goosetools.users.models import Character
 
 
@@ -11,9 +12,55 @@ class ShipOrder(models.Model):
     assignee = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True
     )
-    ship = models.ForeignKey(Item, on_delete=models.CASCADE)
+    contract_made = models.BooleanField(default=False)
+    ship = models.ForeignKey(Ship, on_delete=models.CASCADE)
+    uid = models.TextField(unique=True)
     quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField()
-    state = models.TextField()
+    state = FSMField(default="not_started")
     notes = models.TextField(blank=True)
     payment_method = models.TextField(choices=PAYMENT_METHODS)
+
+    def availible_transitions(self):
+        # pylint: disable=no-member
+        return {t.name: t for t in self.get_available_state_transitions()}  # type: ignore
+
+    def availible_transition_names(self):
+        # pylint: disable=no-member
+        return [t.name for t in self.get_available_state_transitions()]  # type: ignore
+
+    @transition(field=state, source="not_started", target="inventing")
+    def inventing(self):
+        pass
+
+    @transition(field=state, source="inventing", target="awaiting_production_slot")
+    def awaiting_production_slot(self):
+        pass
+
+    @transition(
+        field=state,
+        source=["inventing", "awaiting_production_slot", "not_started"],
+        target="building",
+    )
+    def building(self):
+        pass
+
+    @transition(field=state, source=["building", "not_started"], target="built")
+    def built(self):
+        pass
+
+    @transition(field=state, source="built", target="audit")
+    def audit(self):
+        pass
+
+    @transition(field=state, source=["audit", "missing_contract"], target="sent")
+    def sent(self):
+        pass
+
+    @transition(field=state, source="audit", target="missing_contract")
+    def missing_contract(self):
+        pass
+
+    @transition(field=state, source="*", target="not_started")
+    def reset(self):
+        pass

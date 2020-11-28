@@ -2,7 +2,7 @@ from dal import autocomplete
 from django import forms
 
 from goosetools.industry.models import ShipOrder
-from goosetools.items.models import Item
+from goosetools.items.models import Ship
 from goosetools.users.models import Character
 
 
@@ -13,7 +13,7 @@ class ShipOrderForm(forms.Form):
         initial=0,
     )
     ship = forms.ModelChoiceField(
-        queryset=Item.all_ships(),
+        queryset=Ship.objects.all(),
         initial="Vexor Navy Issue",
         widget=autocomplete.ModelSelect2(url="ship-autocomplete"),
         required=False,

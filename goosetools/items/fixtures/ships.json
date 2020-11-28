@@ -1,0 +1,2194 @@
+[
+    {
+        "model": "items.ship",
+        "pk": "Garmur",
+        "fields": {
+            "name": "Garmur",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Daredevil",
+        "fields": {
+            "name": "Daredevil",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Dramiel",
+        "fields": {
+            "name": "Dramiel",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Succubus",
+        "fields": {
+            "name": "Succubus",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Worm",
+        "fields": {
+            "name": "Worm",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Astero",
+        "fields": {
+            "name": "Astero",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Cruor",
+        "fields": {
+            "name": "Cruor",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Orthrus",
+        "fields": {
+            "name": "Orthrus",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Cynabal",
+        "fields": {
+            "name": "Cynabal",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Gila",
+        "fields": {
+            "name": "Gila",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Phantasm",
+        "fields": {
+            "name": "Phantasm",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Ashimmu",
+        "fields": {
+            "name": "Ashimmu",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Vigilant",
+        "fields": {
+            "name": "Vigilant",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Stratios",
+        "fields": {
+            "name": "Stratios",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Rattlesnake",
+        "fields": {
+            "name": "Rattlesnake",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Nightmare",
+        "fields": {
+            "name": "Nightmare",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Bhaalgorn",
+        "fields": {
+            "name": "Bhaalgorn",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Machariel",
+        "fields": {
+            "name": "Machariel",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Vindicator",
+        "fields": {
+            "name": "Vindicator",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Nestor",
+        "fields": {
+            "name": "Nestor",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Barghest",
+        "fields": {
+            "name": "Barghest",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Executioner",
+        "fields": {
+            "name": "Executioner",
+            "tech_level": "2"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Condor",
+        "fields": {
+            "name": "Condor",
+            "tech_level": "2"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Atron",
+        "fields": {
+            "name": "Atron",
+            "tech_level": "2"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Slasher",
+        "fields": {
+            "name": "Slasher",
+            "tech_level": "2"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Tormentor",
+        "fields": {
+            "name": "Tormentor",
+            "tech_level": "2"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Merlin",
+        "fields": {
+            "name": "Merlin",
+            "tech_level": "2"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Tristan",
+        "fields": {
+            "name": "Tristan",
+            "tech_level": "3"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Rifter",
+        "fields": {
+            "name": "Rifter",
+            "tech_level": "2"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Punisher",
+        "fields": {
+            "name": "Punisher",
+            "tech_level": "3"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Kestrel",
+        "fields": {
+            "name": "Kestrel",
+            "tech_level": "3"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Incursus",
+        "fields": {
+            "name": "Incursus",
+            "tech_level": "2"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Breacher",
+        "fields": {
+            "name": "Breacher",
+            "tech_level": "3"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Magnate",
+        "fields": {
+            "name": "Magnate",
+            "tech_level": "3"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Heron",
+        "fields": {
+            "name": "Heron",
+            "tech_level": "3"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Imicus",
+        "fields": {
+            "name": "Imicus",
+            "tech_level": "3"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Probe",
+        "fields": {
+            "name": "Probe",
+            "tech_level": "3"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Coercer",
+        "fields": {
+            "name": "Coercer",
+            "tech_level": "3"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Cormorant",
+        "fields": {
+            "name": "Cormorant",
+            "tech_level": "3"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Catalyst",
+        "fields": {
+            "name": "Catalyst",
+            "tech_level": "3"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Thrasher",
+        "fields": {
+            "name": "Thrasher",
+            "tech_level": "3"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Dragoon Trainer",
+        "fields": {
+            "name": "Dragoon Trainer",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Corax Trainer",
+        "fields": {
+            "name": "Corax Trainer",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Algos Trainer",
+        "fields": {
+            "name": "Algos Trainer",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Talwar Trainer",
+        "fields": {
+            "name": "Talwar Trainer",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Crucifier",
+        "fields": {
+            "name": "Crucifier",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Griffin",
+        "fields": {
+            "name": "Griffin",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Maulus",
+        "fields": {
+            "name": "Maulus",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Vigil",
+        "fields": {
+            "name": "Vigil",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Venture Trainer",
+        "fields": {
+            "name": "Venture Trainer",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Venture",
+        "fields": {
+            "name": "Venture",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Executioner II",
+        "fields": {
+            "name": "Executioner II",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Condor II",
+        "fields": {
+            "name": "Condor II",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Atron II",
+        "fields": {
+            "name": "Atron II",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Slasher II",
+        "fields": {
+            "name": "Slasher II",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Coercer II",
+        "fields": {
+            "name": "Coercer II",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Cormorant II",
+        "fields": {
+            "name": "Cormorant II",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Catalyst II",
+        "fields": {
+            "name": "Catalyst II",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Thrasher II",
+        "fields": {
+            "name": "Thrasher II",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Dragoon",
+        "fields": {
+            "name": "Dragoon",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Corax",
+        "fields": {
+            "name": "Corax",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Algos",
+        "fields": {
+            "name": "Algos",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Talwar",
+        "fields": {
+            "name": "Talwar",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Imicus High Mobility",
+        "fields": {
+            "name": "Imicus High Mobility",
+            "tech_level": "4"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Purifier",
+        "fields": {
+            "name": "Purifier",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Manticore",
+        "fields": {
+            "name": "Manticore",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Nemesis",
+        "fields": {
+            "name": "Nemesis",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Hound",
+        "fields": {
+            "name": "Hound",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Venture II",
+        "fields": {
+            "name": "Venture II",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Magnate Covert Ops",
+        "fields": {
+            "name": "Magnate Covert Ops",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Heron Covert Ops",
+        "fields": {
+            "name": "Heron Covert Ops",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Imicus Covert Ops",
+        "fields": {
+            "name": "Imicus Covert Ops",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Probe Covert Ops",
+        "fields": {
+            "name": "Probe Covert Ops",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Inquisitor",
+        "fields": {
+            "name": "Inquisitor",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Bantam",
+        "fields": {
+            "name": "Bantam",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Navitas",
+        "fields": {
+            "name": "Navitas",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Burst",
+        "fields": {
+            "name": "Burst",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Dragoon Assault",
+        "fields": {
+            "name": "Dragoon Assault",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Corax Assault",
+        "fields": {
+            "name": "Corax Assault",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Algos Assault",
+        "fields": {
+            "name": "Algos Assault",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Talwar Assault",
+        "fields": {
+            "name": "Talwar Assault",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Coercer Guardian",
+        "fields": {
+            "name": "Coercer Guardian",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Cormorant Guardian",
+        "fields": {
+            "name": "Cormorant Guardian",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Catalyst Guardian",
+        "fields": {
+            "name": "Catalyst Guardian",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Thrasher Guardian",
+        "fields": {
+            "name": "Thrasher Guardian",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Omen",
+        "fields": {
+            "name": "Omen",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Caracal",
+        "fields": {
+            "name": "Caracal",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Vexor",
+        "fields": {
+            "name": "Vexor",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Stabber",
+        "fields": {
+            "name": "Stabber",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Omen Trainer",
+        "fields": {
+            "name": "Omen Trainer",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Caracal Trainer",
+        "fields": {
+            "name": "Caracal Trainer",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Vexor Trainer",
+        "fields": {
+            "name": "Vexor Trainer",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Stabber Trainer",
+        "fields": {
+            "name": "Stabber Trainer",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Thorax Prototype",
+        "fields": {
+            "name": "Thorax Prototype",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Venture III",
+        "fields": {
+            "name": "Venture III",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Crucifier E-War",
+        "fields": {
+            "name": "Crucifier E-War",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Griffin E-War",
+        "fields": {
+            "name": "Griffin E-War",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Maulus E-War",
+        "fields": {
+            "name": "Maulus E-War",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Vigil E-War",
+        "fields": {
+            "name": "Vigil E-War",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Inquisitor II",
+        "fields": {
+            "name": "Inquisitor II",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Bantam II",
+        "fields": {
+            "name": "Bantam II",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Navitas II",
+        "fields": {
+            "name": "Navitas II",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Burst II",
+        "fields": {
+            "name": "Burst II",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Dragoon Sniper",
+        "fields": {
+            "name": "Dragoon Sniper",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Corax Sniper",
+        "fields": {
+            "name": "Corax Sniper",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Algos Sniper",
+        "fields": {
+            "name": "Algos Sniper",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Talwar Sniper",
+        "fields": {
+            "name": "Talwar Sniper",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Coercer Interdictor",
+        "fields": {
+            "name": "Coercer Interdictor",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Cormorant Interdictor",
+        "fields": {
+            "name": "Cormorant Interdictor",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Catalyst Interdictor",
+        "fields": {
+            "name": "Catalyst Interdictor",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Thrasher Interdictor",
+        "fields": {
+            "name": "Thrasher Interdictor",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Maller",
+        "fields": {
+            "name": "Maller",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Moa",
+        "fields": {
+            "name": "Moa",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Thorax",
+        "fields": {
+            "name": "Thorax",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Rupture",
+        "fields": {
+            "name": "Rupture",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Maller Trainer",
+        "fields": {
+            "name": "Maller Trainer",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Moa Trainer",
+        "fields": {
+            "name": "Moa Trainer",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Thorax Trainer",
+        "fields": {
+            "name": "Thorax Trainer",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Rupture Trainer",
+        "fields": {
+            "name": "Rupture Trainer",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Omen Navy Issue",
+        "fields": {
+            "name": "Omen Navy Issue",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Caracal Navy Issue",
+        "fields": {
+            "name": "Caracal Navy Issue",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Vexor Navy Issue",
+        "fields": {
+            "name": "Vexor Navy Issue",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Stabber Fleet Issue",
+        "fields": {
+            "name": "Stabber Fleet Issue",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Arbitrator",
+        "fields": {
+            "name": "Arbitrator",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Blackbird",
+        "fields": {
+            "name": "Blackbird",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Celestis",
+        "fields": {
+            "name": "Celestis",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Bellicose",
+        "fields": {
+            "name": "Bellicose",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Bestower",
+        "fields": {
+            "name": "Bestower",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Tayra",
+        "fields": {
+            "name": "Tayra",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Kryos",
+        "fields": {
+            "name": "Kryos",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Mammoth",
+        "fields": {
+            "name": "Mammoth",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Nereus High Mobility",
+        "fields": {
+            "name": "Nereus High Mobility",
+            "tech_level": "6"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Punisher Assault",
+        "fields": {
+            "name": "Punisher Assault",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Merlin Assault",
+        "fields": {
+            "name": "Merlin Assault",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Incursus Assault",
+        "fields": {
+            "name": "Incursus Assault",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Breacher Assault",
+        "fields": {
+            "name": "Breacher Assault",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Coercer Navy Issue",
+        "fields": {
+            "name": "Coercer Navy Issue",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Cormorant Navy Issue",
+        "fields": {
+            "name": "Cormorant Navy Issue",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Catalyst Navy Issue",
+        "fields": {
+            "name": "Catalyst Navy Issue",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Thrasher Fleet Issue",
+        "fields": {
+            "name": "Thrasher Fleet Issue",
+            "tech_level": "5"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Maller Guardian",
+        "fields": {
+            "name": "Maller Guardian",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Moa Guardian",
+        "fields": {
+            "name": "Moa Guardian",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Thorax Guardian",
+        "fields": {
+            "name": "Thorax Guardian",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Rupture Guardian",
+        "fields": {
+            "name": "Rupture Guardian",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Retriever",
+        "fields": {
+            "name": "Retriever",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Augoror",
+        "fields": {
+            "name": "Augoror",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Osprey",
+        "fields": {
+            "name": "Osprey",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Exequror",
+        "fields": {
+            "name": "Exequror",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Scythe",
+        "fields": {
+            "name": "Scythe",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Arbitrator Covert Ops",
+        "fields": {
+            "name": "Arbitrator Covert Ops",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Blackbird Covert Ops",
+        "fields": {
+            "name": "Blackbird Covert Ops",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Celestis Covert Ops",
+        "fields": {
+            "name": "Celestis Covert Ops",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Bellicose Covert Ops",
+        "fields": {
+            "name": "Bellicose Covert Ops",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Prophecy",
+        "fields": {
+            "name": "Prophecy",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Ferox",
+        "fields": {
+            "name": "Ferox",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Myrmidon",
+        "fields": {
+            "name": "Myrmidon",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Cyclone",
+        "fields": {
+            "name": "Cyclone",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Hurricane Prototype",
+        "fields": {
+            "name": "Hurricane Prototype",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Harbinger Prototype",
+        "fields": {
+            "name": "Harbinger Prototype",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Nereus Combat",
+        "fields": {
+            "name": "Nereus Combat",
+            "tech_level": "7"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Executioner Interceptor",
+        "fields": {
+            "name": "Executioner Interceptor",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Condor Interceptor",
+        "fields": {
+            "name": "Condor Interceptor",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Atron Interceptor",
+        "fields": {
+            "name": "Atron Interceptor",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Slasher Interceptor",
+        "fields": {
+            "name": "Slasher Interceptor",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Omen Sniper",
+        "fields": {
+            "name": "Omen Sniper",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Caracal Sniper",
+        "fields": {
+            "name": "Caracal Sniper",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Vexor Sniper",
+        "fields": {
+            "name": "Vexor Sniper",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Stabber Sniper",
+        "fields": {
+            "name": "Stabber Sniper",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Sigil",
+        "fields": {
+            "name": "Sigil",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Badger",
+        "fields": {
+            "name": "Badger",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Nereus",
+        "fields": {
+            "name": "Nereus",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Wreathe",
+        "fields": {
+            "name": "Wreathe",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Arbitrator E-War",
+        "fields": {
+            "name": "Arbitrator E-War",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Blackbird E-War",
+        "fields": {
+            "name": "Blackbird E-War",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Celestis E-War",
+        "fields": {
+            "name": "Celestis E-War",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Bellicose E-War",
+        "fields": {
+            "name": "Bellicose E-War",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Arbitrator Interdictor",
+        "fields": {
+            "name": "Arbitrator Interdictor",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Blackbird Interdictor",
+        "fields": {
+            "name": "Blackbird Interdictor",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Celestis Interdictor",
+        "fields": {
+            "name": "Celestis Interdictor",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Bellicose Interdictor",
+        "fields": {
+            "name": "Bellicose Interdictor",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Maller II Guardian",
+        "fields": {
+            "name": "Maller II Guardian",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Moa II Guardian",
+        "fields": {
+            "name": "Moa II Guardian",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Thorax II Guardian",
+        "fields": {
+            "name": "Thorax II Guardian",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Rupture II Guardian",
+        "fields": {
+            "name": "Rupture II Guardian",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Oracle",
+        "fields": {
+            "name": "Oracle",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Naga",
+        "fields": {
+            "name": "Naga",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Talos",
+        "fields": {
+            "name": "Talos",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Tornado",
+        "fields": {
+            "name": "Tornado",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Harbinger",
+        "fields": {
+            "name": "Harbinger",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Drake",
+        "fields": {
+            "name": "Drake",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Brutix",
+        "fields": {
+            "name": "Brutix",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Hurricane",
+        "fields": {
+            "name": "Hurricane",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Can-Yue Prototype",
+        "fields": {
+            "name": "Can-Yue Prototype",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Can-Yue",
+        "fields": {
+            "name": "Can-Yue",
+            "tech_level": "0"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Prophecy Command",
+        "fields": {
+            "name": "Prophecy Command",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Ferox Command",
+        "fields": {
+            "name": "Ferox Command",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Myrmidon Command",
+        "fields": {
+            "name": "Myrmidon Command",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Cyclone Command",
+        "fields": {
+            "name": "Cyclone Command",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Nereus Hauling",
+        "fields": {
+            "name": "Nereus Hauling",
+            "tech_level": "8"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Purifier II",
+        "fields": {
+            "name": "Purifier II",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Manticore II",
+        "fields": {
+            "name": "Manticore II",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Nemesis II",
+        "fields": {
+            "name": "Nemesis II",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Hound II",
+        "fields": {
+            "name": "Hound II",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Coercer II Interdictor",
+        "fields": {
+            "name": "Coercer II Interdictor",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Cormorant II Interdictor",
+        "fields": {
+            "name": "Cormorant II Interdictor",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Catalyst II Interdictor",
+        "fields": {
+            "name": "Catalyst II Interdictor",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Thrasher II Interdictor",
+        "fields": {
+            "name": "Thrasher II Interdictor",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Procurer",
+        "fields": {
+            "name": "Procurer",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Porpoise",
+        "fields": {
+            "name": "Porpoise",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Arbitrator II Covert Ops",
+        "fields": {
+            "name": "Arbitrator II Covert Ops",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Blackbird II Covert Ops",
+        "fields": {
+            "name": "Blackbird II Covert Ops",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Celestis II Covert Ops",
+        "fields": {
+            "name": "Celestis II Covert Ops",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Bellicose II Covert Ops",
+        "fields": {
+            "name": "Bellicose II Covert Ops",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Harbinger Logistics",
+        "fields": {
+            "name": "Harbinger Logistics",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Drake Logistics",
+        "fields": {
+            "name": "Drake Logistics",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Brutix Logistics",
+        "fields": {
+            "name": "Brutix Logistics",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Hurricane Logistics",
+        "fields": {
+            "name": "Hurricane Logistics",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Oracle II",
+        "fields": {
+            "name": "Oracle II",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Naga II",
+        "fields": {
+            "name": "Naga II",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Talos II",
+        "fields": {
+            "name": "Talos II",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Tornado II",
+        "fields": {
+            "name": "Tornado II",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Prophecy Guardian",
+        "fields": {
+            "name": "Prophecy Guardian",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Ferox Guardian",
+        "fields": {
+            "name": "Ferox Guardian",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Myrmidon Guardian",
+        "fields": {
+            "name": "Myrmidon Guardian",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Cyclone Guardian",
+        "fields": {
+            "name": "Cyclone Guardian",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Apocalypse",
+        "fields": {
+            "name": "Apocalypse",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Rokh",
+        "fields": {
+            "name": "Rokh",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Megathron",
+        "fields": {
+            "name": "Megathron",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Maelstrom",
+        "fields": {
+            "name": "Maelstrom",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Armageddon",
+        "fields": {
+            "name": "Armageddon",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Scorpion",
+        "fields": {
+            "name": "Scorpion",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Dominix",
+        "fields": {
+            "name": "Dominix",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Typhoon",
+        "fields": {
+            "name": "Typhoon",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Humpback High Mobility",
+        "fields": {
+            "name": "Humpback High Mobility",
+            "tech_level": "9"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Executioner II Interceptor",
+        "fields": {
+            "name": "Executioner II Interceptor",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Condor II Interceptor",
+        "fields": {
+            "name": "Condor II Interceptor",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Atron II Interceptor",
+        "fields": {
+            "name": "Atron II Interceptor",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Slasher II Interceptor",
+        "fields": {
+            "name": "Slasher II Interceptor",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Coercer Covert Ops",
+        "fields": {
+            "name": "Coercer Covert Ops",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Cormorant Covert Ops",
+        "fields": {
+            "name": "Cormorant Covert Ops",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Catalyst Covert Ops",
+        "fields": {
+            "name": "Catalyst Covert Ops",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Thrasher Covert Ops",
+        "fields": {
+            "name": "Thrasher Covert Ops",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Covetor",
+        "fields": {
+            "name": "Covetor",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Sigil II",
+        "fields": {
+            "name": "Sigil II",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Badger II",
+        "fields": {
+            "name": "Badger II",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Nereus II",
+        "fields": {
+            "name": "Nereus II",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Wreathe II",
+        "fields": {
+            "name": "Wreathe II",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Maller Interdictor",
+        "fields": {
+            "name": "Maller Interdictor",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Moa Interdictor",
+        "fields": {
+            "name": "Moa Interdictor",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Thorax Interdictor",
+        "fields": {
+            "name": "Thorax Interdictor",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Rupture Interdictor",
+        "fields": {
+            "name": "Rupture Interdictor",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Prophecy II Command",
+        "fields": {
+            "name": "Prophecy II Command",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Ferox II Command",
+        "fields": {
+            "name": "Ferox II Command",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Myrmidon II Command",
+        "fields": {
+            "name": "Myrmidon II Command",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Cyclone II Command",
+        "fields": {
+            "name": "Cyclone II Command",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Prophecy II Guardian",
+        "fields": {
+            "name": "Prophecy II Guardian",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Ferox II Guardian",
+        "fields": {
+            "name": "Ferox II Guardian",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Myrmidon II Guardian",
+        "fields": {
+            "name": "Myrmidon II Guardian",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Cyclone II Guardian",
+        "fields": {
+            "name": "Cyclone II Guardian",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Harbinger E-War",
+        "fields": {
+            "name": "Harbinger E-War",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Drake E-War",
+        "fields": {
+            "name": "Drake E-War",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Brutix E-War",
+        "fields": {
+            "name": "Brutix E-War",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Hurricane E-War",
+        "fields": {
+            "name": "Hurricane E-War",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Orca",
+        "fields": {
+            "name": "Orca",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Humpback Hauling",
+        "fields": {
+            "name": "Humpback Hauling",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Humpback Combat",
+        "fields": {
+            "name": "Humpback Combat",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Abaddon",
+        "fields": {
+            "name": "Abaddon",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Raven",
+        "fields": {
+            "name": "Raven",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Hyperion",
+        "fields": {
+            "name": "Hyperion",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Tempest",
+        "fields": {
+            "name": "Tempest",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Apocalypse Striker",
+        "fields": {
+            "name": "Apocalypse Striker",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Raven Striker",
+        "fields": {
+            "name": "Raven Striker",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Megathron Striker",
+        "fields": {
+            "name": "Megathron Striker",
+            "tech_level": "10"
+        }
+    },
+    {
+        "model": "items.ship",
+        "pk": "Maelstrom Striker",
+        "fields": {
+            "name": "Maelstrom Striker",
+            "tech_level": "10"
+        }
+    }
+]

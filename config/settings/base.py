@@ -80,6 +80,7 @@ THIRD_PARTY_APPS = [
     "materializecssform",
     "dbbackup",
     "rest_framework",
+    "django_fsm",
 ]
 
 LOCAL_APPS = [
@@ -297,3 +298,5 @@ DBBACKUP_STORAGE_OPTIONS = {"location": env("DB_BACKUP_LOCATION")}
 REST_FRAMEWORK = {
     "DATETIME_FORMAT": "%Y-%m-%d %H:%M",
 }
+
+GSHEETS = {"CLIENT_SECRETS": ".google_creds.json"}

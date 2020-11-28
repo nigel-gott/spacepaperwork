@@ -39,16 +39,54 @@ $(function() {
             { "data": "ship", "title":"Ship"},
             { "data": "quantity", "title":"Quantity"},
             { "data": "payment_method", "title":"Payment Method"},
-            { "data": "state", "title": "Status"},
+            { "data": "state", "title":"Status"},
+            { "data": null, "title": "Progress",
+                render: function ( data, type, row ) {
+                    progress_dict = {
+                        'not_started':0,
+                        'inventing':1,
+                        'awaiting_production_slot':2,
+                        'building':3,
+                        'built':4,
+                        'audit':5,
+                        'missing_contract':5,
+                        'sent':6,
+                    }
+                    state = row['state']
+                    progress = Math.floor((progress_dict[state] / 6)*100) + 1;
+                    return '<div id="progress" style="height:35px;width:100%;background-color:grey;"><div style="height:35px;width:'+progress+'%;background-color:green;"></div></div>';
+                }
+            },
+            { "data": "availible_transition_names", "visible": false},
             { "data": "recipient_character", "visible": false, "searchable": false},
             { "data": "assignee", "visible": false, "searchable": false},
     ];
     if(page_data["has_industry_permission"]){
         columns.push({
+            "title": "Contract Code",
+            "data": "uid",
+        });
+        columns.push({
             "title": "Action",
             "data": null,
             render: function ( data, type, row ) {
-                return '';
+                if(row["assignee"]===page_data["request_user_pk"]){
+                    buttons = "";
+                    reset_found = false;
+                    for(const t of row['availible_transition_names']){
+                        if(t!=="reset"){
+                            buttons += '<a class="state-link" href="#">' + t + '</a><br/>'
+                        } else if(row['state'] !== "not_started") {
+                            reset_found = true;
+                        }
+                    }
+                    if(reset_found){
+                        buttons += '<a class="state-link red-text" href="#">reset</a><br/>'
+                    }
+                    return buttons;
+                } else {
+                    return '';
+                }
             }
         });
     }
@@ -59,6 +97,12 @@ $(function() {
         },
         "columns": columns
     } );
+
+    $('#ship_orders_table').on( 'click', '.state-link', function () {
+        const row = table.row( $(this).parents('tr') );
+        var data = row.data();
+        state_change(row, $(this).text());
+    });
 
     $('#ship_orders_table').on( 'click', '.claim-btn', function () {
         const row = table.row( $(this).parents('tr') );
@@ -79,6 +123,31 @@ function django_request(url){
         url,
         {headers: {'X-CSRFToken': csrftoken}}
     );
+}
+function json_django_request(url){
+    const csrftoken = Cookies.get('csrftoken');
+    return new Request(
+        url,
+        {headers: {'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json'
+        }}
+    );
+}
+function state_change(row, transition){
+    const id = row.data()['id'];
+    const request = json_django_request("shiporder/" + id + "/transition/");
+    fetch(request, {
+        method: 'PUT',
+        mode: 'same-origin',
+        body: JSON.stringify({"transition":transition})
+    })
+    .then(response => response.json())
+    .then(response_data => {
+        const row_data = row.data();
+        row_data['state'] = response_data["new_state"];
+        row_data['availible_transition_names'] = response_data["availible_transition_names"];
+        row.data(row_data);
+    });
 }
 
 function claim(row){

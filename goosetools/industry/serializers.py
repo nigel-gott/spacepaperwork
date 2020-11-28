@@ -11,10 +11,13 @@ class ShipOrderSerializer(serializers.ModelSerializer):
         source="assignee.discord_user.username", read_only=True
     )
 
+    availible_transition_names = serializers.ReadOnlyField()
+
     class Meta:
         model = ShipOrder
         fields = [
             "id",
+            "uid",
             "created_at",
             "ship",
             "quantity",
@@ -25,4 +28,5 @@ class ShipOrderSerializer(serializers.ModelSerializer):
             "notes",
             "recipient_character_name",
             "assignee_name",
+            "availible_transition_names",
         ]

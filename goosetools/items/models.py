@@ -409,3 +409,11 @@ class JunkedItem(models.Model):
         item.full_clean()
         item.save()
         self.delete()
+
+
+class Ship(models.Model):
+    name = models.TextField(primary_key=True)
+    tech_level = models.PositiveIntegerField()
+
+    def __str__(self):
+        return str(self.name)

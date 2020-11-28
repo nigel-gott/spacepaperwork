@@ -2,25 +2,25 @@ from django.contrib.auth.models import Group
 from django.urls.base import reverse
 from freezegun import freeze_time
 
+from goosetools import industry
 from goosetools.industry.models import ShipOrder
-from goosetools.items.models import Item, ItemSubSubType, ItemSubType, ItemType
+from goosetools.items.models import Ship
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
+
+
+# TODO Figure out a better way of mocking this out rather than monkey
+def get_mock_random_string():
+    return "mock_random"
+
+
+industry.views.generate_random_string = get_mock_random_string
 
 
 @freeze_time("2012-01-14 12:00:00")
 class ShipOrderTest(GooseToolsTestCase):
     def setUp(self):
         super().setUp()
-        self.ship_type = ItemType.objects.create(name="Ships")
-        self.cruiser_type = ItemSubType.objects.create(
-            name="Cruisers", item_type=self.ship_type
-        )
-        self.cruiser_sub_type = ItemSubSubType.objects.create(
-            name="Cruisers", item_sub_type=self.cruiser_type
-        )
-        self.thorax = Item.objects.create(
-            name="Thorax", item_type=self.cruiser_sub_type
-        )
+        self.thorax = Ship.objects.create(name="Thorax", tech_level=6)
 
     def a_ship_order(self):
         self.post(
@@ -33,7 +33,9 @@ class ShipOrderTest(GooseToolsTestCase):
                 "notes": "",
             },
         )
-        return ShipOrder.objects.last()
+        ship_order = ShipOrder.objects.last()
+        self.post(reverse("industry:shiporders_contract_confirm", args=[ship_order.pk]))
+        return ship_order
 
     def test_can_order_a_ship(self):
         self.post(
@@ -57,7 +59,7 @@ class ShipOrderTest(GooseToolsTestCase):
         )
         self.assertEqual(
             str(response.content, encoding="utf-8"),
-            f'{{"id":{ship_order.id},"created_at":"2012-01-14 12:00","ship":"Thorax","quantity":1,"assignee":null,"recipient_character":{self.char.pk},"payment_method":"eggs","state":"not_started","notes":"","recipient_character_name":"{self.char.ingame_name}"}}',
+            f'{{"id":{ship_order.id},"uid":"Test Discord User-mock_random","created_at":"2012-01-14 12:00","ship":"Thorax","quantity":1,"assignee":null,"recipient_character":{self.char.pk},"payment_method":"eggs","state":"not_started","notes":"","recipient_character_name":"{self.char.ingame_name}","availible_transition_names":["building","built","inventing","reset"]}}',
         )
 
     def test_can_list_ship_orders(self):
@@ -65,7 +67,7 @@ class ShipOrderTest(GooseToolsTestCase):
         response = self.get(reverse("industry:shiporder-list"))
         self.assertEqual(
             str(response.content, encoding="utf-8"),
-            f'[{{"id":{ship_order.id},"created_at":"2012-01-14 12:00","ship":"Thorax","quantity":1,"assignee":null,"recipient_character":{self.char.pk},"payment_method":"eggs","state":"not_started","notes":"","recipient_character_name":"{self.char.ingame_name}"}}]',
+            f'[{{"id":{ship_order.id},"uid":"Test Discord User-mock_random","created_at":"2012-01-14 12:00","ship":"Thorax","quantity":1,"assignee":null,"recipient_character":{self.char.pk},"payment_method":"eggs","state":"not_started","notes":"","recipient_character_name":"{self.char.ingame_name}","availible_transition_names":["building","built","inventing","reset"]}}]',
         )
 
     def test_can_claim_ship_order_if_in_industry_group(self):
@@ -122,7 +124,7 @@ class ShipOrderTest(GooseToolsTestCase):
         response = self.get(reverse("industry:shiporder-list"))
         self.assertEqual(
             str(response.content, encoding="utf-8"),
-            f'[{{"id":{ship_order.id},"created_at":"2012-01-14 12:00","ship":"Thorax","quantity":1,"assignee":{self.user.pk},"recipient_character":{self.char.pk},"payment_method":"eggs","state":"not_started","notes":"","recipient_character_name":"{self.char.ingame_name}","assignee_name":"{self.user.discord_username()}"}}]',
+            f'[{{"id":{ship_order.id},"uid":"Test Discord User-mock_random","created_at":"2012-01-14 12:00","ship":"Thorax","quantity":1,"assignee":{self.user.pk},"recipient_character":{self.char.pk},"payment_method":"eggs","state":"not_started","notes":"","recipient_character_name":"{self.char.ingame_name}","assignee_name":"{self.user.discord_username()}","availible_transition_names":["building","built","inventing","reset"]}}]',
         )
 
     def test_can_unassign_yourself_from_a_ship_order(self):

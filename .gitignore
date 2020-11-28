@@ -5,6 +5,7 @@ misc_data/
 .vscode/
 .env
 python
+.google_creds.json
 
 # Django #
 *.log
