@@ -24,5 +24,4 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 #     "DJANGO_SECURE_CONTENT_TYPE_NOSNIFF", default=True
 # )
 
-
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
