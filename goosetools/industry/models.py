@@ -2,8 +2,15 @@ from django.conf import settings
 from django.db import models
 from django_fsm import FSMField, transition
 
-from goosetools.items.models import Ship
 from goosetools.users.models import Character
+
+
+class Ship(models.Model):
+    name = models.TextField(primary_key=True)
+    tech_level = models.PositiveIntegerField()
+
+    def __str__(self):
+        return str(self.name)
 
 
 class ShipOrder(models.Model):

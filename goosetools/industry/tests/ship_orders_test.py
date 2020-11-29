@@ -3,8 +3,7 @@ from django.urls.base import reverse
 from freezegun import freeze_time
 
 from goosetools import industry
-from goosetools.industry.models import ShipOrder
-from goosetools.items.models import Ship
+from goosetools.industry.models import Ship, ShipOrder
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
 
 

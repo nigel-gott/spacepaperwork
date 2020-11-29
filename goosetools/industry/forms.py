@@ -1,8 +1,7 @@
 from dal import autocomplete
 from django import forms
 
-from goosetools.industry.models import ShipOrder
-from goosetools.items.models import Ship
+from goosetools.industry.models import Ship, ShipOrder
 from goosetools.users.models import Character
 
 
@@ -15,7 +14,7 @@ class ShipOrderForm(forms.Form):
     ship = forms.ModelChoiceField(
         queryset=Ship.objects.all(),
         initial="Vexor Navy Issue",
-        widget=autocomplete.ModelSelect2(url="ship-autocomplete"),
+        widget=autocomplete.ModelSelect2(url="industry:ship-autocomplete"),
         required=False,
     )
     payment_method = forms.ChoiceField(choices=ShipOrder.PAYMENT_METHODS)

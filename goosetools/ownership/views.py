@@ -517,9 +517,10 @@ def make_transfer_command(total_participation, transfering_user):
     for discord_username, isk in total_participation.items():
         floored_isk = m.floor(isk.amount)
         if discord_username != transfering_user.discord_username():
+            user = DiscordUser.objects.get(username=discord_username)
             commands_issued = True
-            next_user = f"@{discord_username} {floored_isk}\n"
-            if length_since_last_bulk + len(next_user) > 2000:
+            next_user = f"<@{user.uid}> {floored_isk}\n"
+            if length_since_last_bulk + len(next_user) > 1500:
                 new_bulk = "$bulk\n"
                 command = (
                     command

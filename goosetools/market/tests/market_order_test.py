@@ -76,7 +76,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
         log = TransferLog.objects.all()[0]
         # The seller indicated they wanted their own share in eggs so the deposit command includes all profit.
         self.assertEqual(log.deposit_command, "$deposit 8500")
-        self.assertEqual(log.transfer_command, "$bulk\n@Test Discord User 2 4037\n")
+        self.assertEqual(log.transfer_command, "$bulk\n<@2> 4037\n")
         # The seller can later mark the transfer as all done
         # However this is just a graphical display indicator to help sellers track which transfers have been completed, and has no impact on internal balances.
         self.assertEqual(log.all_done, False)
@@ -87,10 +87,10 @@ class MarketOrderTestCase(GooseToolsTestCase):
         loot_group = self.a_loot_group(fleet)
         item = self.an_item(loot_group, item_quantity=1)
 
-        num_users = 81
+        num_users = 200
         for i in range(0, num_users):
             discord_user = DiscordUser.objects.create(
-                username=f"A Test Discord User {i:02d}"
+                username=f"A Test Discord User {i:02d}", uid=str(10 + i)
             )
             char = Character.objects.create(
                 discord_user=discord_user,
@@ -117,20 +117,13 @@ class MarketOrderTestCase(GooseToolsTestCase):
         sold_item.refresh_from_db()
         self.assertEqual(sold_item.transfered_so_far(), True)
         self.assertEqual(self.user.isk_balance(), isk("0"))
-        self.assertEqual(self.user.egg_balance(), isk("75"))
+        self.assertEqual(self.user.egg_balance(), isk("100"))
         log = TransferLog.objects.all()[0]
         # The seller indicated they wanted their own share in eggs so the deposit command includes all profit.
         self.assertEqual(log.deposit_command, "$deposit 8500")
-        self.maxDiff = None
-        expected_bulk = "$bulk\n"
-        for i in range(0, num_users):
-            if i == 71:
-                expected_bulk = (
-                    expected_bulk
-                    + "\nNEW MESSAGE TO AVOID DISCORD CHARACTER LIMIT:\n$bulk\n"
-                )
-            expected_bulk = expected_bulk + f"@A Test Discord User {i:02d} 104\n"
-        self.assertEqual(log.transfer_command, expected_bulk)
+        self.assertIn(
+            "NEW MESSAGE TO AVOID DISCORD CHARACTER LIMIT", log.transfer_command
+        )
         # The seller can later mark the transfer as all done
         # However this is just a graphical display indicator to help sellers track which transfers have been completed, and has no impact on internal balances.
         self.assertEqual(log.all_done, False)
@@ -175,7 +168,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
         log = TransferLog.objects.all()[0]
         # The seller indicated they wanted their own share in isk so the deposit command only includes the other players shares.
         self.assertEqual(log.deposit_command, "$deposit 4037")
-        self.assertEqual(log.transfer_command, "$bulk\n@Test Discord User 2 4037\n")
+        self.assertEqual(log.transfer_command, "$bulk\n<@2> 4037\n")
         # The seller can later mark the transfer as all done
         # However this is just a graphical display indicator to help sellers track which transfers have been completed, and has no impact on internal balances.
         self.assertEqual(log.all_done, False)

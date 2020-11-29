@@ -39,9 +39,11 @@ class GooseToolsTestCase(DjangoTestCase):
         self.item = Item.objects.create(name="Tritanium", item_type=sub_sub_type)
         self.another_item = Item.objects.create(name="Condor", item_type=sub_sub_type)
 
-        self.discord_user = DiscordUser.objects.create(username="Test Discord User")
+        self.discord_user = DiscordUser.objects.create(
+            username="Test Discord User", uid="1"
+        )
         self.other_discord_user = DiscordUser.objects.create(
-            username="Test Discord User 2"
+            username="Test Discord User 2", uid="2"
         )
         self.corp = Corp.objects.create(name="Test Corp")
         self.char = Character.objects.create(
