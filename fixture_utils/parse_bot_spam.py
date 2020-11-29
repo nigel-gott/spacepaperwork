@@ -70,7 +70,7 @@ def load_existing_models():
         next_character_pk = 1
         next_discord_user_pk = 0
         for model in existing_models:
-            if model["model"] == "users.DiscordUser":
+            if model["model"].lower() == "users.discorduser":
                 fields = model["fields"]
                 uid = fields["uid"]
                 if uid in existing_characters:
@@ -84,7 +84,7 @@ def load_existing_models():
                 users_by_pk[model["pk"]] = existing_users[uid]
                 next_discord_user_pk = max(model["pk"] + 1, next_discord_user_pk)
         for model in existing_models:
-            if model["model"] == "users.Character":
+            if model["model"].lower() == "users.character":
                 fields = model["fields"]
                 ingame_name = fields["ingame_name"]
                 if ingame_name in existing_characters:
@@ -231,7 +231,7 @@ def url_to_hash(url):
 
 def output_models(chars, users):
     models = []
-    with open("core/fixtures/characters_and_users.json", "w") as out_file:
+    with open("goosetools/users/fixtures/characters_and_users.json", "w") as out_file:
         for char in chars.values():
             models.append(
                 {
