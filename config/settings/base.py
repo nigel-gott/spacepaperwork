@@ -7,7 +7,6 @@ from typing import List
 
 import environ
 import moneyed
-import os
 from django.urls.resolvers import URLResolver
 from moneyed.localization import _FORMATTER
 
