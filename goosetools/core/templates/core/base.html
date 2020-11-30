@@ -75,15 +75,14 @@
                 <i class="material-icons right">arrow_drop_down</i>
                 </a></li>
             <li><a href="{% url 'contracts' %}">Contracts ({{contracts}})<i class="material-icons left">compare_arrows</i></a></li>
-            <li>
-
-
-            <a class="tab" href="{% url 'own_user_transactions' %}">Transactions<i class="material-icons left">toc</i></a></li>
-            <a class="tab" href="{% url 'industry:shiporders_view' %}">Ship Orders <i class="material-icons left">directions_boat</i>
+            <li><a class="tab" href="{% url 'own_user_transactions' %}">Transactions<i class="material-icons left">toc</i></a></li>
+            <li><a class="tab" href="{% url 'industry:shiporders_view' %}">Ship Orders <i class="material-icons left">directions_boat</i>
               <span class="new badge"></span>
             </a></li>
-            <a class="tab" href="{% url 'settings' %}">Settings<i class="material-icons left">settings</i></a></li>
-            <li>
+            <li><a class="tab" href="{% url 'settings' %}">Settings<i class="material-icons left">settings</i></a></li>
+            {% if user.is_staff %}
+            <li><a class="tab" href="{% url 'admin:index' %}">Admin<i class="material-icons left">build</i></a></li>
+            {% endif %}
         </ul>
         {% endif %}
         <ul class="right hide-on-med-and-down">
@@ -105,6 +104,9 @@
     </div>
 </nav>
 <ul class="sidenav" id="mobile-demo">
+    {% if user.is_staff %}
+    <li><a class="tab" href="{% url 'admin:index' %}">Admin<i class="material-icons left">build</i></a></li>
+    {% endif %}
     {% if user.is_authenticated %}
     <li class="tab"><a href="{% url 'industry:shiporders_view' %}">Ship Orders
     </a>
