@@ -242,22 +242,6 @@ function unclaim(row, table){
 
 function filter_change(dt){
     return function(){
-        $this = $(this);
-        const assigned = $('#toggle_assigned');
-        const requested = $('#toggle_requested');
-        const completed = $('#toggle_completed');
-        const assigned_checked = assigned.is(':checked');
-        const requested_checked = requested.is(':checked');
-        const completed_checked = completed.is(':checked');
-
-        const changed_one = $this.attr('id');
-
-        if (changed_one == 'toggle_assigned') {
-            requested.prop("checked",!assigned_checked);
-        } else if( changed_one == 'toggle_requested') {
-            assigned.prop("checked",!requested_checked);
-        }
-
         dt.draw();
     }
 }
