@@ -4,7 +4,8 @@
         "pk": "Garmur",
         "fields": {
             "name": "Garmur",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -12,7 +13,8 @@
         "pk": "Daredevil",
         "fields": {
             "name": "Daredevil",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -20,7 +22,8 @@
         "pk": "Dramiel",
         "fields": {
             "name": "Dramiel",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -28,7 +31,8 @@
         "pk": "Succubus",
         "fields": {
             "name": "Succubus",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -36,7 +40,8 @@
         "pk": "Worm",
         "fields": {
             "name": "Worm",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -44,7 +49,8 @@
         "pk": "Astero",
         "fields": {
             "name": "Astero",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -52,7 +58,8 @@
         "pk": "Cruor",
         "fields": {
             "name": "Cruor",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -60,7 +67,8 @@
         "pk": "Orthrus",
         "fields": {
             "name": "Orthrus",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -68,7 +76,8 @@
         "pk": "Cynabal",
         "fields": {
             "name": "Cynabal",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -76,7 +85,8 @@
         "pk": "Gila",
         "fields": {
             "name": "Gila",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -84,7 +94,8 @@
         "pk": "Phantasm",
         "fields": {
             "name": "Phantasm",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -92,7 +103,8 @@
         "pk": "Ashimmu",
         "fields": {
             "name": "Ashimmu",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -100,7 +112,8 @@
         "pk": "Vigilant",
         "fields": {
             "name": "Vigilant",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -108,7 +121,8 @@
         "pk": "Stratios",
         "fields": {
             "name": "Stratios",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -116,7 +130,8 @@
         "pk": "Rattlesnake",
         "fields": {
             "name": "Rattlesnake",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -124,7 +139,8 @@
         "pk": "Nightmare",
         "fields": {
             "name": "Nightmare",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -132,7 +148,8 @@
         "pk": "Bhaalgorn",
         "fields": {
             "name": "Bhaalgorn",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -140,7 +157,8 @@
         "pk": "Machariel",
         "fields": {
             "name": "Machariel",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -148,7 +166,8 @@
         "pk": "Vindicator",
         "fields": {
             "name": "Vindicator",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -156,7 +175,8 @@
         "pk": "Nestor",
         "fields": {
             "name": "Nestor",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -164,7 +184,8 @@
         "pk": "Barghest",
         "fields": {
             "name": "Barghest",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -172,7 +193,8 @@
         "pk": "Executioner",
         "fields": {
             "name": "Executioner",
-            "tech_level": "2"
+            "tech_level": "2",
+            "free": true
         }
     },
     {
@@ -180,7 +202,8 @@
         "pk": "Condor",
         "fields": {
             "name": "Condor",
-            "tech_level": "2"
+            "tech_level": "2",
+            "free": true
         }
     },
     {
@@ -188,7 +211,8 @@
         "pk": "Atron",
         "fields": {
             "name": "Atron",
-            "tech_level": "2"
+            "tech_level": "2",
+            "free": true
         }
     },
     {
@@ -196,7 +220,8 @@
         "pk": "Slasher",
         "fields": {
             "name": "Slasher",
-            "tech_level": "2"
+            "tech_level": "2",
+            "free": true
         }
     },
     {
@@ -204,7 +229,8 @@
         "pk": "Tormentor",
         "fields": {
             "name": "Tormentor",
-            "tech_level": "2"
+            "tech_level": "2",
+            "free": true
         }
     },
     {
@@ -212,7 +238,8 @@
         "pk": "Merlin",
         "fields": {
             "name": "Merlin",
-            "tech_level": "2"
+            "tech_level": "2",
+            "free": true
         }
     },
     {
@@ -220,7 +247,8 @@
         "pk": "Tristan",
         "fields": {
             "name": "Tristan",
-            "tech_level": "3"
+            "tech_level": "3",
+            "free": true
         }
     },
     {
@@ -228,7 +256,8 @@
         "pk": "Rifter",
         "fields": {
             "name": "Rifter",
-            "tech_level": "2"
+            "tech_level": "2",
+            "free": true
         }
     },
     {
@@ -236,7 +265,8 @@
         "pk": "Punisher",
         "fields": {
             "name": "Punisher",
-            "tech_level": "3"
+            "tech_level": "3",
+            "free": true
         }
     },
     {
@@ -244,7 +274,8 @@
         "pk": "Kestrel",
         "fields": {
             "name": "Kestrel",
-            "tech_level": "3"
+            "tech_level": "3",
+            "free": true
         }
     },
     {
@@ -252,7 +283,8 @@
         "pk": "Incursus",
         "fields": {
             "name": "Incursus",
-            "tech_level": "2"
+            "tech_level": "2",
+            "free": true
         }
     },
     {
@@ -260,7 +292,8 @@
         "pk": "Breacher",
         "fields": {
             "name": "Breacher",
-            "tech_level": "3"
+            "tech_level": "3",
+            "free": true
         }
     },
     {
@@ -268,7 +301,8 @@
         "pk": "Magnate",
         "fields": {
             "name": "Magnate",
-            "tech_level": "3"
+            "tech_level": "3",
+            "free": true
         }
     },
     {
@@ -276,7 +310,8 @@
         "pk": "Heron",
         "fields": {
             "name": "Heron",
-            "tech_level": "3"
+            "tech_level": "3",
+            "free": true
         }
     },
     {
@@ -284,7 +319,8 @@
         "pk": "Imicus",
         "fields": {
             "name": "Imicus",
-            "tech_level": "3"
+            "tech_level": "3",
+            "free": true
         }
     },
     {
@@ -292,7 +328,8 @@
         "pk": "Probe",
         "fields": {
             "name": "Probe",
-            "tech_level": "3"
+            "tech_level": "3",
+            "free": true
         }
     },
     {
@@ -300,7 +337,8 @@
         "pk": "Coercer",
         "fields": {
             "name": "Coercer",
-            "tech_level": "3"
+            "tech_level": "3",
+            "free": true
         }
     },
     {
@@ -308,7 +346,8 @@
         "pk": "Cormorant",
         "fields": {
             "name": "Cormorant",
-            "tech_level": "3"
+            "tech_level": "3",
+            "free": true
         }
     },
     {
@@ -316,7 +355,8 @@
         "pk": "Catalyst",
         "fields": {
             "name": "Catalyst",
-            "tech_level": "3"
+            "tech_level": "3",
+            "free": true
         }
     },
     {
@@ -324,7 +364,8 @@
         "pk": "Thrasher",
         "fields": {
             "name": "Thrasher",
-            "tech_level": "3"
+            "tech_level": "3",
+            "free": true
         }
     },
     {
@@ -332,7 +373,8 @@
         "pk": "Dragoon Trainer",
         "fields": {
             "name": "Dragoon Trainer",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -340,7 +382,8 @@
         "pk": "Corax Trainer",
         "fields": {
             "name": "Corax Trainer",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -348,7 +391,8 @@
         "pk": "Algos Trainer",
         "fields": {
             "name": "Algos Trainer",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -356,7 +400,8 @@
         "pk": "Talwar Trainer",
         "fields": {
             "name": "Talwar Trainer",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -364,7 +409,8 @@
         "pk": "Crucifier",
         "fields": {
             "name": "Crucifier",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -372,7 +418,8 @@
         "pk": "Griffin",
         "fields": {
             "name": "Griffin",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -380,7 +427,8 @@
         "pk": "Maulus",
         "fields": {
             "name": "Maulus",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -388,7 +436,8 @@
         "pk": "Vigil",
         "fields": {
             "name": "Vigil",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -396,7 +445,8 @@
         "pk": "Venture Trainer",
         "fields": {
             "name": "Venture Trainer",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -404,7 +454,8 @@
         "pk": "Venture",
         "fields": {
             "name": "Venture",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -412,7 +463,8 @@
         "pk": "Executioner II",
         "fields": {
             "name": "Executioner II",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -420,7 +472,8 @@
         "pk": "Condor II",
         "fields": {
             "name": "Condor II",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -428,7 +481,8 @@
         "pk": "Atron II",
         "fields": {
             "name": "Atron II",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -436,7 +490,8 @@
         "pk": "Slasher II",
         "fields": {
             "name": "Slasher II",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -444,7 +499,8 @@
         "pk": "Coercer II",
         "fields": {
             "name": "Coercer II",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -452,7 +508,8 @@
         "pk": "Cormorant II",
         "fields": {
             "name": "Cormorant II",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -460,7 +517,8 @@
         "pk": "Catalyst II",
         "fields": {
             "name": "Catalyst II",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -468,7 +526,8 @@
         "pk": "Thrasher II",
         "fields": {
             "name": "Thrasher II",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -476,7 +535,8 @@
         "pk": "Dragoon",
         "fields": {
             "name": "Dragoon",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -484,7 +544,8 @@
         "pk": "Corax",
         "fields": {
             "name": "Corax",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -492,7 +553,8 @@
         "pk": "Algos",
         "fields": {
             "name": "Algos",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -500,7 +562,8 @@
         "pk": "Talwar",
         "fields": {
             "name": "Talwar",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -508,7 +571,8 @@
         "pk": "Imicus High Mobility",
         "fields": {
             "name": "Imicus High Mobility",
-            "tech_level": "4"
+            "tech_level": "4",
+            "free": true
         }
     },
     {
@@ -516,7 +580,8 @@
         "pk": "Purifier",
         "fields": {
             "name": "Purifier",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -524,7 +589,8 @@
         "pk": "Manticore",
         "fields": {
             "name": "Manticore",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -532,7 +598,8 @@
         "pk": "Nemesis",
         "fields": {
             "name": "Nemesis",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -540,7 +607,8 @@
         "pk": "Hound",
         "fields": {
             "name": "Hound",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -548,7 +616,8 @@
         "pk": "Venture II",
         "fields": {
             "name": "Venture II",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -556,7 +625,8 @@
         "pk": "Magnate Covert Ops",
         "fields": {
             "name": "Magnate Covert Ops",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -564,7 +634,8 @@
         "pk": "Heron Covert Ops",
         "fields": {
             "name": "Heron Covert Ops",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -572,7 +643,8 @@
         "pk": "Imicus Covert Ops",
         "fields": {
             "name": "Imicus Covert Ops",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -580,7 +652,8 @@
         "pk": "Probe Covert Ops",
         "fields": {
             "name": "Probe Covert Ops",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -588,7 +661,8 @@
         "pk": "Inquisitor",
         "fields": {
             "name": "Inquisitor",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -596,7 +670,8 @@
         "pk": "Bantam",
         "fields": {
             "name": "Bantam",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -604,7 +679,8 @@
         "pk": "Navitas",
         "fields": {
             "name": "Navitas",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -612,7 +688,8 @@
         "pk": "Burst",
         "fields": {
             "name": "Burst",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -620,7 +697,8 @@
         "pk": "Dragoon Assault",
         "fields": {
             "name": "Dragoon Assault",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -628,7 +706,8 @@
         "pk": "Corax Assault",
         "fields": {
             "name": "Corax Assault",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -636,7 +715,8 @@
         "pk": "Algos Assault",
         "fields": {
             "name": "Algos Assault",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -644,7 +724,8 @@
         "pk": "Talwar Assault",
         "fields": {
             "name": "Talwar Assault",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -652,7 +733,8 @@
         "pk": "Coercer Guardian",
         "fields": {
             "name": "Coercer Guardian",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -660,7 +742,8 @@
         "pk": "Cormorant Guardian",
         "fields": {
             "name": "Cormorant Guardian",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -668,7 +751,8 @@
         "pk": "Catalyst Guardian",
         "fields": {
             "name": "Catalyst Guardian",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -676,7 +760,8 @@
         "pk": "Thrasher Guardian",
         "fields": {
             "name": "Thrasher Guardian",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -684,7 +769,8 @@
         "pk": "Omen",
         "fields": {
             "name": "Omen",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -692,7 +778,8 @@
         "pk": "Caracal",
         "fields": {
             "name": "Caracal",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -700,7 +787,8 @@
         "pk": "Vexor",
         "fields": {
             "name": "Vexor",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -708,7 +796,8 @@
         "pk": "Stabber",
         "fields": {
             "name": "Stabber",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -716,7 +805,8 @@
         "pk": "Omen Trainer",
         "fields": {
             "name": "Omen Trainer",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -724,7 +814,8 @@
         "pk": "Caracal Trainer",
         "fields": {
             "name": "Caracal Trainer",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -732,7 +823,8 @@
         "pk": "Vexor Trainer",
         "fields": {
             "name": "Vexor Trainer",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -740,7 +832,8 @@
         "pk": "Stabber Trainer",
         "fields": {
             "name": "Stabber Trainer",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -748,7 +841,8 @@
         "pk": "Thorax Prototype",
         "fields": {
             "name": "Thorax Prototype",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -756,7 +850,8 @@
         "pk": "Venture III",
         "fields": {
             "name": "Venture III",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -764,7 +859,8 @@
         "pk": "Crucifier E-War",
         "fields": {
             "name": "Crucifier E-War",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -772,7 +868,8 @@
         "pk": "Griffin E-War",
         "fields": {
             "name": "Griffin E-War",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -780,7 +877,8 @@
         "pk": "Maulus E-War",
         "fields": {
             "name": "Maulus E-War",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -788,7 +886,8 @@
         "pk": "Vigil E-War",
         "fields": {
             "name": "Vigil E-War",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -796,7 +895,8 @@
         "pk": "Inquisitor II",
         "fields": {
             "name": "Inquisitor II",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -804,7 +904,8 @@
         "pk": "Bantam II",
         "fields": {
             "name": "Bantam II",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -812,7 +913,8 @@
         "pk": "Navitas II",
         "fields": {
             "name": "Navitas II",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -820,7 +922,8 @@
         "pk": "Burst II",
         "fields": {
             "name": "Burst II",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -828,7 +931,8 @@
         "pk": "Dragoon Sniper",
         "fields": {
             "name": "Dragoon Sniper",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -836,7 +940,8 @@
         "pk": "Corax Sniper",
         "fields": {
             "name": "Corax Sniper",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -844,7 +949,8 @@
         "pk": "Algos Sniper",
         "fields": {
             "name": "Algos Sniper",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -852,7 +958,8 @@
         "pk": "Talwar Sniper",
         "fields": {
             "name": "Talwar Sniper",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -860,7 +967,8 @@
         "pk": "Coercer Interdictor",
         "fields": {
             "name": "Coercer Interdictor",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -868,7 +976,8 @@
         "pk": "Cormorant Interdictor",
         "fields": {
             "name": "Cormorant Interdictor",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -876,7 +985,8 @@
         "pk": "Catalyst Interdictor",
         "fields": {
             "name": "Catalyst Interdictor",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -884,7 +994,8 @@
         "pk": "Thrasher Interdictor",
         "fields": {
             "name": "Thrasher Interdictor",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -892,7 +1003,8 @@
         "pk": "Maller",
         "fields": {
             "name": "Maller",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -900,7 +1012,8 @@
         "pk": "Moa",
         "fields": {
             "name": "Moa",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -908,7 +1021,8 @@
         "pk": "Thorax",
         "fields": {
             "name": "Thorax",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -916,7 +1030,8 @@
         "pk": "Rupture",
         "fields": {
             "name": "Rupture",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -924,7 +1039,8 @@
         "pk": "Maller Trainer",
         "fields": {
             "name": "Maller Trainer",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -932,7 +1048,8 @@
         "pk": "Moa Trainer",
         "fields": {
             "name": "Moa Trainer",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -940,7 +1057,8 @@
         "pk": "Thorax Trainer",
         "fields": {
             "name": "Thorax Trainer",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -948,7 +1066,8 @@
         "pk": "Rupture Trainer",
         "fields": {
             "name": "Rupture Trainer",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -956,7 +1075,8 @@
         "pk": "Omen Navy Issue",
         "fields": {
             "name": "Omen Navy Issue",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -964,7 +1084,8 @@
         "pk": "Caracal Navy Issue",
         "fields": {
             "name": "Caracal Navy Issue",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -972,7 +1093,8 @@
         "pk": "Vexor Navy Issue",
         "fields": {
             "name": "Vexor Navy Issue",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -980,7 +1102,8 @@
         "pk": "Stabber Fleet Issue",
         "fields": {
             "name": "Stabber Fleet Issue",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -988,7 +1111,8 @@
         "pk": "Arbitrator",
         "fields": {
             "name": "Arbitrator",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -996,7 +1120,8 @@
         "pk": "Blackbird",
         "fields": {
             "name": "Blackbird",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -1004,7 +1129,8 @@
         "pk": "Celestis",
         "fields": {
             "name": "Celestis",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -1012,7 +1138,8 @@
         "pk": "Bellicose",
         "fields": {
             "name": "Bellicose",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -1020,7 +1147,8 @@
         "pk": "Bestower",
         "fields": {
             "name": "Bestower",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -1028,7 +1156,8 @@
         "pk": "Tayra",
         "fields": {
             "name": "Tayra",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -1036,7 +1165,8 @@
         "pk": "Kryos",
         "fields": {
             "name": "Kryos",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -1044,7 +1174,8 @@
         "pk": "Mammoth",
         "fields": {
             "name": "Mammoth",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -1052,7 +1183,8 @@
         "pk": "Nereus High Mobility",
         "fields": {
             "name": "Nereus High Mobility",
-            "tech_level": "6"
+            "tech_level": "6",
+            "free": true
         }
     },
     {
@@ -1060,7 +1192,8 @@
         "pk": "Punisher Assault",
         "fields": {
             "name": "Punisher Assault",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1068,7 +1201,8 @@
         "pk": "Merlin Assault",
         "fields": {
             "name": "Merlin Assault",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1076,7 +1210,8 @@
         "pk": "Incursus Assault",
         "fields": {
             "name": "Incursus Assault",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1084,7 +1219,8 @@
         "pk": "Breacher Assault",
         "fields": {
             "name": "Breacher Assault",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1092,7 +1228,8 @@
         "pk": "Coercer Navy Issue",
         "fields": {
             "name": "Coercer Navy Issue",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -1100,7 +1237,8 @@
         "pk": "Cormorant Navy Issue",
         "fields": {
             "name": "Cormorant Navy Issue",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -1108,7 +1246,8 @@
         "pk": "Catalyst Navy Issue",
         "fields": {
             "name": "Catalyst Navy Issue",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -1116,7 +1255,8 @@
         "pk": "Thrasher Fleet Issue",
         "fields": {
             "name": "Thrasher Fleet Issue",
-            "tech_level": "5"
+            "tech_level": "5",
+            "free": true
         }
     },
     {
@@ -1124,7 +1264,8 @@
         "pk": "Maller Guardian",
         "fields": {
             "name": "Maller Guardian",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1132,7 +1273,8 @@
         "pk": "Moa Guardian",
         "fields": {
             "name": "Moa Guardian",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1140,7 +1282,8 @@
         "pk": "Thorax Guardian",
         "fields": {
             "name": "Thorax Guardian",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1148,7 +1291,8 @@
         "pk": "Rupture Guardian",
         "fields": {
             "name": "Rupture Guardian",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1156,7 +1300,8 @@
         "pk": "Retriever",
         "fields": {
             "name": "Retriever",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1164,7 +1309,8 @@
         "pk": "Augoror",
         "fields": {
             "name": "Augoror",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1172,7 +1318,8 @@
         "pk": "Osprey",
         "fields": {
             "name": "Osprey",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1180,7 +1327,8 @@
         "pk": "Exequror",
         "fields": {
             "name": "Exequror",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1188,7 +1336,8 @@
         "pk": "Scythe",
         "fields": {
             "name": "Scythe",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1196,7 +1345,8 @@
         "pk": "Arbitrator Covert Ops",
         "fields": {
             "name": "Arbitrator Covert Ops",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1204,7 +1354,8 @@
         "pk": "Blackbird Covert Ops",
         "fields": {
             "name": "Blackbird Covert Ops",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1212,7 +1363,8 @@
         "pk": "Celestis Covert Ops",
         "fields": {
             "name": "Celestis Covert Ops",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1220,7 +1372,8 @@
         "pk": "Bellicose Covert Ops",
         "fields": {
             "name": "Bellicose Covert Ops",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1228,7 +1381,8 @@
         "pk": "Prophecy",
         "fields": {
             "name": "Prophecy",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1236,7 +1390,8 @@
         "pk": "Ferox",
         "fields": {
             "name": "Ferox",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1244,7 +1399,8 @@
         "pk": "Myrmidon",
         "fields": {
             "name": "Myrmidon",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1252,7 +1408,8 @@
         "pk": "Cyclone",
         "fields": {
             "name": "Cyclone",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1260,7 +1417,8 @@
         "pk": "Hurricane Prototype",
         "fields": {
             "name": "Hurricane Prototype",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1268,7 +1426,8 @@
         "pk": "Harbinger Prototype",
         "fields": {
             "name": "Harbinger Prototype",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1276,7 +1435,8 @@
         "pk": "Nereus Combat",
         "fields": {
             "name": "Nereus Combat",
-            "tech_level": "7"
+            "tech_level": "7",
+            "free": false
         }
     },
     {
@@ -1284,7 +1444,8 @@
         "pk": "Executioner Interceptor",
         "fields": {
             "name": "Executioner Interceptor",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1292,7 +1453,8 @@
         "pk": "Condor Interceptor",
         "fields": {
             "name": "Condor Interceptor",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1300,7 +1462,8 @@
         "pk": "Atron Interceptor",
         "fields": {
             "name": "Atron Interceptor",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1308,7 +1471,8 @@
         "pk": "Slasher Interceptor",
         "fields": {
             "name": "Slasher Interceptor",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1316,7 +1480,8 @@
         "pk": "Omen Sniper",
         "fields": {
             "name": "Omen Sniper",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1324,7 +1489,8 @@
         "pk": "Caracal Sniper",
         "fields": {
             "name": "Caracal Sniper",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1332,7 +1498,8 @@
         "pk": "Vexor Sniper",
         "fields": {
             "name": "Vexor Sniper",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1340,7 +1507,8 @@
         "pk": "Stabber Sniper",
         "fields": {
             "name": "Stabber Sniper",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1348,7 +1516,8 @@
         "pk": "Sigil",
         "fields": {
             "name": "Sigil",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1356,7 +1525,8 @@
         "pk": "Badger",
         "fields": {
             "name": "Badger",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1364,7 +1534,8 @@
         "pk": "Nereus",
         "fields": {
             "name": "Nereus",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1372,7 +1543,8 @@
         "pk": "Wreathe",
         "fields": {
             "name": "Wreathe",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1380,7 +1552,8 @@
         "pk": "Arbitrator E-War",
         "fields": {
             "name": "Arbitrator E-War",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1388,7 +1561,8 @@
         "pk": "Blackbird E-War",
         "fields": {
             "name": "Blackbird E-War",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1396,7 +1570,8 @@
         "pk": "Celestis E-War",
         "fields": {
             "name": "Celestis E-War",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1404,7 +1579,8 @@
         "pk": "Bellicose E-War",
         "fields": {
             "name": "Bellicose E-War",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1412,7 +1588,8 @@
         "pk": "Arbitrator Interdictor",
         "fields": {
             "name": "Arbitrator Interdictor",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1420,7 +1597,8 @@
         "pk": "Blackbird Interdictor",
         "fields": {
             "name": "Blackbird Interdictor",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1428,7 +1606,8 @@
         "pk": "Celestis Interdictor",
         "fields": {
             "name": "Celestis Interdictor",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1436,7 +1615,8 @@
         "pk": "Bellicose Interdictor",
         "fields": {
             "name": "Bellicose Interdictor",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1444,7 +1624,8 @@
         "pk": "Maller II Guardian",
         "fields": {
             "name": "Maller II Guardian",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1452,7 +1633,8 @@
         "pk": "Moa II Guardian",
         "fields": {
             "name": "Moa II Guardian",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1460,7 +1642,8 @@
         "pk": "Thorax II Guardian",
         "fields": {
             "name": "Thorax II Guardian",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1468,7 +1651,8 @@
         "pk": "Rupture II Guardian",
         "fields": {
             "name": "Rupture II Guardian",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1476,7 +1660,8 @@
         "pk": "Oracle",
         "fields": {
             "name": "Oracle",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1484,7 +1669,8 @@
         "pk": "Naga",
         "fields": {
             "name": "Naga",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1492,7 +1678,8 @@
         "pk": "Talos",
         "fields": {
             "name": "Talos",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1500,7 +1687,8 @@
         "pk": "Tornado",
         "fields": {
             "name": "Tornado",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1508,7 +1696,8 @@
         "pk": "Harbinger",
         "fields": {
             "name": "Harbinger",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1516,7 +1705,8 @@
         "pk": "Drake",
         "fields": {
             "name": "Drake",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1524,7 +1714,8 @@
         "pk": "Brutix",
         "fields": {
             "name": "Brutix",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1532,7 +1723,8 @@
         "pk": "Hurricane",
         "fields": {
             "name": "Hurricane",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1540,7 +1732,8 @@
         "pk": "Can-Yue Prototype",
         "fields": {
             "name": "Can-Yue Prototype",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -1548,7 +1741,8 @@
         "pk": "Can-Yue",
         "fields": {
             "name": "Can-Yue",
-            "tech_level": "0"
+            "tech_level": "0",
+            "free": true
         }
     },
     {
@@ -1556,7 +1750,8 @@
         "pk": "Prophecy Command",
         "fields": {
             "name": "Prophecy Command",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1564,7 +1759,8 @@
         "pk": "Ferox Command",
         "fields": {
             "name": "Ferox Command",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1572,7 +1768,8 @@
         "pk": "Myrmidon Command",
         "fields": {
             "name": "Myrmidon Command",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1580,7 +1777,8 @@
         "pk": "Cyclone Command",
         "fields": {
             "name": "Cyclone Command",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1588,7 +1786,8 @@
         "pk": "Nereus Hauling",
         "fields": {
             "name": "Nereus Hauling",
-            "tech_level": "8"
+            "tech_level": "8",
+            "free": false
         }
     },
     {
@@ -1596,7 +1795,8 @@
         "pk": "Purifier II",
         "fields": {
             "name": "Purifier II",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1604,7 +1804,8 @@
         "pk": "Manticore II",
         "fields": {
             "name": "Manticore II",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1612,7 +1813,8 @@
         "pk": "Nemesis II",
         "fields": {
             "name": "Nemesis II",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1620,7 +1822,8 @@
         "pk": "Hound II",
         "fields": {
             "name": "Hound II",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1628,7 +1831,8 @@
         "pk": "Coercer II Interdictor",
         "fields": {
             "name": "Coercer II Interdictor",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1636,7 +1840,8 @@
         "pk": "Cormorant II Interdictor",
         "fields": {
             "name": "Cormorant II Interdictor",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1644,7 +1849,8 @@
         "pk": "Catalyst II Interdictor",
         "fields": {
             "name": "Catalyst II Interdictor",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1652,7 +1858,8 @@
         "pk": "Thrasher II Interdictor",
         "fields": {
             "name": "Thrasher II Interdictor",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1660,7 +1867,8 @@
         "pk": "Procurer",
         "fields": {
             "name": "Procurer",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1668,7 +1876,8 @@
         "pk": "Porpoise",
         "fields": {
             "name": "Porpoise",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1676,7 +1885,8 @@
         "pk": "Arbitrator II Covert Ops",
         "fields": {
             "name": "Arbitrator II Covert Ops",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1684,7 +1894,8 @@
         "pk": "Blackbird II Covert Ops",
         "fields": {
             "name": "Blackbird II Covert Ops",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1692,7 +1903,8 @@
         "pk": "Celestis II Covert Ops",
         "fields": {
             "name": "Celestis II Covert Ops",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1700,7 +1912,8 @@
         "pk": "Bellicose II Covert Ops",
         "fields": {
             "name": "Bellicose II Covert Ops",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1708,7 +1921,8 @@
         "pk": "Harbinger Logistics",
         "fields": {
             "name": "Harbinger Logistics",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1716,7 +1930,8 @@
         "pk": "Drake Logistics",
         "fields": {
             "name": "Drake Logistics",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1724,7 +1939,8 @@
         "pk": "Brutix Logistics",
         "fields": {
             "name": "Brutix Logistics",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1732,7 +1948,8 @@
         "pk": "Hurricane Logistics",
         "fields": {
             "name": "Hurricane Logistics",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1740,7 +1957,8 @@
         "pk": "Oracle II",
         "fields": {
             "name": "Oracle II",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1748,7 +1966,8 @@
         "pk": "Naga II",
         "fields": {
             "name": "Naga II",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1756,7 +1975,8 @@
         "pk": "Talos II",
         "fields": {
             "name": "Talos II",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1764,7 +1984,8 @@
         "pk": "Tornado II",
         "fields": {
             "name": "Tornado II",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1772,7 +1993,8 @@
         "pk": "Prophecy Guardian",
         "fields": {
             "name": "Prophecy Guardian",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1780,7 +2002,8 @@
         "pk": "Ferox Guardian",
         "fields": {
             "name": "Ferox Guardian",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1788,7 +2011,8 @@
         "pk": "Myrmidon Guardian",
         "fields": {
             "name": "Myrmidon Guardian",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1796,7 +2020,8 @@
         "pk": "Cyclone Guardian",
         "fields": {
             "name": "Cyclone Guardian",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1804,7 +2029,8 @@
         "pk": "Apocalypse",
         "fields": {
             "name": "Apocalypse",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1812,7 +2038,8 @@
         "pk": "Rokh",
         "fields": {
             "name": "Rokh",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1820,7 +2047,8 @@
         "pk": "Megathron",
         "fields": {
             "name": "Megathron",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1828,7 +2056,8 @@
         "pk": "Maelstrom",
         "fields": {
             "name": "Maelstrom",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1836,7 +2065,8 @@
         "pk": "Armageddon",
         "fields": {
             "name": "Armageddon",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1844,7 +2074,8 @@
         "pk": "Scorpion",
         "fields": {
             "name": "Scorpion",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1852,7 +2083,8 @@
         "pk": "Dominix",
         "fields": {
             "name": "Dominix",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1860,7 +2092,8 @@
         "pk": "Typhoon",
         "fields": {
             "name": "Typhoon",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1868,7 +2101,8 @@
         "pk": "Humpback High Mobility",
         "fields": {
             "name": "Humpback High Mobility",
-            "tech_level": "9"
+            "tech_level": "9",
+            "free": false
         }
     },
     {
@@ -1876,7 +2110,8 @@
         "pk": "Executioner II Interceptor",
         "fields": {
             "name": "Executioner II Interceptor",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -1884,7 +2119,8 @@
         "pk": "Condor II Interceptor",
         "fields": {
             "name": "Condor II Interceptor",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -1892,7 +2128,8 @@
         "pk": "Atron II Interceptor",
         "fields": {
             "name": "Atron II Interceptor",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -1900,7 +2137,8 @@
         "pk": "Slasher II Interceptor",
         "fields": {
             "name": "Slasher II Interceptor",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -1908,7 +2146,8 @@
         "pk": "Coercer Covert Ops",
         "fields": {
             "name": "Coercer Covert Ops",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -1916,7 +2155,8 @@
         "pk": "Cormorant Covert Ops",
         "fields": {
             "name": "Cormorant Covert Ops",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -1924,7 +2164,8 @@
         "pk": "Catalyst Covert Ops",
         "fields": {
             "name": "Catalyst Covert Ops",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -1932,7 +2173,8 @@
         "pk": "Thrasher Covert Ops",
         "fields": {
             "name": "Thrasher Covert Ops",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -1940,7 +2182,8 @@
         "pk": "Covetor",
         "fields": {
             "name": "Covetor",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -1948,7 +2191,8 @@
         "pk": "Sigil II",
         "fields": {
             "name": "Sigil II",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -1956,7 +2200,8 @@
         "pk": "Badger II",
         "fields": {
             "name": "Badger II",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -1964,7 +2209,8 @@
         "pk": "Nereus II",
         "fields": {
             "name": "Nereus II",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -1972,7 +2218,8 @@
         "pk": "Wreathe II",
         "fields": {
             "name": "Wreathe II",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -1980,7 +2227,8 @@
         "pk": "Maller Interdictor",
         "fields": {
             "name": "Maller Interdictor",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -1988,7 +2236,8 @@
         "pk": "Moa Interdictor",
         "fields": {
             "name": "Moa Interdictor",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -1996,7 +2245,8 @@
         "pk": "Thorax Interdictor",
         "fields": {
             "name": "Thorax Interdictor",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2004,7 +2254,8 @@
         "pk": "Rupture Interdictor",
         "fields": {
             "name": "Rupture Interdictor",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2012,7 +2263,8 @@
         "pk": "Prophecy II Command",
         "fields": {
             "name": "Prophecy II Command",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2020,7 +2272,8 @@
         "pk": "Ferox II Command",
         "fields": {
             "name": "Ferox II Command",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2028,7 +2281,8 @@
         "pk": "Myrmidon II Command",
         "fields": {
             "name": "Myrmidon II Command",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2036,7 +2290,8 @@
         "pk": "Cyclone II Command",
         "fields": {
             "name": "Cyclone II Command",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2044,7 +2299,8 @@
         "pk": "Prophecy II Guardian",
         "fields": {
             "name": "Prophecy II Guardian",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2052,7 +2308,8 @@
         "pk": "Ferox II Guardian",
         "fields": {
             "name": "Ferox II Guardian",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2060,7 +2317,8 @@
         "pk": "Myrmidon II Guardian",
         "fields": {
             "name": "Myrmidon II Guardian",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2068,7 +2326,8 @@
         "pk": "Cyclone II Guardian",
         "fields": {
             "name": "Cyclone II Guardian",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2076,7 +2335,8 @@
         "pk": "Harbinger E-War",
         "fields": {
             "name": "Harbinger E-War",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2084,7 +2344,8 @@
         "pk": "Drake E-War",
         "fields": {
             "name": "Drake E-War",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2092,7 +2353,8 @@
         "pk": "Brutix E-War",
         "fields": {
             "name": "Brutix E-War",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2100,7 +2362,8 @@
         "pk": "Hurricane E-War",
         "fields": {
             "name": "Hurricane E-War",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2108,7 +2371,8 @@
         "pk": "Orca",
         "fields": {
             "name": "Orca",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2116,7 +2380,8 @@
         "pk": "Humpback Hauling",
         "fields": {
             "name": "Humpback Hauling",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2124,7 +2389,8 @@
         "pk": "Humpback Combat",
         "fields": {
             "name": "Humpback Combat",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2132,7 +2398,8 @@
         "pk": "Abaddon",
         "fields": {
             "name": "Abaddon",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2140,7 +2407,8 @@
         "pk": "Raven",
         "fields": {
             "name": "Raven",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2148,7 +2416,8 @@
         "pk": "Hyperion",
         "fields": {
             "name": "Hyperion",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2156,7 +2425,8 @@
         "pk": "Tempest",
         "fields": {
             "name": "Tempest",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2164,7 +2434,8 @@
         "pk": "Apocalypse Striker",
         "fields": {
             "name": "Apocalypse Striker",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2172,7 +2443,8 @@
         "pk": "Raven Striker",
         "fields": {
             "name": "Raven Striker",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2180,7 +2452,8 @@
         "pk": "Megathron Striker",
         "fields": {
             "name": "Megathron Striker",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     },
     {
@@ -2188,7 +2461,8 @@
         "pk": "Maelstrom Striker",
         "fields": {
             "name": "Maelstrom Striker",
-            "tech_level": "10"
+            "tech_level": "10",
+            "free": false
         }
     }
 ]

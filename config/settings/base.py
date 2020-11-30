@@ -6,7 +6,6 @@ from decimal import ROUND_HALF_EVEN
 from pathlib import Path
 from typing import List
 
-import os
 import environ
 import moneyed
 from django.urls.resolvers import URLResolver

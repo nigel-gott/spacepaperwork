@@ -21,19 +21,26 @@ class ShipOrderTest(GooseToolsTestCase):
         super().setUp()
         self.thorax = Ship.objects.create(name="Thorax", tech_level=6)
 
-    def a_ship_order(self):
-        self.post(
+    def a_ship_order_returning_response(self, ship_pk=None, payment_method="eggs"):
+        if not ship_pk:
+            ship_pk = self.thorax.pk
+        r = self.post(
             reverse("industry:shiporders_create"),
             {
-                "ship": self.thorax.pk,
+                "ship": ship_pk,
                 "quantity": 1,
                 "recipient_character": self.char.pk,
-                "payment_method": "eggs",
+                "payment_method": payment_method,
                 "notes": "",
             },
         )
         ship_order = ShipOrder.objects.last()
         self.post(reverse("industry:shiporders_contract_confirm", args=[ship_order.pk]))
+        return r
+
+    def a_ship_order(self, ship_pk=None, payment_method="eggs"):
+        self.a_ship_order_returning_response(ship_pk, payment_method)
+        ship_order = ShipOrder.objects.last()
         return ship_order
 
     def test_can_order_a_ship(self):
@@ -143,4 +150,127 @@ class ShipOrderTest(GooseToolsTestCase):
         )
         self.assertEqual(
             str(response.content, encoding="utf-8"), '{"status":"unclaimed"}'
+        )
+
+    def test_a_ship_can_be_marked_as_free(self):
+        free_ship = Ship.objects.create(name="FreeShip", tech_level=6, free=True)
+        ship_order = self.a_ship_order(free_ship.pk, payment_method="free")
+
+        response = self.get(reverse("industry:shiporder-list"))
+        self.json_matches(
+            response,
+            f"""[
+     {{
+        "assignee": null,
+        "availible_transition_names": [
+            "building",
+            "built",
+            "inventing",
+            "reset"
+        ],
+        "created_at": "2012-01-14 12:00",
+        "id": {ship_order.pk},
+        "notes": "",
+        "payment_method": "free",
+        "quantity": 1,
+        "recipient_character": {self.char.pk},
+        "recipient_character_name": "Test Char",
+        "ship": "FreeShip",
+        "state": "not_started",
+        "uid": "Test Discord User-mock_random"
+    }}
+]""",
+        )
+
+    def test_ordering_a_free_ship_with_isk_turns_the_method_into_free(self):
+        free_ship = Ship.objects.create(name="FreeShip", tech_level=6, free=True)
+        r = self.a_ship_order_returning_response(free_ship.pk, payment_method="isk")
+
+        self.assert_messages(
+            r,
+            [
+                (
+                    "info",
+                    "This ship is free, you selected to pay with isk, instead this has been switched to free!",
+                )
+            ],
+        )
+
+        r = self.get(reverse("industry:shiporder-list"))
+        self.json_matches(
+            r,
+            f"""[
+     {{
+        "assignee": null,
+        "availible_transition_names": [
+            "building",
+            "built",
+            "inventing",
+            "reset"
+        ],
+        "created_at": "2012-01-14 12:00",
+        "id": {ShipOrder.objects.last().pk},
+        "notes": "",
+        "payment_method": "free",
+        "quantity": 1,
+        "recipient_character": {self.char.pk},
+        "recipient_character_name": "Test Char",
+        "ship": "FreeShip",
+        "state": "not_started",
+        "uid": "Test Discord User-mock_random"
+    }}
+]""",
+        )
+
+    def test_ordering_a_nonfree_ship_with_free_method_fails(self):
+        paid_ship = Ship.objects.create(name="PaidShip", tech_level=6, free=False)
+        r = self.client.post(
+            reverse("industry:shiporders_create"),
+            {
+                "ship": paid_ship.pk,
+                "quantity": 1,
+                "recipient_character": self.char.pk,
+                "payment_method": "free",
+                "notes": "",
+            },
+        )
+
+        self.assert_messages(
+            r,
+            [
+                (
+                    "error",
+                    "This ship is not free, you must select eggs or isk as a payment method.",
+                )
+            ],
+        )
+
+        r = self.get(reverse("industry:shiporder-list"))
+        self.json_matches(
+            r,
+            "[]",
+        )
+
+    def test_ordering_more_than_one_free_ship_fails(self):
+        free_ship = Ship.objects.create(name="FreeShip", tech_level=6, free=True)
+        r = self.client.post(
+            reverse("industry:shiporders_create"),
+            {
+                "ship": free_ship.pk,
+                "quantity": 2,
+                "recipient_character": self.char.pk,
+                "payment_method": "free",
+                "notes": "",
+            },
+        )
+
+        self.assert_messages(
+            r,
+            [("error", "You cannot order more than free ship at one time.")],
+        )
+
+        r = self.get(reverse("industry:shiporder-list"))
+        self.json_matches(
+            r,
+            "[]",
         )

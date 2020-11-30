@@ -23,16 +23,17 @@ def main():
             if name in invalid_ships:
                 continue
             tech_level = line[7]
+            free = int(tech_level) <= 6
             models.append(
                 {
-                    "model": "items.ship",
+                    "model": "industry.ship",
                     "pk": name,
-                    "fields": {"name": name, "tech_level": tech_level},
+                    "fields": {"name": name, "tech_level": tech_level, "free": free},
                 }
             )
             pk = pk + 1
 
-        with open("goosetools/items/fixtures/ships.json", "w") as out_file:
+        with open("goosetools/industry/fixtures/ships.json", "w") as out_file:
             out_file.write(jsonpickle.encode(models, indent=4))
 
 

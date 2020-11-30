@@ -1,4 +1,5 @@
-from typing import Any, Dict, List
+import json
+from typing import Any, Dict, List, Tuple
 
 from django.contrib.messages.api import get_messages
 from django.http.response import HttpResponse
@@ -59,3 +60,29 @@ class DjangoTestCase(TestCase):
     def post_expecting_error(self, url: str, args: Dict[str, Any] = None) -> List[str]:
         response = self.client.post(url, args)
         return self.get_errors_from_response(response)
+
+    def assert_messages(
+        self, r: HttpResponse, expected_messages: List[Tuple[str, str]]
+    ):
+        self.assertEqual(
+            [(m.level_tag, m.message) for m in get_messages(r.wsgi_request)],
+            expected_messages,
+        )
+
+    def json_matches(self, r: HttpResponse, expected_json: str):
+        actual_json = str(r.content, encoding="utf-8")
+        self.assertEqual(
+            nowhitespace_json(actual_json),
+            nowhitespace_json(expected_json),
+            pretty_json(actual_json),
+        )
+
+
+def nowhitespace_json(json_str: str):
+    parsed = json.loads(json_str)
+    return json.dumps(parsed, indent=0, sort_keys=True)
+
+
+def pretty_json(json_str: str):
+    parsed = json.loads(json_str)
+    return json.dumps(parsed, indent=4, sort_keys=True)

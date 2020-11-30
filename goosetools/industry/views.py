@@ -57,21 +57,43 @@ def shiporders_create(request):
             username = data["recipient_character"].discord_user.username
 
             uid = f"{username}-{generate_random_string()}"
-            ship_order = ShipOrder.objects.create(
-                ship=data["ship"],
-                recipient_character=data["recipient_character"],
-                quantity=data["quantity"],
-                payment_method=data["payment_method"],
-                notes=data["notes"],
-                uid=uid,
-                state="not_started",
-                assignee=None,
-                created_at=timezone.now(),
-                contract_made=False,
-            )
-            return HttpResponseRedirect(
-                reverse("industry:shiporders_contract_confirm", args=[ship_order.pk])
-            )
+            ship = data["ship"]
+            payment_method = data["payment_method"]
+            quantity = data["quantity"]
+            if not ship.free and payment_method == "free":
+                messages.error(
+                    request,
+                    "This ship is not free, you must select eggs or isk as a payment method.",
+                )
+            else:
+                if ship.free and payment_method != "free":
+                    messages.info(
+                        request,
+                        f"This ship is free, you selected to pay with {payment_method}, instead this has been switched to free!",
+                    )
+                    payment_method = "free"
+                if ship.free and quantity > 1:
+                    messages.error(
+                        request, "You cannot order more than free ship at one time."
+                    )
+                else:
+                    ship_order = ShipOrder.objects.create(
+                        ship=ship,
+                        recipient_character=data["recipient_character"],
+                        quantity=quantity,
+                        payment_method=payment_method,
+                        notes=data["notes"],
+                        uid=uid,
+                        state="not_started",
+                        assignee=None,
+                        created_at=timezone.now(),
+                        contract_made=False,
+                    )
+                    return HttpResponseRedirect(
+                        reverse(
+                            "industry:shiporders_contract_confirm", args=[ship_order.pk]
+                        )
+                    )
     else:
         form = ShipOrderForm(
             initial={"recipient_character": request.user.default_character}

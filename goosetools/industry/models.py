@@ -8,13 +8,17 @@ from goosetools.users.models import Character
 class Ship(models.Model):
     name = models.TextField(primary_key=True)
     tech_level = models.PositiveIntegerField()
+    free = models.BooleanField(default=False)
 
     def __str__(self):
-        return str(self.name)
+        if self.free:
+            return f"{self.name} - FREE"
+        else:
+            return str(self.name)
 
 
 class ShipOrder(models.Model):
-    PAYMENT_METHODS = [("eggs", "eggs"), ("isk", "isk")]
+    PAYMENT_METHODS = [("eggs", "eggs"), ("isk", "isk"), ("free", "free")]
     recipient_character = models.ForeignKey(Character, on_delete=models.CASCADE)
     assignee = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True
