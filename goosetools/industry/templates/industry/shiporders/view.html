@@ -91,6 +91,7 @@ $(function() {
         });
     }
     table = $('#ship_orders_table').DataTable( {
+        "pageLength": 50,
         ajax: {
             url: "{% url 'industry:shiporder-list' %}",
             dataSrc: '',
