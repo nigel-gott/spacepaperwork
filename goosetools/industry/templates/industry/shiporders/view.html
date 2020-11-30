@@ -112,7 +112,10 @@ $(function() {
                     }
                     state = row['state']
                     progress = Math.floor((progress_dict[state] / 6)*100) + 1;
-                    return '<div id="progress" style="height:35px;width:100%;background-color:grey;"><div style="height:35px;width:'+progress+'%;background-color:green;"></div></div>';
+                    if ( type === 'display' || type === 'filter' ) {
+                        return '<div id="progress" style="height:35px;width:100%;background-color:grey;"><div style="height:35px;width:'+progress+'%;background-color:green;"></div></div>';
+                    }
+                    return progress;
                 }
             },
             { "data": "availible_transition_names", "visible": false},
