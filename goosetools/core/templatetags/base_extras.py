@@ -2,7 +2,6 @@ import math as m
 import numbers
 
 from django import template
-from django.db.models.expressions import F
 
 from goosetools.contracts.models import Contract
 from goosetools.fleets.models import (
@@ -37,7 +36,7 @@ def num_orders(user):
 def num_sold(user):
     return SoldItem.objects.filter(
         item__location__character_location__character__discord_user=user.discord_user,
-        transfered_quantity__lt=F("quantity"),
+        transfered=False,
     ).count()
 
 
