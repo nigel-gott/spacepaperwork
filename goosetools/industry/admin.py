@@ -21,6 +21,7 @@ make_paid.short_description = "Mark selected ships as not free"  # type:ignore
 
 class ShipAdmin(admin.ModelAdmin):
     search_fields = ("name", "tech_level", "free")
+    list_display = ["name", "tech_level", "free"]
     actions = [make_paid, make_free]
 
 
