@@ -97,7 +97,22 @@ $(function() {
             { "data": "ship", "title":"Ship"},
             { "data": "quantity", "title":"Quantity"},
             { "data": "payment_method", "title":"Payment Method"},
-            { "data": "state", "title":"Status"},
+            { "data": "state", "title":"Status",
+                render: function ( data, type, row ) {
+                    progress_dict = {
+                        'not_started':0,
+                        'inventing':1,
+                        'awaiting_production_slot':2,
+                        'building':3,
+                        'built':4,
+                        'audit':5,
+                        'missing_contract':5,
+                        'sent':6,
+                    }
+                    state = row['state']
+                    return progress_dict[state] + ": " + state;
+                }
+            },
             { "data": null, "title": "Progress",
                 render: function ( data, type, row ) {
                     progress_dict = {
