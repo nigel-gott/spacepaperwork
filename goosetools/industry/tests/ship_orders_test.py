@@ -173,7 +173,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "notes": "",
         "payment_method": "free",
         "quantity": 1,
-        "recipient_character": {self.char.pk},
+        "recipient_discord_user_pk": {self.discord_user.pk},
         "recipient_character_name": "Test Char",
         "ship": "FreeShip",
         "state": "not_started",

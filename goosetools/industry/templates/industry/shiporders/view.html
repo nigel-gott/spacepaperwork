@@ -11,7 +11,7 @@
         <ul class="collection">
             <li class="collection-item">
                 <div class="switch">
-                    Just My Requested Orders:
+                    My Requested Orders:
                     <label>
                     Off
                     <input id="toggle_requested" type="checkbox" checked>
@@ -22,7 +22,7 @@
             </li>
             <li class="collection-item">
                 <div class="switch">
-                    Just My Assigned Orders:
+                    My Assigned Orders:
                     <label>
                     Off
                     <input id="toggle_assigned" type="checkbox">
@@ -37,7 +37,7 @@
         <ul class="collection">
             <li class="collection-item">
                 <div class="switch">
-                    Just Unassigned Orders:
+                    Unassigned Orders:
                     <label>
                     Off
                     <input id="toggle_unassigned" type="checkbox">
@@ -175,6 +175,8 @@ $(function() {
         unclaim(row, table);
     });
 
+    loadCheckboxes();
+
     add_filter(page_data);
 
     $('input:checkbox').change(filter_change(table));
@@ -253,6 +255,7 @@ function unclaim(row, table){
 
 function filter_change(dt){
     return function(){
+        updateStorage();
         dt.draw();
     }
 }
@@ -275,19 +278,44 @@ function add_filter(page_data){
             if(!completed_checked && row['state'] === 'sent'){
                 return false;
             }
-            if(assigned_checked && row['assignee'] !== page_data['request_user_pk']){
-                return false;
+            if(requested_checked && parseInt(row['recipient_discord_user_pk']) === page_data['request_discord_user_pk']){
+                return true;
             }
-            if(unassigned_checked && row['assignee']){
-                return false;
+
+            row_is_assigned_to_user = row['assignee'] === page_data['request_user_pk'];
+            row_has_assignee = row['assignee'];
+            if(assigned_checked && unassigned_checked){
+                return row_is_assigned_to_user || !row_has_assignee;
+            } else if(assigned_checked){
+                return row_is_assigned_to_user;
+            } else if (unassigned_checked){
+                return !row_has_assignee;
+            } else {
+                return true;
             }
-            if(requested_checked && parseInt(row['recipient_discord_user_pk']) !== page_data['request_discord_user_pk']){
-                return false;
-            }
-            return true;
         }
     );
 
+}
+
+
+function updateStorage(){
+    checkboxValues = {};
+    const $checkboxes = $(":checkbox");
+    $checkboxes.each(function(){
+        checkboxValues[this.id] = this.checked;
+    });
+
+    localStorage.setItem("checkboxValues", JSON.stringify(checkboxValues));
+}
+
+function loadCheckboxes(){
+    var checkboxValues = JSON.parse(localStorage.getItem('checkboxValues')) || {};
+    $.each(checkboxValues, function(key, value) {
+        if(key){
+            $("#" + key).prop('checked', value);
+        }
+    });
 }
 </script>
 {% endblock %}
