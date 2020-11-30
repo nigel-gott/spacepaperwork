@@ -220,6 +220,25 @@ def loot_share_add_fleet_members(request, pk):
 
 
 @login_required(login_url=login_url)
+def loot_group_copy(request, pk):
+    loot_bucket = get_object_or_404(LootBucket, pk=pk)
+    if not loot_bucket.fleet.has_admin(request.user):
+        return forbidden(request)
+    if request.method == "POST":
+        to_copy = loot_bucket.lootgroup_set.last()
+        if to_copy:
+            to_copy.pk = None
+            to_copy.full_clean()
+            to_copy.save()
+            messages.success(request, f"Copied loot group: {to_copy}")
+        else:
+            messages.error(request, "No existing group in this bucket to copy...")
+        return HttpResponseRedirect(reverse("fleet_view", args=[loot_bucket.fleet.id]))
+    else:
+        return HttpResponseNotAllowed("POST")
+
+
+@login_required(login_url=login_url)
 def loot_group_close(request, pk):
     lg = get_object_or_404(LootGroup, pk=pk)
     if not lg.fleet().has_admin(request.user):
@@ -229,7 +248,7 @@ def loot_group_close(request, pk):
         lg.full_clean()
         lg.save()
         messages.success(request, f"Closed loot group: {lg}")
-        return HttpResponseRedirect(reverse("loot_group_view", args=[lg.id]))
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
     else:
         return HttpResponseNotAllowed("POST")
 
@@ -244,7 +263,7 @@ def loot_group_open(request, pk):
         lg.full_clean()
         lg.save()
         messages.success(request, f"Opened loot group: {lg}")
-        return HttpResponseRedirect(reverse("loot_group_view", args=[lg.id]))
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
     else:
         return HttpResponseNotAllowed("POST")
 

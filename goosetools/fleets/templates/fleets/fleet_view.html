@@ -96,7 +96,7 @@
                         <input id="shareurl" type="text" value="{{request.build_absolute_uri}}join">
                         <label for="shareurl">Shareable Fleet Invite Link</label>
                     </div>
-                    <button class="waves-effect waves-light btn" data-clipboard-target="#shareurl" id="share_button">
+                    <button class="waves-effect waves-light copybtn" data-clipboard-target="#shareurl" id="share_button">
                         Copy Invite Link
                     </button>
                 </div>
@@ -185,10 +185,17 @@
                     </div>
                     <div class="col s12 m6 right-align">
                         {% if admin %}
-                        <a class="btn "
-                           href="{% url 'loot_group_add' fleet.id bucket.id %}"><i
-                                class='material-icons right'>add_circle</i>
-                            Add Anom</a>
+                            <a class="btn "
+                            href="{% url 'loot_group_add' fleet.id bucket.id %}"><i
+                                    class='material-icons right'>add_circle</i>
+                                Add Anom</a>
+
+                            {% if bucket.lootgroup_set.count > 0%}
+                                <form style="display: inline-block;" method="POST" action="{% url 'loot_group_copy' bucket.id %}">
+                                    {% csrf_token %}
+                                    <button class="btn waves-btn green">Copy Prev Anom</button>
+                                </form>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
@@ -196,11 +203,12 @@
                 <div class="collection">
                     {% for lootgroup in bucket.lootgroup_set.all %}
                     {% has_share lootgroup user as has_share_already %}
+                    <div class="collection-item">
                     <a
                         {% if has_share_already %}
                          title="You have shares in this loot group"
                         {% endif %}
-                        href="{% url 'loot_group_view' lootgroup.id %}" class="collection-item
+                        href="{% url 'loot_group_view' lootgroup.id %}" class="
                         {% if lootgroup.closed %}red-text{% endif %}
                     ">
                         {% if has_share_already %}
@@ -213,6 +221,27 @@
                             <i class='material-icons left'>lock</i>
                         {% endif %}
                     </a>
+                        <div class="input-field">
+                            <input id="shareurl_{{lootgroup.id}}" type="hidden" value="{{ request.scheme }}://{{ request.get_host }}{% url 'loot_share_join' lootgroup.id %}">
+                        </div>
+                        <button class="waves-effect waves-light copybtn" data-clipboard-target="#shareurl_{{lootgroup.id}}" id="share_button">
+                            Copy Invite Link
+                        </button>
+
+                        {% if admin %}
+                                {% if not lootgroup.closed %}
+                                <form style="display: inline-block;" method="POST" action="{% url 'loot_group_close' lootgroup.id %}">
+                                        {% csrf_token %}
+                                        <button class="btn waves-btn red">Close</button>
+                                </form>
+                            {% else %}
+                                <form style="display: inline-block;" method="POST" action="{% url 'loot_group_open' lootgroup.id %}">
+                                        {% csrf_token %}
+                                        <button class="btn waves-btn green">Open</button>
+                                </form>
+                            {% endif %}
+                        {% endif %}
+                        </div>
                     {% endfor %}
                 </div>
             </div>
@@ -241,7 +270,7 @@
 
 
 <script>
-    var clipboard = new ClipboardJS('.btn');
+    var clipboard = new ClipboardJS('.copybtn');
 
     document.addEventListener('DOMContentLoaded', function () {
         var elems = document.querySelectorAll('.collapsible');
