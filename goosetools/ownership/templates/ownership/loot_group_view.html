@@ -16,12 +16,26 @@
             <b>Location:</b> {{loot_group.fleet_anom.system}}<br/>
             <b>Total Profit So Far:</b> {{loot_group.isk_and_eggs_balance}}<br/>
         </p>
+        {% if loot_group.closed %}
+        <h5 class="red-text">Loot Group Closed.</h5>
+        {% endif %}
     </div>
     {% if admin %}
 
-    <div class="card-action right-align">
+    <div class="card-action left-align">
         <a class="waves-effect waves-light btn orange darken-2"
            href="{% url 'loot_group_edit' loot_group.id %}"><i class='material-icons right'>edit</i>Edit</a>
+        {% if not loot_group.closed %}
+            <form style="display: inline-block;" method="POST" action="{% url 'loot_group_close' loot_group.id %}">
+                    {% csrf_token %}
+                    <button class="btn waves-btn red">Close</button>
+            </form>
+        {% else %}
+            <form style="display: inline-block;" method="POST" action="{% url 'loot_group_open' loot_group.id %}">
+                    {% csrf_token %}
+                    <button class="btn waves-btn green">Open</button>
+            </form>
+        {% endif %}
     </div>
     {% endif %}
 </div>
@@ -133,7 +147,7 @@
         <td colspan="5">
             {% has_share loot_group user as has_share_already %}
             {% loot_group_still_can_join_alts loot_group user as user_can_still_join_alts %}
-            {% if not has_share_already %}
+            {% if not has_share_already and loot_group.still_open %}
             <a class="waves-effect waves-light btn green darken-2"
                href="{% url 'loot_share_join' loot_group.id %}"><i
                     class="material-icons right">add_circle</i>Join As Participant</a>

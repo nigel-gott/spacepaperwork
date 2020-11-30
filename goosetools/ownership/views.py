@@ -86,23 +86,20 @@ def loot_share_join(request, pk):
                     request,
                     f"{selected_character} is not your Character, you cannot join the loot group with it.",
                 )
-                return forbidden(request)
-
-            if not loot_group.can_join(selected_character):
+            elif not loot_group.can_join(selected_character):
                 messages.error(
                     request, f"{selected_character} is not allowed to join this group."
                 )
-                return forbidden(request)
-
-            ls = LootShare(
-                character=selected_character,
-                loot_group=loot_group,
-                share_quantity=1,
-                flat_percent_cut=0,
-                created_at=timezone.now(),
-            )
-            ls.full_clean()
-            ls.save()
+            else:
+                ls = LootShare(
+                    character=selected_character,
+                    loot_group=loot_group,
+                    share_quantity=1,
+                    flat_percent_cut=0,
+                    created_at=timezone.now(),
+                )
+                ls.full_clean()
+                ls.save()
             return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
     else:
         can_still_join = non_participation_chars(loot_group, request.user)
@@ -223,6 +220,36 @@ def loot_share_add_fleet_members(request, pk):
 
 
 @login_required(login_url=login_url)
+def loot_group_close(request, pk):
+    lg = get_object_or_404(LootGroup, pk=pk)
+    if not lg.fleet().has_admin(request.user):
+        return forbidden(request)
+    if request.method == "POST":
+        lg.closed = True
+        lg.full_clean()
+        lg.save()
+        messages.success(request, f"Closed loot group: {lg}")
+        return HttpResponseRedirect(reverse("loot_group_view", args=[lg.id]))
+    else:
+        return HttpResponseNotAllowed("POST")
+
+
+@login_required(login_url=login_url)
+def loot_group_open(request, pk):
+    lg = get_object_or_404(LootGroup, pk=pk)
+    if not lg.fleet().has_admin(request.user):
+        return forbidden(request)
+    if request.method == "POST":
+        lg.closed = False
+        lg.full_clean()
+        lg.save()
+        messages.success(request, f"Opened loot group: {lg}")
+        return HttpResponseRedirect(reverse("loot_group_view", args=[lg.id]))
+    else:
+        return HttpResponseNotAllowed("POST")
+
+
+@login_required(login_url=login_url)
 def loot_group_add(request, fleet_pk, loot_bucket_pk):
     f = get_object_or_404(Fleet, pk=fleet_pk)
     if request.method == "POST":
@@ -264,7 +291,11 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
                 else:
                     loot_bucket = get_object_or_404(LootBucket, pk=loot_bucket_pk)
 
-                new_group = LootGroup(bucket=loot_bucket, fleet_anom=fleet_anom)
+                new_group = LootGroup(
+                    name=form.cleaned_data["name"],
+                    bucket=loot_bucket,
+                    fleet_anom=fleet_anom,
+                )
                 new_group.full_clean()
                 new_group.save()
 

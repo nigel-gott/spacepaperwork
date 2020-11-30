@@ -205,8 +205,13 @@
                         {{lootgroup.display_name}}
                     </a>
                     {% else %}
-                    <a href="{% url 'loot_group_view' lootgroup.id %}" class="collection-item">
+                    <a href="{% url 'loot_group_view' lootgroup.id %}" class="collection-item
+                        {% if lootgroup.closed %}red-text{% endif %}
+                    ">
                         {{lootgroup.display_name}}
+                        {% if lootgroup.closed %}
+                        <i class='material-icons left'>lock</i>
+                        {% endif %}
                     </a>
                     {% endif %}
                     {% endfor %}

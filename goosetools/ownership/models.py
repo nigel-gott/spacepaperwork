@@ -95,6 +95,7 @@ class LootGroup(models.Model):
     bucket = models.ForeignKey(LootBucket, on_delete=models.CASCADE)
     name = models.TextField(blank=True, null=True)
     manual = models.BooleanField(default=False)
+    closed = models.BooleanField(default=False)
 
     # TODO Uncouple the fleet requirement from LootGroups
     def fleet(self):
@@ -136,7 +137,7 @@ class LootGroup(models.Model):
         )
 
     def still_open(self):
-        return not self.fleet().in_the_past()
+        return not self.fleet().in_the_past() and not self.closed
 
     def still_can_join_alts(self, user):
         num_chars = len(user.characters())
