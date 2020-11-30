@@ -106,9 +106,9 @@ class ItemAutocomplete(autocomplete.Select2QuerySetView):
         if faction and faction != "All":
             qs = qs.filter(
                 inventoryitem__loot_group__fleet_anom__anom_type__faction=faction
-            )
+            ).distinct()
 
         if self.q:
             qs = qs.filter(name__icontains=self.q)
 
-        return qs
+        return qs.distinct()
