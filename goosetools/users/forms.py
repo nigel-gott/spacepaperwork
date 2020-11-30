@@ -40,6 +40,20 @@ class SettingsForm(forms.Form):
 
 
 class CharacterForm(forms.Form):
+    FACTIONS = [
+        ("All", "All"),
+        ("Guristas", "Guritas"),
+        ("Angel", "Angel"),
+        ("Blood", "Blood"),
+        ("Sansha", "Sansha"),
+        ("Serpentis", "Serpentis"),
+    ]
+    faction = forms.ChoiceField(
+        choices=FACTIONS,
+        required=False,
+        initial="Serpentis",
+        label="Item Faction Filter",
+    )
     character = forms.ModelChoiceField(
         queryset=Character.objects.all(),
         initial=0,

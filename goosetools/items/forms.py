@@ -11,7 +11,7 @@ class InventoryItemForm(forms.Form):
     item = forms.ModelChoiceField(
         queryset=Item.objects.all(),
         initial=0,
-        widget=autocomplete.ModelSelect2(url="item-autocomplete"),
+        widget=autocomplete.ModelSelect2(url="item-autocomplete", forward=["faction"]),
         required=False,
     )
     quantity = forms.IntegerField(min_value=0, required=False)

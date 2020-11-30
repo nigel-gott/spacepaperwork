@@ -32,7 +32,8 @@
         </div>
         {% endif %}
         <div class="row">
-            {{ char_form.character|materializecss:'s12 m12, icon=person'}}
+            {{ char_form.character|materializecss:'s12 m6, icon=person'}}
+            {{ char_form.faction|materializecss:'s12 m6, icon=person'}}
         </div>
     </div>
     <div class="divider"></div>
@@ -101,7 +102,7 @@
         }
     });
 
-    $('select').select2({
+    $('select:not(#id_faction)').select2({
         selectOnClose: true
     });
 
