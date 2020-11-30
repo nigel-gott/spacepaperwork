@@ -33,4 +33,61 @@
 <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
 {{form.media}}
 
+<script>
+
+$(function(){
+    $('#id_ship').on('change paste keyup', set_free_or_not);
+
+    set_free_or_not();
+});
+
+function set_free_or_not(){
+    const ship_text = $(this).find('option:selected').text();
+    const current_payment = $('#id_payment_method').find('option:selected').val();
+    const selectedCategory = document.querySelector('#id_payment_method');
+    if(ship_text.endsWith("FREE")){
+        $("#id_payment_method option").remove();
+        $('#id_payment_method').append($('<option>', {
+            value: "free",
+            text: "free"
+        }));
+
+        selectedCategory.value = "free";
+        if (typeof(Event) === 'function') {
+            var event = new Event('change');
+        } else {  // for IE11
+            var event = document.createEvent('Event');
+            event.initEvent('change', true, true);
+        }
+        selectedCategory.dispatchEvent(event);
+        M.FormSelect.init(selectedCategory);
+    } else {
+        $("#id_payment_method option").remove();
+        $('#id_payment_method').append($('<option>', {
+            value: "eggs",
+            text: "eggs"
+        }));
+        $('#id_payment_method').append($('<option>', {
+            value: "isk",
+            text: "isk"
+        }));
+
+        new_payment = current_payment === "free" ? "eggs" : current_payment;
+        selectedCategory.value = new_payment;
+
+        if (typeof(Event) === 'function') {
+            var event = new Event('change');
+        } else {  // for IE11
+            var event = document.createEvent('Event');
+            event.initEvent('change', true, true);
+        }
+        selectedCategory.dispatchEvent(event);
+        M.FormSelect.init(selectedCategory);
+    }
+
+}
+
+
+</script>
+
 {% endblock %}
