@@ -5,16 +5,63 @@
 {% block body %}
 <div class="row">
     <div class="col s12 m12">
-    <a class="btn waves-btn green" href="{% url 'industry:shiporders_create' %}">Order A Ship!</a>
-    <table id="ship_orders_table"></table>
+        <a class="btn waves-btn green" href="{% url 'industry:shiporders_create' %}">Order A Ship!</a>
+    </div>
+    <div class="col s12 m4">
+        <ul class="collection">
+            <li class="collection-item">
+                <div class="switch">
+                    Just My Requested Orders:
+                    <label>
+                    Off
+                    <input id="toggle_requested" type="checkbox" checked>
+                    <span class="lever"></span>
+                    On
+                    </label>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="col s12 m4">
+        <ul class="collection">
+            <li class="collection-item">
+                <div class="switch">
+                    Just My Assigned Orders:
+                    <label>
+                    Off
+                    <input id="toggle_assigned" type="checkbox">
+                    <span class="lever"></span>
+                    On
+                    </label>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="col s12 m4">
+        <ul class="collection">
+            <li class="collection-item">
+                <div class="switch">
+                    Hide Completed Orders:
+                    <label>
+                    Off
+                    <input id="toggle_completed" type="checkbox" checked>
+                    <span class="lever"></span>
+                    On
+                    </label>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="col s12 m12">
+        <table id="ship_orders_table"></table>
     </div>
 </div>
 {% endblock %}
 
 {% block extrafooter %}
 <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/jquery.dataTables.min.css" integrity="sha512-1k7mWiTNoyx2XtmI96o+hdjP8nn0f3Z2N4oF/9ZZRgijyV4omsKOXEnqL1gKQNPy2MTSP9rIEWGcH/CInulptA==" crossorigin="anonymous" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js" integrity="sha512-BkpSL20WETFylMrcirBahHfSnY++H2O1W+UnEEO4yNIl+jI2+zowyoGJpbtk6bx97fBXf++WJHSSK2MV4ghPcg==" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"> </script>
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
 {{ page_data|json_script:"page-data" }}
 <script>
@@ -58,7 +105,7 @@ $(function() {
                 }
             },
             { "data": "availible_transition_names", "visible": false},
-            { "data": "recipient_character", "visible": false, "searchable": false},
+            { "data": "recipient_discord_user_pk", "visible": false, "searchable": false},
             { "data": "assignee", "visible": false, "searchable": false},
     ];
     if(page_data["has_industry_permission"]){
@@ -91,31 +138,36 @@ $(function() {
         });
     }
     table = $('#ship_orders_table').DataTable( {
-        "pageLength": 50,
+        pageLength: 50,
         ajax: {
             url: "{% url 'industry:shiporder-list' %}",
             dataSrc: '',
         },
-        "columns": columns
+        columns: columns,
     } );
 
     $('#ship_orders_table').on( 'click', '.state-link', function () {
         const row = table.row( $(this).parents('tr') );
         var data = row.data();
-        state_change(row, $(this).text());
+        state_change(row, $(this).text(), table);
     });
 
     $('#ship_orders_table').on( 'click', '.claim-btn', function () {
         const row = table.row( $(this).parents('tr') );
         var data = row.data();
-        claim(row);
+        claim(row, table);
     });
 
     $('#ship_orders_table').on( 'click', '.unclaim-btn', function () {
         const row = table.row( $(this).parents('tr') );
         var data = row.data();
-        unclaim(row);
+        unclaim(row, table);
     });
+
+    add_filter(page_data);
+
+    $('input:checkbox').change(filter_change(table));
+    filter_change(table)();
 });
 
 function django_request(url){
@@ -134,7 +186,7 @@ function json_django_request(url){
         }}
     );
 }
-function state_change(row, transition){
+function state_change(row, transition, table){
     const id = row.data()['id'];
     const request = json_django_request("shiporder/" + id + "/transition/");
     fetch(request, {
@@ -148,10 +200,11 @@ function state_change(row, transition){
         row_data['state'] = response_data["new_state"];
         row_data['availible_transition_names'] = response_data["availible_transition_names"];
         row.data(row_data);
+        table.draw();
     });
 }
 
-function claim(row){
+function claim(row, table){
     const id = row.data()['id'];
     const request = django_request("shiporder/" + id + "/claim/");
     fetch(request, {
@@ -164,10 +217,11 @@ function claim(row){
         row_data['assignee_name'] = response_data["assignee_name"];
         row_data['assignee'] = response_data["assignee"];
         row.data(row_data);
+        table.draw();
     });
 }
 
-function unclaim(row){
+function unclaim(row, table){
     const id = row.data()['id'];
     const request = django_request("shiporder/" + id + "/unclaim/");
     fetch(request, {
@@ -181,8 +235,56 @@ function unclaim(row){
             row_data['assignee_name'] = null;
             row_data['assignee'] = null;
             row.data(row_data);
+            table.draw();
         }
     });
+}
+
+function filter_change(dt){
+    return function(){
+        $this = $(this);
+        const assigned = $('#toggle_assigned');
+        const requested = $('#toggle_requested');
+        const completed = $('#toggle_completed');
+        const assigned_checked = assigned.is(':checked');
+        const requested_checked = requested.is(':checked');
+        const completed_checked = completed.is(':checked');
+
+        const changed_one = $this.attr('id');
+
+        if (changed_one == 'toggle_assigned') {
+            requested.prop("checked",!assigned_checked);
+        } else if( changed_one == 'toggle_requested') {
+            assigned.prop("checked",!requested_checked);
+        }
+
+        dt.draw();
+    }
+}
+
+function add_filter(page_data){
+    $.fn.dataTable.ext.search.push(
+        function( settings, data, dataIndex, row ) {
+            const assigned = $('#toggle_assigned');
+            const requested = $('#toggle_requested');
+            const completed = $('#toggle_completed');
+            const assigned_checked = assigned.is(':checked');
+            const requested_checked = requested.is(':checked');
+            const completed_checked = completed.is(':checked');
+
+            if(completed_checked && row['state'] === 'sent'){
+                return false;
+            }
+            if(assigned_checked && row['assignee'] !== page_data['request_user_pk']){
+                return false;
+            }
+            if(requested_checked && parseInt(row['recipient_discord_user_pk']) !== page_data['request_discord_user_pk']){
+                return false;
+            }
+            return true;
+        }
+    );
+
 }
 </script>
 {% endblock %}

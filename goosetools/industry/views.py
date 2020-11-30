@@ -184,6 +184,7 @@ def shiporders_view(request):
                     "industry.change_shiporder"
                 ),
                 "request_user_discord_username": request.user.discord_username(),
+                "request_discord_user_pk": request.user.discord_user.pk,
                 "request_user_pk": request.user.pk,
                 "request_user_character_pks": [
                     char.pk for char in request.user.characters()
