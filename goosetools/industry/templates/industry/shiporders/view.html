@@ -97,6 +97,27 @@ $(function() {
             { "data": "ship", "title":"Ship"},
             { "data": "quantity", "title":"Quantity"},
             { "data": "payment_method", "title":"Payment Method"},
+            { "data": "notes", "title":"Notes",
+                render: function ( data, type, row, meta ) {
+                    if(row['notes']){
+                        notes = row['notes'].trim();
+                        short_notes = notes.substring(0,8) + "..."
+                        return `
+  <a class="btn modal-trigger" href="#modal${meta.row}">${short_notes}</a>
+  <div id="modal${meta.row}" class="modal">
+    <div class="modal-content">
+      <h4>Notes:</h4>
+      <b>For Order ${row['ship']} x ${row['quantity']} -> ${row['recipient_character_name']}</b>
+      <p>${notes}</p>
+    </div>
+  </div>`
+                    } else {
+                        return '';
+                    }
+
+                }
+
+            },
             { "data": "state", "title":"Status",
                 render: function ( data, type, row ) {
                     progress_dict = {
@@ -199,6 +220,11 @@ $(function() {
 
     $('input:checkbox').change(filter_change(table));
     filter_change(table)();
+
+    table.on( 'draw', function () {
+        var elems = document.querySelectorAll('.modal');
+        var instances = M.Modal.init(elems);
+    } );
 });
 
 function django_request(url){
