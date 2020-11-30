@@ -20,10 +20,6 @@
                     </label>
                 </div>
             </li>
-        </ul>
-    </div>
-    <div class="col s12 m4">
-        <ul class="collection">
             <li class="collection-item">
                 <div class="switch">
                     Just My Assigned Orders:
@@ -41,10 +37,25 @@
         <ul class="collection">
             <li class="collection-item">
                 <div class="switch">
-                    Hide Completed Orders:
+                    Just Unassigned Orders:
                     <label>
                     Off
-                    <input id="toggle_completed" type="checkbox" checked>
+                    <input id="toggle_unassigned" type="checkbox">
+                    <span class="lever"></span>
+                    On
+                    </label>
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="col s12 m4">
+        <ul class="collection">
+            <li class="collection-item">
+                <div class="switch">
+                    Archive View:
+                    <label>
+                    Off
+                    <input id="toggle_completed" type="checkbox">
                     <span class="lever"></span>
                     On
                     </label>
@@ -250,16 +261,24 @@ function add_filter(page_data){
     $.fn.dataTable.ext.search.push(
         function( settings, data, dataIndex, row ) {
             const assigned = $('#toggle_assigned');
+            const unassigned = $('#toggle_unassigned');
             const requested = $('#toggle_requested');
             const completed = $('#toggle_completed');
             const assigned_checked = assigned.is(':checked');
+            const unassigned_checked = unassigned.is(':checked');
             const requested_checked = requested.is(':checked');
             const completed_checked = completed.is(':checked');
 
-            if(completed_checked && row['state'] === 'sent'){
+            if(completed_checked && row['state'] !== 'sent'){
+                return false;
+            }
+            if(!completed_checked && row['state'] === 'sent'){
                 return false;
             }
             if(assigned_checked && row['assignee'] !== page_data['request_user_pk']){
+                return false;
+            }
+            if(unassigned_checked && row['assignee']){
                 return false;
             }
             if(requested_checked && parseInt(row['recipient_discord_user_pk']) !== page_data['request_discord_user_pk']){
