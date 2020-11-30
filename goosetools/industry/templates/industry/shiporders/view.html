@@ -278,9 +278,6 @@ function add_filter(page_data){
             if(!completed_checked && row['state'] === 'sent'){
                 return false;
             }
-            if(requested_checked && parseInt(row['recipient_discord_user_pk']) === page_data['request_discord_user_pk']){
-                return true;
-            }
 
             row_is_assigned_to_user = row['assignee'] === page_data['request_user_pk'];
             row_has_assignee = row['assignee'];
@@ -290,6 +287,8 @@ function add_filter(page_data){
                 return row_is_assigned_to_user;
             } else if (unassigned_checked){
                 return !row_has_assignee;
+            } else if(requested_checked){
+                return parseInt(row['recipient_discord_user_pk']) === page_data['request_discord_user_pk'];
             } else {
                 return true;
             }
