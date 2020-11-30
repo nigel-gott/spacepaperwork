@@ -63,17 +63,55 @@ class ShipOrderTest(GooseToolsTestCase):
         response = self.get(
             reverse("industry:shiporder-detail", args=[ship_order.pk]),
         )
-        self.assertEqual(
-            str(response.content, encoding="utf-8"),
-            f'{{"id":{ship_order.id},"uid":"Test Discord User-mock_random","created_at":"2012-01-14 12:00","ship":"Thorax","quantity":1,"assignee":null,"recipient_character":{self.char.pk},"payment_method":"eggs","state":"not_started","notes":"","recipient_character_name":"{self.char.ingame_name}","availible_transition_names":["building","built","inventing","reset"]}}',
+        self.json_matches(
+            response,
+            f"""{{
+        "assignee": null,
+        "availible_transition_names": [
+            "building",
+            "built",
+            "inventing",
+            "reset"
+        ],
+        "created_at": "2012-01-14 12:00",
+        "id": {ship_order.pk},
+        "notes": "",
+        "payment_method": "eggs",
+        "quantity": 1,
+        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_character_name": "Test Char",
+        "ship": "Thorax",
+        "state": "not_started",
+        "uid": "Test Discord User-mock_random"
+ }}""",
         )
 
     def test_can_list_ship_orders(self):
         ship_order = self.a_ship_order()
         response = self.get(reverse("industry:shiporder-list"))
-        self.assertEqual(
-            str(response.content, encoding="utf-8"),
-            f'[{{"id":{ship_order.id},"uid":"Test Discord User-mock_random","created_at":"2012-01-14 12:00","ship":"Thorax","quantity":1,"assignee":null,"recipient_character":{self.char.pk},"payment_method":"eggs","state":"not_started","notes":"","recipient_character_name":"{self.char.ingame_name}","availible_transition_names":["building","built","inventing","reset"]}}]',
+        self.json_matches(
+            response,
+            f"""[
+     {{
+        "assignee": null,
+        "availible_transition_names": [
+            "building",
+            "built",
+            "inventing",
+            "reset"
+        ],
+        "created_at": "2012-01-14 12:00",
+        "id": {ship_order.pk},
+        "notes": "",
+        "payment_method": "eggs",
+        "quantity": 1,
+        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_character_name": "Test Char",
+        "ship": "Thorax",
+        "state": "not_started",
+        "uid": "Test Discord User-mock_random"
+    }}
+]""",
         )
 
     def test_can_claim_ship_order_if_in_industry_group(self):
@@ -132,7 +170,8 @@ class ShipOrderTest(GooseToolsTestCase):
             response,
             f"""[
      {{
-        "assignee": null,
+        "assignee": {self.user.pk},
+        "assignee_name": "{self.user.discord_username()}",
         "availible_transition_names": [
             "building",
             "built",
@@ -142,11 +181,11 @@ class ShipOrderTest(GooseToolsTestCase):
         "created_at": "2012-01-14 12:00",
         "id": {ship_order.pk},
         "notes": "",
-        "payment_method": "free",
+        "payment_method": "eggs",
         "quantity": 1,
-        "recipient_discord_user_pk": {self.discord_user.pk},
+        "recipient_discord_user_pk": "{self.discord_user.pk}",
         "recipient_character_name": "Test Char",
-        "ship": "FreeShip",
+        "ship": "Thorax",
         "state": "not_started",
         "uid": "Test Discord User-mock_random"
     }}
@@ -193,8 +232,8 @@ class ShipOrderTest(GooseToolsTestCase):
         "notes": "",
         "payment_method": "free",
         "quantity": 1,
-        "recipient_discord_user_pk": {self.discord_user.pk},
         "recipient_character_name": "Test Char",
+        "recipient_discord_user_pk": "{self.discord_user.pk}",
         "ship": "FreeShip",
         "state": "not_started",
         "uid": "Test Discord User-mock_random"
@@ -233,8 +272,8 @@ class ShipOrderTest(GooseToolsTestCase):
         "notes": "",
         "payment_method": "free",
         "quantity": 1,
-        "recipient_character": {self.char.pk},
         "recipient_character_name": "Test Char",
+        "recipient_discord_user_pk": "{self.discord_user.pk}",
         "ship": "FreeShip",
         "state": "not_started",
         "uid": "Test Discord User-mock_random"
