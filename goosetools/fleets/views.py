@@ -2,6 +2,7 @@ from typing import Dict, List
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.db.models import Sum
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -15,6 +16,7 @@ from goosetools.fleets.models import (
     future_fleets_query,
     past_fleets_query,
 )
+from goosetools.ownership.models import LootGroup
 from goosetools.users.models import Character
 
 from .forms import FleetAddMemberForm, FleetForm, JoinFleetForm
@@ -96,6 +98,7 @@ def fleet_view(request, pk):
 
 
 @login_required(login_url=login_url)
+@transaction.atomic
 def fleet_end(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     if f.has_admin(request.user):
@@ -103,6 +106,7 @@ def fleet_end(request, pk):
             f.end = timezone.now()
             f.full_clean()
             f.save()
+            LootGroup.objects.filter(bucket__fleet=f).update(closed=True)
         else:
             messages.error(
                 request, "You cannot end a future fleet or one that is already closed."

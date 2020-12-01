@@ -135,3 +135,11 @@ class LootGroupTest(GooseToolsTestCase):
                 }
             ],
         )
+
+    def test_closing_a_fleet_closes_any_open_loot_groups_in_the_fleet(self):
+        fleet = self.an_open_fleet()
+        loot_group = self.a_loot_group(fleet)
+        self.assertFalse(loot_group.closed)
+        self.post(reverse("fleet_end", args=[fleet.pk]))
+        loot_group.refresh_from_db()
+        self.assertTrue(loot_group.closed)
