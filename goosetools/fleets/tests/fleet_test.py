@@ -225,6 +225,39 @@ class FleetTest(GooseToolsTestCase):
         )
 
     @freeze_time("2012-01-14 12:00:00")
+    def test_can_open_a_closed_fleet(self):
+        a_closed_fleet = self.a_fleet(
+            start_date="Jan. 13, 2012",
+            start_time="1:00 AM",
+        )
+
+        self.post(reverse("fleet_open", args=[a_closed_fleet.id]))
+
+        fleet_view = self.get(reverse("fleet_view", args=[a_closed_fleet.id]))
+        a_closed_fleet.refresh_from_db()
+        self.assertFalse(a_closed_fleet.in_the_past())
+        self.assertIn(
+            "Start: Jan. 14, 2012, noon (Starts Now)",
+            str(fleet_view.content),
+        )
+        self.assertNotIn(
+            "End:",
+            str(fleet_view.content),
+        )
+
+    @freeze_time("2012-01-14 12:00:00")
+    def test_cant_open_an_open_fleet(self):
+        a_closed_fleet = self.a_fleet(
+            start_date="Jan. 14, 2012",
+            start_time="1:00 AM",
+        )
+
+        errors = self.post_expecting_error(
+            reverse("fleet_open", args=[a_closed_fleet.id])
+        )
+        self.assertEqual(errors, ["You cannot open an already open fleet"])
+
+    @freeze_time("2012-01-14 12:00:00")
     def test_cant_end_a_future_fleet(self):
         a_future_fleet = self.a_fleet(
             start_date="Jan. 15, 2012",

@@ -99,6 +99,23 @@ def fleet_view(request, pk):
 
 @login_required(login_url=login_url)
 @transaction.atomic
+def fleet_open(request, pk):
+    f = get_object_or_404(Fleet, pk=pk)
+    if f.has_admin(request.user):
+        if not f.is_open():
+            f.end = None
+            f.start = timezone.now()
+            f.full_clean()
+            f.save()
+        else:
+            messages.error(request, "You cannot open an already open fleet")
+    else:
+        return forbidden(request)
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
+
+
+@login_required(login_url=login_url)
+@transaction.atomic
 def fleet_end(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     if f.has_admin(request.user):
@@ -113,7 +130,7 @@ def fleet_end(request, pk):
             )
     else:
         return forbidden(request)
-    return HttpResponseRedirect(reverse("fleet"))
+    return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 
 @login_required(login_url=login_url)

@@ -10,6 +10,7 @@ from .views import (
     fleet_join,
     fleet_leave,
     fleet_make_admin,
+    fleet_open,
     fleet_past,
     fleet_remove_admin,
     fleet_view,
@@ -28,5 +29,6 @@ urlpatterns = [
     path("fleet/remove_admin/<int:pk>/", fleet_remove_admin, name="fleet_remove_admin"),
     path("fleet/leave/<int:pk>/", fleet_leave, name="fleet_leave"),
     path("fleet/end/<int:pk>/", fleet_end, name="fleet_end"),
+    path("fleet/open/<int:pk>/", fleet_open, name="fleet_open"),
     path("fleet/edit/<int:pk>/", fleet_edit, name="fleet_edit"),
 ]
