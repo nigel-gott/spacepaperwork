@@ -32,6 +32,9 @@ class ShipOrder(models.Model):
     notes = models.TextField(blank=True)
     payment_method = models.TextField(choices=PAYMENT_METHODS)
 
+    def __str__(self):
+        return f"ShipOrder({self.id}) - {self.ship}*{self.quantity}->{self.recipient_character}:{self.uid}"
+
     def availible_transitions(self):
         # pylint: disable=no-member
         return {t.name: t for t in self.get_available_state_transitions()}  # type: ignore
