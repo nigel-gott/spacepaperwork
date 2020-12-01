@@ -37,6 +37,14 @@ repos:
     rev: 5.6.4
     hooks:
       - id: isort
+  - repo: local
+    hooks:
+      - id: pylint
+        language: system
+        name: Run pylint only on changed files.
+        entry: bash -c "pylint `git diff --name-only --diff-filter=d HEAD^ | grep -E '\.py$' | tr '\n' ' '`"
+        types: ["python"]
+        pass_filenames: false
   # - repo: local
   #   hooks:
   #     - id: migrations-check

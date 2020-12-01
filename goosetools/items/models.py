@@ -188,6 +188,7 @@ class StackedInventoryItem(models.Model):
         return self._first_item() and self._first_item().item
 
     def marketorder(self):
+        # pylint: disable=no-member
         items = self.marketorders()  # type: ignore
         if items.count() > 0:
             return items.first()

@@ -7,6 +7,9 @@ ignore-paths:
 ignore-patterns:
   - (^|/)skip(this)?(/|$)
 
+pylint:
+  run: false
+
 pep8:
   disable:
     - E501

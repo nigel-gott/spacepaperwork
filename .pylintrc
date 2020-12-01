@@ -1,6 +1,9 @@
 [MASTER]
 load-plugins=pylint_django
 init-hook='import sys; sys.path.append("goosetools")'
+jobs=0
+ignore-patterns=migrations,templates,venv
+
 
 [FORMAT]
 max-line-length=88
