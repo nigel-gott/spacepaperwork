@@ -38,7 +38,7 @@ class ShipAdmin(admin.ModelAdmin):
 
 
 class ShipOrderAdmin(admin.ModelAdmin):
-    search_fields = ("uid", "ship", "state", "assignee", "recipient_character")
+    search_fields = ["uid"]
     list_display = [
         "uid",
         "ship",
