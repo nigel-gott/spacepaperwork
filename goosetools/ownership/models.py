@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models.aggregates import Sum
 from django.db.models.expressions import F
 from django.db.models.functions import Coalesce
+from django.utils import timezone
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 
@@ -26,6 +27,9 @@ def model_sum(queryset, key):
 
 class LootBucket(models.Model):
     fleet = models.ForeignKey(Fleet, on_delete=models.CASCADE)
+
+    def ordered_lootgroup_set(self):
+        return self.lootgroup_set.order_by("-created_at").all()
 
     def isk_and_eggs_balance(self):
         isk = to_isk(
@@ -96,6 +100,7 @@ class LootGroup(models.Model):
     name = models.TextField(blank=True, null=True)
     manual = models.BooleanField(default=False)
     closed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(default=timezone.now)
 
     # TODO Uncouple the fleet requirement from LootGroups
     def fleet(self):

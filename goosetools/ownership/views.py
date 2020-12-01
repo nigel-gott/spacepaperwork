@@ -295,6 +295,7 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
                     name=form.cleaned_data["name"],
                     bucket=loot_bucket,
                     fleet_anom=fleet_anom,
+                    created_at=timezone.now(),
                 )
                 new_group.full_clean()
                 new_group.save()

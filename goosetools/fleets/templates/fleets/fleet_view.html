@@ -197,7 +197,7 @@
                 </div>
 
                 <div class="collection">
-                    {% for lootgroup in bucket.lootgroup_set.all %}
+                    {% for lootgroup in bucket.ordered_lootgroup_set %}
                     {% has_share lootgroup user as has_share_already %}
                     <a
                         {% if has_share_already %}
