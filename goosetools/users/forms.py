@@ -51,7 +51,7 @@ class CharacterForm(forms.Form):
     faction = forms.ChoiceField(
         choices=FACTIONS,
         required=False,
-        initial="Serpentis",
+        initial="All",
         label="Item Faction Filter",
     )
     character = forms.ModelChoiceField(
