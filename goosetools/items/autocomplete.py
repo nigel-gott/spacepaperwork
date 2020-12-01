@@ -1,4 +1,5 @@
 from dal import autocomplete
+from django.db.models import Count
 
 from goosetools.items.models import Item, ItemSubSubType, ItemSubType, ItemType, System
 
@@ -104,9 +105,14 @@ class ItemAutocomplete(autocomplete.Select2QuerySetView):
 
         faction = self.forwarded.get("faction", None)
         if faction and faction != "All":
-            qs = qs.filter(
-                inventoryitem__loot_group__fleet_anom__anom_type__faction=faction
-            ).distinct()
+            qs = (
+                qs.filter(  # type: ignore
+                    inventoryitem__loot_group__fleet_anom__anom_type__faction=faction
+                )
+                .annotate(num=Count("name"))
+                .distinct()
+                .filter(num__gt=10)
+            )
 
         if self.q:
             qs = qs.filter(name__icontains=self.q)
