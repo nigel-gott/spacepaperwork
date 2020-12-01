@@ -6,7 +6,11 @@ from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.urls import reverse
 
-from goosetools.users.models import DiscordUser
+from goosetools.users.models import (
+    DiscordGuild,
+    DiscordRoleDjangoGroupMapping,
+    DiscordUser,
+)
 
 
 # pylint: disable=unused-argument
@@ -15,7 +19,7 @@ def user_login_handler(sender, request, user, **kwargs):
     account = SocialAccount.objects.get(user=user, provider="discord")
     # Keep the easier to use DiscordUser model upto date as the username, discriminator and avatar_hash fields could change between logins.
     discord_user = DiscordUser.objects.get(uid=account.uid)
-    _update_user_from_social_account(discord_user, account)
+    _update_user_from_social_account(discord_user, account, user)
 
 
 class AccountAdapter(DefaultAccountAdapter):
@@ -53,7 +57,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         else:
             discord_user = DiscordUser()
 
-        _update_user_from_social_account(discord_user, account)
+        _update_user_from_social_account(discord_user, account, sociallogin.user)
         sociallogin.user.discord_user = discord_user
         super().save_user(request, sociallogin, form)
 
@@ -61,7 +65,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         raise ValidationError("Can not disconnect")
 
 
-def _update_user_from_social_account(discord_user, account):
+def _update_user_from_social_account(discord_user, account, gooseuser):
 
     discord_user.uid = account.uid
     discord_user.shortened_uid = False
@@ -69,6 +73,24 @@ def _update_user_from_social_account(discord_user, account):
         account.extra_data["username"] + "#" + account.extra_data["discriminator"]
     )
     discord_user.avatar_hash = account.extra_data["avatar"]
+    _setup_user_groups_from_discord_guild_roles(gooseuser, account.extra_data)
 
     discord_user.full_clean()
     discord_user.save()
+
+
+def _setup_user_groups_from_discord_guild_roles(user, extra_data):
+    try:
+        guild = DiscordGuild.objects.get(active=True)
+        user.groups.clear()
+        if "roles" in extra_data:
+            for role_id in extra_data["roles"]:
+                try:
+                    group_mapping = DiscordRoleDjangoGroupMapping.objects.get(
+                        role_id=role_id, guild=guild
+                    )
+                    user.groups.add(group_mapping.group)
+                except DiscordRoleDjangoGroupMapping.DoesNotExist:
+                    pass
+    except DiscordGuild.DoesNotExist:
+        pass

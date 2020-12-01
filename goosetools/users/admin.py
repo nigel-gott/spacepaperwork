@@ -2,7 +2,14 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from goosetools.users.models import Character, Corp, DiscordUser, GooseUser
+from goosetools.users.models import (
+    Character,
+    Corp,
+    DiscordGuild,
+    DiscordRoleDjangoGroupMapping,
+    DiscordUser,
+    GooseUser,
+)
 
 admin.site.register(Corp)
 admin.site.register(Character)
@@ -42,3 +49,5 @@ class CustomUserAdmin(UserAdmin):
 
 
 admin.site.register(GooseUser, CustomUserAdmin)
+admin.site.register(DiscordGuild)
+admin.site.register(DiscordRoleDjangoGroupMapping)

@@ -1,6 +1,6 @@
 from typing import Union
 
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.utils.deconstruct import deconstructible
@@ -121,5 +121,26 @@ class GooseUser(AbstractUser):
     def discord_avatar_hash(self):
         return self.discord_user.uid
 
-    # class Meta:
-    #     db_table = "core_gooseuser"
+
+class DiscordGuild(models.Model):
+    guild_id = models.TextField()
+    bot_token = models.TextField()
+    active = models.BooleanField(default=False)
+
+    # pylint: disable=signature-differs
+    def save(self, *args, **kwargs):
+        if self.active:
+            try:
+                other_active = DiscordGuild.objects.get(active=True)
+                if self != other_active:
+                    other_active.active = False
+                    other_active.save()
+            except DiscordGuild.DoesNotExist:
+                pass
+        super().save(*args, **kwargs)
+
+
+class DiscordRoleDjangoGroupMapping(models.Model):
+    guild = models.ForeignKey(DiscordGuild, on_delete=models.CASCADE)
+    role_id = models.TextField()
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)

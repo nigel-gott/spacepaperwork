@@ -2,7 +2,8 @@ import debug_toolbar
 from django.conf.urls import include
 from django.urls.conf import path
 
-from .base import *  # noqa
+# pylint: disable=unused-wildcard-import,wildcard-import
+from .base import *
 from .base import env
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
@@ -20,19 +21,23 @@ CACHES = {
 }
 
 
+STUB_DISCORD = env.bool("STUB_DISCORD", True)
+
 # WhiteNoise
 # ------------------------------------------------------------------------------
 # http://whitenoise.evans.io/en/latest/django.html#using-whitenoise-in-development
-INSTALLED_APPS = (
-    ["whitenoise.runserver_nostatic"]
-    + INSTALLED_APPS  # noqa
-    + ["goosetools.stub_discord_auth.apps.StubDiscordAuthConfig"]
-)
+INSTALLED_APPS = ["whitenoise.runserver_nostatic"] + INSTALLED_APPS  # noqa
+
 
 ENV_SPECIFIC_URLS = [
-    path("stub_discord_auth/", include("stub_discord_auth.urls")),
     path("__debug__/", include(debug_toolbar.urls)),
 ]
+
+if STUB_DISCORD:
+    ENV_SPECIFIC_URLS.append(
+        path("stub_discord_auth/", include("stub_discord_auth.urls")),
+    )
+    INSTALLED_APPS.append("goosetools.stub_discord_auth.apps.StubDiscordAuthConfig")
 
 # django-debug-toolbar
 # ------------------------------------------------------------------------------

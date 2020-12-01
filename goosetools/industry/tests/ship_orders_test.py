@@ -2,7 +2,7 @@ from django.contrib.auth.models import Group
 from django.urls.base import reverse
 from freezegun import freeze_time
 
-from goosetools import industry
+import goosetools.industry.views
 from goosetools.industry.models import Ship, ShipOrder
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
 
@@ -12,7 +12,7 @@ def get_mock_random_string():
     return "mock_random"
 
 
-industry.views.generate_random_string = get_mock_random_string
+goosetools.industry.views.generate_random_string = get_mock_random_string
 
 
 @freeze_time("2012-01-14 12:00:00")
