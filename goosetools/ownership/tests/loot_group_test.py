@@ -86,3 +86,52 @@ class LootGroupTest(GooseToolsTestCase):
         self.assertEqual(
             errors, ["[Test Corp] Test Char 2 is not allowed to join this group."]
         )
+        self.assertEqual(loot_group.lootshare_set.count(), 0)
+
+    def test_fc_can_still_add_members_to_closed_loot_group(self):
+        fleet = self.an_open_fleet()
+        loot_group = self.a_loot_group(fleet)
+
+        self.post(reverse("loot_group_close", args=[loot_group.pk]))
+
+        loot_share_info = {
+            "character": self.other_char.pk,
+            "share_quantity": 1,
+            "flat_percent_cut": 0,
+        }
+        self.post(reverse("loot_share_add", args=[loot_group.pk]), loot_share_info)
+        self.assertEqual(
+            list(
+                loot_group.lootshare_set.values(
+                    "character", "share_quantity", "flat_percent_cut"
+                ).all()
+            ),
+            [loot_share_info],
+        )
+
+    def test_can_reopen_a_closed_loot_group(self):
+        fleet = self.an_open_fleet()
+        loot_group = self.a_loot_group(fleet)
+
+        self.post(reverse("loot_group_close", args=[loot_group.pk]))
+        self.post(reverse("loot_group_open", args=[loot_group.pk]))
+
+        self.client.force_login(self.other_user)
+        self.post(
+            reverse("loot_share_join", args=[loot_group.pk]),
+            {"character": self.other_char.pk},
+        )
+        self.assertEqual(
+            list(
+                loot_group.lootshare_set.values(
+                    "character", "share_quantity", "flat_percent_cut"
+                ).all()
+            ),
+            [
+                {
+                    "character": self.other_char.pk,
+                    "share_quantity": 1,
+                    "flat_percent_cut": 0,
+                }
+            ],
+        )
