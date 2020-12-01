@@ -86,10 +86,11 @@ def _setup_user_groups_from_discord_guild_roles(user, extra_data):
         if "roles" in extra_data:
             for role_id in extra_data["roles"]:
                 try:
-                    group_mapping = DiscordRoleDjangoGroupMapping.objects.get(
+                    group_mappings = DiscordRoleDjangoGroupMapping.objects.filter(
                         role_id=role_id, guild=guild
                     )
-                    user.groups.add(group_mapping.group)
+                    for group_mapping in group_mappings.all():
+                        user.groups.add(group_mapping.group)
                 except DiscordRoleDjangoGroupMapping.DoesNotExist:
                     pass
     except DiscordGuild.DoesNotExist:
