@@ -223,6 +223,8 @@ class ShipOrderViewSet(
     # pylint: disable=unused-argument
     def claim(self, request, pk=None):
         ship_order = self.get_object()
+        if ship_order.currently_blocked():
+            return Response(status=status.HTTP_403_FORBIDDEN)
         if ship_order.assignee is None:
             ship_order.assignee = request.user
             ship_order.save()

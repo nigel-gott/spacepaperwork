@@ -96,7 +96,7 @@ $(function() {
             { "data": "created_at", "title": "Created At"},
             { "data": "assignee_name", "title" : "Assignee", "defaultContent": "Nobody",
                 render: function ( data, type, row ) {
-                    if(page_data["has_industry_permission"]){
+                    if(page_data["has_industry_permission"] && !row['currently_blocked']){
                         if(!row["assignee_name"]){
                             return '<button class="claim-btn waves-btn btn green">Claim</button>';
                         } else if(row["assignee"]===page_data["request_user_pk"]){
@@ -193,7 +193,7 @@ $(function() {
             "title": "Action",
             "data": null,
             render: function ( data, type, row ) {
-                if(row["assignee"]===page_data["request_user_pk"]){
+                if(row["assignee"]===page_data["request_user_pk"] && !row['currently_blocked']){
                     buttons = "";
                     reset_found = false;
                     for(const t of row['availible_transition_names']){

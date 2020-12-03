@@ -496,10 +496,34 @@ class ShipOrderTest(GooseToolsTestCase):
         self.assertEqual(
             r.context["ship_data"],
             {
-                "Thorax": {"free": False, "blocked_until": None},
+                "Thorax": {"free": False},
                 "DailyShip": {
                     "free": True,
+                    "order_limit_group": {
+                        "days_between_orders": 1,
+                        "name": "Free Tech 6 and Below",
+                    },
                     "blocked_until": "2012-01-16 12:00",
                 },
             },
         )
+
+    @freeze_time("2012-01-14 12:00:00")
+    def test_cant_claim_a_blocked_ship(self):
+        order_limit_group = OrderLimitGroup.objects.create(
+            days_between_orders=1, name="Free Tech 6 and Below"
+        )
+        daily_ship = Ship.objects.create(
+            name="DailyShip",
+            tech_level=6,
+            free=True,
+            order_limit_group=order_limit_group,
+        )
+
+        self.a_ship_order(ship_pk=daily_ship.pk, payment_method="free")
+        blocked_ship = self.a_ship_order(ship_pk=daily_ship.pk, payment_method="free")
+
+        r = self.client.put(
+            reverse("industry:shiporder-claim", args=[blocked_ship.pk]),
+        )
+        self.assertEqual(r.status_code, 403)
