@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Set, Tuple
 
 from django.contrib.messages.api import get_messages
 from django.http.response import HttpResponse
@@ -70,19 +70,59 @@ class DjangoTestCase(TestCase):
         )
 
     def json_matches(self, r: HttpResponse, expected_json: str):
+        keys_to_ignore = find_keys_to_ignore(expected_json)
         actual_json = str(r.content, encoding="utf-8")
         self.assertEqual(
-            nowhitespace_json(actual_json),
-            nowhitespace_json(expected_json),
-            pretty_json(actual_json),
+            nowhitespace_json(actual_json, keys_to_ignore),
+            nowhitespace_json(expected_json, keys_to_ignore),
+            # pretty_json(actual_json),
         )
 
 
-def nowhitespace_json(json_str: str):
-    parsed = json.loads(json_str)
-    return json.dumps(parsed, indent=0, sort_keys=True)
+def nowhitespace_json(json_str: str, keys_to_ignore: Set[str]):
+    parsed = filter_out_keys(json_str, keys_to_ignore)
+    return json.dumps(parsed, indent=4, sort_keys=True)
 
 
-def pretty_json(json_str: str):
+def pretty_json(json_str: str) -> str:
     parsed = json.loads(json_str)
     return json.dumps(parsed, indent=4, sort_keys=True)
+
+
+def filter_out_keys(json_str: str, keys_to_filter_out: Set[str]) -> Any:
+    parsed = json.loads(json_str)
+    return filter_out_keys_recursive(parsed, keys_to_filter_out)
+
+
+def filter_out_keys_recursive(json_obj: Any, keys_to_filter: Set[str]) -> Any:
+    if isinstance(json_obj, list):
+        new_list = []
+        for item in json_obj:
+            new_list.append(filter_out_keys_recursive(item, keys_to_filter))
+        return new_list
+    elif isinstance(json_obj, dict):
+        new_dict: Dict[str, Any] = dict()
+        for key, item in json_obj.items():
+            if key not in keys_to_filter:
+                new_dict[key] = filter_out_keys_recursive(item, keys_to_filter)
+        return new_dict
+    else:
+        return json_obj
+
+
+def find_keys_to_ignore(json_str: str) -> Set[str]:
+    parsed = json.loads(json_str)
+    return finds_keys_to_ignore_recursive(parsed, set())
+
+
+def finds_keys_to_ignore_recursive(json_obj: Any, keys_so_far: Set[str]) -> Set[str]:
+    if isinstance(json_obj, list):
+        for item in json_obj:
+            keys_so_far = finds_keys_to_ignore_recursive(item, keys_so_far)
+    elif isinstance(json_obj, dict):
+        for key, item in json_obj.items():
+            if item == "IGNORE":
+                keys_so_far.add(key)
+            else:
+                keys_so_far = finds_keys_to_ignore_recursive(item, keys_so_far)
+    return keys_so_far

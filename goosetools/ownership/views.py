@@ -422,7 +422,7 @@ def fleet_shares(request, pk):
             estimated_profit = estimated_profit + (item.estimated_profit() or 0)
         your_total_est_sales = estimated_profit + your_total_est_sales
         total_estimated_profit = loot_group.estimated_profit()
-        real_profit = loot_group.isk_and_eggs_balance()
+        real_profit = loot_group.isk_balance()
         estimated_participation = loot_group.bucket.calculate_participation(
             total_estimated_profit, loot_group
         )

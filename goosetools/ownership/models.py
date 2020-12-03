@@ -158,10 +158,8 @@ class LootGroup(models.Model):
             and (num_chars - num_characters_in_group) > 0
         )
 
-    def isk_and_eggs_balance(self):
-        isk = to_isk(model_sum(self.inventoryitem_set, "isktransaction__isk"))
-        eggs = to_isk(model_sum(self.inventoryitem_set, "eggtransaction__eggs"))
-        return isk + eggs
+    def isk_balance(self):
+        return to_isk(model_sum(self.inventoryitem_set, "isktransaction__isk"))
 
     def estimated_profit(self):
         return to_isk(

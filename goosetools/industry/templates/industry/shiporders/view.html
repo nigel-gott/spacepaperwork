@@ -46,6 +46,17 @@
                     </label>
                 </div>
             </li>
+            <li class="collection-item">
+                <div class="switch">
+                    Blocked Orders:
+                    <label>
+                    Off
+                    <input id="toggle_blocked" type="checkbox" checked>
+                    <span class="lever"></span>
+                    On
+                    </label>
+                </div>
+            </li>
         </ul>
     </div>
     <div class="col s12 m4">
@@ -80,6 +91,8 @@ $(function() {
     const page_data = JSON.parse(document.getElementById('page-data').textContent);
     columns = [
             { "data": "id", "visible": false, "searchable": false },
+            { "data": "currently_blocked", "visible": false, "searchable": false },
+            { "data": "blocked_until", "visible": false, "searchable": false },
             { "data": "created_at", "title": "Created At"},
             { "data": "assignee_name", "title" : "Assignee", "defaultContent": "Nobody",
                 render: function ( data, type, row ) {
@@ -120,6 +133,10 @@ $(function() {
             },
             { "data": "state", "title":"Status",
                 render: function ( data, type, row ) {
+                    currently_blocked = row['currently_blocked'];
+                    if(currently_blocked){
+                        return "Blocked Until: " + row['blocked_until'];
+                    }
                     progress_dict = {
                         'not_started':0,
                         'inventing':1,
@@ -136,6 +153,15 @@ $(function() {
             },
             { "data": null, "title": "Progress",
                 render: function ( data, type, row ) {
+                    currently_blocked = row['currently_blocked'];
+                    if(currently_blocked){
+                        if ( type === 'display' || type === 'filter' ) {
+                            return "<i class='material-icons left red-text'>lock</i>"
+                        } else {
+                            return -1;
+                        }
+                    }
+
                     progress_dict = {
                         'not_started':0,
                         'inventing':1,
@@ -311,10 +337,12 @@ function add_filter(page_data){
             const unassigned = $('#toggle_unassigned');
             const requested = $('#toggle_requested');
             const completed = $('#toggle_completed');
+            const blocked = $('#toggle_blocked');
             const assigned_checked = assigned.is(':checked');
             const unassigned_checked = unassigned.is(':checked');
             const requested_checked = requested.is(':checked');
             const completed_checked = completed.is(':checked');
+            const blocked_checked = blocked.is(':checked');
 
             if(completed_checked && row['state'] !== 'sent'){
                 return false;
@@ -325,12 +353,8 @@ function add_filter(page_data){
 
             row_is_assigned_to_user = row['assignee'] === page_data['request_user_pk'];
             row_has_assignee = row['assignee'];
-            if(assigned_checked && unassigned_checked){
-                return row_is_assigned_to_user || !row_has_assignee;
-            } else if(assigned_checked){
-                return row_is_assigned_to_user;
-            } else if (unassigned_checked){
-                return !row_has_assignee;
+            if(assigned_checked || unassigned_checked || blocked_checked){
+                return assigned_checked && row_is_assigned_to_user || unassigned_checked && !row_has_assignee || blocked_checked && row['currently_blocked'];
             } else if(requested_checked){
                 return parseInt(row['recipient_discord_user_pk']) === page_data['request_discord_user_pk'];
             } else {

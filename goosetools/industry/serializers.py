@@ -13,6 +13,7 @@ class ShipOrderSerializer(serializers.ModelSerializer):
     assignee_name = serializers.CharField(
         source="assignee.discord_user.username", read_only=True
     )
+    currently_blocked = serializers.BooleanField(read_only=True)
 
     availible_transition_names = serializers.ReadOnlyField()
 
@@ -21,7 +22,9 @@ class ShipOrderSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "uid",
+            "blocked_until",
             "created_at",
+            "currently_blocked",
             "ship",
             "quantity",
             "assignee",

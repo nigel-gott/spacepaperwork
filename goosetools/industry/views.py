@@ -3,6 +3,9 @@ import json
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models.aggregates import Max
+from django.db.models.functions import Coalesce
+from django.http.request import HttpRequest
 from django.http.response import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
@@ -14,8 +17,9 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from goosetools.industry.forms import ShipOrderForm
-from goosetools.industry.models import ShipOrder
+from goosetools.industry.models import Ship, ShipOrder
 from goosetools.industry.serializers import ShipOrderSerializer
+from goosetools.users.models import Character
 
 login_url = reverse_lazy("discord_login")
 
@@ -47,6 +51,76 @@ def generate_random_string():
     return get_random_string(6)
 
 
+def generate_contract_code(username):
+    return f"{username}-{generate_random_string()}"
+
+
+def calculate_blocked_until_for_order(ship, username, request):
+    order_limit_group = ship.order_limit_group
+    if order_limit_group:
+        limit_period = timezone.timedelta(days=order_limit_group.days_between_orders)
+        limit = timezone.now() - limit_period
+        prev_order_start = (
+            ShipOrder.objects.filter(
+                recipient_character__discord_user__username=username,
+                payment_method="free",
+                contract_made=True,
+                ship__order_limit_group=order_limit_group,
+            )
+            .annotate(order_valid_from=Coalesce("blocked_until", "created_at"))
+            .filter(order_valid_from__gt=limit)
+            .aggregate(prev_order_start=Max("order_valid_from"))["prev_order_start"]
+        )
+        if prev_order_start:
+            blocked_until = prev_order_start + limit_period
+            messages.info(
+                request,
+                f"You have already ordered a ship in the '{order_limit_group.name}' category within the last {order_limit_group.days_between_orders} days, this order will be blocked until {blocked_until}.",
+            )
+            return blocked_until
+    return None
+
+
+def create_ship_order(
+    ship: Ship,
+    username: str,
+    recipient_character: Character,
+    quantity: int,
+    payment_method: str,
+    notes: str,
+    request: HttpRequest,
+) -> ShipOrder:
+    uid = generate_contract_code(username)
+    blocked_until = calculate_blocked_until_for_order(ship, username, request)
+
+    return ShipOrder.objects.create(
+        ship=ship,
+        recipient_character=recipient_character,
+        quantity=quantity,
+        payment_method=payment_method,
+        notes=notes,
+        uid=uid,
+        state="not_started",
+        assignee=None,
+        created_at=timezone.now(),
+        blocked_until=blocked_until,
+        contract_made=False,
+    )
+
+
+def validate_order(request, ship, payment_method, quantity):
+    if not ship.free and payment_method == "free":
+        messages.error(
+            request,
+            "This ship is not free, you must select eggs or isk as a payment method.",
+        )
+    elif payment_method == "free" and quantity > 1:
+        messages.error(request, "You cannot order more than free ship at one time.")
+    else:
+        return True
+    return False
+
+
 @transaction.atomic
 @login_required(login_url=login_url)
 def shiporders_create(request):
@@ -54,46 +128,25 @@ def shiporders_create(request):
         form = ShipOrderForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            username = data["recipient_character"].discord_user.username
-
-            uid = f"{username}-{generate_random_string()}"
+            username = request.user.discord_username()
             ship = data["ship"]
             payment_method = data["payment_method"]
             quantity = data["quantity"]
-            if not ship.free and payment_method == "free":
-                messages.error(
+            if validate_order(request, ship, payment_method, quantity):
+                ship_order = create_ship_order(
+                    ship,
+                    username,
+                    data["recipient_character"],
+                    quantity,
+                    payment_method,
+                    data["notes"],
                     request,
-                    "This ship is not free, you must select eggs or isk as a payment method.",
                 )
-            else:
-                if ship.free and payment_method != "free":
-                    messages.info(
-                        request,
-                        f"This ship is free, you selected to pay with {payment_method}, instead this has been switched to free!",
+                return HttpResponseRedirect(
+                    reverse(
+                        "industry:shiporders_contract_confirm", args=[ship_order.pk]
                     )
-                    payment_method = "free"
-                if ship.free and quantity > 1:
-                    messages.error(
-                        request, "You cannot order more than free ship at one time."
-                    )
-                else:
-                    ship_order = ShipOrder.objects.create(
-                        ship=ship,
-                        recipient_character=data["recipient_character"],
-                        quantity=quantity,
-                        payment_method=payment_method,
-                        notes=data["notes"],
-                        uid=uid,
-                        state="not_started",
-                        assignee=None,
-                        created_at=timezone.now(),
-                        contract_made=False,
-                    )
-                    return HttpResponseRedirect(
-                        reverse(
-                            "industry:shiporders_contract_confirm", args=[ship_order.pk]
-                        )
-                    )
+                )
     else:
         form = ShipOrderForm(
             initial={"recipient_character": request.user.default_character}

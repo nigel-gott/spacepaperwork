@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from goosetools.industry.models import Ship, ShipOrder
+from goosetools.industry.models import OrderLimitGroup, Ship, ShipOrder
 
 
 # pylint: disable=unused-argument
@@ -40,5 +40,11 @@ class ShipOrderAdmin(admin.ModelAdmin):
     ]
 
 
+class OrderLimitGroupAdmin(admin.ModelAdmin):
+    search_fields = ["name"]
+    list_display = ["name", "days_between_orders"]
+
+
+admin.site.register(OrderLimitGroup, OrderLimitGroupAdmin)
 admin.site.register(ShipOrder, ShipOrderAdmin)
 admin.site.register(Ship, ShipAdmin)

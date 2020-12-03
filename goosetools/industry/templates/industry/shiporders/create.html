@@ -71,6 +71,10 @@ function set_free_or_not(){
             value: "isk",
             text: "isk"
         }));
+        $('#id_payment_method').append($('<option>', {
+            value: "srp",
+            text: "srp"
+        }));
 
         new_payment = current_payment === "free" ? "eggs" : current_payment;
         selectedCategory.value = new_payment;
