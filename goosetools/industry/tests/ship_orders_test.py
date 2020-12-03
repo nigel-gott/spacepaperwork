@@ -330,7 +330,7 @@ class ShipOrderTest(GooseToolsTestCase):
             r,
             [
                 (
-                    "info",
+                    "warning",
                     "You have already ordered a ship in the 'Free Tech 6 and Below' category within the last 1 days, this order will be blocked until 2012-01-15 12:00:00+00:00.",
                 )
             ],
@@ -473,4 +473,33 @@ class ShipOrderTest(GooseToolsTestCase):
         "uid": "Test Discord User-mock_random_3"
     }}
 ]""",
+        )
+
+    @freeze_time("2012-01-14 12:00:00")
+    def test_ship_availability_is_passed_to_create_ship_order_template(self):
+        order_limit_group = OrderLimitGroup.objects.create(
+            days_between_orders=1, name="Free Tech 6 and Below"
+        )
+        daily_ship = Ship.objects.create(
+            name="DailyShip",
+            tech_level=6,
+            free=True,
+            order_limit_group=order_limit_group,
+        )
+
+        self.a_ship_order(ship_pk=daily_ship.pk, payment_method="free")
+        self.a_ship_order(ship_pk=daily_ship.pk, payment_method="free")
+
+        r = self.client.get(
+            reverse("industry:shiporders_create"),
+        )
+        self.assertEqual(
+            r.context["ship_data"],
+            {
+                "Thorax": {"free": False, "blocked_until": None},
+                "DailyShip": {
+                    "free": True,
+                    "blocked_until": "2012-01-16 12:00",
+                },
+            },
         )

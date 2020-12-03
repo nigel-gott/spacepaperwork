@@ -1,4 +1,5 @@
 import json
+from typing import Any, Dict
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -55,7 +56,7 @@ def generate_contract_code(username):
     return f"{username}-{generate_random_string()}"
 
 
-def calculate_blocked_until_for_order(ship, username, request):
+def calculate_blocked_until_for_order(ship, username):
     order_limit_group = ship.order_limit_group
     if order_limit_group:
         limit_period = timezone.timedelta(days=order_limit_group.days_between_orders)
@@ -73,12 +74,11 @@ def calculate_blocked_until_for_order(ship, username, request):
         )
         if prev_order_start:
             blocked_until = prev_order_start + limit_period
-            messages.info(
-                request,
+            return (
+                blocked_until,
                 f"You have already ordered a ship in the '{order_limit_group.name}' category within the last {order_limit_group.days_between_orders} days, this order will be blocked until {blocked_until}.",
             )
-            return blocked_until
-    return None
+    return None, None
 
 
 def create_ship_order(
@@ -91,7 +91,9 @@ def create_ship_order(
     request: HttpRequest,
 ) -> ShipOrder:
     uid = generate_contract_code(username)
-    blocked_until = calculate_blocked_until_for_order(ship, username, request)
+    blocked_until, message = calculate_blocked_until_for_order(ship, username)
+    if message:
+        messages.warning(request, message)
 
     return ShipOrder.objects.create(
         ship=ship,
@@ -119,6 +121,27 @@ def validate_order(request, ship, payment_method, quantity):
     else:
         return True
     return False
+
+
+def populate_ship_data(user) -> Dict[str, Any]:
+    ship_data = {}
+    ships = Ship.objects.all()
+    for ship in ships:
+        current_ship_data: Dict[str, Any] = {"free": ship.free}
+        blocked_until, _ = calculate_blocked_until_for_order(
+            ship, user.discord_username()
+        )
+        if blocked_until is not None:
+            current_ship_data["blocked_until"] = blocked_until.strftime(
+                "%Y-%m-%d %H:%M"
+            )
+        if ship.order_limit_group:
+            current_ship_data["order_limit_group"] = {
+                "name": ship.order_limit_group.name,
+                "days_between_orders": ship.order_limit_group.days_between_orders,
+            }
+        ship_data[ship.name] = current_ship_data
+    return ship_data
 
 
 @transaction.atomic
@@ -153,7 +176,12 @@ def shiporders_create(request):
         )
         form.fields["recipient_character"].queryset = request.user.characters()
 
-    return render(request, "industry/shiporders/create.html", {"form": form})
+    ship_data = populate_ship_data(request.user)
+    return render(
+        request,
+        "industry/shiporders/create.html",
+        {"form": form, "ship_data": ship_data},
+    )
 
 
 class ShipOrderViewSet(
