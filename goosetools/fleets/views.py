@@ -32,22 +32,18 @@ def forbidden(request):
 
 def fleet_list_view(request, fleets_to_display, page_url_name):
     page = int(request.GET.get("page", 0))
-    fleets_annotated_with_isk_and_eggs_balance = fleets_to_display.annotate(
+    page_size = 20
+    total_pages = math.floor(fleets_to_display.count() / page_size)
+    this_page_fleets = fleets_to_display[page * page_size : (page + 1) * page_size]
+    fleets_annotated_with_isk_and_eggs_balance = this_page_fleets.annotate(
         isk_and_eggs_balance=Sum(
             "lootbucket__lootgroup__inventoryitem__isktransaction__isk"
         )
         + Sum("lootbucket__lootgroup__inventoryitem__eggtransaction__eggs")
     )
-    page_size = 50
-    total_pages = math.floor(
-        fleets_annotated_with_isk_and_eggs_balance.count() / page_size
-    )
-    this_page_fleets = fleets_annotated_with_isk_and_eggs_balance[
-        page * page_size : (page + 1) * page_size
-    ]
     context = {
         "page_url_name": page_url_name,
-        "fleets": this_page_fleets,
+        "fleets": fleets_annotated_with_isk_and_eggs_balance,
         "header": "Active Fleets",
         "page": page,
         "total_pages": total_pages,
