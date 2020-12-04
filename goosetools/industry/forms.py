@@ -18,7 +18,9 @@ class ShipOrderForm(forms.Form):
         widget=autocomplete.ModelSelect2(url="industry:ship-autocomplete"),
         required=False,
     )
-    payment_method = forms.ChoiceField(choices=ShipOrder.PAYMENT_METHODS)
+    payment_method = forms.ChoiceField(
+        choices=ShipOrder.PAYMENT_METHODS, initial="free"
+    )
     notes = forms.CharField(initial="", required=False)
     quantity = forms.IntegerField(min_value=1, initial=1)
 
