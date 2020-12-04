@@ -510,6 +510,8 @@ class ShipOrderTest(GooseToolsTestCase):
 
     @freeze_time("2012-01-14 12:00:00")
     def test_cant_claim_a_blocked_ship(self):
+        group = Group.objects.get(name="industry")
+        self.user.groups.add(group)
         order_limit_group = OrderLimitGroup.objects.create(
             days_between_orders=1, name="Free Tech 6 and Below"
         )
@@ -526,4 +528,104 @@ class ShipOrderTest(GooseToolsTestCase):
         r = self.client.put(
             reverse("industry:shiporder-claim", args=[blocked_ship.pk]),
         )
-        self.assertEqual(r.status_code, 403)
+        self.assertEqual(r.status_code, 400)
+
+    def test_after_past_blocked_until_then_can_claim_previously_blocked_ship(self):
+        with freeze_time("2012-01-14 12:00:00") as frozen_time:
+            group = Group.objects.get(name="industry")
+            self.user.groups.add(group)
+            order_limit_group = OrderLimitGroup.objects.create(
+                days_between_orders=1, name="Free Tech 6 and Below"
+            )
+            daily_ship = Ship.objects.create(
+                name="DailyShip",
+                tech_level=6,
+                free=True,
+                order_limit_group=order_limit_group,
+            )
+
+            self.a_ship_order(ship_pk=daily_ship.pk, payment_method="free")
+            blocked_ship = self.a_ship_order(
+                ship_pk=daily_ship.pk, payment_method="free"
+            )
+
+            r = self.client.put(
+                reverse("industry:shiporder-claim", args=[blocked_ship.pk]),
+            )
+            self.assertEqual(r.status_code, 400)
+            frozen_time.move_to("2014-01-15 12:00:01")
+            # Tokens expire when moving time in tests!
+            self.client.force_login(self.user)
+            self.put(
+                reverse("industry:shiporder-claim", args=[blocked_ship.pk]),
+            )
+            blocked_ship.refresh_from_db()
+            self.assertEqual(blocked_ship.assignee, self.user)
+            self.assertFalse(blocked_ship.currently_blocked())
+
+    def test_order_no_longer_shows_as_blocked_in_list_view_after_time_expires(self):
+        with freeze_time("2012-01-14 12:00:00") as frozen_time:
+            order_limit_group = OrderLimitGroup.objects.create(
+                days_between_orders=1, name="Free Tech 6 and Below"
+            )
+            daily_ship = Ship.objects.create(
+                name="DailyShip",
+                tech_level=6,
+                free=True,
+                order_limit_group=order_limit_group,
+            )
+
+            self.a_ship_order(ship_pk=daily_ship.pk, payment_method="free")
+            self.a_ship_order(ship_pk=daily_ship.pk, payment_method="free")
+
+            frozen_time.move_to("2014-01-15 12:00:01")
+            # Tokens expire when moving time in tests!
+            self.client.force_login(self.user)
+            response = self.get(reverse("industry:shiporder-list"))
+            self.json_matches(
+                response,
+                f"""[
+        {{
+            "assignee": null,
+            "availible_transition_names": [
+                "building",
+                "built",
+                "inventing",
+                "reset"
+            ],
+            "blocked_until": null,
+            "created_at": "2012-01-14 12:00",
+            "currently_blocked": false,
+            "id": "IGNORE",
+            "notes": "",
+            "payment_method": "free",
+            "quantity": 1,
+            "recipient_discord_user_pk": "{self.discord_user.pk}",
+            "recipient_character_name": "Test Char",
+            "ship": "DailyShip",
+            "state": "not_started",
+            "uid": "Test Discord User-mock_random_1"
+        }},
+        {{
+            "assignee": null,
+            "availible_transition_names": [
+                "building",
+                "built",
+                "inventing",
+                "reset"
+            ],
+            "blocked_until": "2012-01-15 12:00",
+            "created_at": "2012-01-14 12:00",
+            "currently_blocked": false,
+            "id": "IGNORE",
+            "notes": "",
+            "payment_method": "free",
+            "quantity": 1,
+            "recipient_discord_user_pk": "{self.discord_user.pk}",
+            "recipient_character_name": "Test Char",
+            "ship": "DailyShip",
+            "state": "not_started",
+            "uid": "Test Discord User-mock_random_2"
+        }}
+    ]""",
+            )

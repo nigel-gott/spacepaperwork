@@ -353,8 +353,11 @@ function add_filter(page_data){
 
             row_is_assigned_to_user = row['assignee'] === page_data['request_user_pk'];
             row_has_assignee = row['assignee'];
-            if(assigned_checked || unassigned_checked || blocked_checked){
-                return assigned_checked && row_is_assigned_to_user || unassigned_checked && !row_has_assignee || blocked_checked && row['currently_blocked'];
+            if(!blocked_checked && row['currently_blocked']){
+                return false;
+            }
+            if(assigned_checked || unassigned_checked){
+                return assigned_checked && row_is_assigned_to_user || unassigned_checked && !row_has_assignee;
             } else if(requested_checked){
                 return parseInt(row['recipient_discord_user_pk']) === page_data['request_discord_user_pk'];
             } else {
