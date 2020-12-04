@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from goosetools.industry.forms import OrderLimitGroupForm
 from goosetools.industry.models import OrderLimitGroup, Ship, ShipOrder
 
 
@@ -41,6 +42,7 @@ class ShipOrderAdmin(admin.ModelAdmin):
 
 
 class OrderLimitGroupAdmin(admin.ModelAdmin):
+    form = OrderLimitGroupForm
     search_fields = ["name"]
     list_display = ["name", "days_between_orders"]
 

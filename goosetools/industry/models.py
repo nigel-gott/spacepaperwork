@@ -1,6 +1,8 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMField, transition
 
 from goosetools.users.models import Character
@@ -21,6 +23,19 @@ class Ship(models.Model):
     order_limit_group = models.ForeignKey(
         OrderLimitGroup, on_delete=models.SET_NULL, null=True, blank=True
     )
+
+    def clean(self):
+        if not self.free and self.order_limit_group is not None:
+            raise ValidationError(
+                _(
+                    "A Ship cannot be free and in a Order Limit Group. Either remove the group or make the ship free."
+                )
+            )
+
+    # pylint: disable=signature-differs
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         if self.free:

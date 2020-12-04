@@ -1,4 +1,6 @@
+import pytest
 from django.contrib.auth.models import Group
+from django.core.exceptions import ValidationError
 from django.urls.base import reverse
 from freezegun import freeze_time
 
@@ -389,6 +391,23 @@ class ShipOrderTest(GooseToolsTestCase):
     }}
 ]""",
         )
+
+    @freeze_time("2012-01-14 12:00:00")
+    # pylint: disable=no-self-use
+    def test_cant_add_a_nonfree_ship_to_an_order_limit_group(self):
+        order_limit_group = OrderLimitGroup.objects.create(
+            days_between_orders=1, name="Free Tech 6 and Below"
+        )
+        with pytest.raises(
+            ValidationError,
+            match=r"A Ship cannot be free and in a Order Limit Group. Either remove the group or make the ship free.",
+        ):
+            Ship.objects.create(
+                name="DailyShip",
+                tech_level=6,
+                free=False,
+                order_limit_group=order_limit_group,
+            )
 
     @freeze_time("2012-01-14 12:00:00")
     def test_ordering_multiple_free_limited_ships_queues_them_up(self):
