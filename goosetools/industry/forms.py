@@ -1,6 +1,6 @@
-from dal import autocomplete
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.forms.models import ModelChoiceField
 
 from goosetools.industry.models import OrderLimitGroup, Ship, ShipOrder
 from goosetools.users.models import Character
@@ -12,11 +12,10 @@ class ShipOrderForm(forms.Form):
         queryset=Character.objects.all(),
         initial=0,
     )
-    ship = forms.ModelChoiceField(
+    ship = ModelChoiceField(
         queryset=Ship.objects.all(),
         initial="Vexor Navy Issue",
-        widget=autocomplete.ModelSelect2(url="industry:ship-autocomplete"),
-        required=False,
+        widget=forms.Select(attrs={"class": "browser-default"}),
     )
     payment_method = forms.ChoiceField(
         choices=ShipOrder.PAYMENT_METHODS, initial="free"
@@ -32,7 +31,9 @@ class OrderLimitGroupForm(forms.ModelForm):
 
     ships = forms.ModelMultipleChoiceField(
         queryset=Ship.objects.filter(free=True).all(),
-        widget=FilteredSelectMultiple("verbose name", is_stacked=False),
+        widget=FilteredSelectMultiple(
+            "Ships In This Order Limit Group", is_stacked=False
+        ),
     )
 
     def __init__(self, *args, **kwargs):

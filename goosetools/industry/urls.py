@@ -2,7 +2,6 @@ from django.urls import path
 from django.urls.conf import include
 from rest_framework import routers
 
-from goosetools.industry.autocomplete import ShipAutocomplete
 from goosetools.industry.views import (
     ShipOrderViewSet,
     shiporders_contract_confirm,
@@ -25,5 +24,4 @@ urlpatterns = [
     path("shiporder/form_create", shiporders_create, name="shiporders_create"),
     path("shiporder/", shiporders_view, name="shiporders_view"),
     path("shiporder/", include((router.urls))),
-    path("ship-autocomplete/", ShipAutocomplete.as_view(), name="ship-autocomplete"),
 ]

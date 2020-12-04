@@ -515,7 +515,7 @@ class ShipOrderTest(GooseToolsTestCase):
         self.assertEqual(
             r.context["ship_data"],
             {
-                "Thorax": {"free": False},
+                "Thorax": {"free": False, "tech_level": 6},
                 "DailyShip": {
                     "free": True,
                     "order_limit_group": {
@@ -523,6 +523,7 @@ class ShipOrderTest(GooseToolsTestCase):
                         "name": "Free Tech 6 and Below",
                     },
                     "blocked_until": "2012-01-16 12:00",
+                    "tech_level": 6,
                 },
             },
         )

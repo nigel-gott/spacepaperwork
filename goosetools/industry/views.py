@@ -127,7 +127,10 @@ def populate_ship_data(user) -> Dict[str, Any]:
     ship_data = {}
     ships = Ship.objects.all()
     for ship in ships:
-        current_ship_data: Dict[str, Any] = {"free": ship.free}
+        current_ship_data: Dict[str, Any] = {
+            "free": ship.free,
+            "tech_level": ship.tech_level,
+        }
         blocked_until, _ = calculate_blocked_until_for_order(
             ship, user.discord_username()
         )

@@ -38,10 +38,10 @@ class Ship(models.Model):
         return super().save(*args, **kwargs)
 
     def __str__(self):
+        display = f"{self.name} (T{self.tech_level}) "
         if self.free:
-            return f"{self.name} - FREE"
-        else:
-            return str(self.name)
+            display = display + " - FREE"
+        return display
 
 
 class ShipOrder(models.Model):
