@@ -48,9 +48,6 @@ function update_select_text_with_ship_data(ship_data){
         ship_info = ship_data[ship_name];
         text = `${ship_name} (T${ship_info.tech_level})`;
         if(ship_info.free){
-            if(ship_info.order_limit_group){
-                text += ` (${ship_info.order_limit_group.name})`
-            }
             if(ship_info.blocked_until){
                 text += " - Next Free Ship On: " + ship_info.blocked_until;
             } else {
