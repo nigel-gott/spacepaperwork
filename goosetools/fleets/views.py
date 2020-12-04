@@ -38,7 +38,7 @@ def fleet_list_view(request, fleets_to_display, page_url_name):
         )
         + Sum("lootbucket__lootgroup__inventoryitem__eggtransaction__eggs")
     )
-    page_size = 1
+    page_size = 50
     total_pages = math.floor(
         fleets_annotated_with_isk_and_eggs_balance.count() / page_size
     )
