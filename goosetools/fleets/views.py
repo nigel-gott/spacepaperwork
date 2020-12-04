@@ -1,3 +1,4 @@
+import math
 from typing import Dict, List
 
 from django.contrib import messages
@@ -29,16 +30,28 @@ def forbidden(request):
     return render(request, "core/403.html")
 
 
-def fleet_list_view(request, fleets_to_display):
+def fleet_list_view(request, fleets_to_display, page_url_name):
+    page = int(request.GET.get("page", 0))
     fleets_annotated_with_isk_and_eggs_balance = fleets_to_display.annotate(
         isk_and_eggs_balance=Sum(
             "lootbucket__lootgroup__inventoryitem__isktransaction__isk"
         )
         + Sum("lootbucket__lootgroup__inventoryitem__eggtransaction__eggs")
     )
+    page_size = 1
+    total_pages = math.floor(
+        fleets_annotated_with_isk_and_eggs_balance.count() / page_size
+    )
+    this_page_fleets = fleets_annotated_with_isk_and_eggs_balance[
+        page * page_size : (page + 1) * page_size
+    ]
     context = {
-        "fleets": fleets_annotated_with_isk_and_eggs_balance,
+        "page_url_name": page_url_name,
+        "fleets": this_page_fleets,
         "header": "Active Fleets",
+        "page": page,
+        "total_pages": total_pages,
+        "total_pages_range": range(total_pages),
     }
     return render(request, "fleets/fleet.html", context)
 
@@ -46,19 +59,19 @@ def fleet_list_view(request, fleets_to_display):
 @login_required(login_url=login_url)
 def all_fleets_view(request):
     active_fleets = active_fleets_query()
-    return fleet_list_view(request, active_fleets)
+    return fleet_list_view(request, active_fleets, "all_fleets_view")
 
 
 @login_required(login_url=login_url)
 def fleet_past(request):
     past_fleets = past_fleets_query()
-    return fleet_list_view(request, past_fleets)
+    return fleet_list_view(request, past_fleets, "fleet_past")
 
 
 @login_required(login_url=login_url)
 def fleet_future(request):
     future_fleets = future_fleets_query()
-    return fleet_list_view(request, future_fleets)
+    return fleet_list_view(request, future_fleets, "fleet_future")
 
 
 @login_required(login_url=login_url)

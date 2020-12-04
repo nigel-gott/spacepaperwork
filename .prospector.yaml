@@ -16,6 +16,7 @@ pylint:
 pep8:
   disable:
     - E501
+    - E203
   enable:
     - W601
   options:
