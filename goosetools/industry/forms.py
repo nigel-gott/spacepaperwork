@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.forms.models import ModelChoiceField
+from django.forms.widgets import HiddenInput
 
 from goosetools.industry.models import OrderLimitGroup, Ship, ShipOrder
 from goosetools.users.models import Character
@@ -22,6 +23,8 @@ class ShipOrderForm(forms.Form):
     )
     notes = forms.CharField(initial="", required=False)
     quantity = forms.IntegerField(min_value=1, initial=1)
+    isk_price = forms.IntegerField(min_value=1, widget=HiddenInput(), required=False)
+    eggs_price = forms.IntegerField(min_value=1, widget=HiddenInput(), required=False)
 
 
 class OrderLimitGroupForm(forms.ModelForm):

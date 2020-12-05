@@ -18,7 +18,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from goosetools.industry.forms import ShipOrderForm
-from goosetools.industry.models import Ship, ShipOrder
+from goosetools.industry.models import Ship, ShipOrder, to_isk
 from goosetools.industry.serializers import ShipOrderSerializer
 from goosetools.users.models import Character
 
@@ -95,6 +95,17 @@ def create_ship_order(
     if message:
         messages.warning(request, message)
 
+    price = None
+    payment_taken = False
+    if payment_method in {"eggs", "isk"}:
+        if ship.valid_price():
+            if payment_method == "eggs":
+                price = ship.eggs_price
+            else:
+                price = ship.isk_price
+    else:
+        payment_taken = True
+
     return ShipOrder.objects.create(
         ship=ship,
         recipient_character=recipient_character,
@@ -107,11 +118,18 @@ def create_ship_order(
         created_at=timezone.now(),
         blocked_until=blocked_until,
         contract_made=False,
+        price=price,
+        payment_taken=payment_taken,
     )
 
 
-def validate_order(request, ship, payment_method, quantity):
-    if not ship.free and payment_method == "free":
+def validate_order(request, ship, payment_method, quantity, isk_price, eggs_price):
+    if ship.eggs_price != eggs_price or ship.isk_price != isk_price:
+        messages.error(
+            request,
+            f"The prices for the ship have changed since you opened the order form, please order again the prices have been updated. {ship.eggs_price} vs {eggs_price} and {ship.isk_price} vs {isk_price}",
+        )
+    elif not ship.free and payment_method == "free":
         messages.error(
             request,
             "This ship is not free, you must select eggs or isk as a payment method.",
@@ -130,6 +148,9 @@ def populate_ship_data(user) -> Dict[str, Any]:
         current_ship_data: Dict[str, Any] = {
             "free": ship.free,
             "tech_level": ship.tech_level,
+            "isk_price": ship.isk_price and ship.isk_price.amount,
+            "eggs_price": ship.eggs_price and ship.eggs_price.amount,
+            "valid_price": ship.valid_price(),
         }
         blocked_until, _ = calculate_blocked_until_for_order(
             ship, user.discord_username()
@@ -158,7 +179,16 @@ def shiporders_create(request):
             ship = data["ship"]
             payment_method = data["payment_method"]
             quantity = data["quantity"]
-            if validate_order(request, ship, payment_method, quantity):
+            isk_price = data["isk_price"]
+            eggs_price = data["eggs_price"]
+            if validate_order(
+                request,
+                ship,
+                payment_method,
+                quantity,
+                isk_price and to_isk(isk_price),
+                eggs_price and to_isk(eggs_price),
+            ):
                 ship_order = create_ship_order(
                     ship,
                     username,
@@ -255,6 +285,41 @@ class ShipOrderViewSet(
             return Response(
                 {
                     "status": "unclaimed",
+                }
+            )
+
+    @action(detail=True, methods=["PUT"])
+    @transaction.atomic
+    # pylint: disable=unused-argument
+    def paid(self, request, pk=None):
+        ship_order = self.get_object()
+        if ship_order.assignee != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        else:
+            ship_order.payment_taken = True
+            ship_order.full_clean()
+            ship_order.save()
+            return Response({"payment_taken": ship_order.payment_actually_taken()})
+
+    @action(detail=True, methods=["PUT"])
+    @transaction.atomic
+    # pylint: disable=unused-argument
+    def manual_price(self, request, pk=None):
+        ship_order = self.get_object()
+        if ship_order.assignee != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        else:
+            body_unicode = request.body.decode("utf-8")
+            body = json.loads(body_unicode)
+            if "manual_price" not in body or not isinstance(body["manual_price"], int):
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+            ship_order.price = to_isk(body["manual_price"])
+            ship_order.full_clean()
+            ship_order.save()
+            return Response(
+                {
+                    "price": ship_order.price.amount,
+                    "needs_manual_price": ship_order.needs_manual_price(),
                 }
             )
 

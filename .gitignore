@@ -6,6 +6,7 @@ misc_data/
 .env
 python
 .google_creds.json
+.google.credentials.json
 
 # Django #
 *.log
@@ -124,3 +125,5 @@ GitHub.sublime-settings
 !.vscode/launch.json
 !.vscode/extensions.json
 .history
+
+token.pickle

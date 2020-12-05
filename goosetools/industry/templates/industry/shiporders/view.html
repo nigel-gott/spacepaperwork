@@ -87,6 +87,23 @@
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
 {{ page_data|json_script:"page-data" }}
 <script>
+function state_to_progress_int(state){
+    progress_dict = {
+        'not_started':0,
+        'inventing':1,
+        'awaiting_production_slot':2,
+        'building':3,
+        'audit':4,
+        'missing_contract':5,
+        'sent':6,
+    }
+    return progress_dict[state];
+}
+function numberWithCommas(x) {
+    var x = x.toString();
+    var x = x.replace(/,/g, '');
+    return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 $(function() {
     const page_data = JSON.parse(document.getElementById('page-data').textContent);
     columns = [
@@ -95,6 +112,17 @@ $(function() {
             { "data": "blocked_until", "visible": false, "searchable": false },
             { "data": "created_at", "title": "Created At"},
             { "data": "assignee_name", "title" : "Assignee", "defaultContent": "Nobody",
+                render: function ( data, type, row ) {
+                    if(!row["assignee_name"]){
+                        return "Unclaimed";
+                    } else if(row["assignee"]===page_data["request_user_pk"]){
+                        return "Claimed By You";
+                    } else {
+                        return row["assignee_name"];
+                    }
+                }
+            },
+            { "data": "assignee_name", "title" : "Claim/UnClaim", "defaultContent": "Nobody",
                 render: function ( data, type, row ) {
                     if(page_data["has_industry_permission"] && !row['currently_blocked']){
                         if(!row["assignee_name"]){
@@ -109,7 +137,54 @@ $(function() {
             { "data": "recipient_character_name", "title":"Recipient" },
             { "data": "ship", "title":"Ship"},
             { "data": "quantity", "title":"Quantity"},
-            { "data": "payment_method", "title":"Payment Method"},
+            { "data": "payment_method", "title":"Payment Status",
+                render: function ( data, type, row, meta) {
+                    const payment_method = row["payment_method"];
+                    const price = row["price"];
+                    const payment_taken = row["payment_taken"];
+                    const current_user_assigned = row["assignee"]===page_data["request_user_pk"];
+                    const free_ship = payment_method === "free" || payment_method === "srp";
+                    if(row["needs_manual_price"]){
+                        if(current_user_assigned){
+                            return `${payment_method}<br/>
+  <a class="btn orange modal-trigger" href="#modal_price_${meta.row}">Price</a>
+  <div id="modal_price_${meta.row}" class="modal">
+    <div class="modal-content">
+      <h4>Please Enter A Price:</h4>
+      <b>For Order ${row['ship']} x ${row['quantity']} -> ${row['recipient_character_name']}</b>
+      <input type="number" name="Manual Price" id="input_price_${row['id']}">
+      <button class="price-btn waves-btn btn green">Set Manual Price</button>
+    </div>
+  </div>`
+                        } else {
+                            return payment_method + " - Waiting on Manual Price";
+                        }
+                    } else {
+                        const price_display = price ?  " = " + numberWithCommas(price) : "";
+                        const display = payment_method + price_display;
+                        if(payment_taken){
+                            return "PAID: " + display;
+                        } else {
+                            if(current_user_assigned && !free_ship){
+                                return `${display}<br/>
+    <a class="btn green modal-trigger" href="#modal_pay_confirm_${meta.row}">Paid</a>
+    <div id="modal_pay_confirm_${meta.row}" class="modal">
+        <div class="modal-content">
+        <h4>Confirm Payment Has Been Taken:</h4>
+        <b>For Order ${row['ship']} x ${row['quantity']} -> ${row['recipient_character_name']}</b>
+        <br/><a class="paid-link waves-btn btn green">Yes I Confirm That ${numberWithCommas(row['price'])} has been paid via ${row['payment_method']}</a>
+        </div>
+    </div>`
+                            } else {
+                                return display;
+                            }
+                        }
+                    }
+
+                    return row["payment_method"];
+                }
+
+            },
             { "data": "notes", "title":"Notes",
                 render: function ( data, type, row, meta ) {
                     if(row['notes']){
@@ -137,18 +212,8 @@ $(function() {
                     if(currently_blocked){
                         return "Blocked Until: " + row['blocked_until'];
                     }
-                    progress_dict = {
-                        'not_started':0,
-                        'inventing':1,
-                        'awaiting_production_slot':2,
-                        'building':3,
-                        'built':4,
-                        'audit':5,
-                        'missing_contract':5,
-                        'sent':6,
-                    }
                     state = row['state']
-                    return progress_dict[state] + ": " + state;
+                    return state_to_progress_int(state) + ": " + state;
                 }
             },
             { "data": null, "title": "Progress",
@@ -162,18 +227,8 @@ $(function() {
                         }
                     }
 
-                    progress_dict = {
-                        'not_started':0,
-                        'inventing':1,
-                        'awaiting_production_slot':2,
-                        'building':3,
-                        'built':4,
-                        'audit':5,
-                        'missing_contract':5,
-                        'sent':6,
-                    }
                     state = row['state']
-                    progress = Math.floor((progress_dict[state] / 6)*100) + 1;
+                    progress = Math.floor((state_to_progress_int(state) / 6)*100) + 1;
                     if ( type === 'display' || type === 'filter' ) {
                         return '<div id="progress" style="height:35px;width:100%;background-color:grey;"><div style="height:35px;width:'+progress+'%;background-color:green;"></div></div>';
                     }
@@ -219,8 +274,19 @@ $(function() {
             url: "{% url 'industry:shiporder-list' %}",
             dataSrc: '',
         },
-        columns: columns,
+        columns: columns
     } );
+
+    $('#ship_orders_table').on( 'click', '.paid-link', function () {
+        const row = table.row( $(this).parents('tr') );
+        var data = row.data();
+        ship_paid(row, table);
+    });
+    $('#ship_orders_table').on( 'click', '.price-btn', function () {
+        const row = table.row( $(this).parents('tr') );
+        var data = row.data();
+        manually_price_ship(row, table);
+    });
 
     $('#ship_orders_table').on( 'click', '.state-link', function () {
         const row = table.row( $(this).parents('tr') );
@@ -268,6 +334,43 @@ function json_django_request(url){
             'Content-Type': 'application/json'
         }}
     );
+}
+function ship_paid(row, table){
+    const id = row.data()['id'];
+    const request = json_django_request("shiporder/" + id + "/paid/");
+    fetch(request, {
+        method: 'PUT',
+        mode: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(response_data => {
+        const row_data = row.data();
+        row_data['payment_taken'] = response_data["payment_taken"];
+        row.data(row_data);
+        table.draw();
+    });
+}
+function manually_price_ship(row, table){
+    const id = row.data()['id'];
+    const request = json_django_request("shiporder/" + id + "/manual_price/");
+    const price = parseInt($('#input_price_' + id).val());
+    if(price && price > 0){
+        fetch(request, {
+            method: 'PUT',
+            mode: 'same-origin',
+            body: JSON.stringify({"manual_price":price})
+        })
+        .then(response => response.json())
+        .then(response_data => {
+            const row_data = row.data();
+            row_data['price'] = response_data["price"];
+            row_data['needs_manual_price'] = response_data["needs_manual_price"];
+            row.data(row_data);
+            table.draw();
+        });
+    } else {
+        console.log("Price error");
+    }
 }
 function state_change(row, transition, table){
     const id = row.data()['id'];

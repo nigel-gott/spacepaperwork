@@ -4,8 +4,14 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMField, transition
+from djmoney.models.fields import MoneyField
+from djmoney.money import Money
 
 from goosetools.users.models import Character
+
+
+def to_isk(num):
+    return Money(amount=round(num, 2), currency="EEI")
 
 
 class OrderLimitGroup(models.Model):
@@ -23,6 +29,22 @@ class Ship(models.Model):
     order_limit_group = models.ForeignKey(
         OrderLimitGroup, on_delete=models.SET_NULL, null=True, blank=True
     )
+    isk_price = MoneyField(
+        max_digits=20, decimal_places=2, default_currency="EEI", null=True, blank=True
+    )
+    eggs_price = MoneyField(
+        max_digits=20, decimal_places=2, default_currency="EEI", null=True, blank=True
+    )
+    prices_last_updated = models.DateTimeField(null=True, blank=True)
+
+    def valid_price(self):
+        now_minus_1_hour = timezone.now() - timezone.timedelta(hours=1)
+        return (
+            self.isk_price is not None
+            and self.eggs_price is not None
+            and self.prices_last_updated is not None
+            and self.prices_last_updated >= now_minus_1_hour
+        )
 
     def clean(self):
         if not self.free and self.order_limit_group is not None:
@@ -64,6 +86,19 @@ class ShipOrder(models.Model):
     state = FSMField(default="not_started")
     notes = models.TextField(blank=True)
     payment_method = models.TextField(choices=PAYMENT_METHODS)
+    price = MoneyField(
+        max_digits=20, decimal_places=2, default_currency="EEI", null=True, blank=True
+    )
+    payment_taken = models.BooleanField(default=False)
+
+    def paid_ship(self):
+        return self.payment_method in {"eggs", "isk"}
+
+    def payment_actually_taken(self):
+        return not self.paid_ship() or self.payment_taken
+
+    def needs_manual_price(self):
+        return self.paid_ship() and not self.payment_taken and not self.price
 
     def currently_blocked(self) -> bool:
         if self.blocked_until is not None:
@@ -98,15 +133,15 @@ class ShipOrder(models.Model):
     def building(self):
         pass
 
-    @transition(field=state, source=["building", "not_started"], target="built")
-    def built(self):
-        pass
-
-    @transition(field=state, source="built", target="audit")
+    @transition(field=state, source=["building", "not_started"], target="audit")
     def audit(self):
         pass
 
-    @transition(field=state, source=["audit", "missing_contract"], target="sent")
+    @transition(
+        field=state,
+        source=["audit", "missing_contract", "not_started"],
+        target="sent",
+    )
     def sent(self):
         pass
 

@@ -21,25 +21,28 @@ class ShipOrderTest(GooseToolsTestCase):
         self.next_contract_code = self.next_contract_code + 1
         return "mock_random_" + str(self.next_contract_code)
 
-    def a_ship_order_returning_response(self, ship_pk=None, payment_method="eggs"):
+    def a_ship_order_returning_response(
+        self, ship_pk=None, payment_method="eggs", price=None
+    ):
         if not ship_pk:
             ship_pk = self.thorax.pk
-        r = self.post(
-            reverse("industry:shiporders_create"),
-            {
-                "ship": ship_pk,
-                "quantity": 1,
-                "recipient_character": self.char.pk,
-                "payment_method": payment_method,
-                "notes": "",
-            },
-        )
+        args = {
+            "ship": ship_pk,
+            "quantity": 1,
+            "recipient_character": self.char.pk,
+            "payment_method": payment_method,
+            "notes": "",
+        }
+        if price:
+            args["isk_price"] = price
+            args["eggs_price"] = price
+        r = self.post(reverse("industry:shiporders_create"), args)
         ship_order = ShipOrder.objects.last()
         self.post(reverse("industry:shiporders_contract_confirm", args=[ship_order.pk]))
         return r
 
-    def a_ship_order(self, ship_pk=None, payment_method="eggs"):
-        self.a_ship_order_returning_response(ship_pk, payment_method)
+    def a_ship_order(self, ship_pk=None, payment_method="eggs", price=None):
+        self.a_ship_order_returning_response(ship_pk, payment_method, price)
         ship_order = ShipOrder.objects.last()
         return ship_order
 
@@ -68,10 +71,11 @@ class ShipOrderTest(GooseToolsTestCase):
             f"""{{
         "assignee": null,
         "availible_transition_names": [
-            "building",
-            "built",
-            "inventing",
-            "reset"
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
         ],
         "blocked_until": null,
         "created_at": "2012-01-14 12:00",
@@ -84,7 +88,10 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "Thorax",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_1"
+        "uid": "Test Discord User-mock_random_1",
+        "needs_manual_price": true,
+        "payment_taken": false,
+        "price": null
  }}""",
         )
 
@@ -97,10 +104,11 @@ class ShipOrderTest(GooseToolsTestCase):
      {{
         "assignee": null,
         "availible_transition_names": [
-            "building",
-            "built",
-            "inventing",
-            "reset"
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
         ],
         "blocked_until": null,
         "created_at": "2012-01-14 12:00",
@@ -113,7 +121,10 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "Thorax",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_1"
+        "uid": "Test Discord User-mock_random_1",
+        "needs_manual_price": true,
+        "payment_taken": false,
+        "price": null
     }}
 ]""",
         )
@@ -177,10 +188,11 @@ class ShipOrderTest(GooseToolsTestCase):
         "assignee": {self.user.pk},
         "assignee_name": "{self.user.discord_username()}",
         "availible_transition_names": [
-            "building",
-            "built",
-            "inventing",
-            "reset"
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
         ],
         "blocked_until": null,
         "created_at": "2012-01-14 12:00",
@@ -193,7 +205,10 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "Thorax",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_1"
+        "uid": "Test Discord User-mock_random_1",
+        "needs_manual_price": true,
+        "payment_taken": false,
+        "price": null
     }}
 ]""",
         )
@@ -228,10 +243,11 @@ class ShipOrderTest(GooseToolsTestCase):
      {{
         "assignee": null,
         "availible_transition_names": [
-            "building",
-            "built",
-            "inventing",
-            "reset"
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
         ],
         "blocked_until": null,
         "created_at": "2012-01-14 12:00",
@@ -244,7 +260,10 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_discord_user_pk": "{self.discord_user.pk}",
         "ship": "FreeShip",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_1"
+        "uid": "Test Discord User-mock_random_1",
+        "needs_manual_price": false,
+        "payment_taken": true,
+        "price": null
     }}
 ]""",
         )
@@ -350,10 +369,11 @@ class ShipOrderTest(GooseToolsTestCase):
      {{
         "assignee": null,
         "availible_transition_names": [
-            "building",
-            "built",
-            "inventing",
-            "reset"
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
         ],
         "blocked_until": null,
         "created_at": "2012-01-14 12:00",
@@ -366,15 +386,19 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_1"
+        "uid": "Test Discord User-mock_random_1",
+        "needs_manual_price": false,
+        "payment_taken": true,
+        "price": null
     }},
      {{
         "assignee": null,
         "availible_transition_names": [
-            "building",
-            "built",
-            "inventing",
-            "reset"
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
         ],
         "blocked_until": "2012-01-15 12:00",
         "created_at": "2012-01-14 12:00",
@@ -387,7 +411,10 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_2"
+        "uid": "Test Discord User-mock_random_2",
+        "needs_manual_price": false,
+        "payment_taken": true,
+        "price": null
     }}
 ]""",
         )
@@ -431,10 +458,11 @@ class ShipOrderTest(GooseToolsTestCase):
      {{
         "assignee": null,
         "availible_transition_names": [
-            "building",
-            "built",
-            "inventing",
-            "reset"
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
         ],
         "blocked_until": null,
         "created_at": "2012-01-14 12:00",
@@ -447,15 +475,19 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_1"
+        "uid": "Test Discord User-mock_random_1",
+        "needs_manual_price": false,
+        "payment_taken": true,
+        "price": null
     }},
      {{
         "assignee": null,
         "availible_transition_names": [
-            "building",
-            "built",
-            "inventing",
-            "reset"
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
         ],
         "blocked_until": "2012-01-15 12:00",
         "created_at": "2012-01-14 12:00",
@@ -468,15 +500,19 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_2"
+        "uid": "Test Discord User-mock_random_2",
+        "needs_manual_price": false,
+        "payment_taken": true,
+        "price": null
     }},
      {{
         "assignee": null,
-        "availible_transition_names": [
-            "building",
-            "built",
-            "inventing",
-            "reset"
+                        "availible_transition_names": [
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
         ],
         "blocked_until": "2012-01-16 12:00",
         "currently_blocked": true,
@@ -489,7 +525,10 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_3"
+        "uid": "Test Discord User-mock_random_3",
+        "needs_manual_price": false,
+        "payment_taken": true,
+        "price": null
     }}
 ]""",
         )
@@ -515,7 +554,13 @@ class ShipOrderTest(GooseToolsTestCase):
         self.assertEqual(
             r.context["ship_data"],
             {
-                "Thorax": {"free": False, "tech_level": 6},
+                "Thorax": {
+                    "free": False,
+                    "tech_level": 6,
+                    "isk_price": None,
+                    "eggs_price": None,
+                    "valid_price": False,
+                },
                 "DailyShip": {
                     "free": True,
                     "order_limit_group": {
@@ -524,6 +569,9 @@ class ShipOrderTest(GooseToolsTestCase):
                     },
                     "blocked_until": "2012-01-16 12:00",
                     "tech_level": 6,
+                    "isk_price": None,
+                    "eggs_price": None,
+                    "valid_price": False,
                 },
             },
         )
@@ -607,11 +655,12 @@ class ShipOrderTest(GooseToolsTestCase):
                 f"""[
         {{
             "assignee": null,
-            "availible_transition_names": [
+                    "availible_transition_names": [
+                "audit",
                 "building",
-                "built",
                 "inventing",
-                "reset"
+                "reset",
+                "sent"
             ],
             "blocked_until": null,
             "created_at": "2012-01-14 12:00",
@@ -624,15 +673,19 @@ class ShipOrderTest(GooseToolsTestCase):
             "recipient_character_name": "Test Char",
             "ship": "DailyShip",
             "state": "not_started",
-            "uid": "Test Discord User-mock_random_1"
+            "uid": "Test Discord User-mock_random_1",
+            "needs_manual_price": false,
+            "payment_taken": true,
+            "price": null
         }},
         {{
             "assignee": null,
-            "availible_transition_names": [
+                    "availible_transition_names": [
+                "audit",
                 "building",
-                "built",
                 "inventing",
-                "reset"
+                "reset",
+                "sent"
             ],
             "blocked_until": "2012-01-15 12:00",
             "created_at": "2012-01-14 12:00",
@@ -645,7 +698,178 @@ class ShipOrderTest(GooseToolsTestCase):
             "recipient_character_name": "Test Char",
             "ship": "DailyShip",
             "state": "not_started",
-            "uid": "Test Discord User-mock_random_2"
+            "uid": "Test Discord User-mock_random_2",
+            "needs_manual_price": false,
+            "payment_taken": true,
+            "price": null
         }}
     ]""",
             )
+
+    @freeze_time("2012-01-14 12:00:00")
+    def test_ship_with_no_price_can_have_manual_price_entered(self):
+        group = Group.objects.get(name="industry")
+        self.user.groups.add(group)
+        unpriced_ship = Ship.objects.create(
+            name="ShipWithNoPrice",
+            tech_level=6,
+            free=True,
+            isk_price=None,
+            eggs_price=None,
+        )
+
+        unpriced_ship_order = self.a_ship_order(
+            ship_pk=unpriced_ship.pk, payment_method="isk"
+        )
+
+        self.put(
+            reverse("industry:shiporder-claim", args=[unpriced_ship_order.pk]),
+        )
+        self.put(
+            reverse("industry:shiporder-manual-price", args=[unpriced_ship_order.pk]),
+            {"manual_price": 10},
+            content_type="application/json",
+        )
+        response = self.get(reverse("industry:shiporder-list"))
+        self.json_matches(
+            response,
+            f"""[
+        {{
+            "assignee": {self.user.pk},
+            "assignee_name": "{self.user.discord_username()}",
+            "availible_transition_names": [
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
+            ],
+            "blocked_until": null,
+            "created_at": "2012-01-14 12:00",
+            "currently_blocked": false,
+            "id": "IGNORE",
+            "notes": "",
+            "payment_method": "isk",
+            "quantity": 1,
+            "recipient_discord_user_pk": "{self.discord_user.pk}",
+            "recipient_character_name": "Test Char",
+            "ship": "ShipWithNoPrice",
+            "state": "not_started",
+            "uid": "Test Discord User-mock_random_1",
+            "needs_manual_price": false,
+            "payment_taken": false,
+            "price": "10.00"
+        }}]""",
+        )
+
+    @freeze_time("2012-01-14 12:00:00")
+    def test_can_mark_a_ship_as_paid_for(self):
+        group = Group.objects.get(name="industry")
+        self.user.groups.add(group)
+        unpriced_ship = Ship.objects.create(
+            name="ShipWithNoPrice",
+            tech_level=6,
+            free=True,
+            isk_price=None,
+            eggs_price=None,
+        )
+
+        unpriced_ship_order = self.a_ship_order(
+            ship_pk=unpriced_ship.pk, payment_method="isk"
+        )
+
+        self.put(
+            reverse("industry:shiporder-claim", args=[unpriced_ship_order.pk]),
+        )
+        self.put(
+            reverse("industry:shiporder-paid", args=[unpriced_ship_order.pk]),
+            content_type="application/json",
+        )
+        response = self.get(reverse("industry:shiporder-list"))
+        self.json_matches(
+            response,
+            f"""[
+        {{
+            "assignee": {self.user.pk},
+            "assignee_name": "{self.user.discord_username()}",
+            "availible_transition_names": [
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
+            ],
+            "blocked_until": null,
+            "created_at": "2012-01-14 12:00",
+            "currently_blocked": false,
+            "id": "IGNORE",
+            "notes": "",
+            "payment_method": "isk",
+            "quantity": 1,
+            "recipient_discord_user_pk": "{self.discord_user.pk}",
+            "recipient_character_name": "Test Char",
+            "ship": "ShipWithNoPrice",
+            "state": "not_started",
+            "uid": "Test Discord User-mock_random_1",
+            "needs_manual_price": false,
+            "payment_taken": true,
+            "price": null
+        }}]""",
+        )
+
+    @freeze_time("2012-01-14 12:00:00")
+    def test_ship_with_valid_price_doesnt_need_price(self):
+        group = Group.objects.get(name="industry")
+        self.user.groups.add(group)
+        unpriced_ship = Ship.objects.create(
+            name="ShipWithNoPrice",
+            tech_level=6,
+            free=True,
+            isk_price=100,
+            eggs_price=100,
+            prices_last_updated="2012-01-14 11:30:00",
+        )
+
+        unpriced_ship_order = self.a_ship_order(
+            ship_pk=unpriced_ship.pk, payment_method="isk", price=100
+        )
+
+        self.put(
+            reverse("industry:shiporder-claim", args=[unpriced_ship_order.pk]),
+        )
+        self.put(
+            reverse("industry:shiporder-manual-price", args=[unpriced_ship_order.pk]),
+            {"manual_price": 10},
+            content_type="application/json",
+        )
+        response = self.get(reverse("industry:shiporder-list"))
+        self.json_matches(
+            response,
+            f"""[
+        {{
+            "assignee": {self.user.pk},
+            "assignee_name": "{self.user.discord_username()}",
+            "availible_transition_names": [
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
+            ],
+            "blocked_until": null,
+            "created_at": "2012-01-14 12:00",
+            "currently_blocked": false,
+            "id": "IGNORE",
+            "notes": "",
+            "payment_method": "isk",
+            "quantity": 1,
+            "recipient_discord_user_pk": "{self.discord_user.pk}",
+            "recipient_character_name": "Test Char",
+            "ship": "ShipWithNoPrice",
+            "state": "not_started",
+            "uid": "Test Discord User-mock_random_1",
+            "needs_manual_price": false,
+            "payment_taken": false,
+            "price": "10.00"
+        }}]""",
+        )

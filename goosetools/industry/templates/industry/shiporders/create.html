@@ -21,6 +21,8 @@
         <div class="row">
             {{ form.payment_method|materializecss:'s12 m6, icon=attach_money'}}
             {{ form.notes|materializecss:'s12 m6, icon=comment'}}
+            {{form.eggs_price}}
+            {{form.isk_price}}
         </div>
         <div class="row">
             <div id="ship_info_display"></div>
@@ -42,6 +44,12 @@
 
 <script>
 
+function numberWithCommas(x) {
+    var x = x.toString();
+    var x = x.replace(/,/g, '');
+    return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 function update_select_text_with_ship_data(ship_data){
     $("#id_ship option").each(function(){
         ship_name = $(this).val();
@@ -59,9 +67,9 @@ function update_select_text_with_ship_data(ship_data){
 }
 
 $(document).ready(function() {
-    $('#id_ship').select2();
     const ship_data = JSON.parse(document.getElementById('ship_data').textContent);
     update_select_text_with_ship_data(ship_data);
+    $('#id_ship').select2();
     $('#id_ship').on('change paste keyup', function() { return update_after_ship_change(ship_data); } );
     $('#id_quantity').on('change paste keyup', function() { return update_after_ship_change(ship_data); } );
     $('#id_payment_method').on('change paste keyup', function() { return update_after_ship_change(ship_data); } );
@@ -77,6 +85,9 @@ function update_after_ship_change(ship_data){
     selected_ship_data = ship_data[ship_name];
     if(selected_ship_data){
         $('#submit_btn').prop('disabled', false);
+        paid_method = current_payment === "eggs" || current_payment === "isk";
+        free_method = current_payment === "free";
+        display = "";
         if(selected_ship_data.free){
             free_option = $("#id_payment_method option[value='free']");
             if(free_option.length === 0){
@@ -87,27 +98,35 @@ function update_after_ship_change(ship_data){
                 M.FormSelect.init(selectedCategory);
             }
             display = "";
-            if(selected_ship_data.blocked_until){
-                if(current_payment === "free"){
-                    olg = selected_ship_data.order_limit_group;
-                    display += `<b class="orange-text">Warning: you have already ordered from the ${olg.name} category in the last ${olg.days_between_orders} days.
-                    If you place this order it will be blocked from starting until ${selected_ship_data.blocked_until}.</b>`
-                }
-            } else {
-                if(current_payment === "eggs" || current_payment === "isk"){
-                    display += "<b class='orange-text'>Warning: you are choosing to pay for this ship which you could have for free if you set the method to free!</b>"
-                }
+            if(selected_ship_data.blocked_until && free_method){
+                olg = selected_ship_data.order_limit_group;
+                display += `<b class="orange-text">Warning: you have already ordered from the ${olg.name} category in the last ${olg.days_between_orders} days.
+                If you place this order it will be blocked from starting until ${selected_ship_data.blocked_until}.</b>`
+            } else if(paid_method){
+                display += "<b class='orange-text'>Warning: you are choosing to pay for this ship which you could have for free if you set the method to free!</b>"
             }
-            if(current_payment === "free" && quantity > 1){
+            if(free_method && quantity > 1){
                     display = " <h4 class='red-text'>ERROR</h4><b>You cannot order more than one free ship at once. If you wish to pay for the rest make a seperate order for them.</b>";
                     $('#submit_btn').prop('disabled', true);
             }
-            $('#ship_info_display').html(display);
         } else {
             $('#id_payment_method option[value="free"]').remove();
-            $('#ship_info_display').html("");
+            $('#ship_info_display').html(display);
             M.FormSelect.init(selectedCategory);
         }
+        if(selected_ship_data.valid_price){
+            display += " <br/> ISK PRICE: " + numberWithCommas(ship_info.isk_price);
+            display += " <br/> EGGS PRICE: " + numberWithCommas(ship_info.eggs_price);
+        } else if(paid_method) {
+            display += ` <h5 class='orange-text'>WARNING</h5> <br/> Unable to lookup a valid price for this ship from Wal Marx. Please ping @Certified Forklift Operator to get a price on discord first.
+                If you place this order now without a valid price the industry team will manually price your ship later on.`
+        }
+        if(current_payment === "srp"){
+            display += "<br/><b class='red-text'>You must upload a screenshot of your lossmail to imgur and include the link in the notes.</b>";
+        }
+        $('#id_isk_price').val(selected_ship_data.isk_price);
+        $('#id_eggs_price').val(selected_ship_data.eggs_price);
+        $('#ship_info_display').html(display);
     } else {
         $('#submit_btn').prop('disabled', true);
     }
