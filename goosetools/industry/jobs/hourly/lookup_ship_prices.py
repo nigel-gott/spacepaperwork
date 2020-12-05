@@ -61,12 +61,14 @@ class Job(HourlyJob):
         if not values:
             print("No data found.")
         else:
+            i = 0
             for row in values:
                 try:
                     if len(row) > 9:
                         ship_name = row[9]
                         ship = Ship.objects.get(name=ship_name.strip())
                         try:
+                            print(f"Attempting to parse prices for {ship_name}")
                             isk_price = parse_price(row[0])
                             eggs_price = parse_price(row[1])
                             ship.isk_price = to_isk(isk_price)
@@ -74,6 +76,7 @@ class Job(HourlyJob):
                         except Exception as e:  # pylint: disable=broad-except
                             ship.isk_price = None
                             ship.eggs_price = None
+                            print(f"Failed parsing prices for {ship_name}")
                             print(e)
 
                         ship.prices_last_updated = timezone.now()
@@ -81,7 +84,9 @@ class Job(HourlyJob):
                         ship.save()
                         print(f"Added {ship}")
                 except Exception as e:  # pylint: disable=broad-except
+                    print(f"Failed for row {i}")
                     print(e)
+                i = i + 1
 
 
 def parse_price(price_str: str) -> int:
