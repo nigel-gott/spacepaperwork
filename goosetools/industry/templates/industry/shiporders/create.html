@@ -84,9 +84,7 @@ function update_after_ship_change(ship_data){
     const selectedCategory = document.querySelector('#id_payment_method');
     selected_ship_data = ship_data[ship_name];
     if(selected_ship_data){
-        console.log(selected_ship_data);
         $('#submit_btn').prop('disabled', false);
-        console.log(current_payment);
         paid_method = current_payment === "eggs" || current_payment === "isk";
         free_method = current_payment === "free";
         display = "";
