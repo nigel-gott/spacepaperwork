@@ -438,6 +438,103 @@ class ShipOrderTest(GooseToolsTestCase):
             )
 
     @freeze_time("2012-01-14 12:00:00")
+    def test_can_still_order_paid_ships_after_ordering_a_free_one(self):
+        order_limit_group = OrderLimitGroup.objects.create(
+            days_between_orders=1, name="Free Tech 6 and Below"
+        )
+        daily_ship = Ship.objects.create(
+            name="DailyShip",
+            tech_level=6,
+            free=True,
+            order_limit_group=order_limit_group,
+        )
+
+        self.a_ship_order(ship_pk=daily_ship.pk, payment_method="free")
+        self.a_ship_order(ship_pk=daily_ship.pk, payment_method="isk")
+        self.a_ship_order(ship_pk=daily_ship.pk, payment_method="eggs")
+        response = self.get(reverse("industry:shiporder-list"))
+        self.json_matches(
+            response,
+            f"""[
+     {{
+        "assignee": null,
+        "availible_transition_names": [
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
+        ],
+        "blocked_until": null,
+        "created_at": "2012-01-14 12:00",
+        "currently_blocked": false,
+        "id": "IGNORE",
+        "notes": "",
+        "payment_method": "free",
+        "quantity": 1,
+        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_character_name": "Test Char",
+        "ship": "DailyShip",
+        "state": "not_started",
+        "uid": "Test Discord User-mock_random_1",
+        "needs_manual_price": false,
+        "payment_taken": true,
+        "price": null
+    }},
+     {{
+        "assignee": null,
+        "availible_transition_names": [
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
+        ],
+        "blocked_until": null,
+        "created_at": "2012-01-14 12:00",
+        "currently_blocked": false,
+        "id": "IGNORE",
+        "notes": "",
+        "payment_method": "isk",
+        "quantity": 1,
+        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_character_name": "Test Char",
+        "ship": "DailyShip",
+        "state": "not_started",
+        "uid": "Test Discord User-mock_random_2",
+        "needs_manual_price": true,
+        "payment_taken": false,
+        "price": null
+    }},
+     {{
+        "assignee": null,
+                        "availible_transition_names": [
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
+        ],
+        "blocked_until": null,
+        "currently_blocked": false,
+        "created_at": "2012-01-14 12:00",
+        "id": "IGNORE",
+        "notes": "",
+        "payment_method": "eggs",
+        "quantity": 1,
+        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_character_name": "Test Char",
+        "ship": "DailyShip",
+        "state": "not_started",
+        "uid": "Test Discord User-mock_random_3",
+        "needs_manual_price": true,
+        "payment_taken": false,
+        "price": null
+    }}
+]""",
+        )
+
+    @freeze_time("2012-01-14 12:00:00")
     def test_ordering_multiple_free_limited_ships_queues_them_up(self):
         order_limit_group = OrderLimitGroup.objects.create(
             days_between_orders=1, name="Free Tech 6 and Below"
@@ -828,7 +925,9 @@ class ShipOrderTest(GooseToolsTestCase):
             free=True,
             isk_price=100,
             eggs_price=100,
-            prices_last_updated="2012-01-14 11:30:00",
+            prices_last_updated=timezone.make_aware(
+                timezone.datetime(2012, 1, 14, 11, 30, 0)
+            ),
         )
 
         unpriced_ship_order = self.a_ship_order(

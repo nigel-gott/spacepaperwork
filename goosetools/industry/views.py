@@ -91,12 +91,10 @@ def create_ship_order(
     request: HttpRequest,
 ) -> ShipOrder:
     uid = generate_contract_code(username)
-    blocked_until, message = calculate_blocked_until_for_order(ship, username)
-    if message:
-        messages.warning(request, message)
 
     price = None
     payment_taken = False
+    blocked_until = None
     if payment_method in {"eggs", "isk"}:
         if ship.valid_price():
             if payment_method == "eggs":
@@ -104,6 +102,10 @@ def create_ship_order(
             else:
                 price = ship.isk_price
     else:
+        if payment_method == "free":
+            blocked_until, message = calculate_blocked_until_for_order(ship, username)
+            if message:
+                messages.warning(request, message)
         payment_taken = True
 
     return ShipOrder.objects.create(
