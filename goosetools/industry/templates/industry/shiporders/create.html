@@ -103,7 +103,12 @@ function update_after_ship_change(ship_data){
                 display += `<b class="orange-text">Warning: you have already ordered from the ${olg.name} category in the last ${olg.days_between_orders} days.
                 If you place this order it will be blocked from starting until ${selected_ship_data.blocked_until}.</b>`
             } else if(paid_method){
-                display += "<b class='orange-text'>Warning: you are choosing to pay for this ship which you could have for free if you set the method to free!</b>"
+                if(selected_ship_data.blocked_until){
+                    display += `<b class='orange-text'>Your next free ship in this category can be ordered after: ${selected_ship_data.blocked_until}.</b>
+                    <br/> For now you can pay for the ship to get it quicker.`
+                } else {
+                    display += "<b class='orange-text'>Warning: you are choosing to pay for this ship which you could have for free if you set the method to free!</b>"
+                }
             }
             if(free_method && quantity > 1){
                     display = " <h4 class='red-text'>ERROR</h4><b>You cannot order more than one free ship at once. If you wish to pay for the rest make a seperate order for them.</b>";
