@@ -25,6 +25,7 @@ urlpatterns = [
                 path(
                     "api/", include("rest_framework.urls", namespace="rest_framework")
                 ),
+                path("", include("django_prometheus.urls")),
             ]
             + settings.ENV_SPECIFIC_URLS
         ),

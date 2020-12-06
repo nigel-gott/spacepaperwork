@@ -2,6 +2,7 @@ import pytest
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.urls.base import reverse
+from django.utils import timezone
 from freezegun import freeze_time
 
 import goosetools.industry.views
@@ -872,4 +873,41 @@ class ShipOrderTest(GooseToolsTestCase):
             "payment_taken": false,
             "price": "10.00"
         }}]""",
+        )
+
+    @freeze_time("2012-01-14 12:00:00")
+    def test_ship_submitting_with_old_prices_generates_error(self):
+        group = Group.objects.get(name="industry")
+        self.user.groups.add(group)
+        unpriced_ship = Ship.objects.create(
+            name="ShipWithNoPrice",
+            tech_level=6,
+            free=True,
+            isk_price=100,
+            eggs_price=100,
+            prices_last_updated=timezone.make_aware(
+                timezone.datetime(2012, 1, 14, 11, 30, 0)
+            ),
+        )
+
+        r = self.client.post(
+            reverse("industry:shiporders_create"),
+            {
+                "ship": unpriced_ship.pk,
+                "quantity": 1,
+                "recipient_character": self.char.pk,
+                "payment_method": "eggs",
+                "notes": "",
+                "isk_price": 10,
+                "eggs_price": 10,
+            },
+        )
+        self.assert_messages(
+            r,
+            [
+                (
+                    "error",
+                    "The prices for the ship have changed since you opened the order form, please order again the prices have been updated. Ƶ 100.00 vs Ƶ 10.00 and Ƶ 100.00 vs Ƶ 10.00",
+                )
+            ],
         )

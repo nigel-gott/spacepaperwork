@@ -44,7 +44,7 @@ SECRET_KEY = env("SECRET_KEY")
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 DATABASES = {
     # read os.environ['DATABASE_URL'] and raises ImproperlyConfigured exception if not found
-    "default": env.db()
+    "default": env.db(engine="django_prometheus.db.backends.postgresql")
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
@@ -82,6 +82,7 @@ THIRD_PARTY_APPS = [
     "dbbackup",
     "rest_framework",
     "django_fsm",
+    "django_prometheus",
 ]
 
 LOCAL_APPS = [
@@ -167,6 +168,7 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#middleware
 MIDDLEWARE = [
+    "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -179,6 +181,7 @@ MIDDLEWARE = [
     # "django.middleware.common.BrokenLinkEmailsMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "config.middleware.TimezoneMiddleware",
+    "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
 # STATIC
@@ -299,5 +302,3 @@ DBBACKUP_STORAGE_OPTIONS = {"location": env("DB_BACKUP_LOCATION")}
 REST_FRAMEWORK = {
     "DATETIME_FORMAT": "%Y-%m-%d %H:%M",
 }
-
-GSHEETS = {"CLIENT_SECRETS": ".google_creds.json"}

@@ -5,6 +5,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
+from django_prometheus.models import ExportModelOperationsMixin
 from timezone_field import TimeZoneField
 
 
@@ -85,7 +86,7 @@ class UnicodeAndSpacesUsernameValidator(UnicodeUsernameValidator):
     flags = 0
 
 
-class GooseUser(AbstractUser):
+class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type: ignore
     username = models.CharField(
         max_length=150,
         unique=True,

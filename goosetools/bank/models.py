@@ -113,6 +113,6 @@ def egg_balance(self):
 
 
 # TODO Fix dependency ordering instead of monkey patching
-GooseUser.isk_balance = isk_balance  # type: ignore
-GooseUser.egg_balance = egg_balance  # type: ignore
-GooseUser.debt_egg_balance = debt_egg_balance  # type: ignore
+GooseUser.isk_balance = isk_balance
+GooseUser.egg_balance = egg_balance
+GooseUser.debt_egg_balance = debt_egg_balance

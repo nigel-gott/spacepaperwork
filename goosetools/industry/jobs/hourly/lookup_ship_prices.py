@@ -68,7 +68,6 @@ class Job(HourlyJob):
                         ship_name = row[9]
                         ship = Ship.objects.get(name=ship_name.strip())
                         try:
-                            print(f"Attempting to parse prices for {ship_name}")
                             isk_price = parse_price(row[0])
                             eggs_price = parse_price(row[1])
                             ship.isk_price = to_isk(isk_price)
