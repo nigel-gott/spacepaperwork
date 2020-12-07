@@ -11,6 +11,8 @@ INTERNAL_IPS = ["127.0.0.1"]
 
 ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "django"]
 
+MAPBOT_HOST = "http://localhost:5000"
+
 GRAPH_MODELS = {"all_applications": True, "group_models": True}
 
 CACHES = {

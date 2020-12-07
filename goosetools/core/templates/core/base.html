@@ -77,6 +77,8 @@
             <li><a href="{% url 'contracts' %}">Contracts ({{contracts}})<i class="material-icons left">compare_arrows</i></a></li>
             <li><a class="tab" href="{% url 'own_user_transactions' %}">Transactions<i class="material-icons left">toc</i></a></li>
             <li><a class="tab" href="{% url 'industry:shiporders_view' %}">Ship Orders <i class="material-icons left">directions_boat</i>
+            </a></li>
+            <li><a class="tab" href="{% url 'mapbot:mapbot_index' %}">MapBot<i class="material-icons left">public</i>
               <span class="new badge"></span>
             </a></li>
             <li><a class="tab" href="{% url 'settings' %}">Settings<i class="material-icons left">settings</i></a></li>
@@ -109,6 +111,8 @@
     {% endif %}
     {% if user.is_authenticated %}
     <li class="tab"><a href="{% url 'industry:shiporders_view' %}">Ship Orders
+    </a>
+    <li class="tab"><a href="{% url 'mapbot:mapbot_index' %}">MapBot
     </a>
     <li class="tab"><a href="{% url 'fleet' %}">Active Fleets
         ({% num_active_fleets %})

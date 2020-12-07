@@ -1,0 +1,228 @@
+@import 'https://fonts.googleapis.com/css?family=Prompt:400,700';
+
+html,body,main {
+    background-color: #111;
+    margin: 0px;
+    padding: 0px;
+    font-family: sans-serif;
+    width: 100%;
+    height: 100%;
+  }
+
+.map_container {
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+.map_navigation {
+    color: #CCC;
+    padding: 5px;
+}
+
+.map {
+
+}
+
+.star {
+    fill: #888;
+    stroke: #666;
+    stroke-width: 0.1px;
+}
+
+.star:hover {
+    stroke: #36F;
+    stroke-width: 0.25px;
+}
+
+.star_label {
+    fill: #CCC;
+    font-size: 0.8pt;
+    pointer-events: none;
+}
+
+.star_label_select {
+    fill: #FA2;
+    font-size: 1pt;
+}
+
+.connection {
+    stroke: #666;
+    stroke-width: 0.2;
+    pointer-events: none;
+}
+
+.connection_region {
+    stroke: #949;
+    pointer-events: none;
+    stroke-dasharray: 0.8 0.4;
+}
+
+.route {
+    stroke: #FA2;
+    stroke-width: 0.4;
+}
+
+.connection_select {
+    stroke: #36F;
+    stroke-width: 0.3;
+    pointer-events: none;
+}
+
+.region_label {
+    text-align: center;
+    fill: #733;
+    stroke: #522;
+    stroke-width: 0.4px;
+    font-size: 12pt;
+    pointer-events: none;
+    text-anchor: middle;
+}
+
+.danger {
+    stroke: #C33;
+    stroke-width: 0.3px;
+}
+
+.base-null {
+    fill: #020;
+}
+
+.base-0 {
+    fill: #020;
+}
+
+.base-1 {
+    fill: #030;
+}
+
+.base-2 {
+    fill: #040;
+}
+
+.base-3 {
+    fill: #050;
+}
+
+.base-4 {
+    fill: #060;
+}
+
+.base-5 {
+    fill: #2AA3E2;
+}
+
+.base-6 {
+    fill: #E2692A;
+}
+
+.base-7 {
+    fill: #e22a85;
+}
+
+.base-8 {
+    fill: #C52AE2;
+}
+
+.base-9 {
+    fill: #822ae2;
+}
+
+.base-10 {
+    fill: #3c2288;
+}
+
+
+
+
+
+
+
+.route_window {
+    visibility: visible;
+    opacity: 0.85;
+    transition: all 300ms ease;
+
+    display: block;
+    width: 100px;
+    position: fixed;
+    left: 0%;
+    top: 40px;
+    padding: 4px;
+
+    background: #111;
+    box-shadow: 0 0 20px 10px rgba(0, 0, 0, 0.9);
+
+    color: #AAA;
+}
+
+
+
+.modal {
+    visibility: visible;
+    opacity: 1;
+    transition: all 300ms ease;
+
+    /* This way it could be display flex or grid or whatever also. */
+    display: block;
+
+    /* Probably need media queries here */
+    width: 350px;
+    max-width: 100%;
+
+    height: 220px;
+    max-height: 100%;
+
+    position: fixed;
+
+    z-index: 100;
+
+    left: 50%;
+    top: 50%;
+
+    /* Use this for centering if unknown width/height */
+    transform: translate(-50%, -50%);
+
+    /* If known, negative margins are probably better (less chance of blurry text). */
+    /* margin: -200px 0 0 -200px; */
+
+    background: #CCC;
+    box-shadow: 0 0 60px 10px rgba(0, 0, 0, 0.9);
+}
+
+.base button {
+    margin: 0px;
+}
+
+.alert button {
+    width: 140px;
+    margin: 0px;
+}
+
+.closed {
+    top: 0px;
+    visibility: hidden;
+    opacity: 0;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 50;
+
+    background: rgba(0, 0, 0, 0.6);
+    transition: all 300ms ease;
+}
+.modal-guts {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    padding: 00px 20px 20px 20px;
+}

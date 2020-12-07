@@ -1,0 +1,53 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <title>Mapbot</title>
+    <link rel="stylesheet" href="{% static 'mapbot/mapbot.css' %}">
+  </head>
+  <body>
+    <main role="main" class="container">
+      <div class="map_navigation">
+        Region <select id="map_region_select" onchange="OnRegionSelect();"></select>
+        System <input id="map_system_1" />
+        to <input id="map_system_2" />
+        <button onclick="OnClickRoute();">Route</button>
+        <button onclick="ShowRoute([]);">Clear</button>
+        <!-- Fleet Sync <select id="map_fleet_select"></select> -->
+      </div>
+      <div id="route_window" class="route_window closed"></div>
+      <div class="map_container">
+        <div class="modal-overlay closed" id="modal-overlay" onclick="CloseModal();"></div>
+        <div class="modal closed" id="modal">
+          <div class="modal-guts">
+            <h1><span id="modal-title"></span><button>Listen for Honks</button></h1>
+            <span id="modal-body">
+              <div class="base">
+                Update Base Level:<br />
+                <button onclick="UpdateBaseClick(0);">0</button><button onclick="UpdateBaseClick(1);">1</button><button onclick="UpdateBaseClick(2);">2</button><button onclick="UpdateBaseClick(3);">3</button><button onclick="UpdateBaseClick(4);">4</button><button onclick="UpdateBaseClick(5);">5</button><button onclick="UpdateBaseClick(6);">6</button><button onclick="UpdateBaseClick(7);">7</button><button onclick="UpdateBaseClick(8);">8</button><button onclick="UpdateBaseClick(9);">9</button><button onclick="UpdateBaseClick(10);">10</button>
+              </div>
+              <div class="alert">
+                Report:<br />
+                  <button>Deadspace</button>
+                  <button>Condensed Belt</button>
+                  <button>Enemy Presence</button>
+                  <button>Outpost</button>
+                  <button>HONK!</button>
+              </div>
+            </span>
+          </div>
+        </div>
+        <svg width="100%" height="100%" viewbox="0 0 1000 1000" id="mapSVG" class="map" preserveAspectRatio="none"></svg>
+      </div>
+    </main>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+    <script src="{% static 'mapbot/svg-pan-zoom.min.js'%}"></script>
+    <script>
+    MAPBOT_HOST="{{mapbot_host}}";
+    </script>
+    <script src="{% static 'mapbot/mapbot.js'%}"></script>
+  </body>
+</html>

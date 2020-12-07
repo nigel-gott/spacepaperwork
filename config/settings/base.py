@@ -95,6 +95,7 @@ LOCAL_APPS = [
     "goosetools.contracts.apps.ContractsConfig",
     "goosetools.ownership.apps.OwnershipConfig",
     "goosetools.industry.apps.IndustryConfig",
+    "goosetools.mapbot.apps.MapBotConfig",
     "goosetools.core.apps.CoreConfig",
     # Goosetools apps go here
 ]

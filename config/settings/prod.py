@@ -1,3 +1,4 @@
+# pylint: disable=unused-wildcard-import,wildcard-import
 from .base import *  # noqa
 from .base import env
 
@@ -25,3 +26,5 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 # )
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+
+MAPBOT_HOST = "https://www.goosetools.com/mapbot/"
