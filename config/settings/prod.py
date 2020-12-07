@@ -27,4 +27,4 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
-MAPBOT_HOST = "https://www.goosetools.com/mapbot/"
+MAPBOT_HOST = "https://www.goosetools.com/mapbot"
