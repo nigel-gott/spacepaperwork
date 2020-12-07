@@ -4,33 +4,26 @@
 {% block body %}
 
 <div class="section">
-    <div class="row">
-        Fleet Page:
-        {% for i in total_pages_range %}
-        {% if i == page %}
-        {{i}}
-        {% else %}
-        <a href="{% url page_url_name %}?page={{i}}">{{i}}</a>
-        {% endif %}
-        /
-        {% endfor %}
-        End
+    <div class="d-sm-flex mb-3">
+        <div class="flex-fill mb-3 mb-sm-0">
+            <h1>{{header}}</h1>
+        </div>
+        <div>
+            <a class="waves-effect waves-light btn light-green darken-3" href="{% url 'fleet_create' %}"
+               id="start_new_fleet_button"><i
+                    class='material-icons right'>add_circle</i>Create Fleet</a>
+        </div>
     </div>
-    <a class="waves-effect waves-light btn light-green darken-3" href="{% url 'fleet_create' %}"
-       id="start_new_fleet_button"><i
-            class='material-icons right'>add_circle</i>Start New Fleet</a>
 
     {% if fleets %}
     <ul class="collection with-header">
-        <li class="collection-header">
-            <h5>{{header}}</h5>
-        </li>
         {% for fleet in fleets %}
-        <li class="collection-item">
+        <li class="collection-item d-sm-flex">
             {% has_fleet_member fleet user as is_member %}
             {% can_join fleet user as can_join_fleet %}
-            <img alt="" class="avatar" src="{{ fleet.fc.discord_user.avatar_url }}" style="width: 42px">
-            <span class="title">
+            <div class="flex-fill">
+                <img class="avatar" src="{{ fleet.fc.discord_user.avatar_url }}" style="width: 42px">
+                <span class="title">
                 <a href="{% url 'fleet_view' fleet.id %}">{{ fleet.name }} run by {{fleet.fc.username}}
                     - {% num_fleet_members fleet.id %} Members
                     {% if is_member %}
@@ -38,8 +31,8 @@
                     {% endif %}
                 <i class='material-icons tiny'>info</i></a>
             </span>
-            <div class="divider" style="width:50%;"></div>
-            <span class="blue-grey-text darken-4">Start: {{fleet.start}} ({{fleet.human_readable_started}})
+                <div class="divider" style="width:50%;"></div>
+                <span class="blue-grey-text darken-4">Start: {{fleet.start}} ({{fleet.human_readable_started}})
                 {% if fleet.auto_end %}
                 <br/>End: {{fleet.auto_end }} ({{fleet.human_readable_ended}})
                 {% else %}
@@ -50,26 +43,40 @@
                 </span>
 
 
-            <p>
-                <br/>
-                {{fleet.description}}<br/>
-                {{fleet.location}}<br/>
-                Profit So Far: Ƶ {{fleet.isk_and_eggs_balance|nicemoney}}<br/>
-            </p>
-            {% if not is_member and can_join_fleet %}
-            <a class="secondary-content waves-effect waves-light btn purple lighten-2"
-               href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Join Fleet</a>
-            {% else %}
-            <a class="secondary-content waves-effect waves-light btn blue"
-               href="{% url 'fleet_view' fleet.id %}"><i class='material-icons right'>info</i>Loot Tracker</a>
-            {% endif %}
-
-            {% endfor %}
+                <p>
+                    <br/>
+                    {{fleet.description}}<br/>
+                    {{fleet.location}}<br/>
+                    Profit So Far: Ƶ {{fleet.isk_and_eggs_balance|nicemoney}}<br/>
+                </p>
+            </div>
+            <div>
+                {% if not is_member and can_join_fleet %}
+                <a class=" waves-effect waves-light btn purple lighten-2"
+                   href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Join Fleet</a>
+                {% else %}
+                <a class=" waves-effect waves-light btn blue"
+                   href="{% url 'fleet_view' fleet.id %}"><i class='material-icons right'>info</i>Loot Tracker</a>
+                {% endif %}
+                {% endfor %}
+            </div>
     </ul>
+    <div class="center">
+        {% for i in total_pages_range %}
+        {% if i == page %}
+        {{i}}
+        {% else %}
+        <a href="{% url page_url_name %}?page={{i}}">{{i}}</a>
+        {% endif %}
+        {% endfor %}
+    </div>
     {% else %}
-    <p> No fleets. </p>
+    <div class="card">
+        <div class="card-content">
+            There are currently no fleets of this type
+        </div>
+    </div>
     {% endif %}
 </div>
-
 
 {% endblock %}
