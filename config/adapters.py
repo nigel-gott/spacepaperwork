@@ -57,9 +57,9 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         else:
             discord_user = DiscordUser()
 
-        _update_user_from_social_account(discord_user, account, sociallogin.user)
         sociallogin.user.discord_user = discord_user
         super().save_user(request, sociallogin, form)
+        _update_user_from_social_account(discord_user, account, sociallogin.user)
 
     def validate_disconnect(self, account, accounts):
         raise ValidationError("Can not disconnect")
