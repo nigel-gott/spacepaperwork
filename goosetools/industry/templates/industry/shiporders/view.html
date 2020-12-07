@@ -253,15 +253,15 @@ $(function() {
                     reset_found = false;
                     for(const t of row['availible_transition_names']){
                         if(t!=="reset"){
-                            buttons += '<a class="state-link" href="#">' + t + '</a><br/>'
+                            buttons += '<a class="collection-item state-link" href="#">' + t + '</a>'
                         } else if(row['state'] !== "not_started") {
                             reset_found = true;
                         }
                     }
                     if(reset_found){
-                        buttons += '<a class="state-link red-text" href="#">reset</a><br/>'
+                        buttons += '<a class="collection-item state-link red-text" href="#">reset</a>'
                     }
-                    return buttons;
+                    return       `<div class="collection">${buttons}</div>`;
                 } else {
                     return '';
                 }
