@@ -34,7 +34,13 @@ def fleet_list_view(request, fleets_to_display, page_url_name):
     page = int(request.GET.get("page", 0))
     page_size = 20
     total_pages = math.floor(fleets_to_display.count() / page_size)
-    this_page_fleets = fleets_to_display[page * page_size : (page + 1) * page_size]
+    this_page_fleets = fleets_to_display[page * page_size: (page + 1) * page_size]
+    header = "Active Fleets"
+    if page_url_name == "fleet_past":
+        header = "Past Fleets"
+    elif page_url_name == "fleet_future":
+        header = "Future Fleets"
+
     fleets_annotated_with_isk_and_eggs_balance = this_page_fleets.annotate(
         isk_and_eggs_balance=Sum(
             "lootbucket__lootgroup__inventoryitem__isktransaction__isk"
@@ -44,7 +50,7 @@ def fleet_list_view(request, fleets_to_display, page_url_name):
     context = {
         "page_url_name": page_url_name,
         "fleets": fleets_annotated_with_isk_and_eggs_balance,
-        "header": "Active Fleets",
+        "header": header,
         "page": page,
         "total_pages": total_pages,
         "total_pages_range": range(total_pages),
@@ -75,7 +81,7 @@ def fleet_leave(request, pk):
     member = get_object_or_404(FleetMember, pk=pk)
     fleet = member.fleet
     if member.character.discord_user == request.user.discord_user or fleet.has_admin(
-        request.user
+            request.user
     ):
         member.delete()
     else:
