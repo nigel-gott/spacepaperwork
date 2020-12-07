@@ -4,7 +4,9 @@ from typing import Dict, List
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Case, Sum
+from django.db.models.expressions import F, When
+from django.db.models.fields import IntegerField
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse, reverse_lazy
@@ -43,9 +45,17 @@ def fleet_list_view(request, fleets_to_display, page_url_name):
 
     fleets_annotated_with_isk_and_eggs_balance = this_page_fleets.annotate(
         isk_and_eggs_balance=Sum(
-            "lootbucket__lootgroup__inventoryitem__isktransaction__isk"
+            Case(
+                When(
+                    lootbucket__lootgroup__inventoryitem__eggtransaction__debt=False,
+                    then=F(
+                        "lootbucket__lootgroup__inventoryitem__eggtransaction__eggs"
+                    ),
+                ),
+                output_field=IntegerField(),
+                default=0,
+            )
         )
-        + Sum("lootbucket__lootgroup__inventoryitem__eggtransaction__eggs")
     )
     context = {
         "page_url_name": page_url_name,
