@@ -49,7 +49,7 @@ def shiporders_contract_confirm(request, pk):
 
 
 def generate_random_string():
-    return get_random_string(6)
+    return get_random_string(6).lower()
 
 
 def generate_contract_code(username):
@@ -264,13 +264,16 @@ class ShipOrderViewSet(
             ship_order.assignee = request.user
             ship_order.save()
             claim_status = "claimed"
+            uid = ship_order.uid
         else:
             claim_status = "already_claimed"
+            uid = None
         return Response(
             {
                 "status": claim_status,
                 "assignee": ship_order.assignee.pk,
                 "assignee_name": ship_order.assignee.discord_username(),
+                "uid": uid,
             }
         )
 

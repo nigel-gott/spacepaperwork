@@ -140,7 +140,7 @@ class ShipOrderTest(GooseToolsTestCase):
         )
         self.assertEqual(
             str(response.content, encoding="utf-8"),
-            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Discord User"}}',
+            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Discord User","uid":"Test Discord User-mock_random_1"}}',
         )
 
     def test_cant_claim_ship_order_if_not_in_industry_group(self):
@@ -161,7 +161,7 @@ class ShipOrderTest(GooseToolsTestCase):
         )
         self.assertEqual(
             str(response.content, encoding="utf-8"),
-            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Discord User"}}',
+            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Discord User","uid":"Test Discord User-mock_random_1"}}',
         )
         self.client.force_login(self.other_user)
         response = self.client.put(
@@ -169,7 +169,7 @@ class ShipOrderTest(GooseToolsTestCase):
         )
         self.assertEqual(
             str(response.content, encoding="utf-8"),
-            f'{{"status":"already_claimed","assignee":{self.user.pk},"assignee_name":"{self.user.discord_username()}"}}',
+            f'{{"status":"already_claimed","assignee":{self.user.pk},"assignee_name":"{self.user.discord_username()}","uid":null}}',
         )
 
     def test_list_of_ship_orders_shows_assignee_name_after_claiming(self):
@@ -224,7 +224,7 @@ class ShipOrderTest(GooseToolsTestCase):
         )
         self.assertEqual(
             str(response.content, encoding="utf-8"),
-            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Discord User"}}',
+            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Discord User","uid":"Test Discord User-mock_random_1"}}',
         )
         response = self.put(
             reverse("industry:shiporder-unclaim", args=[ship_order.pk]),
@@ -1009,4 +1009,40 @@ class ShipOrderTest(GooseToolsTestCase):
                     "The prices for the ship have changed since you opened the order form, please order again the prices have been updated. Ƶ 100.00 vs Ƶ 10.00 and Ƶ 100.00 vs Ƶ 10.00",
                 )
             ],
+        )
+
+    @freeze_time("2012-01-14 12:00:00")
+    def test_cant_see_another_users_contract_code(self):
+        ship_order = self.a_ship_order()
+        self.client.force_login(self.other_user)
+        response = self.get(reverse("industry:shiporder-list"))
+        self.json_matches(
+            response,
+            f"""[
+     {{
+        "assignee": null,
+        "availible_transition_names": [
+                "audit",
+                "building",
+                "inventing",
+                "reset",
+                "sent"
+        ],
+        "blocked_until": null,
+        "created_at": "2012-01-14 12:00",
+        "currently_blocked": false,
+        "id": {ship_order.pk},
+        "notes": "",
+        "payment_method": "eggs",
+        "quantity": 1,
+        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_character_name": "Test Char",
+        "ship": "Thorax",
+        "state": "not_started",
+        "uid": null,
+        "needs_manual_price": true,
+        "payment_taken": false,
+        "price": null
+    }}
+]""",
         )

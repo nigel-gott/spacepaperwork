@@ -3,6 +3,18 @@ from rest_framework import serializers
 from goosetools.industry.models import ShipOrder
 
 
+# pylint: disable=abstract-method
+class AssigneeOnlyContractCodeField(serializers.ReadOnlyField):
+    def get_attribute(self, instance):
+        user = self.context["request"].user
+        if (
+            instance.assignee == user
+            or instance.recipient_character.discord_user == user.discord_user
+        ):
+            return super().get_attribute(instance)
+        return None
+
+
 class ShipOrderSerializer(serializers.ModelSerializer):
     recipient_character_name = serializers.CharField(
         source="recipient_character.ingame_name", read_only=True
@@ -18,6 +30,7 @@ class ShipOrderSerializer(serializers.ModelSerializer):
     payment_taken = serializers.BooleanField(
         source="payment_actually_taken", read_only=True
     )
+    uid = AssigneeOnlyContractCodeField()
 
     availible_transition_names = serializers.ReadOnlyField()
 

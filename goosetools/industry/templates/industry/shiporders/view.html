@@ -238,12 +238,9 @@ $(function() {
             { "data": "availible_transition_names", "visible": false},
             { "data": "recipient_discord_user_pk", "visible": false, "searchable": false},
             { "data": "assignee", "visible": false, "searchable": false},
+            { "data": "uid", "title": "Contract Code"}
     ];
     if(page_data["has_industry_permission"]){
-        columns.push({
-            "title": "Contract Code",
-            "data": "uid",
-        });
         columns.push({
             "title": "Action",
             "data": null,
@@ -402,6 +399,7 @@ function claim(row, table){
         const row_data = row.data();
         row_data['assignee_name'] = response_data["assignee_name"];
         row_data['assignee'] = response_data["assignee"];
+        row_data['uid'] = response_data["uid"];
         row.data(row_data);
         table.draw();
     });
@@ -420,6 +418,7 @@ function unclaim(row, table){
             const row_data = row.data();
             row_data['assignee_name'] = null;
             row_data['assignee'] = null;
+            row_data['uid'] = null;
             row.data(row_data);
             table.draw();
         }
