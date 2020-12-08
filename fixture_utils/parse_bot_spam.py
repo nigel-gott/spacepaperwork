@@ -163,10 +163,7 @@ def parse_chat_data(chat):
 
 
 def load_and_parse_chat_data():
-    chat_filenames = glob.glob(
-        "misc_data/discord_channel_dump/Gooseflock Featheration - "
-        "stupid Goon chat - general-bot-spam*.json"
-    )
+    chat_filenames = glob.glob("misc_data/discord_channel_dump/*general-bot-spam*.json")
     if len(chat_filenames) != 1:
         raise Exception(
             "Found multiple or no chat files in sub dir: " + str(chat_filenames)
