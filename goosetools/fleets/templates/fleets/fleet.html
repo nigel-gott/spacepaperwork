@@ -11,51 +11,59 @@
         <div>
             <a class="waves-effect waves-light btn light-green darken-3" href="{% url 'fleet_create' %}"
                id="start_new_fleet_button"><i
-                    class='material-icons right'>add_circle</i>Create Fleet</a>
+                    class="material-icons right">add_circle</i>Create Fleet</a>
         </div>
     </div>
 
     {% if fleets %}
     <ul class="collection with-header">
         {% for fleet in fleets %}
-        <li class="collection-item d-sm-flex">
+        <li class="collection-item row">
             {% has_fleet_member fleet user as is_member %}
             {% can_join fleet user as can_join_fleet %}
-            <div class="flex-fill">
-                <img class="avatar" src="{{ fleet.fc.discord_user.avatar_url }}" style="width: 42px">
-                <span class="title">
-                <a href="{% url 'fleet_view' fleet.id %}">{{ fleet.name }} run by {{fleet.fc.username}}
-                    - {% num_fleet_members fleet.id %} Members
+            <div class="col s12 l8">
+                <div class="mb-3">
+                    <img class="avatar" src="{{ fleet.fc.discord_user.avatar_url }}" style="width: 42px"/>
+                    <a href="{% url 'fleet_view' fleet.id %}">
+                        <h3 class="d-inline-block ml-2">
+                            {{ fleet.name }} run by {{fleet.fc.username}}
+                        </h3>
+                    </a>
+                </div>
+                <div>
+                    {% num_fleet_members fleet.id %} Members
                     {% if is_member %}
-                    (including you!)
+                    (including you)
                     {% endif %}
-                <i class='material-icons tiny'>info</i></a>
-            </span>
-                <div class="divider" style="width:50%;"></div>
-                <span class="blue-grey-text darken-4">Start: {{fleet.start}} ({{fleet.human_readable_started}})
-                {% if fleet.auto_end %}
-                <br/>End: {{fleet.auto_end }} ({{fleet.human_readable_ended}})
-                {% else %}
-                    {% if fleet.expected_duration %}
-                      <br/>Duration: {{fleet.expected_duration}}
+                </div>
+                <div>
+                    Start: {{fleet.start}} ({{fleet.human_readable_started}})
+                </div>
+                <div>
+                    {% if fleet.auto_end %}
+                    End: {{fleet.auto_end }} ({{fleet.human_readable_ended}})
+                    {% elif fleet.expected_duration %}
+                    Duration: {{fleet.expected_duration}}
                     {% endif %}
-                {% endif %}
-                </span>
-
-
-                <p>
-                    <br/>
-                    {{fleet.description}}<br/>
-                    {{fleet.location}}<br/>
-                    Profit So Far: Ƶ {{fleet.isk_and_eggs_balance|nicemoney}}<br/>
-                </p>
+                </div>
+                <div class="mt-3">
+                    <div>
+                        {{fleet.description}}
+                    </div>
+                    <div>
+                        {{fleet.location}}
+                    </div>
+                </div>
+                <div class="mt-5">
+                    Profit So Far: Ƶ {{fleet.isk_and_eggs_balance|nicemoney}}
+                </div>
             </div>
-            <div>
+            <div class="col s12 l4 right-align">
                 {% if not is_member and can_join_fleet %}
-                <a class=" waves-effect waves-light btn purple lighten-2"
-                   href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Join Fleet</a>
+                <a class="waves-effect waves-teal btn blue"
+                   href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>login</i>Join Fleet</a>
                 {% else %}
-                <a class=" waves-effect waves-light btn blue"
+                <a class="waves-effect waves-teal btn blue"
                    href="{% url 'fleet_view' fleet.id %}"><i class='material-icons right'>info</i>Loot Tracker</a>
                 {% endif %}
                 {% endfor %}
