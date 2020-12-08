@@ -1,4 +1,5 @@
 import json
+from random import randint
 from typing import Any, Dict
 
 from django.contrib import messages
@@ -11,7 +12,6 @@ from django.http.response import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
-from django.utils.crypto import get_random_string
 from rest_framework import mixins, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -48,12 +48,18 @@ def shiporders_contract_confirm(request, pk):
         )
 
 
-def generate_random_string():
-    return get_random_string(6).lower()
+def random_with_n_digits(n):
+    range_start = 10 ** (n - 1)
+    range_end = (10 ** n) - 1
+    return randint(range_start, range_end)
 
 
-def generate_contract_code(username):
-    return f"{username}-{generate_random_string()}"
+def generate_contract_code(user):
+    for _ in range(100):
+        possible_id = f"{user.discord_username()}-{random_with_n_digits(6)}"
+        if ShipOrder.objects.filter(uid=possible_id).count() == 0:
+            return possible_id
+    raise Exception(f"Failed to create a unique random contract code for {user}")
 
 
 def calculate_blocked_until_for_order(ship, username):
@@ -90,7 +96,7 @@ def create_ship_order(
     notes: str,
     request: HttpRequest,
 ) -> ShipOrder:
-    uid = generate_contract_code(username)
+    uid = generate_contract_code(request.user)
 
     price = None
     payment_taken = False

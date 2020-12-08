@@ -15,10 +15,10 @@ class ShipOrderTest(GooseToolsTestCase):
     def setUp(self):
         super().setUp()
         self.next_contract_code = 0
-        goosetools.industry.views.generate_random_string = self.get_mock_random_1_string
+        goosetools.industry.views.random_with_n_digits = self.get_mock_random_1_string
         self.thorax = Ship.objects.create(name="Thorax", tech_level=6)
 
-    def get_mock_random_1_string(self):
+    def get_mock_random_1_string(self, _):
         self.next_contract_code = self.next_contract_code + 1
         return "mock_random_" + str(self.next_contract_code)
 
