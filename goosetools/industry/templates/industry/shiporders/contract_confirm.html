@@ -19,17 +19,22 @@
                 <blockquote>
                 {{ship_order.uid}}
                 </blockquote>
+                {% if ship_order.payment_method == "isk" %}
+                    {% if ship_order.valid_price %}
+                        <span>You are paying with ISK so you must enter the below price into the "I'll pay" section of the contract.</span>
+                        <blockquote>{{ship_order.price}}</blockquote>
+                    {% else %}
+                        <span class="red-text">You are paying with ISK however goosetools was unable to find a valid price for the ship. Please ping the role @Certified Forklift Operator on discord before making the contract.</span>
+                    {% endif %}
+                {% endif %}
+                {% if ship_order.blocked_until %}
+                        <span class="red-text">This ship order will not be processed until after {{ship_order.blocked_until}}, make sure the contract you make will not expire by a week after that date by either extending the contract expiry or waiting to make the contract.</span>
+                {% endif %}
                 <img src="{% static "how_to_contract.gif" %}"/>
             </div>
             <div class="col s12 m12">
                 <h6>Or the same instructions but in Text:</h6>
                 <ol>
-                    <li>
-                        First make sure you haven't already ordered a ship today and that if you are ordering a Maller/Thorax ProtoType/Vexor Navy Issue/Caracal Navy Issue you haven't already ordered one this week.
-                    </li>
-                    <li>
-                        Next if you are paying by isk for a non-free ship (T7 or T8) lookup the contract price by using the !quote shipname command in #general-bot-spam
-                    </li>
                     <li>
                         Now start making a contract ingame, it's visibility must be set to the alliance.
                     </li>
@@ -42,8 +47,22 @@
                         {{ship_order.uid}}
                         </blockquote>
                     </li>
+                {% if ship_order.payment_method == "isk" %}
+                        <li>
+                    {% if ship_order.valid_price %}
+                        You are paying with ISK so you must enter the below price into the "I'll pay" section of the contract.
+                        <blockquote>{{ship_order.price}}</blockquote>
+                    {% else %}
+                        <span class="red-text">You are paying with ISK however goosetools was unable to find a valid price for the ship. Please ping the role @Certified Forklift Operator on discord before making the contract.</span>
+                    {% endif %}
+                        </li>
+                {% endif %}
                     <li>
+                {% if ship_order.blocked_until %}
+                        This ship order will not be processed until after {{ship_order.blocked_until}}, make sure the contract you make will not expire by a week after that date by either setting the contract expiry to be 2 weeks, or waiting to make the contract until {{ship_order.blocked_until}}.
+                {% else %}
                         Make sure the expiry is set to 1 week, or 2 weeks for a battleship.
+                {% endif %}
                     </li>
                     <li>
                         Then scroll down, click add item and find the ship you want and add it.
@@ -58,7 +77,7 @@
             </div>
         </div>
         <button class="btn waves-effect waves-light green" type="submit" value="Submit">
-            Yes, I Have Made The Correct Contract In Game, Place The Ship Order Now:
+            Confirm
             <i class="material-icons right">send</i>
         </button>
     </form>
