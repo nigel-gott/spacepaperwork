@@ -115,7 +115,8 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
             ("unapproved", "unapproved"),
             ("approved", "approved"),
             ("rejected", "rejected"),
-        ]
+        ],
+        default="unapproved",
     )
 
     def is_approved(self):

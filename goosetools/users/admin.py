@@ -28,6 +28,7 @@ class CustomUserAdmin(UserAdmin):
                     "discord_user",
                     "default_character",
                     "broker_fee",
+                    "status",
                 )
             },
         ),
@@ -42,6 +43,7 @@ class CustomUserAdmin(UserAdmin):
                     "discord_user",
                     "default_character",
                     "broker_fee",
+                    "status",
                 )
             },
         ),
