@@ -15,7 +15,7 @@ class SignupFormWithTimezone(SignupForm):
         max_digits=5, decimal_places=2, label="Broker Fee %", initial=8
     )
     default_character = forms.ModelChoiceField(
-        queryset=Character.objects.all(), initial=0
+        queryset=Character.objects.all(), initial=0, required=False
     )
 
     def __init__(self, *args, **kwargs):
@@ -35,7 +35,7 @@ class SettingsForm(forms.Form):
         max_digits=5, decimal_places=2, label="Broker Fee %", initial=8
     )
     default_character = forms.ModelChoiceField(
-        queryset=Character.objects.all(), initial=0
+        queryset=Character.objects.all(), initial=0, required=False
     )
 
 

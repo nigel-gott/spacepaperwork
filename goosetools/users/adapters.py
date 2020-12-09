@@ -19,6 +19,7 @@ def user_login_handler(sender, request, user, **kwargs):
     account = SocialAccount.objects.get(user=user, provider="discord")
     # Keep the easier to use DiscordUser model upto date as the username, discriminator and avatar_hash fields could change between logins.
     discord_user = DiscordUser.objects.get(uid=account.uid)
+    _update_discord_user(discord_user, account)
     _update_user_from_social_account(discord_user, account, user)
 
 
@@ -58,6 +59,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             discord_user = DiscordUser()
 
         sociallogin.user.discord_user = discord_user
+        _update_discord_user(discord_user, account)
         super().save_user(request, sociallogin, form)
         _update_user_from_social_account(discord_user, account, sociallogin.user)
 
@@ -65,20 +67,22 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         raise ValidationError("Can not disconnect")
 
 
-def _update_user_from_social_account(discord_user, account, gooseuser):
-
+def _update_discord_user(discord_user, account):
     discord_user.uid = account.uid
     discord_user.shortened_uid = False
     discord_user.username = (
         account.extra_data["username"] + "#" + account.extra_data["discriminator"]
     )
     discord_user.avatar_hash = account.extra_data["avatar"]
-    _setup_user_groups_from_discord_guild_roles(gooseuser, account.extra_data)
-    if discord_user.pre_approved:
-        gooseuser.set_approved()
 
     discord_user.full_clean()
     discord_user.save()
+
+
+def _update_user_from_social_account(discord_user, account, gooseuser):
+    _setup_user_groups_from_discord_guild_roles(gooseuser, account.extra_data)
+    if discord_user.pre_approved:
+        gooseuser.set_approved()
 
 
 def _setup_user_groups_from_discord_guild_roles(user, extra_data):

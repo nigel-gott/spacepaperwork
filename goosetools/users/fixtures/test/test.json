@@ -1,0 +1,24 @@
+[
+  {
+    "model": "sites.site",
+    "pk": 3,
+    "fields": {
+      "domain": "localhost",
+      "name": "localhost"
+    }
+  },
+  {
+    "model": "socialaccount.socialapp",
+    "pk": 1,
+    "fields": {
+      "provider": "discord",
+      "name": "discord",
+      "client_id": "123456",
+      "secret": "some_rando_key",
+      "key": "",
+      "sites": [
+        3
+      ]
+    }
+  }
+]

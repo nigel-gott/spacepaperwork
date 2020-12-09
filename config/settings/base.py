@@ -170,6 +170,7 @@ LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [
     "account_signup",
     "account_login",
     "socialaccount_signup",
+    "discord_callback",
 ]
 LOGIN_REQUIRED_UNAPPROVED_USER_REDIRECT = "discord_login"
 

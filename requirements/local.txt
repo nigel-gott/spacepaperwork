@@ -19,6 +19,7 @@ pytest-watch==4.2.0
 watchdog==0.10.3
 # For testing time related features
 freezegun==1.0.0
+requests-mock==1.8.0
 
 # Documentation
 # ------------------------------------------------------------------------------

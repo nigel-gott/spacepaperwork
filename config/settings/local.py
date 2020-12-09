@@ -62,7 +62,13 @@ if env("USE_DOCKER") == "yes":
 
 LOGIN_REQUIRED_IGNORE_VIEW_NAMES = LOGIN_REQUIRED_IGNORE_VIEW_NAMES + [
     "authorize_url",
-    "discord_callback",
     "access_token_url",
     "profile_url",
+    "set_uid",
 ]
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "local-cache",
+    }
+}
