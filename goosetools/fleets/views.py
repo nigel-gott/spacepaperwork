@@ -2,14 +2,13 @@ import math
 from typing import Dict, List
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Case, Sum
 from django.db.models.expressions import F, When
 from django.db.models.fields import IntegerField
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from django.urls.base import reverse, reverse_lazy
+from django.urls.base import reverse
 from django.utils import timezone
 
 from goosetools.fleets.models import (
@@ -23,8 +22,6 @@ from goosetools.ownership.models import LootGroup
 from goosetools.users.models import Character
 
 from .forms import FleetAddMemberForm, FleetForm, JoinFleetForm
-
-login_url = reverse_lazy("discord_login")
 
 
 def forbidden(request):
@@ -68,25 +65,21 @@ def fleet_list_view(request, fleets_to_display, page_url_name):
     return render(request, "fleets/fleet.html", context)
 
 
-@login_required(login_url=login_url)
 def all_fleets_view(request):
     active_fleets = active_fleets_query()
     return fleet_list_view(request, active_fleets, "all_fleets_view")
 
 
-@login_required(login_url=login_url)
 def fleet_past(request):
     past_fleets = past_fleets_query()
     return fleet_list_view(request, past_fleets, "fleet_past")
 
 
-@login_required(login_url=login_url)
 def fleet_future(request):
     future_fleets = future_fleets_query()
     return fleet_list_view(request, future_fleets, "fleet_future")
 
 
-@login_required(login_url=login_url)
 def fleet_leave(request, pk):
     member = get_object_or_404(FleetMember, pk=pk)
     fleet = member.fleet
@@ -101,7 +94,6 @@ def fleet_leave(request, pk):
     return HttpResponseRedirect(reverse("fleet_view", args=[fleet.pk]))
 
 
-@login_required(login_url=login_url)
 def fleet_view(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     fleet_members = f.fleetmember_set.all()
@@ -122,7 +114,6 @@ def fleet_view(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def fleet_open(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
@@ -139,7 +130,6 @@ def fleet_open(request, pk):
     return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def fleet_end(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
@@ -158,7 +148,6 @@ def fleet_end(request, pk):
     return HttpResponseRedirect(request.META.get("HTTP_REFERER"))
 
 
-@login_required(login_url=login_url)
 def fleet_make_admin(request, pk):
     f = get_object_or_404(FleetMember, pk=pk)
     if f.fleet.has_admin(request.user):
@@ -170,7 +159,6 @@ def fleet_make_admin(request, pk):
     return HttpResponseRedirect(reverse("fleet_view", args=[f.fleet.pk]))
 
 
-@login_required(login_url=login_url)
 def fleet_remove_admin(request, pk):
     f = get_object_or_404(FleetMember, pk=pk)
     if f.fleet.has_admin(request.user):
@@ -182,7 +170,6 @@ def fleet_remove_admin(request, pk):
     return HttpResponseRedirect(reverse("fleet_view", args=[f.fleet.pk]))
 
 
-@login_required(login_url=login_url)
 def fleet_add(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     if not f.has_admin(request.user):
@@ -209,7 +196,6 @@ def fleet_add(request, pk):
     return render(request, "fleets/add_fleet_form.html", {"form": form, "fleet": f})
 
 
-@login_required(login_url=login_url)
 def fleet_join(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     if request.method == "POST":
@@ -244,7 +230,6 @@ def non_member_chars(fleet_id, user):
     return characters
 
 
-@login_required(login_url=login_url)
 def fleet_create(request):
     if request.method == "POST":
         form = FleetForm(request.POST)
@@ -309,7 +294,6 @@ def fleet_create(request):
     )
 
 
-@login_required(login_url=login_url)
 def fleet_edit(request, pk):
     existing_fleet = Fleet.objects.get(pk=pk)
     if not existing_fleet.has_admin(request.user):

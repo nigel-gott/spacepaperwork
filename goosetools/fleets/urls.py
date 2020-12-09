@@ -17,7 +17,6 @@ from .views import (
 )
 
 urlpatterns = [
-    path("", all_fleets_view, name="home"),
     path("fleet/", all_fleets_view, name="fleet"),
     path("fleet/past", fleet_past, name="fleet_past"),
     path("fleet/future", fleet_future, name="fleet_future"),

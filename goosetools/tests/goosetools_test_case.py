@@ -63,11 +63,13 @@ class GooseToolsTestCase(DjangoTestCase):
             username="Test Goose User",
             discord_user=self.discord_user,
             default_character=self.char,
+            status="approved",
         )
         self.other_user = GooseUser.objects.create(
             username="Test Goose User 2",
             discord_user=self.other_discord_user,
             default_character=self.other_char,
+            status="approved",
         )
         region = Region.objects.create(name="Test Region")
         self.system = System.objects.create(name="Test System", region=region)

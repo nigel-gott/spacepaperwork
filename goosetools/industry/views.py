@@ -3,14 +3,13 @@ from random import randint
 from typing import Any, Dict
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models.aggregates import Max
 from django.db.models.functions import Coalesce
 from django.http.request import HttpRequest
 from django.http.response import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils import timezone
 from rest_framework import mixins, permissions, status
 from rest_framework.decorators import action
@@ -22,8 +21,6 @@ from goosetools.industry.models import Ship, ShipOrder, to_isk
 from goosetools.industry.serializers import ShipOrderSerializer
 from goosetools.users.models import Character
 
-login_url = reverse_lazy("discord_login")
-
 
 def forbidden(request):
     messages.error(request, "You are forbidden to access this.")
@@ -31,7 +28,6 @@ def forbidden(request):
 
 
 @transaction.atomic
-@login_required(login_url=login_url)
 def shiporders_contract_confirm(request, pk):
     ship_order = get_object_or_404(ShipOrder, pk=pk)
     if ship_order.recipient_character.discord_user != request.user.discord_user:
@@ -177,7 +173,6 @@ def populate_ship_data(user) -> Dict[str, Any]:
 
 
 @transaction.atomic
-@login_required(login_url=login_url)
 def shiporders_create(request):
     if request.method == "POST":
         form = ShipOrderForm(request.POST)
@@ -335,7 +330,6 @@ class ShipOrderViewSet(
             )
 
 
-@login_required(login_url=login_url)
 def shiporders_view(request):
     return render(
         request,

@@ -1,0 +1,10 @@
+
+{% extends "core/base.html" %}
+{% load materializecss %}
+{% load static %}
+{% block body %}
+<div class="section">
+    <h4>Home</h4>
+    <p>You are logged in as {{request.user.discord_username}}. Please use the links at the top of the page to navigate.</p>
+</div>
+{% endblock body %}

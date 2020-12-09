@@ -22,6 +22,8 @@ class DiscordUser(models.Model):
     uid = models.TextField(unique=True, blank=True, null=True)
     avatar_hash = models.TextField(blank=True, null=True)
 
+    pre_approved = models.BooleanField(default=False)
+
     def avatar_url(self) -> Union[bool, str]:
         return self._construct_avatar_url()
 
@@ -105,7 +107,24 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
         decimal_places=2,
         default=15.0,
     )
-    default_character = models.OneToOneField(Character, on_delete=models.CASCADE)
+    default_character = models.OneToOneField(
+        Character, on_delete=models.CASCADE, null=True, blank=True
+    )
+    status = models.TextField(
+        choices=[
+            ("unapproved", "unapproved"),
+            ("approved", "approved"),
+            ("rejected", "rejected"),
+        ]
+    )
+
+    def is_approved(self):
+        return self.status == "approved"
+
+    def set_approved(self):
+        self.status = "approved"
+        self.full_clean()
+        self.save()
 
     def characters(self):
         if getattr(self, "discord_user"):

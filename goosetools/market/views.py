@@ -3,13 +3,12 @@ from decimal import Decimal
 
 from django import forms
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models.expressions import F
 from django.forms.formsets import formset_factory
 from django.http.response import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils import timezone
 from djmoney.money import Money
 
@@ -30,15 +29,12 @@ from goosetools.market.forms import (
 )
 from goosetools.market.models import MarketOrder, SoldItem, to_isk
 
-login_url = reverse_lazy("discord_login")
-
 
 def forbidden(request):
     messages.error(request, "You are forbidden to access this.")
     return render(request, "market/403.html")
 
 
-@login_required(login_url=login_url)
 def stack_change_price(request, pk):
     stack = get_object_or_404(StackedInventoryItem, pk=pk)
 
@@ -89,7 +85,6 @@ def stack_change_price(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 def edit_order_price(request, pk):
     market_order = get_object_or_404(MarketOrder, pk=pk)
 
@@ -136,7 +131,6 @@ def estimate_price(item, hours):
     return price, datapoints, price_other
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def sell_all_items(request, pk):
     loc = get_object_or_404(CharacterLocation, pk=pk)
@@ -243,7 +237,6 @@ def sell_all_items(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 def sold(request):
     characters = request.user.characters()
     all_sold = []
@@ -270,7 +263,6 @@ def sold(request):
     )
 
 
-@login_required(login_url=login_url)
 def orders(request):
     characters = request.user.characters()
     all_orders = []
@@ -331,7 +323,6 @@ def item_sold(order, remaining_quantity_to_sell):
     return remaining_quantity_to_sell - quantity_sold
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def stack_sold(request, pk):
     stack = get_object_or_404(StackedInventoryItem, pk=pk)
@@ -364,7 +355,6 @@ def stack_sold(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def order_sold(request, pk):
     order = get_object_or_404(MarketOrder, pk=pk)
@@ -475,7 +465,6 @@ def sell_item(item, form, quantity_to_sell, new_stack=None):
     return remaining_quantity_to_sell
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def stack_sell(request, pk):
     stack = get_object_or_404(StackedInventoryItem, pk=pk)
@@ -533,7 +522,6 @@ def stack_sell(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def item_sell(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)

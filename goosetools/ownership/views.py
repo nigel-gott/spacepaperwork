@@ -5,14 +5,13 @@ from typing import Dict, List
 
 from django import forms
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import F, Sum
 from django.db.models.functions import Coalesce
 from django.forms.formsets import formset_factory
 from django.http.response import HttpResponseNotAllowed, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils import timezone, translation
 from django.utils.safestring import mark_safe
 from djmoney.money import Money
@@ -39,8 +38,6 @@ from goosetools.ownership.models import (
 from goosetools.users.forms import CharacterForm
 from goosetools.users.models import DiscordUser
 
-login_url = reverse_lazy("discord_login")
-
 
 class ComplexEncoder(json.JSONEncoder):
     def default(self, o):
@@ -54,7 +51,6 @@ class ComplexEncoder(json.JSONEncoder):
 
 # Two types needed - one without bucket which makes it, one which adds group to existing bucket
 # Buckets group up all shares in underlying groups and split all items in underlying groups by total shares
-@login_required(login_url=login_url)
 def loot_group_create(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     if not f.has_admin(request.user):
@@ -74,7 +70,6 @@ def forbidden(request):
     return render(request, "ownership/403.html")
 
 
-@login_required(login_url=login_url)
 def loot_share_join(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
     if request.method == "POST":
@@ -129,7 +124,6 @@ def loot_share_join(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 def loot_share_add(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
     if not loot_group.has_admin(request.user):
@@ -157,7 +151,6 @@ def loot_share_add(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 def loot_share_delete(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
     if not loot_share.loot_group.fleet().has_admin(request.user):
@@ -170,7 +163,6 @@ def loot_share_delete(request, pk):
         return forbidden(request)
 
 
-@login_required(login_url=login_url)
 def loot_share_edit(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
     if not loot_share.loot_group.fleet().has_admin(request.user):
@@ -201,7 +193,6 @@ def loot_share_edit(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 def loot_share_add_fleet_members(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
     if request.method == "POST":
@@ -219,7 +210,6 @@ def loot_share_add_fleet_members(request, pk):
     return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
 
 
-@login_required(login_url=login_url)
 def loot_group_close(request, pk):
     lg = get_object_or_404(LootGroup, pk=pk)
     if not lg.fleet().has_admin(request.user):
@@ -234,7 +224,6 @@ def loot_group_close(request, pk):
         return HttpResponseNotAllowed("POST")
 
 
-@login_required(login_url=login_url)
 def loot_group_open(request, pk):
     lg = get_object_or_404(LootGroup, pk=pk)
     if not lg.fleet().has_admin(request.user):
@@ -249,7 +238,6 @@ def loot_group_open(request, pk):
         return HttpResponseNotAllowed("POST")
 
 
-@login_required(login_url=login_url)
 def loot_group_add(request, fleet_pk, loot_bucket_pk):
     f = get_object_or_404(Fleet, pk=fleet_pk)
     if request.method == "POST":
@@ -314,7 +302,6 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
     )
 
 
-@login_required(login_url=login_url)
 def loot_group_edit(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
     if not loot_group.fleet_anom:
@@ -366,7 +353,6 @@ def loot_group_edit(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 def loot_group_view(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
     by_discord_user: Dict[int, List[LootShare]] = {}
@@ -382,12 +368,10 @@ def loot_group_view(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 def your_fleet_shares(request):
     return fleet_shares(request, request.user.discord_user.pk)
 
 
-@login_required(login_url=login_url)
 def fleet_shares(request, pk):
     loot_shares = LootShare.objects.filter(character__discord_user_id=pk)
     items = []
@@ -476,7 +460,6 @@ def fleet_shares(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 def loot_share_plus(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
     if not loot_share.has_admin(request.user):
@@ -488,7 +471,6 @@ def loot_share_plus(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 def loot_share_minus(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
     if not loot_share.has_admin(request.user):
@@ -500,7 +482,6 @@ def loot_share_minus(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 def transfered_items(request):
     characters = request.user.characters()
     all_sold = []
@@ -518,7 +499,6 @@ def transfered_items(request):
     return render(request, "ownership/transfered_items.html", {"all_sold": all_sold})
 
 
-@login_required(login_url=login_url)
 def completed_egg_transfers(request):
     return render(
         request,
@@ -531,7 +511,6 @@ def completed_egg_transfers(request):
     )
 
 
-@login_required(login_url=login_url)
 def view_transfer_log(request, pk):
     item = get_object_or_404(TransferLog, pk=pk)
     return render(
@@ -732,7 +711,6 @@ def valid_transfer(to_transfer, request):
     return True
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def transfer_eggs(request):
     if request.method == "POST":
@@ -760,7 +738,6 @@ def transfer_eggs(request):
     )
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def mark_transfer_as_done(request, pk):
     log = get_object_or_404(TransferLog, pk=pk)
@@ -777,7 +754,6 @@ def mark_transfer_as_done(request, pk):
         return HttpResponseNotAllowed("POST")
 
 
-@login_required(login_url=login_url)
 def item_add(request, lg_pk):
     extra = 10
     InventoryItemFormset = formset_factory(InventoryItemForm, extra=0)  # noqa

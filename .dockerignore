@@ -3,4 +3,5 @@
 !.pylintrc
 !.pre-commit-config.yaml
 !.git/
+!misc_data/
 .ipython/

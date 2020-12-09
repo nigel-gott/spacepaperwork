@@ -1,20 +1,15 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import login_required
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 
 from goosetools.bank.models import EggTransaction, IskTransaction, to_isk
 
-login_url = reverse_lazy("discord_login")
 
-
-@login_required(login_url=login_url)
 def own_user_transactions(request):
     return HttpResponseRedirect(reverse("user_transactions", args=[request.user.pk]))
 
 
-@login_required(login_url=login_url)
 def user_transactions(request, pk):
     user = get_object_or_404(get_user_model(), pk=pk)
     isk_transactions = IskTransaction.user_isk_transactions(user).order_by("time").all()

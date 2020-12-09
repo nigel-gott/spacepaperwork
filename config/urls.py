@@ -20,6 +20,7 @@ urlpatterns = [
                 path("", include("contracts.urls")),
                 path("", include("market.urls")),
                 path("", include("ownership.urls")),
+                path("", include("core.urls")),
                 path("mapbot/", include("mapbot.urls")),
                 path("industry/", include("industry.urls")),
                 path("accounts/", include("allauth.urls")),

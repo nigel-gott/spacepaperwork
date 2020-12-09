@@ -3,12 +3,11 @@ import math as m
 from decimal import Decimal
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.forms.forms import Form
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils import timezone, translation
 from djmoney.money import Money
 from moneyed.localization import format_money
@@ -18,15 +17,12 @@ from goosetools.contracts.models import Contract
 from goosetools.fleets.models import Fleet
 from goosetools.items.models import CharacterLocation, InventoryItem, ItemLocation
 
-login_url = reverse_lazy("discord_login")
-
 
 def forbidden(request):
     messages.error(request, "You are forbidden to access this.")
     return render(request, "contracts/403.html")
 
 
-@login_required(login_url=login_url)
 def reject_contract(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if request.method == "POST":
@@ -52,7 +48,6 @@ def reject_contract(request, pk):
 
 
 @transaction.atomic
-@login_required(login_url=login_url)
 def cancel_contract(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if request.method == "POST":
@@ -105,7 +100,6 @@ def change_contract_status(contract, status, change_location):
 
 
 @transaction.atomic
-@login_required(login_url=login_url)
 def accept_contract(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if request.method == "POST":
@@ -116,7 +110,6 @@ def accept_contract(request, pk):
 
 
 @transaction.atomic
-@login_required(login_url=login_url)
 def create_contract_item(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     if request.method == "POST":
@@ -159,7 +152,6 @@ def create_contract_item(request, pk):
 
 
 @transaction.atomic
-@login_required(login_url=login_url)
 def create_contract_for_loc(request, pk):
     loc = get_object_or_404(ItemLocation, pk=pk)
     if request.method == "POST":
@@ -204,7 +196,6 @@ def create_contract_for_loc(request, pk):
 
 
 @transaction.atomic
-@login_required(login_url=login_url)
 def create_contract_for_fleet(request, fleet_pk, loc_pk):
     f = get_object_or_404(Fleet, pk=fleet_pk)
     loc = get_object_or_404(ItemLocation, pk=loc_pk)
@@ -251,7 +242,6 @@ def create_contract_for_fleet(request, fleet_pk, loc_pk):
 
 
 @transaction.atomic
-@login_required(login_url=login_url)
 def item_move_all(request):
     if request.method == "POST":
         form = ItemMoveAllForm(request.POST)
@@ -290,7 +280,6 @@ def item_move_all(request):
     )
 
 
-@login_required(login_url=login_url)
 def view_contract(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if contract.status == "pending":
@@ -313,7 +302,6 @@ def view_contract(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 def contracts(request):
     return render(
         request,

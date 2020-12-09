@@ -74,6 +74,8 @@ def _update_user_from_social_account(discord_user, account, gooseuser):
     )
     discord_user.avatar_hash = account.extra_data["avatar"]
     _setup_user_groups_from_discord_guild_roles(gooseuser, account.extra_data)
+    if discord_user.pre_approved:
+        gooseuser.set_approved()
 
     discord_user.full_clean()
     discord_user.save()

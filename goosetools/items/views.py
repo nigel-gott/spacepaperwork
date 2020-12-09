@@ -2,14 +2,13 @@ from typing import Any, Dict, List
 
 from django import forms
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import ExpressionWrapper, F, Sum
 from django.db.models.fields import FloatField
 from django.db.models.functions import Coalesce
 from django.http.response import HttpResponseNotAllowed, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils import timezone
 
 from goosetools.items.forms import DeleteItemForm, InventoryItemForm, JunkItemsForm
@@ -25,15 +24,12 @@ from goosetools.items.models import (
 from goosetools.users.forms import CharacterForm
 from goosetools.users.models import Character
 
-login_url = reverse_lazy("discord_login")
-
 
 def forbidden(request):
     messages.error(request, "You are forbidden to access this.")
     return render(request, "items/403.html")
 
 
-@login_required(login_url=login_url)
 def junk(request):
     characters = request.user.characters()
     all_junked = []
@@ -58,7 +54,6 @@ def junk(request):
     return render(request, "items/junk.html", {"all_junked": all_junked})
 
 
-@login_required(login_url=login_url)
 def items_view(request):
     characters = request.user.characters()
     return render_item_view(
@@ -69,7 +64,6 @@ def items_view(request):
     )
 
 
-@login_required(login_url=login_url)
 def items_grouped(request):
     items = (
         Item.objects.annotate(total=Sum("inventoryitem__quantity"))
@@ -83,7 +77,6 @@ def items_grouped(request):
     )
 
 
-@login_required(login_url=login_url)
 def all_items(request):
     characters = Character.objects.annotate(
         cc=Sum("characterlocation__itemlocation__inventoryitem__quantity")
@@ -195,7 +188,6 @@ def stack_in_location(loc):
     return True, f"Stacked All Items in {loc}!"
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def stack_view(request, pk):
     stack = get_object_or_404(StackedInventoryItem, pk=pk)
@@ -209,7 +201,6 @@ def stack_view(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def stack_delete(request, pk):
     stack = get_object_or_404(StackedInventoryItem, pk=pk)
@@ -230,7 +221,6 @@ def stack_delete(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def unjunk_item(request, pk):
     junked_item = get_object_or_404(JunkedItem, pk=pk)
@@ -247,7 +237,6 @@ def unjunk_item(request, pk):
         return HttpResponseNotAllowed("POST")
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def junk_stack(request, pk):
     stack = get_object_or_404(StackedInventoryItem, pk=pk)
@@ -266,7 +255,6 @@ def junk_stack(request, pk):
         return HttpResponseNotAllowed("POST")
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def junk_item(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
@@ -285,7 +273,6 @@ def junk_item(request, pk):
         return HttpResponseNotAllowed("POST")
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def junk_items(request, pk):
     loc = get_object_or_404(ItemLocation, pk=pk)
@@ -333,7 +320,6 @@ def junk_items(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 @transaction.atomic
 def stack_items(request, pk):
     loc = get_object_or_404(ItemLocation, pk=pk)
@@ -357,13 +343,11 @@ def stack_items(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 def item_view(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     return render(request, "items/item_view.html", {"item": item})
 
 
-@login_required(login_url=login_url)
 def item_minus(request, pk):
     inventory_item = get_object_or_404(InventoryItem, pk=pk)
     if not inventory_item.has_admin(request.user):
@@ -382,7 +366,6 @@ def item_minus(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 def item_plus(request, pk):
     inventory_item = get_object_or_404(InventoryItem, pk=pk)
     if not inventory_item.has_admin(request.user):
@@ -401,7 +384,6 @@ def item_plus(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 def item_edit(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     if not item.has_admin(request.user):
@@ -444,7 +426,6 @@ def item_edit(request, pk):
     )
 
 
-@login_required(login_url=login_url)
 def item_delete(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
     if not item.has_admin(request.user):

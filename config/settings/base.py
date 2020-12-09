@@ -137,8 +137,8 @@ ACCOUNT_FORMS = {
     "reset_password": "config.forms.ResetPasswordForm",
 }
 # Setup custom adapters to properly create the custom GooseUser and disable normal sign up
-ACCOUNT_ADAPTER = "config.adapters.AccountAdapter"
-SOCIALACCOUNT_ADAPTER = "config.adapters.SocialAccountAdapter"
+ACCOUNT_ADAPTER = "goosetools.users.adapters.AccountAdapter"
+SOCIALACCOUNT_ADAPTER = "goosetools.users.adapters.SocialAccountAdapter"
 SOCIALACCOUNT_PROVIDERS = {
     "discord": {
         # Restrict down to the minimum scope to identify the user.
@@ -165,6 +165,14 @@ AUTH_PASSWORD_VALIDATORS = [
 
 ACCOUNT_EMAIL_VERIFICATION = "none"
 
+LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [
+    "discord_login",
+    "account_signup",
+    "account_login",
+    "socialaccount_signup",
+]
+LOGIN_REQUIRED_UNAPPROVED_USER_REDIRECT = "discord_login"
+
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#middleware
@@ -177,6 +185,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "goosetools.users.middleware.LoginAndApprovedUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     # TODO Setup email and enable this to notify admins when there are broken links.
     # "django.middleware.common.BrokenLinkEmailsMiddleware",

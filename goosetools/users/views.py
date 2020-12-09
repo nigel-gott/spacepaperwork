@@ -1,16 +1,12 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 
 from goosetools.users.forms import SettingsForm
 from goosetools.users.models import Character
 
-login_url = reverse_lazy("discord_login")
 
-
-@login_required(login_url=login_url)
 def settings_view(request):
     goose_user = request.user
     if request.method == "POST":
