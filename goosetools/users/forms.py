@@ -45,8 +45,6 @@ class SignupFormWithTimezone(SignupForm):
         self.fields["corp"].queryset = Corp.objects.filter(
             Q(required_discord_role__in=roles) | Q(required_discord_role__isnull=True)
         )
-        print("CORPS")
-        print(self.fields["corp"].queryset.all())
 
         existing_characters = Character.objects.filter(discord_user__uid=uid)
         default_character_field = self.fields["default_character"]
