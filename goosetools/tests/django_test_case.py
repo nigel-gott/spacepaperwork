@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Set, Tuple, Union
 
 from django.contrib.messages.api import get_messages
 from django.http.response import HttpResponse
@@ -69,7 +69,11 @@ class DjangoTestCase(TestCase):
             expected_messages,
         )
 
-    def json_matches(self, r: HttpResponse, expected_json: str):
+    def json_matches(
+        self, r: HttpResponse, expected_json: Union[str, Union[dict, list]]
+    ):
+        if not isinstance(expected_json, str):
+            expected_json = json.dumps(expected_json)
         keys_to_ignore = find_keys_to_ignore(expected_json)
         actual_json = str(r.content, encoding="utf-8")
         self.assertEqual(

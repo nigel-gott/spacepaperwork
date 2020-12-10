@@ -1,10 +1,13 @@
 import urllib
 
+from django.contrib.auth import logout
+from django.core.cache import caches
 from django.http.response import (
     HttpResponseBadRequest,
     HttpResponseRedirect,
     JsonResponse,
 )
+from django.urls.base import reverse
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -16,13 +19,20 @@ def authorize_url(request):
     return HttpResponseRedirect(redirect_uri + "?" + str(params))
 
 
+def set_uid(request, uid):
+    logout(request)
+    caches["default"].set("uid", uid)
+    return HttpResponseRedirect(reverse("core:home"))
+
+
 def profile_url(request):
+    uid = str(caches["default"].get("uid", "123456789"))
     return JsonResponse(
         {
-            "id": "123456789",
-            "username": "TEST USER",
+            "id": uid,
+            "username": "TEST USER" + uid,
             "avatar": "e71b856158d285d6ac6e8877d17bae45",
-            "discriminator": "1234",
+            "discriminator": uid,
             "public_flags": 0,
             "flags": 0,
             "locale": "en-US",

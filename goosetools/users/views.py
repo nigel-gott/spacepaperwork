@@ -1,10 +1,17 @@
 from django.contrib import messages
-from django.http.response import HttpResponseRedirect
-from django.shortcuts import render
+from django.contrib.auth.decorators import permission_required
+from django.db import transaction
+from django.http.response import (
+    HttpResponseBadRequest,
+    HttpResponseNotAllowed,
+    HttpResponseRedirect,
+)
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.views.generic import ListView
 
 from goosetools.users.forms import SettingsForm
-from goosetools.users.models import Character
+from goosetools.users.models import Character, UserApplication
 
 
 def settings_view(request):
@@ -34,3 +41,23 @@ def settings_view(request):
         discord_user=goose_user.discord_user
     )
     return render(request, "users/settings.html", {"form": form})
+
+
+@permission_required("users.change_userapplication")
+@transaction.atomic
+def application_update(request, pk):
+    application = get_object_or_404(UserApplication, pk=pk)
+    if request.method == "POST":
+        if "approve" in request.POST:
+            application.approve()
+        elif "reject" in request.POST:
+            application.reject()
+        else:
+            return HttpResponseBadRequest()
+        return HttpResponseRedirect(reverse("applications"))
+    else:
+        return HttpResponseNotAllowed("POST")
+
+
+class UserApplicationListView(ListView):
+    model = UserApplication

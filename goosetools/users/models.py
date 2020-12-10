@@ -3,6 +3,7 @@ from typing import Union
 from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
+from django.utils import timezone
 from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
 from django_prometheus.models import ExportModelOperationsMixin
@@ -122,8 +123,16 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
     def is_approved(self):
         return self.status == "approved"
 
-    def set_approved(self):
+    def is_authed_and_approved(self):
+        return self.is_authenticated and self.is_approved()
+
+    def approved(self):
         self.status = "approved"
+        self.full_clean()
+        self.save()
+
+    def rejected(self):
+        self.status = "rejected"
         self.full_clean()
         self.save()
 
@@ -141,6 +150,47 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
 
     def discord_avatar_hash(self):
         return self.discord_user.uid
+
+    def discord_avatar_url(self):
+        return self.discord_user.avatar_url()
+
+
+class UserApplication(models.Model):
+    user = models.OneToOneField(GooseUser, on_delete=models.CASCADE)
+    status = models.TextField(
+        choices=[
+            ("unapproved", "unapproved"),
+            ("approved", "approved"),
+            ("rejected", "rejected"),
+        ],
+        default="unapproved",
+    )
+    created_at = models.DateTimeField(default=timezone.now)
+    application_notes = models.TextField(blank=True, null=True)
+    ingame_name = models.TextField()
+    corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
+
+    def _create_character(self):
+        main_char = Character(
+            discord_user=self.user.discord_user,
+            ingame_name=self.ingame_name,
+            corp=self.corp,
+        )
+        main_char.full_clean()
+        main_char.save()
+
+    def approve(self):
+        self.status = "approved"
+        self.user.approved()
+        self._create_character()
+        self.full_clean()
+        self.save()
+
+    def reject(self):
+        self.status = "rejected"
+        self.user.rejected()
+        self.full_clean()
+        self.save()
 
 
 class DiscordGuild(models.Model):

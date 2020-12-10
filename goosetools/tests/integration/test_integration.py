@@ -27,6 +27,7 @@ def test_can_sign_up_and_create_new_fleet(http_service, browser):
 
     wait_and_click(browser, "sign_up_button")
 
+    browser.visit("http://django:8000/goosetools/fleet")
     wait_and_click(browser, "start_new_fleet_button")
     browser.find_by_id("id_name").first.fill("Test Fleet Name")
     wait_and_click(browser, "create_fleet_button")

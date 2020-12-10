@@ -5,11 +5,13 @@ from allauth.socialaccount.models import SocialAccount
 from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.urls import reverse
+from django.utils import timezone
 
 from goosetools.users.models import (
     DiscordGuild,
     DiscordRoleDjangoGroupMapping,
     DiscordUser,
+    UserApplication,
 )
 
 
@@ -44,6 +46,20 @@ class AccountAdapter(DefaultAccountAdapter):
         user.save()
 
 
+def _create_application_if_not_approved(user, discord_user, form):
+    if not discord_user.pre_approved:
+        application = UserApplication(
+            user=user,
+            status="unapproved",
+            created_at=timezone.now(),
+            application_notes=form.cleaned_data["application_notes"],
+            ingame_name=form.cleaned_data["ingame_name"],
+            corp=form.cleaned_data["corp"],
+        )
+        application.full_clean()
+        application.save()
+
+
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def save_user(self, request, sociallogin, form=None):
         """
@@ -61,6 +77,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         sociallogin.user.discord_user = discord_user
         _update_discord_user(discord_user, account)
         super().save_user(request, sociallogin, form)
+        _create_application_if_not_approved(sociallogin.user, discord_user, form)
         _update_user_from_social_account(discord_user, account, sociallogin.user)
 
     def validate_disconnect(self, account, accounts):
@@ -82,7 +99,10 @@ def _update_discord_user(discord_user, account):
 def _update_user_from_social_account(discord_user, account, gooseuser):
     _setup_user_groups_from_discord_guild_roles(gooseuser, account.extra_data)
     if discord_user.pre_approved:
-        gooseuser.set_approved()
+        print("PRE APPROVING")
+        gooseuser.approved()
+    else:
+        print("NOT PRE APPROVED")
 
 
 def _setup_user_groups_from_discord_guild_roles(user, extra_data):

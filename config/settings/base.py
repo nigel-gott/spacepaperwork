@@ -149,7 +149,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 ACCOUNT_LOGOUT_REDIRECT_URL = "/goosetools/"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
-LOGIN_REDIRECT_URL = "fleet"
+LOGIN_REDIRECT_URL = "core:home"
 # LOGIN_REDIRECT_URL = 'fleet'
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
 LOGIN_URL = "account_login"
@@ -171,6 +171,7 @@ LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [
     "account_login",
     "socialaccount_signup",
     "discord_callback",
+    "account_logout",
 ]
 LOGIN_REQUIRED_UNAPPROVED_USER_REDIRECT = "discord_login"
 

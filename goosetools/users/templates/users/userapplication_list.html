@@ -1,0 +1,44 @@
+{% extends "core/base.html" %}
+{% block body %}
+<div class="section">
+    <h4>Corp Applications</h4>
+</div>
+<div class="section">
+    <h5>Pending Applications</h5>
+    <ul class="collection" style="overflow: visible;">
+    {% for application in object_list %}
+        <li class="collection-item avatar">
+            <span class="title">Application for: {{application.user.discord_username}}</span>
+            <div class="divider"></div>
+            {% if application.user.discord_avatar_url %}
+            <img alt="" class="avatar"
+                    src="{{ application.user.discord_avatar_url }}?size=32" style="width: 32px">
+            {% endif %}
+            <p>
+                <b>Discord ID:</b> {{application.user.discord_user.uid}}<br/>
+                <b>In Game Name:</b> {{application.ingame_name}}<br/>
+                <b>Corp Applying To:</b> {{application.corp}}<br/>
+                {% if application.application_notes %}
+                <b>Notes From Applicant:</b> <blockquote>{{application.application_notes}}</blockquote>
+                {% endif %}
+            </p>
+
+            <form action="{% url 'application_update' application.pk %}" method="post">
+                {% csrf_token %}
+                <label>Notes:</label>
+                        <textarea class="materialize-textarea" id="id_notes"></textarea>
+                        <input type="hidden" id="id_user" value="{{user.id}}"></input>
+                <button name="approve" class="btn green waves-effect waves-light" type="submit" value="Submit">Approve
+                    <i class="material-icons right">send</i>
+                </button>
+                <button name="deny" class="btn red waves-effect waves-light" type="submit" value="Submit">Reject
+                    <i class="material-icons right">send</i>
+                </button>
+            </form>
+            </p>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

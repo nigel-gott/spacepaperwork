@@ -3,7 +3,7 @@ from dal import autocomplete
 from django import forms
 
 from goosetools.users.fields import TimeZoneFormField
-from goosetools.users.models import Character
+from goosetools.users.models import Character, Corp, DiscordUser
 
 
 class SignupFormWithTimezone(SignupForm):
@@ -15,15 +15,39 @@ class SignupFormWithTimezone(SignupForm):
         max_digits=5, decimal_places=2, label="Broker Fee %", initial=8
     )
     default_character = forms.ModelChoiceField(
-        queryset=Character.objects.all(), initial=0, required=False
+        queryset=Character.objects.all(), required=False
     )
+    application_notes = forms.CharField(required=False)
+    ingame_name = forms.CharField()
+    corp = forms.ModelChoiceField(queryset=Corp.objects.all())
+
+    def _disable_field(self, field_name):
+        field = self.fields[field_name]
+        field.required = False
+        field.widget = forms.HiddenInput()
+        field.label = ""
 
     def __init__(self, *args, **kwargs):
         sociallogin = kwargs.get("sociallogin", None)
-        super(SignupFormWithTimezone, self).__init__(*args, **kwargs)
-        self.fields["default_character"].queryset = Character.objects.filter(
-            discord_user__uid=sociallogin.account.uid
-        )
+        super().__init__(*args, **kwargs)
+        uid = sociallogin.account.uid
+        try:
+            pre_approved = DiscordUser.objects.get(uid=uid).pre_approved
+        except DiscordUser.DoesNotExist:
+            pre_approved = False
+
+        existing_characters = Character.objects.filter(discord_user__uid=uid)
+        default_character_field = self.fields["default_character"]
+        if pre_approved and existing_characters.count() > 0:
+            default_character_field.queryset = existing_characters
+        else:
+            default_character_field.queryset = Character.objects.none()
+            self._disable_field("default_character")
+
+        if pre_approved:
+            self._disable_field("application_notes")
+            self._disable_field("ingame_name")
+            self._disable_field("corp")
 
 
 class SettingsForm(forms.Form):

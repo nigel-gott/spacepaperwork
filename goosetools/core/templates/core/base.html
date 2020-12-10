@@ -12,7 +12,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 </head>
 <body>
-{% if user.is_authenticated %}
+{% if user.is_authenticated and user.is_approved %}
 <ul class="dropdown-content" id="dropdown_fleets">
     <li><a href="{% url 'fleet' %}">Active Fleets
         ({% num_active_fleets %})
@@ -31,6 +31,8 @@
 </ul>
 <ul class="dropdown-content" id="dropdown_sales">
     {% num_items user as num_to_sell %}
+    {% num_contracts user as contracts %}
+    <li><a href="{% url 'contracts' %}">Contracts ({{contracts}})</a></li>
     <li><a href="{% url 'items' %}">Your Loot To Sell
         ({{ num_to_sell }})
     </a>
@@ -49,40 +51,49 @@
     </a>
     <li><a href="{% url 'junk' %}">Junked Items
     </a>
+    <li><a href="{% url 'own_user_transactions' %}">Transactions</a></li>
     </li>
-    <li><a href="{% url 'all_items' %}">View Everyone's Items
-    </a>
+</ul>
+{% endif %}
+{% if user.is_staff %}
+<ul class="dropdown-content" id="dropdown_admin">
+    <li>
+        <a href="{% url 'applications' %}">Applications</a>
     </li>
-    <li><a href="{% url 'grouped_items' %}">View Everyone's Items Grouped
-    </a>
+    <li>
+        <a href="{% url 'admin:index' %}">Site Admin</a>
     </li>
 </ul>
 {% endif %}
 <nav class="nav-extended blue-grey darken-3">
     <div class="nav-wrapper">
         <a class="sidenav-trigger" data-target="mobile-demo" href="#"><i class="material-icons">menu</i></a>
-        {% if user.is_authenticated %}
+        {% if user.is_authenticated and user.is_approved %}
         <ul class="left hide-on-med-and-down valign-wrapper">
 
-            <li><a class="dropdown-trigger valign-wrapper" data-target="dropdown_fleets" href="#!">
-                <i class="material-icons left">star</i>Fleets
-                <i class="material-icons right">arrow_drop_down</i>
-                </a></li>
+            <li>
+                <a class="dropdown-trigger valign-wrapper" data-target="dropdown_fleets" href="#!">
+                    <i class="material-icons left">star</i>Fleets
+                    <i class="material-icons right">arrow_drop_down</i>
+                </a>
+            </li>
             {% all_sales user as all_sales_num %}
-            {% num_contracts user as contracts %}
             <li><a class="dropdown-trigger valign-wrapper" data-target="dropdown_sales" href="#!">
                 <i class="material-icons left" style="margin-right:0px;">attach_money</i>Sales ({{all_sales_num}})
                 <i class="material-icons right">arrow_drop_down</i>
                 </a></li>
-            <li><a href="{% url 'contracts' %}">Contracts ({{contracts}})<i class="material-icons left">compare_arrows</i></a></li>
-            <li><a class="tab" href="{% url 'own_user_transactions' %}">Transactions<i class="material-icons left">toc</i></a></li>
             <li><a class="tab" href="{% url 'industry:shiporders_view' %}">Ship Orders <i class="material-icons left">directions_boat</i>
             </a></li>
             <li><a class="tab" href="{% url 'mapbot:mapbot_index' %}">MapBot<i class="material-icons left">public</i>
             </a></li>
             <li><a class="tab" href="{% url 'settings' %}">Settings<i class="material-icons left">settings</i></a></li>
             {% if user.is_staff %}
-            <li><a class="tab" href="{% url 'admin:index' %}">Admin<i class="material-icons left">build</i></a></li>
+            <li>
+                <a class="dropdown-trigger valign-wrapper" data-target="dropdown_admin" href="#!">
+                    <i class="material-icons left">build</i>Admin
+                    <i class="material-icons right">arrow_drop_down</i>
+                </a>
+            </li>
             {% endif %}
         </ul>
         {% endif %}
@@ -108,7 +119,7 @@
     {% if user.is_staff %}
     <li><a class="tab" href="{% url 'admin:index' %}">Admin<i class="material-icons left">build</i></a></li>
     {% endif %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated and user.is_approved %}
     <li class="tab"><a href="{% url 'industry:shiporders_view' %}">Ship Orders
     </a>
     <li class="tab"><a href="{% url 'mapbot:mapbot_index' %}">MapBot

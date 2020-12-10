@@ -30,6 +30,7 @@ class LoginAndApprovedUserMiddleware(AuthenticationMiddleware):
                 resolver = resolve(path)
                 views = ((name == resolver.view_name) for name in APPROVED_IGNORE)
                 if not any(views):
+                    print("failed for " + resolver.view_name)
                     messages.error(
                         request, "You are not yet approved and cannot access this page."
                     )

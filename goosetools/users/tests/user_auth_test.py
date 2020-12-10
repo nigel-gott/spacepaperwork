@@ -1,9 +1,32 @@
 import requests_mock
+from django.contrib.auth.models import Group
 from django.urls.base import reverse
 from freezegun import freeze_time
 
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
-from goosetools.users.models import DiscordUser
+from goosetools.users.models import DiscordUser, GooseUser
+
+
+def mock_discord_returns_with_uid(m, uid):
+    m.post(
+        "http://localhost:8000/goosetools/stub_discord_auth/access_token_url",
+        json={"access_token": "stub_access_code"},
+        headers={"content-type": "application/json"},
+    )
+    m.get(
+        "http://localhost:8000/goosetools/stub_discord_auth/profile_url",
+        json={
+            "id": uid,
+            "username": "TEST USER",
+            "avatar": "e71b856158d285d6ac6e8877d17bae45",
+            "discriminator": "1234",
+            "public_flags": 0,
+            "flags": 0,
+            "locale": "en-US",
+            "mfa_enabled": True,
+        },
+        headers={"content-type": "application/json"},
+    )
 
 
 @freeze_time("2012-01-14 12:00:00")
@@ -29,25 +52,7 @@ class UserAuthTest(GooseToolsTestCase):
 
     def test_a_preapproved_discord_user_is_approved_after_signing_up(self):
         with requests_mock.Mocker() as m:
-            m.post(
-                "http://localhost:8000/goosetools/stub_discord_auth/access_token_url",
-                json={"access_token": "stub_access_code"},
-                headers={"content-type": "application/json"},
-            )
-            m.get(
-                "http://localhost:8000/goosetools/stub_discord_auth/profile_url",
-                json={
-                    "id": "3",
-                    "username": "TEST USER",
-                    "avatar": "e71b856158d285d6ac6e8877d17bae45",
-                    "discriminator": "1234",
-                    "public_flags": 0,
-                    "flags": 0,
-                    "locale": "en-US",
-                    "mfa_enabled": True,
-                },
-                headers={"content-type": "application/json"},
-            )
+            mock_discord_returns_with_uid(m, "3")
             DiscordUser.objects.create(
                 username="Preapproved Discord User", uid="3", pre_approved=True
             )
@@ -71,25 +76,7 @@ class UserAuthTest(GooseToolsTestCase):
 
     def test_an_unknown_discord_user_is_unapproved_after_signing_up(self):
         with requests_mock.Mocker() as m:
-            m.post(
-                "http://localhost:8000/goosetools/stub_discord_auth/access_token_url",
-                json={"access_token": "stub_access_code"},
-                headers={"content-type": "application/json"},
-            )
-            m.get(
-                "http://localhost:8000/goosetools/stub_discord_auth/profile_url",
-                json={
-                    "id": "UNKNOWN",
-                    "username": "TEST USER",
-                    "avatar": "e71b856158d285d6ac6e8877d17bae45",
-                    "discriminator": "1234",
-                    "public_flags": 0,
-                    "flags": 0,
-                    "locale": "en-US",
-                    "mfa_enabled": True,
-                },
-                headers={"content-type": "application/json"},
-            )
+            mock_discord_returns_with_uid(m, "3")
             self.client.logout()
             response = self.client.get("/goosetools/", follow=True)
             last_url, _ = response.redirect_chain[-1]
@@ -100,6 +87,8 @@ class UserAuthTest(GooseToolsTestCase):
                     "transaction_tax": 14,
                     "broker_fee": 3,
                     "username": "test",
+                    "ingame_name": "My Ingame Name",
+                    "corp": self.corp.pk,
                 },
             )
             response = self.client.get(reverse("fleet"))
@@ -107,6 +96,108 @@ class UserAuthTest(GooseToolsTestCase):
                 response,
                 [
                     ("success", "Successfully signed in as test."),
+                    ("error", "You are not yet approved and cannot access this page."),
+                ],
+            )
+            self.assertNotIn("Active Fleets", str(response.content, encoding="utf-8"))
+
+    def test_unknown_user_creates_an_app_on_signup_which_can_be_approved(
+        self,
+    ):
+        with requests_mock.Mocker() as m:
+            mock_discord_returns_with_uid(m, "3")
+            self.client.logout()
+            # When an unknown and hence unapproved user applies to the corp
+            response = self.client.get("/goosetools/", follow=True)
+            last_url, _ = response.redirect_chain[-1]
+            self.post(
+                last_url,
+                {
+                    "timezone": "Pacific/Niue",
+                    "transaction_tax": 14,
+                    "broker_fee": 3,
+                    "username": "test",
+                    "ingame_name": "My Main",
+                    "corp": self.corp.pk,
+                    "application_notes": "Hello please let me into goosefleet",
+                },
+            )
+
+            self.client.logout()
+            self.client.force_login(self.user)
+
+            user_admin_group = Group.objects.get(name="user_admin")
+            self.user.groups.add(user_admin_group)
+
+            # Their application can been seen by a user_admin
+            applications = self.get(reverse("applications")).context["object_list"]
+            self.assertEqual(len(applications), 1)
+            application = applications[0]
+            self.assertEqual(application.user.username, "test")
+            self.assertEqual(application.user.discord_uid(), "3")
+            self.assertEqual(application.corp, self.corp)
+            self.assertEqual(application.ingame_name, "My Main")
+            self.assertEqual(
+                application.application_notes, "Hello please let me into goosefleet"
+            )
+            self.assertEqual(application.status, "unapproved")
+
+            self.post(
+                reverse("application_update", args=[application.pk]), {"approve": ""}
+            )
+            self.client.force_login(GooseUser.objects.get(username="test"))
+            response = self.client.get(reverse("fleet"))
+            self.assertIn("Active Fleets", str(response.content, encoding="utf-8"))
+
+    def test_unknown_user_creates_an_app_on_signup_which_can_be_rejected(
+        self,
+    ):
+        with requests_mock.Mocker() as m:
+            mock_discord_returns_with_uid(m, "3")
+            self.client.logout()
+            # When an unknown and hence unapproved user applies to the corp
+            response = self.client.get("/goosetools/", follow=True)
+            last_url, _ = response.redirect_chain[-1]
+            self.post(
+                last_url,
+                {
+                    "timezone": "Pacific/Niue",
+                    "transaction_tax": 14,
+                    "broker_fee": 3,
+                    "username": "test",
+                    "ingame_name": "My Main",
+                    "corp": self.corp.pk,
+                    "application_notes": "Hello please let me into goosefleet",
+                },
+            )
+
+            self.client.logout()
+            self.client.force_login(self.user)
+
+            user_admin_group = Group.objects.get(name="user_admin")
+            self.user.groups.add(user_admin_group)
+
+            # Their application can been seen by a user_admin
+            applications = self.get(reverse("applications")).context["object_list"]
+            self.assertEqual(len(applications), 1)
+            application = applications[0]
+            self.assertEqual(application.user.username, "test")
+            self.assertEqual(application.user.discord_uid(), "3")
+            self.assertEqual(application.corp, self.corp)
+            self.assertEqual(application.ingame_name, "My Main")
+            self.assertEqual(
+                application.application_notes, "Hello please let me into goosefleet"
+            )
+            self.assertEqual(application.status, "unapproved")
+
+            self.post(
+                reverse("application_update", args=[application.pk]), {"reject": ""}
+            )
+            self.client.force_login(GooseUser.objects.get(username="test"))
+            response = self.client.get(reverse("fleet"))
+            self.assert_messages(
+                response,
+                [
                     ("error", "You are not yet approved and cannot access this page."),
                 ],
             )
