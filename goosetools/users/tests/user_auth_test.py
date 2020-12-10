@@ -7,24 +7,27 @@ from goosetools.tests.goosetools_test_case import GooseToolsTestCase
 from goosetools.users.models import DiscordUser, GooseUser
 
 
-def mock_discord_returns_with_uid(m, uid):
+def mock_discord_returns_with_uid(m, uid, roles=None):
     m.post(
         "http://localhost:8000/goosetools/stub_discord_auth/access_token_url",
         json={"access_token": "stub_access_code"},
         headers={"content-type": "application/json"},
     )
+    profile_json = {
+        "id": uid,
+        "username": "TEST USER",
+        "avatar": "e71b856158d285d6ac6e8877d17bae45",
+        "discriminator": "1234",
+        "public_flags": 0,
+        "flags": 0,
+        "locale": "en-US",
+        "mfa_enabled": True,
+    }
+    if roles is not None:
+        profile_json["roles"] = roles
     m.get(
         "http://localhost:8000/goosetools/stub_discord_auth/profile_url",
-        json={
-            "id": uid,
-            "username": "TEST USER",
-            "avatar": "e71b856158d285d6ac6e8877d17bae45",
-            "discriminator": "1234",
-            "public_flags": 0,
-            "flags": 0,
-            "locale": "en-US",
-            "mfa_enabled": True,
-        },
+        json=profile_json,
         headers={"content-type": "application/json"},
     )
 
@@ -202,3 +205,76 @@ class UserAuthTest(GooseToolsTestCase):
                 ],
             )
             self.assertNotIn("Active Fleets", str(response.content, encoding="utf-8"))
+
+    def test_cant_apply_for_restricted_corp_if_user_doesnt_have_role(
+        self,
+    ):
+        with requests_mock.Mocker() as m:
+            mock_discord_returns_with_uid(m, "3")
+            self.client.logout()
+            response = self.client.get("/goosetools/", follow=True)
+            last_url, _ = response.redirect_chain[-1]
+            self.corp.required_discord_role = "1234"
+            self.corp.save()
+            errors = self.client.post(
+                last_url,
+                {
+                    "timezone": "Pacific/Niue",
+                    "transaction_tax": 14,
+                    "broker_fee": 3,
+                    "username": "test",
+                    "ingame_name": "My Main",
+                    "corp": self.corp.pk,
+                    "application_notes": "Hello please let me into goosefleet",
+                },
+            )
+            self.assertEqual(
+                errors.context["form"].errors.as_json(),
+                '{"corp": [{"message": "Select a valid choice. That choice is not one of the available choices.", "code": "invalid_choice"}]}',
+            )
+
+    def test_can_apply_to_unrestricted_corp(
+        self,
+    ):
+        with requests_mock.Mocker() as m:
+            mock_discord_returns_with_uid(m, "3")
+            self.client.logout()
+            response = self.client.get("/goosetools/", follow=True)
+            last_url, _ = response.redirect_chain[-1]
+            self.corp.required_discord_role = None
+            self.corp.save()
+            self.post(
+                last_url,
+                {
+                    "timezone": "Pacific/Niue",
+                    "transaction_tax": 14,
+                    "broker_fee": 3,
+                    "username": "test",
+                    "ingame_name": "My Main",
+                    "corp": self.corp.pk,
+                    "application_notes": "Hello please let me into goosefleet",
+                },
+            )
+
+    def test_can_apply_to_restricted_corp_if_you_have_roles(
+        self,
+    ):
+        with requests_mock.Mocker() as m:
+            mock_discord_returns_with_uid(m, "3", roles=["1234"])
+            self.client.logout()
+            response = self.client.get("/goosetools/", follow=True)
+            last_url, _ = response.redirect_chain[-1]
+            self.corp.required_discord_role = "1234"
+            self.corp.save()
+            self.post(
+                last_url,
+                {
+                    "timezone": "Pacific/Niue",
+                    "transaction_tax": 14,
+                    "broker_fee": 3,
+                    "username": "test",
+                    "ingame_name": "My Main",
+                    "corp": self.corp.pk,
+                    "application_notes": "Hello please let me into goosefleet",
+                },
+            )

@@ -1,6 +1,7 @@
 from allauth.socialaccount.forms import SignupForm
 from dal import autocomplete
 from django import forms
+from django.db.models.query_utils import Q
 
 from goosetools.users.fields import TimeZoneFormField
 from goosetools.users.models import Character, Corp, DiscordUser
@@ -35,6 +36,17 @@ class SignupFormWithTimezone(SignupForm):
             pre_approved = DiscordUser.objects.get(uid=uid).pre_approved
         except DiscordUser.DoesNotExist:
             pre_approved = False
+
+        roles = (
+            sociallogin.account.extra_data["roles"]
+            if "roles" in sociallogin.account.extra_data
+            else []
+        )
+        self.fields["corp"].queryset = Corp.objects.filter(
+            Q(required_discord_role__in=roles) | Q(required_discord_role__isnull=True)
+        )
+        print("CORPS")
+        print(self.fields["corp"].queryset.all())
 
         existing_characters = Character.objects.filter(discord_user__uid=uid)
         default_character_field = self.fields["default_character"]

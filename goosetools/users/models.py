@@ -12,6 +12,7 @@ from timezone_field import TimeZoneField
 
 class Corp(models.Model):
     name = models.TextField(primary_key=True)
+    required_discord_role = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return str(self.name)
