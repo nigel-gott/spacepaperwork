@@ -146,9 +146,12 @@ class UserAuthTest(GooseToolsTestCase):
             self.assertEqual(application.status, "unapproved")
 
             self.post(
-                reverse("application_update", args=[application.pk]), {"approve": ""}
+                reverse("application_update", args=[application.pk]),
+                {"approve": "", "notes": "Test Notes"},
             )
-            self.client.force_login(GooseUser.objects.get(username="test"))
+            new_user = GooseUser.objects.get(username="test")
+            self.assertEqual(new_user.notes, "Test Notes")
+            self.client.force_login(new_user)
             response = self.client.get(reverse("fleet"))
             self.assertIn("Active Fleets", str(response.content, encoding="utf-8"))
 

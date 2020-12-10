@@ -120,6 +120,8 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
         ],
         default="unapproved",
     )
+    notes = models.TextField(null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)  # type: ignore
 
     def is_approved(self):
         return self.status == "approved"

@@ -25,12 +25,12 @@ class CustomUserAdmin(UserAdmin):
             None,
             {
                 "fields": (
-                    "timezone",
                     "transaction_tax",
                     "discord_user",
                     "default_character",
                     "broker_fee",
                     "status",
+                    "notes",
                 )
             },
         ),
@@ -40,12 +40,12 @@ class CustomUserAdmin(UserAdmin):
             None,
             {
                 "fields": (
-                    "timezone",
                     "transaction_tax",
                     "discord_user",
                     "default_character",
                     "broker_fee",
                     "status",
+                    "notes",
                 )
             },
         ),

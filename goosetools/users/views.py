@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.generic import ListView
 
-from goosetools.users.forms import SettingsForm
+from goosetools.users.forms import SettingsForm, UserApplicationUpdateForm
 from goosetools.users.models import Character, UserApplication
 
 
@@ -54,6 +54,11 @@ def application_update(request, pk):
             application.reject()
         else:
             return HttpResponseBadRequest()
+
+        form = UserApplicationUpdateForm(request.POST)
+        if form.is_valid():
+            application.user.notes = form.cleaned_data["notes"]
+            application.user.save()
         return HttpResponseRedirect(reverse("applications"))
     else:
         return HttpResponseNotAllowed("POST")

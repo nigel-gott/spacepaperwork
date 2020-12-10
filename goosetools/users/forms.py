@@ -31,6 +31,7 @@ class SignupFormWithTimezone(SignupForm):
     def __init__(self, *args, **kwargs):
         sociallogin = kwargs.get("sociallogin", None)
         super().__init__(*args, **kwargs)
+        self.fields.pop("email")
         uid = sociallogin.account.uid
         try:
             pre_approved = DiscordUser.objects.get(uid=uid).pre_approved
@@ -73,6 +74,10 @@ class SettingsForm(forms.Form):
     default_character = forms.ModelChoiceField(
         queryset=Character.objects.all(), initial=0, required=False
     )
+
+
+class UserApplicationUpdateForm(forms.Form):
+    notes = forms.CharField(required=False)
 
 
 class CharacterForm(forms.Form):
