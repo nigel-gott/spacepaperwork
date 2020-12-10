@@ -256,6 +256,29 @@ class UserAuthTest(GooseToolsTestCase):
                 },
             )
 
+    def test_can_apply_to_unrestricted_corp_with_blank_role(
+        self,
+    ):
+        with requests_mock.Mocker() as m:
+            mock_discord_returns_with_uid(m, "3")
+            self.client.logout()
+            response = self.client.get("/goosetools/", follow=True)
+            last_url, _ = response.redirect_chain[-1]
+            self.corp.required_discord_role = ""
+            self.corp.save()
+            self.post(
+                last_url,
+                {
+                    "timezone": "Pacific/Niue",
+                    "transaction_tax": 14,
+                    "broker_fee": 3,
+                    "username": "test",
+                    "ingame_name": "My Main",
+                    "corp": self.corp.pk,
+                    "application_notes": "Hello please let me into goosefleet",
+                },
+            )
+
     def test_can_apply_to_restricted_corp_if_you_have_roles(
         self,
     ):
