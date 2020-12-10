@@ -218,3 +218,4 @@ class DiscordRoleDjangoGroupMapping(models.Model):
     guild = models.ForeignKey(DiscordGuild, on_delete=models.CASCADE)
     role_id = models.TextField()
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    grants_staff = models.BooleanField(default=False)

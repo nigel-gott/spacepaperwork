@@ -99,10 +99,7 @@ def _update_discord_user(discord_user, account):
 def _update_user_from_social_account(discord_user, account, gooseuser):
     _setup_user_groups_from_discord_guild_roles(gooseuser, account.extra_data)
     if discord_user.pre_approved:
-        print("PRE APPROVING")
         gooseuser.approved()
-    else:
-        print("NOT PRE APPROVED")
 
 
 def _setup_user_groups_from_discord_guild_roles(user, extra_data):
@@ -117,6 +114,8 @@ def _setup_user_groups_from_discord_guild_roles(user, extra_data):
                     )
                     for group_mapping in group_mappings.all():
                         user.groups.add(group_mapping.group)
+                        if group_mapping.grants_staff:
+                            user.is_staff = True
                 except DiscordRoleDjangoGroupMapping.DoesNotExist:
                     pass
     except DiscordGuild.DoesNotExist:
