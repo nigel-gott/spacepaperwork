@@ -31,12 +31,13 @@ class Character:
 
 
 class DiscordUser:
-    def __init__(self, pk, uid, avatar_hash, username):
+    def __init__(self, pk, uid, avatar_hash, username, pre_approved):
         self.pk = pk
         self.uid = uid
         self.avatar_hash = avatar_hash
         self.username = username
         self.characters = {}
+        self.pre_approved = pre_approved
 
     def add_character(self, character):
         if character.ingame_name in self.characters:
@@ -46,7 +47,7 @@ class DiscordUser:
     def __str__(self):
         return (
             f"pk({self.pk}), uid({self.uid}), hash({self.avatar_hash}), "
-            "username({self.username}), chars({self.characters})"
+            "username({self.username}), chars({self.characters}), pre({self.pre_approved})"
         )
 
     def __eq__(self, obj):
@@ -56,6 +57,7 @@ class DiscordUser:
             and obj.uid == self.uid
             and obj.avatar_hash == self.avatar_hash
             and self.username == obj.username
+            and self.pre_approved == obj.pre_approved
         )
 
 
@@ -80,6 +82,7 @@ def load_existing_models():
                     fields["uid"],
                     fields["avatar_hash"],
                     fields["username"],
+                    fields["pre_approved"],
                 )
                 users_by_pk[model["pk"]] = existing_users[uid]
                 next_discord_user_pk = max(model["pk"] + 1, next_discord_user_pk)
@@ -117,7 +120,7 @@ def load_kris_dump(chars, users, char_pk, user_pk):
             ingame_name = line[2]
             corp = line[3]
             if uid not in users:
-                users[uid] = DiscordUser(user_pk, uid, None, discord_name)
+                users[uid] = DiscordUser(user_pk, uid, None, discord_name, True)
                 user_pk = user_pk + 1
 
             if ingame_name not in chars:
@@ -183,6 +186,7 @@ def load_chat_data(chars, users, char_pk, user_pk):
                 uid,
                 url_to_hash(author_info[uid]["avatar_url"]),
                 author_info[uid]["discord_name"],
+                True,
             )
             users[uid] = new_user
             user_pk = user_pk + 1
@@ -192,6 +196,7 @@ def load_chat_data(chars, users, char_pk, user_pk):
                 uid,
                 url_to_hash(author_info[uid]["avatar_url"]),
                 author_info[uid]["discord_name"],
+                True,
             )
             new_user.characters = users[uid].characters
             users[uid] = new_user
@@ -201,6 +206,7 @@ def load_chat_data(chars, users, char_pk, user_pk):
                 uid,
                 url_to_hash(author_info[uid]["avatar_url"]),
                 author_info[uid]["discord_name"],
+                True,
             )
             new_user.characters = users[uid].characters
             if new_user != users[uid]:
@@ -250,6 +256,7 @@ def output_models(chars, users):
                         "username": user.username,
                         "uid": user.uid,
                         "avatar_hash": user.avatar_hash,
+                        "pre_approved": user.pre_approved,
                     },
                 }
             )
