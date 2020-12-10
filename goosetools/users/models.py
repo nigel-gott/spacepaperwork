@@ -129,12 +129,10 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
 
     def approved(self):
         self.status = "approved"
-        self.full_clean()
         self.save()
 
     def rejected(self):
         self.status = "rejected"
-        self.full_clean()
         self.save()
 
     def characters(self):
@@ -170,6 +168,10 @@ class UserApplication(models.Model):
     application_notes = models.TextField(blank=True, null=True)
     ingame_name = models.TextField()
     corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
+
+    @staticmethod
+    def unapproved_applications():
+        return UserApplication.objects.filter(status="unapproved")
 
     def _create_character(self):
         main_char = Character(

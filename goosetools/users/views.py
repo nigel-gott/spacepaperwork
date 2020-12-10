@@ -61,3 +61,6 @@ def application_update(request, pk):
 
 class UserApplicationListView(ListView):
     model = UserApplication
+
+    def get_queryset(self):
+        return UserApplication.unapproved_applications()

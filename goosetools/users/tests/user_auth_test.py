@@ -4,7 +4,7 @@ from django.urls.base import reverse
 from freezegun import freeze_time
 
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
-from goosetools.users.models import DiscordUser, GooseUser
+from goosetools.users.models import DiscordUser, GooseUser, UserApplication
 
 
 def mock_discord_returns_with_uid(m, uid, roles=None):
@@ -301,3 +301,23 @@ class UserAuthTest(GooseToolsTestCase):
                     "application_notes": "Hello please let me into goosefleet",
                 },
             )
+
+    def test_once_an_application_has_been_approved_it_disappears_from_the_applications_screen(
+        self,
+    ):
+        user_admin_group = Group.objects.get(name="user_admin")
+        self.user.groups.add(user_admin_group)
+        UserApplication.objects.create(
+            user=self.other_user,
+            corp=self.corp,
+            ingame_name="TEST",
+            status="unapproved",
+        )
+
+        # Their application can been seen by a user_admin
+        applications = self.get(reverse("applications")).context["object_list"]
+        self.assertEqual(len(applications), 1)
+        application = applications[0]
+        self.post(reverse("application_update", args=[application.pk]), {"approve": ""})
+        applications = self.get(reverse("applications")).context["object_list"]
+        self.assertEqual(len(applications), 0)

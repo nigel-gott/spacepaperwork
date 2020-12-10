@@ -9,11 +9,13 @@ from goosetools.users.models import (
     DiscordRoleDjangoGroupMapping,
     DiscordUser,
     GooseUser,
+    UserApplication,
 )
 
 admin.site.register(Corp)
 admin.site.register(Character)
 admin.site.register(DiscordUser)
+admin.site.register(UserApplication)
 
 
 class CustomUserAdmin(UserAdmin):
