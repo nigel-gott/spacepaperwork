@@ -5,7 +5,7 @@
 {% block body %}
 <div class="row">
     <div class="col s12 m12">
-        <a class="btn waves-btn green" href="{% url 'industry:shiporders_create' %}">Order A Ship!</a>
+        <a class="btn waves-btn green" href="{% url 'industry:shiporders_create' %}">Create An Order</a>
     </div>
     <div class="col s12 m4">
         <ul class="collection">
@@ -135,7 +135,7 @@ $(function() {
                 }
             },
             { "data": "recipient_character_name", "title":"Recipient" },
-            { "data": "ship", "title":"Ship"},
+            { "data": "ship", "title":"Order"},
             { "data": "quantity", "title":"Quantity"},
             { "data": "payment_method", "title":"Payment Status",
                 render: function ( data, type, row, meta) {

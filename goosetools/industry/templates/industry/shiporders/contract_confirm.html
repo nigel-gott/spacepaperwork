@@ -3,7 +3,7 @@
 {% load static %}
 {% block body %}
 <div class="section">
-    <h4>Create the Ship Order Contract</h4>
+    <h3>Create Order Contract</h3>
 </div>
 <div class="divider"></div>
 <div class="section">
@@ -11,8 +11,6 @@
         {% csrf_token %}
         <div class="row">
             <h5 class="red-text">Before Submitting Complete These Steps:</h5>
-
-
             <div class="col s12 m12">
                 <h6>Follow this GIF:</h6>
                 <span>You must put in the contract's description the following code: </span>
@@ -33,13 +31,12 @@
                 <img src="{% static "how_to_contract.gif" %}"/>
             </div>
             <div class="col s12 m12">
-                <h6>Or the same instructions but in Text:</h6>
                 <ol>
                     <li>
-                        Now start making a contract ingame, it's visibility must be set to the alliance.
+                        Make an in-game contract with visibility set to "Alliance"
                     </li>
                     <li>
-                        Next select Jita IV - Moon 4 ITC as the station location. If you don't see this option it is because you don't have an item in that station. Buy something cheap on the market to get an item there first.
+                        Select Jita IV - Moon 4 ITC as the station location (if you don't see this option buy something cheap there first and it will become visible)
                     </li>
                     <li>
                         You must put in the contract's description the following code:
@@ -53,7 +50,7 @@
                         You are paying with ISK so you must enter the below price into the "I'll pay" section of the contract.
                         <blockquote>{{ship_order.price}}</blockquote>
                     {% else %}
-                        <span class="red-text">You are paying with ISK however goosetools was unable to find a valid price for the ship. Please ping the role @Certified Forklift Operator on discord before making the contract.</span>
+                        <span class="red-text">You are paying with ISK however GooseTools was unable to find a valid price for the order. Please ping the role @Certified Forklift Operator on discord before making the contract.</span>
                     {% endif %}
                         </li>
                 {% endif %}
@@ -61,19 +58,20 @@
                 {% if ship_order.blocked_until %}
                         This ship order will not be processed until after {{ship_order.blocked_until}}, make sure the contract you make will not expire by a week after that date by either setting the contract expiry to be 2 weeks, or waiting to make the contract until {{ship_order.blocked_until}}.
                 {% else %}
-                        Make sure the expiry is set to 1 week, or 2 weeks for a battleship.
+                        Make sure the expiry is set to 1 week, or 2 weeks for a battleship
                 {% endif %}
                     </li>
                     <li>
-                        Then scroll down, click add item and find the ship you want and add it.
+                        Scroll down, click 'Add Item' to add the item you ordered
                     </li>
                     <li>
-                        Finally you can create the contract.
-                    </li>
-                    <li>
-                        If you mess up any of these steps, your ship order might not be filled as the industry team will not be able to find or verify your contract.
+                        Finally, create the contract
                     </li>
                 </ol>
+                <p class="red-text">
+                    If you mess up any of these steps, your order might not be filled as the industry team will not be
+                    able to find or verify your contract
+                </p>
             </div>
         </div>
         <button class="btn waves-effect waves-light green" type="submit" value="Submit">
