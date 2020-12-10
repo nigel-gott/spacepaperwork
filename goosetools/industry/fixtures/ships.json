@@ -2464,5 +2464,23 @@
             "tech_level": "10",
             "free": false
         }
+    },
+    {
+        "model": "industry.ship",
+        "pk": "MK5 Doctrine Drone Package",
+        "fields": {
+            "name": "MK5 Doctrine Drone Package",
+            "tech_level": "5",
+            "free": true
+        }
+    },
+    {
+        "model": "industry.ship",
+        "pk": "MK7 Doctrine Drone Package",
+        "fields": {
+            "name": "MK7 Doctrine Drone Package",
+            "tech_level": "7",
+            "free": true
+        }
     }
 ]

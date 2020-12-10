@@ -82,7 +82,7 @@
                 <i class="material-icons left" style="margin-right:0px;">attach_money</i>Sales ({{all_sales_num}})
                 <i class="material-icons right">arrow_drop_down</i>
                 </a></li>
-            <li><a class="tab" href="{% url 'industry:shiporders_view' %}">Ship Orders <i class="material-icons left">directions_boat</i>
+            <li><a class="tab" href="{% url 'industry:shiporders_view' %}">Orders <i class="material-icons left">directions_boat</i>
             </a></li>
             <li><a class="tab" href="{% url 'mapbot:mapbot_index' %}">MapBot<i class="material-icons left">public</i>
             </a></li>
@@ -120,7 +120,7 @@
     <li><a class="tab" href="{% url 'admin:index' %}">Admin<i class="material-icons left">build</i></a></li>
     {% endif %}
     {% if user.is_authenticated and user.is_approved %}
-    <li class="tab"><a href="{% url 'industry:shiporders_view' %}">Ship Orders
+    <li class="tab"><a href="{% url 'industry:shiporders_view' %}">Orders
     </a>
     <li class="tab"><a href="{% url 'mapbot:mapbot_index' %}">MapBot
     </a>
