@@ -1,3 +1,5 @@
+import time
+
 import requests
 from django_extensions.management.jobs import HourlyJob
 from requests.models import HTTPError
@@ -79,6 +81,7 @@ class Job(HourlyJob):
                 members_request.raise_for_status()
                 users = members_request.json()
                 for user in users:
+                    time.sleep(1)
                     uid = user["user"]["id"]
                     if int(uid) > highest_id_so_far:
                         highest_id_so_far = int(uid)
@@ -92,6 +95,7 @@ class Job(HourlyJob):
                             f"Not doing anything for {user['user']['username']} as they are not in goosetools."
                         )
                     users_processed = users_processed + 1
+                time.sleep(10)
         except HTTPError as e:
             print(
                 "Got to "
