@@ -1,0 +1,50 @@
+{% extends "core/base.html" %}
+{% block body %}
+<div class="section">
+    <h4>Corp Applications</h4>
+</div>
+<div class="section">
+    {% for corp, apps in applications_by_corp.items %}
+        <h5>Applications For {{corp}}</h5>
+        <ul class="collection" style="overflow: visible;">
+        {% for application in apps %}
+            <li class="collection-item avatar">
+                {% if application.character.discord_avatar_url %}
+                <img alt="" class="avatar"
+                        src="{{ application.character.discord_avatar_url }}?size=32" style="width: 32px">
+                {% endif %}
+                {% if application.character.corp %}
+                <h6>Application to Transfer: {{application.character}} in [{{application.character.corp}}] to [{{application.corp}}]</h6>
+                {% else %}
+                <h6>Application to Join: {{application.character}} into [{{application.corp}}]</h6>
+                {% endif %}
+                <p>
+                    <b>Discord Username: </b>{{application.character.discord_user.display_name}} <br/>
+                    <b>Other Characters: </b> <br/>
+                    <ol>
+                    {% for char in application.character.discord_user.character_set.all %}
+                        {% if char != application.character %}
+                        <li>{{char}}</li>
+                        {% endif %}
+                    {% endfor %}
+                    </ol>
+                </p>
+
+                <form action="{% url 'corp_application_update' application.pk %}" method="post">
+                    {% csrf_token %}
+                    <button name="approve" class="btn green waves-effect waves-light" type="submit" value="Submit">Approve
+                        <i class="material-icons right">send</i>
+                    </button>
+                    <button name="reject" class="btn red waves-effect waves-light" type="submit" value="Submit">Reject
+                        <i class="material-icons right">send</i>
+                    </button>
+                </form>
+                </p>
+            </li>
+        {% endfor %}
+        </ul>
+    {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

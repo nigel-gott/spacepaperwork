@@ -41,4 +41,4 @@ class LoginAndApprovedUserMiddleware(AuthenticationMiddleware):
         views = ((name == resolver.view_name) for name in IGNORE_VIEW_NAMES)
 
         if not any(views) and not any(url.match(path) for url in IGNORE_PATHS):
-            return HttpResponseRedirect(reverse("discord_login"))
+            return HttpResponseRedirect(reverse("core:splash"))

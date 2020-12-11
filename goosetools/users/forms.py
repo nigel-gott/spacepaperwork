@@ -10,10 +10,18 @@ from goosetools.users.models import Character, Corp, DiscordUser
 class SignupFormWithTimezone(SignupForm):
     timezone = TimeZoneFormField(display_GMT_offset=True)
     transaction_tax = forms.DecimalField(
-        max_digits=5, decimal_places=2, label="Transaction Tax %", initial=15
+        max_digits=5,
+        decimal_places=2,
+        label="Transaction Tax %",
+        initial=15,
+        help_text="Used to calculate fees when you sell loot in goosetools.",
     )
     broker_fee = forms.DecimalField(
-        max_digits=5, decimal_places=2, label="Broker Fee %", initial=8
+        max_digits=5,
+        decimal_places=2,
+        label="Broker Fee %",
+        initial=8,
+        help_text="Used to calculate fees when you sell loot in goosetools.",
     )
     default_character = forms.ModelChoiceField(
         queryset=Character.objects.all(), required=False
@@ -78,6 +86,11 @@ class SettingsForm(forms.Form):
 
 class UserApplicationUpdateForm(forms.Form):
     notes = forms.CharField(required=False)
+
+
+class AddEditCharacterForm(forms.Form):
+    ingame_name = forms.CharField()
+    corp = forms.ModelChoiceField(queryset=Corp.objects.all(), initial=0)
 
 
 class CharacterForm(forms.Form):

@@ -5,16 +5,30 @@ from goosetools.users.autocomplete import (
     DiscordUsernameAutocomplete,
 )
 from goosetools.users.views import (
-    UserApplicationListView,
     application_update,
+    character_edit,
+    character_list,
+    character_new,
+    corp_application_list,
+    corp_application_update,
     settings_view,
+    user_application_list,
 )
 
 urlpatterns = [
     path("settings/", settings_view, name="settings"),
-    path("applications/", UserApplicationListView.as_view(), name="applications"),
+    path("characters/edit/<int:pk>", character_edit, name="character_edit"),
+    path("characters/new/", character_new, name="character_new"),
+    path("characters/", character_list, name="characters"),
+    path("applications/", user_application_list, name="applications"),
+    path("applications/corp", corp_application_list, name="corp_applications"),
     path(
         "applications/update/<int:pk>/", application_update, name="application_update"
+    ),
+    path(
+        "applications/update/corp/<int:pk>/",
+        corp_application_update,
+        name="corp_application_update",
     ),
     path(
         r"character-autocomplete/",

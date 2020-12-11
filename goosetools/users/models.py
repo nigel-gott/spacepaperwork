@@ -62,7 +62,7 @@ class DiscordUser(models.Model):
 class Character(models.Model):
     discord_user = models.ForeignKey(DiscordUser, on_delete=models.CASCADE)
     ingame_name = models.TextField(unique=True)
-    corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
+    corp = models.ForeignKey(Corp, on_delete=models.CASCADE, null=True, blank=True)
 
     # pylint: disable=no-member
     def gooseuser_or_false(self):
@@ -82,7 +82,41 @@ class Character(models.Model):
         return self.discord_user and self.discord_user.display_name()
 
     def __str__(self):
-        return f"[{self.corp}] {self.ingame_name}"
+        if self.corp:
+            return f"[{self.corp}] {self.ingame_name}"
+        else:
+            return f"{self.ingame_name}"
+
+
+class CorpApplication(models.Model):
+    corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
+    character = models.ForeignKey(Character, on_delete=models.CASCADE)
+    status = models.TextField(
+        choices=[
+            ("unapproved", "unapproved"),
+            ("approved", "approved"),
+            ("rejected", "rejected"),
+        ],
+        default="unapproved",
+    )
+    notes = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def approve(self):
+        self.status = "approved"
+        self.character.corp = self.corp
+        self.character.save()
+        self.full_clean()
+        self.save()
+
+    def reject(self):
+        self.status = "rejected"
+        self.full_clean()
+        self.save()
+
+    @staticmethod
+    def unapproved_applications():
+        return CorpApplication.objects.filter(status="unapproved")
 
 
 # Add nullable discord_user FK to Character/GooseUser
@@ -193,10 +227,15 @@ class UserApplication(models.Model):
         main_char = Character(
             discord_user=self.user.discord_user,
             ingame_name=self.ingame_name,
-            corp=self.corp,
+            corp=None,
         )
         main_char.full_clean()
         main_char.save()
+        CorpApplication.objects.create(
+            status="unapproved",
+            corp=self.corp,
+            character=main_char,
+        )
 
     def approve(self):
         self.status = "approved"

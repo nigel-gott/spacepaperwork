@@ -8,6 +8,10 @@
     <ul class="collection" style="overflow: visible;">
     {% for application in object_list %}
         <li class="collection-item avatar">
+            {% if application.user.discord_avatar_url %}
+            <img alt="" class="avatar"
+                    src="{{ application.user.discord_avatar_url }}?size=32" style="width: 32px">
+            {% endif %}
             <span class="title">Application for: {{application.user.discord_username}} ({{application.user.display_name}})</span>
             <div class="divider"></div>
             {% if application.user.discord_avatar_url %}
@@ -30,7 +34,7 @@
                 <button name="approve" class="btn green waves-effect waves-light" type="submit" value="Submit">Approve
                     <i class="material-icons right">send</i>
                 </button>
-                <button name="deny" class="btn red waves-effect waves-light" type="submit" value="Submit">Reject
+                <button name="reject" class="btn red waves-effect waves-light" type="submit" value="Submit">Reject
                     <i class="material-icons right">send</i>
                 </button>
             </form>

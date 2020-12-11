@@ -29,6 +29,10 @@
     <li><a href="{% url 'your_fleet_shares' %}">Your Fleet Shares/Loot
     </a>
 </ul>
+<ul class="dropdown-content" id="dropdown_settings">
+    <li><a href="{% url 'settings' %}">Settings</a></li>
+    <li><a href="{% url 'characters' %}">Characters</a></li>
+</ul>
 <ul class="dropdown-content" id="dropdown_sales">
     {% num_items user as num_to_sell %}
     {% num_contracts user as contracts %}
@@ -58,7 +62,10 @@
 {% if user.is_staff %}
 <ul class="dropdown-content" id="dropdown_admin">
     <li>
-        <a href="{% url 'applications' %}">Applications</a>
+        <a href="{% url 'applications' %}">New User Applications</a>
+    </li>
+    <li>
+        <a href="{% url 'corp_applications' %}">Corp Applications</a>
     </li>
     <li>
         <a href="{% url 'admin:index' %}">Site Admin</a>
@@ -86,7 +93,12 @@
             </a></li>
             <li><a class="tab" href="{% url 'mapbot:mapbot_index' %}">MapBot<i class="material-icons left">public</i>
             </a></li>
-            <li><a class="tab" href="{% url 'settings' %}">Settings<i class="material-icons left">settings</i></a></li>
+            <li>
+                <a class="dropdown-trigger valign-wrapper" data-target="dropdown_settings" href="#!">
+                    <i class="material-icons left">settings</i>Settings
+                    <i class="material-icons right">arrow_drop_down</i>
+                </a>
+            </li>
             {% if user.is_staff %}
             <li>
                 <a class="dropdown-trigger valign-wrapper" data-target="dropdown_admin" href="#!">
@@ -117,7 +129,13 @@
 </nav>
 <ul class="sidenav" id="mobile-demo">
     {% if user.is_staff %}
-    <li><a class="tab" href="{% url 'admin:index' %}">Admin<i class="material-icons left">build</i></a></li>
+    <li><a href="{% url 'admin:index' %}">Admin<i class="material-icons left">build</i></a></li>
+    <li>
+        <a href="{% url 'applications' %}">New User Applications</a>
+    </li>
+    <li>
+        <a href="{% url 'corp_applications' %}">Corp Applications</a>
+    </li>
     {% endif %}
     {% if user.is_authenticated and user.is_approved %}
     <li class="tab"><a href="{% url 'industry:shiporders_view' %}">Orders
@@ -164,6 +182,7 @@
     </a>
     </li>
     <li class="tab"><a href="{% url 'settings' %}">Settings</a></li>
+    <li class="tab"><a href="{% url 'characters' %}">Characters</a></li>
     <li class="center">
         <form action="{% url 'account_logout' %}" method="post">
             {% csrf_token %}
