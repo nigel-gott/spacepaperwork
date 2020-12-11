@@ -198,25 +198,12 @@ class UserApplication(models.Model):
         main_char.full_clean()
         main_char.save()
 
-    def _assign_guild_member_role_if_exists(self):
-        try:
-            guild = DiscordGuild.objects.get(active=True)
-            if guild.member_role_id:
-                bot_headers = {
-                    "Authorization": "Bot {0}".format(guild.bot_token),
-                }
-                url = f"https://discord.com/api/guilds/{guild.guild_id}/members/{self.user.discord_uid()}/roles/{guild.member_role_id}"
-                request = requests.put(url, headers=bot_headers)
-                request.raise_for_status()
-        except DiscordGuild.DoesNotExist:
-            pass
-
     def approve(self):
         self.status = "approved"
         self.user.approved()
         self._create_character()
         self.full_clean()
-        self._assign_guild_member_role_if_exists()
+        DiscordGuild.try_give_guild_member_role(self.user)
         self.save()
 
     def reject(self):
@@ -231,6 +218,28 @@ class DiscordGuild(models.Model):
     member_role_id = models.TextField(null=True, blank=True)
     bot_token = models.TextField()
     active = models.BooleanField(default=False)
+
+    @staticmethod
+    def try_give_guild_member_role(user):
+        try:
+            guild = DiscordGuild.objects.get(active=True)
+            DiscordGuild.try_give_role(user, guild.member_role_id)
+        except DiscordGuild.DoesNotExist:
+            pass
+
+    @staticmethod
+    def try_give_role(user, role_id):
+        try:
+            guild = DiscordGuild.objects.get(active=True)
+            if guild.member_role_id:
+                bot_headers = {
+                    "Authorization": "Bot {0}".format(guild.bot_token),
+                }
+                url = f"https://discord.com/api/guilds/{guild.guild_id}/members/{user.discord_uid()}/roles/{role_id}"
+                request = requests.put(url, headers=bot_headers)
+                request.raise_for_status()
+        except DiscordGuild.DoesNotExist:
+            pass
 
     # pylint: disable=signature-differs
     def save(self, *args, **kwargs):
