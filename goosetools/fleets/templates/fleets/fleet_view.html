@@ -15,7 +15,7 @@
             {% else %}
             <i class="circle material-icons">error</i>
             {% endif %}
-            {{fleet.name}} run by {{fleet.fc.username}}</span>
+            {{fleet.name}} run by {{fleet.fc.display_name}}</span>
                 <b>Start: {{fleet.start}} ({{fleet.human_readable_started}})
                     {% if fleet.auto_end %}
                     <br/>End: {{fleet.auto_end}} ({{fleet.human_readable_ended}})
@@ -139,7 +139,7 @@
                     <img alt="" class="avatar"
                          src="{{ member.character.discord_avatar_url }}?size=32" style="width: 32px">
                     {% endif %}
-                    {{member.character.discord_username}}
+                    {{member.character.display_name}}
                 </td>
                 {% endif %}
                 <td>

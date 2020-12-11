@@ -26,7 +26,7 @@
                     <img class="avatar" src="{{ fleet.fc.discord_user.avatar_url }}" style="width: 42px"/>
                     <a href="{% url 'fleet_view' fleet.id %}">
                         <h3 class="d-inline-block ml-2">
-                            {{ fleet.name }} run by {{fleet.fc.username}}
+                            {{ fleet.name }} run by {{fleet.fc.display_name}}
                         </h3>
                     </a>
                 </div>

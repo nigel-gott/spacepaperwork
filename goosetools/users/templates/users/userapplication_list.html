@@ -8,7 +8,7 @@
     <ul class="collection" style="overflow: visible;">
     {% for application in object_list %}
         <li class="collection-item avatar">
-            <span class="title">Application for: {{application.user.discord_username}}</span>
+            <span class="title">Application for: {{application.user.discord_username}} ({{application.user.display_name}})</span>
             <div class="divider"></div>
             {% if application.user.discord_avatar_url %}
             <img alt="" class="avatar"

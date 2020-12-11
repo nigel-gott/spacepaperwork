@@ -44,9 +44,12 @@ SECRET_KEY = env("SECRET_KEY")
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 DATABASES = {
     # read os.environ['DATABASE_URL'] and raises ImproperlyConfigured exception if not found
-    "default": env.db(engine="django_prometheus.db.backends.postgresql")
+    "default": env.db(engine="django_prometheus.db.backends.postgresql"),
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
+DBBACKUP_CONNECTOR_MAPPING = {
+    "django_prometheus.db.backends.postgresql": "dbbackup.db.postgresql.PgDumpConnector"
+}
 
 # URLS
 # ------------------------------------------------------------------------------

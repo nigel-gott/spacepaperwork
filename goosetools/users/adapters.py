@@ -7,12 +7,10 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
 
-from goosetools.users.models import (
-    DiscordGuild,
-    DiscordRoleDjangoGroupMapping,
-    DiscordUser,
-    UserApplication,
+from goosetools.users.jobs.hourly.update_discord_roles import (
+    _setup_user_groups_from_discord_guild_roles,
 )
+from goosetools.users.models import DiscordGuild, DiscordUser, UserApplication
 
 
 # pylint: disable=unused-argument
@@ -97,26 +95,12 @@ def _update_discord_user(discord_user, account):
 
 
 def _update_user_from_social_account(discord_user, account, gooseuser):
-    _setup_user_groups_from_discord_guild_roles(gooseuser, account.extra_data)
     if discord_user.pre_approved:
         gooseuser.approved()
-
-
-def _setup_user_groups_from_discord_guild_roles(user, extra_data):
     try:
         guild = DiscordGuild.objects.get(active=True)
-        user.groups.clear()
-        if "roles" in extra_data:
-            for role_id in extra_data["roles"]:
-                try:
-                    group_mappings = DiscordRoleDjangoGroupMapping.objects.filter(
-                        role_id=role_id, guild=guild
-                    )
-                    for group_mapping in group_mappings.all():
-                        user.groups.add(group_mapping.group)
-                        if group_mapping.grants_staff:
-                            user.is_staff = True
-                except DiscordRoleDjangoGroupMapping.DoesNotExist:
-                    pass
+        _setup_user_groups_from_discord_guild_roles(
+            gooseuser, account.extra_data, guild
+        )
     except DiscordGuild.DoesNotExist:
         pass

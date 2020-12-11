@@ -21,10 +21,17 @@ class Corp(models.Model):
 # Represents a unique single person using their unique discord uid if known. They might not have ever have visited goosetools and hence will not have a GooseUser model.
 class DiscordUser(models.Model):
     username = models.TextField(unique=True)
+    nick = models.TextField(null=True, blank=True)
     uid = models.TextField(unique=True, blank=True, null=True)
     avatar_hash = models.TextField(blank=True, null=True)
 
     pre_approved = models.BooleanField(default=False)
+
+    def display_name(self):
+        if self.nick:
+            return self.nick
+        else:
+            return self.username
 
     def avatar_url(self) -> Union[bool, str]:
         return self._construct_avatar_url()
@@ -69,6 +76,9 @@ class Character(models.Model):
 
     def discord_username(self):
         return self.discord_user and self.discord_user.username
+
+    def display_name(self):
+        return self.discord_user and self.discord_user.display_name()
 
     def __str__(self):
         return f"[{self.corp}] {self.ingame_name}"
@@ -148,6 +158,9 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
 
     def discord_username(self):
         return self.discord_user.username
+
+    def display_name(self):
+        return self.discord_user.display_name()
 
     def discord_avatar_hash(self):
         return self.discord_user.uid
