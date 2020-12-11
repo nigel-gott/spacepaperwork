@@ -4,7 +4,12 @@ from django.urls.base import reverse
 from freezegun import freeze_time
 
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
-from goosetools.users.models import DiscordUser, GooseUser, UserApplication
+from goosetools.users.models import (
+    DiscordGuild,
+    DiscordUser,
+    GooseUser,
+    UserApplication,
+)
 
 
 def mock_discord_returns_with_uid(m, uid, roles=None):
@@ -324,3 +329,38 @@ class UserAuthTest(GooseToolsTestCase):
         self.post(reverse("application_update", args=[application.pk]), {"approve": ""})
         applications = self.get(reverse("applications")).context["object_list"]
         self.assertEqual(len(applications), 0)
+
+    def test_approving_an_application_when_the_guild_has_a_member_role_assigns_the_role(
+        self,
+    ):
+        with requests_mock.Mocker() as m:
+            DiscordGuild.objects.create(
+                active=True,
+                bot_token="bot_token",
+                guild_id="guildid",
+                member_role_id="memberroleid",
+            )
+            m.put(
+                "https://discord.com/api/guilds/guildid/members/2/roles/memberroleid",
+                headers={
+                    "Authorization": "Bot bot_token",
+                },
+            )
+            user_admin_group = Group.objects.get(name="user_admin")
+            self.user.groups.add(user_admin_group)
+            UserApplication.objects.create(
+                user=self.other_user,
+                corp=self.corp,
+                ingame_name="TEST",
+                status="unapproved",
+            )
+
+            # Their application can been seen by a user_admin
+            applications = self.get(reverse("applications")).context["object_list"]
+            self.assertEqual(len(applications), 1)
+            application = applications[0]
+            self.post(
+                reverse("application_update", args=[application.pk]), {"approve": ""}
+            )
+            applications = self.get(reverse("applications")).context["object_list"]
+            self.assertEqual(len(applications), 0)

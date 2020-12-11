@@ -1,5 +1,6 @@
 from typing import Union
 
+import requests
 from django.contrib.auth.models import AbstractUser, Group
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
@@ -197,11 +198,25 @@ class UserApplication(models.Model):
         main_char.full_clean()
         main_char.save()
 
+    def _assign_guild_member_role_if_exists(self):
+        try:
+            guild = DiscordGuild.objects.get(active=True)
+            if guild.member_role_id:
+                bot_headers = {
+                    "Authorization": "Bot {0}".format(guild.bot_token),
+                }
+                url = f"https://discord.com/api/guilds/{guild.guild_id}/members/{self.user.discord_uid()}/roles/{guild.member_role_id}"
+                request = requests.put(url, headers=bot_headers)
+                request.raise_for_status()
+        except DiscordGuild.DoesNotExist:
+            pass
+
     def approve(self):
         self.status = "approved"
         self.user.approved()
         self._create_character()
         self.full_clean()
+        self._assign_guild_member_role_if_exists()
         self.save()
 
     def reject(self):
@@ -213,6 +228,7 @@ class UserApplication(models.Model):
 
 class DiscordGuild(models.Model):
     guild_id = models.TextField()
+    member_role_id = models.TextField(null=True, blank=True)
     bot_token = models.TextField()
     active = models.BooleanField(default=False)
 
