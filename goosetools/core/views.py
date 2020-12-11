@@ -1,5 +1,7 @@
 from django.contrib import messages
+from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls.base import reverse
 
 
 def forbidden(request):
@@ -8,10 +10,13 @@ def forbidden(request):
 
 
 def core_splash(request):
-    return render(
-        request,
-        "core/splash.html",
-    )
+    if request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("core:home"))
+    else:
+        return render(
+            request,
+            "core/splash.html",
+        )
 
 
 def core_home(request):
