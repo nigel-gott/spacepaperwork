@@ -12,8 +12,32 @@ from goosetools.users.models import (
     UserApplication,
 )
 
+
+class CharacterAdmin(admin.ModelAdmin):
+    search_fields = ("ingame_name", "corp")
+    list_display = [
+        "ingame_name",
+        "corp",
+        "discord_nickname",
+        "discord_username",
+        "status",
+    ]
+
+    # pylint: disable=no-self-use
+    def discord_username(self, obj):
+        return obj.discord_user.username
+
+    # pylint: disable=no-self-use
+    def discord_nickname(self, obj):
+        return obj.discord_user.nick
+
+    # pylint: disable=no-self-use
+    def status(self, obj):
+        return obj.discord_user.gooseuser.status
+
+
 admin.site.register(Corp)
-admin.site.register(Character)
+admin.site.register(Character, CharacterAdmin)
 admin.site.register(DiscordUser)
 admin.site.register(UserApplication)
 
