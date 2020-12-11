@@ -67,6 +67,7 @@ class Job(HourlyJob):
 
         highest_id_so_far = 0
         previous_highest_id = -1
+        users_processed = 0
         try:
             while previous_highest_id < highest_id_so_far:
                 previous_highest_id = highest_id_so_far
@@ -90,9 +91,12 @@ class Job(HourlyJob):
                         print(
                             f"Not doing anything for {user['user']['username']} as they are not in goosetools."
                         )
-        except HTTPError:
+                    users_processed = users_processed + 1
+        except HTTPError as e:
             print(
                 "Got to "
                 + str(highest_id_so_far)
-                + " before discord stopped returning more users."
+                + " before discord stopped returning more users: "
+                + str(e)
             )
+        print(f"Processed {users_processed} users.")
