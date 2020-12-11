@@ -176,6 +176,7 @@ LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [
     "discord_callback",
     "account_logout",
     "core:splash",
+    "core:conduct",
 ]
 LOGIN_REQUIRED_UNAPPROVED_USER_REDIRECT = "core:splash"
 

@@ -1,0 +1,29 @@
+{% extends "core/base.html" %}
+{% load materializecss %}
+{% load static %}
+{% block body %}
+<div class="section">
+    <div class="row">
+        <div class="col s12 m12">
+        <h5> The rules of the Gooseflock Featheration:</h5>
+        <ol>
+            <li>DO NOT post anything bigoted or discriminatory, including but not limited to slurs and similar derogatory terms or phrases. The Gooseflock Featheration is an inclusive space. If someone calls out your language, this is an opportunity to learn and improve.</li>
+            <li>DO NOT steal or scam anything from Gooseflock Featheration, its members, or any of our allies. Everyone else is fair game though!</li>
+            <li>DO NOT pretend to be a diplomat representing Gooseflock Featheration. This is EXTREMELY IMPORTANT. Diplomacy is fragile and there's often lots of things going on behind the scenes. Even when scamming someone (which we encourage, it's fun!), do not pretend to be a diplomat under any circumstances. If you need a diplomat or leadership member for something, you can ping the @Diplomat role or the appropriate Leadership Council member and we'll be happy to help you if we can.</li>
+            <li>DO NOT give any information about Gooseflock Featheration, its members, or any of our allies. to outside parties. This includes everything, to anyone, unless leadership has already cleared it, because even information that seems innocuous can be harmful in the wrong hands. Spies will be shot on sight.</li>
+            <li>DO NOT shoot blues. If someone is set to blue standings, that means they're our allies and don't shoot them. There are exceptions to this, if one of them shoots first or is being shitty to you or a fellow member in chat go right ahead. If you do, though, or if you shoot someone by accident, please ping @Diplomat in a public channel immediately so they can make sure it doesn't escalate. You won't get in trouble if you let us know, but you absolutely will if you don't tell anyone.</li>
+        </ol>
+
+        <h5 class="green-text">Please DO do the following:</h4>
+        <ol>
+           <li>Post. Post a lot! This is a community with lots of people and chances are you'll find someone to talk about pretty much anything. Posting is cool, and good.</li>
+           <li>Be chill. This is, above all else, a game, and games are supposed to be fun. If you're getting frustrated with something, remember that. It's more than okay to take a break.</li>
+           <li>Pace yourself. It's pretty easy to get burnt out on Eve, especially if you try to do too many things at once. See the previous rule, and remember that this is supposed to be fun.</li>
+        </ol>
+        </div>
+    </div>
+    <div class="mb-5">
+        <a class="btn waves-btn green btn-large pulse" href="{% url "discord_login" %}">HONK IF YOU AGREE TO FOLLOW THIS CODE OF CONDUCT</a>
+    </div>
+</div>
+{% endblock body %}

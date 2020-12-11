@@ -24,3 +24,10 @@ def core_home(request):
         request,
         "core/home.html",
     )
+
+
+def core_conduct(request):
+    return render(
+        request,
+        "core/conduct.html",
+    )
