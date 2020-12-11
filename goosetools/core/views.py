@@ -7,6 +7,13 @@ def forbidden(request):
     return render(request, "contracts/403.html")
 
 
+def core_splash(request):
+    return render(
+        request,
+        "core/splash.html",
+    )
+
+
 def core_home(request):
     return render(
         request,

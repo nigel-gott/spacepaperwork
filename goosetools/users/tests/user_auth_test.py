@@ -52,7 +52,7 @@ class UserAuthTest(GooseToolsTestCase):
 
         response = self.client.get(reverse("fleet"))
         self.assertNotIn("Active Fleets", str(response.content, encoding="utf-8"))
-        self.assertRedirects(response, "/goosetools/")
+        self.assertRedirects(response, reverse("core:home"))
         self.assert_messages(
             response,
             [("error", "You are not yet approved and cannot access this page.")],
@@ -65,7 +65,7 @@ class UserAuthTest(GooseToolsTestCase):
                 username="Preapproved Discord User", uid="3", pre_approved=True
             )
             self.client.logout()
-            response = self.client.get("/goosetools/", follow=True)
+            response = self.client.get(reverse("discord_login"), follow=True)
             last_url, _ = response.redirect_chain[-1]
             self.post(
                 last_url,
@@ -86,7 +86,7 @@ class UserAuthTest(GooseToolsTestCase):
         with requests_mock.Mocker() as m:
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
-            response = self.client.get("/goosetools/", follow=True)
+            response = self.client.get(reverse("discord_login"), follow=True)
             last_url, _ = response.redirect_chain[-1]
             self.post(
                 last_url,
@@ -116,7 +116,7 @@ class UserAuthTest(GooseToolsTestCase):
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
             # When an unknown and hence unapproved user applies to the corp
-            response = self.client.get("/goosetools/", follow=True)
+            response = self.client.get(reverse("discord_login"), follow=True)
             last_url, _ = response.redirect_chain[-1]
             self.post(
                 last_url,
@@ -167,7 +167,7 @@ class UserAuthTest(GooseToolsTestCase):
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
             # When an unknown and hence unapproved user applies to the corp
-            response = self.client.get("/goosetools/", follow=True)
+            response = self.client.get(reverse("discord_login"), follow=True)
             last_url, _ = response.redirect_chain[-1]
             self.post(
                 last_url,
@@ -220,7 +220,7 @@ class UserAuthTest(GooseToolsTestCase):
         with requests_mock.Mocker() as m:
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
-            response = self.client.get("/goosetools/", follow=True)
+            response = self.client.get(reverse("discord_login"), follow=True)
             last_url, _ = response.redirect_chain[-1]
             self.corp.required_discord_role = "1234"
             self.corp.save()
@@ -247,7 +247,7 @@ class UserAuthTest(GooseToolsTestCase):
         with requests_mock.Mocker() as m:
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
-            response = self.client.get("/goosetools/", follow=True)
+            response = self.client.get(reverse("discord_login"), follow=True)
             last_url, _ = response.redirect_chain[-1]
             self.corp.required_discord_role = None
             self.corp.save()
@@ -270,7 +270,7 @@ class UserAuthTest(GooseToolsTestCase):
         with requests_mock.Mocker() as m:
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
-            response = self.client.get("/goosetools/", follow=True)
+            response = self.client.get(reverse("discord_login"), follow=True)
             last_url, _ = response.redirect_chain[-1]
             self.corp.required_discord_role = ""
             self.corp.save()
@@ -293,7 +293,7 @@ class UserAuthTest(GooseToolsTestCase):
         with requests_mock.Mocker() as m:
             mock_discord_returns_with_uid(m, "3", roles=["1234"])
             self.client.logout()
-            response = self.client.get("/goosetools/", follow=True)
+            response = self.client.get(reverse("discord_login"), follow=True)
             last_url, _ = response.redirect_chain[-1]
             self.corp.required_discord_role = "1234"
             self.corp.save()

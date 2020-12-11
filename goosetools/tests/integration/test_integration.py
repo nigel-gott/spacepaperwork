@@ -23,7 +23,7 @@ def test_can_sign_up_and_create_new_fleet(http_service, browser):
     response = requests.get(http_service)
     assert response.status_code == 200
 
-    browser.visit("http://django:8000/goosetools")
+    browser.visit("http://django:8000/goosetools/accounts/discord/login/")
 
     wait_and_click(browser, "sign_up_button")
 

@@ -1,0 +1,13 @@
+
+{% extends "core/base.html" %}
+{% load materializecss %}
+{% load static %}
+{% block body %}
+<div class="section center">
+    <a class="btn waves-btn green btn-large pulse" href="{% url "discord_login" %}">Apply Now!</a>
+    <br/>
+    <br/>
+    <br/>
+    <img src="{% static 'core/GF_Recruit_Paper.png' %}"/>
+</div>
+{% endblock body %}

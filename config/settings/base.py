@@ -175,8 +175,9 @@ LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [
     "socialaccount_signup",
     "discord_callback",
     "account_logout",
+    "core:splash",
 ]
-LOGIN_REQUIRED_UNAPPROVED_USER_REDIRECT = "discord_login"
+LOGIN_REQUIRED_UNAPPROVED_USER_REDIRECT = "core:splash"
 
 # MIDDLEWARE
 # ------------------------------------------------------------------------------

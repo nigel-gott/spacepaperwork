@@ -45,6 +45,7 @@ def _setup_user_groups_from_discord_guild_roles(
                             user.is_staff = True
                 except DiscordRoleDjangoGroupMapping.DoesNotExist:
                     pass
+            user.save()
         if not has_member_role:
             if log_output:
                 print(
