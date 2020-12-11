@@ -90,7 +90,9 @@ class Job(HourlyJob):
                             and "750897450365222962" not in user["roles"]
                         ):
                             print("Giving " + user["user"]["username"] + " GDN role")
-                            DiscordGuild.try_give_role(user, "750897450365222962")
+                            DiscordGuild.try_give_role(
+                                user["user"]["id"], "750897450365222962"
+                            )
                         gooseuser = GooseUser.objects.get(discord_user__uid=uid)
                         _setup_user_groups_from_discord_guild_roles(
                             gooseuser, user, guild, log_output=True

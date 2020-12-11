@@ -223,19 +223,19 @@ class DiscordGuild(models.Model):
     def try_give_guild_member_role(user):
         try:
             guild = DiscordGuild.objects.get(active=True)
-            DiscordGuild.try_give_role(user, guild.member_role_id)
+            DiscordGuild.try_give_role(user.discord_uid(), guild.member_role_id)
         except DiscordGuild.DoesNotExist:
             pass
 
     @staticmethod
-    def try_give_role(user, role_id):
+    def try_give_role(uid, role_id):
         try:
             guild = DiscordGuild.objects.get(active=True)
             if guild.member_role_id:
                 bot_headers = {
                     "Authorization": "Bot {0}".format(guild.bot_token),
                 }
-                url = f"https://discord.com/api/guilds/{guild.guild_id}/members/{user.discord_uid()}/roles/{role_id}"
+                url = f"https://discord.com/api/guilds/{guild.guild_id}/members/{uid}/roles/{role_id}"
                 request = requests.put(url, headers=bot_headers)
                 request.raise_for_status()
         except DiscordGuild.DoesNotExist:
