@@ -14,7 +14,7 @@ from goosetools.users.models import (
 
 
 class CharacterAdmin(admin.ModelAdmin):
-    search_fields = "ingame_name"
+    search_fields = ["ingame_name"]
     list_display = [
         "ingame_name",
         "corp",
