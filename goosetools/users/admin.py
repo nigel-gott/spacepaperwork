@@ -5,6 +5,7 @@ from django.contrib.auth.admin import UserAdmin
 from goosetools.users.models import (
     Character,
     Corp,
+    CorpApplication,
     DiscordGuild,
     DiscordRoleDjangoGroupMapping,
     DiscordUser,
@@ -40,9 +41,35 @@ admin.site.register(Corp)
 admin.site.register(Character, CharacterAdmin)
 admin.site.register(DiscordUser)
 admin.site.register(UserApplication)
+admin.site.register(CorpApplication)
 
 
 class CustomUserAdmin(UserAdmin):
+    list_display = [
+        "discord_nickname",
+        "discord_username",
+        "characters",
+        "groups_list",
+        "status",
+        "is_staff",
+        "notes",
+    ]
+
+    # pylint: disable=no-self-use
+    def discord_username(self, obj):
+        return obj.discord_user.username
+
+    # pylint: disable=no-self-use
+    def discord_nickname(self, obj):
+        return obj.discord_user.nick
+
+    # pylint: disable=no-self-use
+    def characters(self, obj):
+        return [str(char) for char in obj.characters()]
+
+    # pylint: disable=no-self-use
+    def groups_list(self, obj):
+        return [str(group) for group in obj.groups.all()]
 
     fieldsets = UserAdmin.fieldsets + (
         (
