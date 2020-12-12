@@ -28,7 +28,11 @@ class DiscordUser(models.Model):
     old_notes = models.TextField(blank=True, null=True)
     sa_profile = models.TextField(blank=True, null=True)
     voucher = models.ForeignKey(
-        "DiscordUser", on_delete=models.SET_NULL, blank=True, null=True
+        "DiscordUser",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="current_vouches",
     )
 
     pre_approved = models.BooleanField(default=False)

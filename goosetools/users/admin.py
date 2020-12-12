@@ -37,9 +37,22 @@ class CharacterAdmin(admin.ModelAdmin):
         return obj.discord_user.gooseuser.status
 
 
+class CustomDiscordUserAdmin(admin.ModelAdmin):
+    search_fields = ["username"]
+    list_display = [
+        "username",
+        "nick",
+        "uid",
+        "pre_approved",
+        "old_notes",
+        "sa_profile",
+        "voucher",
+    ]
+
+
 admin.site.register(Corp)
 admin.site.register(Character, CharacterAdmin)
-admin.site.register(DiscordUser)
+admin.site.register(DiscordUser, CustomDiscordUserAdmin)
 admin.site.register(UserApplication)
 admin.site.register(CorpApplication)
 
@@ -52,7 +65,10 @@ class CustomUserAdmin(UserAdmin):
         "groups_list",
         "status",
         "is_staff",
-        "notes",
+        "notes_with_old",
+        "sa_profile",
+        "vouched_by",
+        "vouches",
     ]
 
     # pylint: disable=no-self-use
@@ -70,6 +86,21 @@ class CustomUserAdmin(UserAdmin):
     # pylint: disable=no-self-use
     def groups_list(self, obj):
         return [str(group) for group in obj.groups.all()]
+
+    def notes_with_old(self, obj):
+        if obj.discord_user.old_notes:
+            return obj.notes + "\n OLD NOTES: " + obj.discord_user.old_notes
+        else:
+            return obj.notes
+
+    def sa_profile(self, obj):
+        return obj.discord_user.sa_profile
+
+    def vouched_by(self, obj):
+        return obj.discord_user.voucher
+
+    def vouches(self, obj):
+        return [str(v.display_name()) for v in obj.discord_user.current_vouches.all()]
 
     fieldsets = UserAdmin.fieldsets + (
         (
