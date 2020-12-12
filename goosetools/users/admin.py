@@ -89,7 +89,7 @@ class CustomUserAdmin(UserAdmin):
 
     def notes_with_old(self, obj):
         if obj.discord_user.old_notes:
-            return obj.notes + "\n OLD NOTES: " + obj.discord_user.old_notes
+            return str(obj.notes) + "\n OLD NOTES: " + str(obj.discord_user.old_notes)
         else:
             return obj.notes
 
