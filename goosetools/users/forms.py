@@ -8,6 +8,16 @@ from goosetools.users.models import Character, Corp, DiscordUser
 
 
 class SignupFormWithTimezone(SignupForm):
+    prefered_pronouns = forms.ChoiceField(
+        choices=[
+            ("blank", "----"),
+            ("they", "They/Them"),
+            ("she", "She/Her"),
+            ("he", "He/Him"),
+        ],
+        help_text="Feel free not to say and leave this blank!",
+        required=False,
+    )
     previous_alliances = forms.CharField(
         help_text="Have you been in any previous alliances? If so, what alliances?"
     )

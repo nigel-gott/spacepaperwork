@@ -80,9 +80,21 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         super().save_user(request, sociallogin, form)
         _create_application_if_not_approved(sociallogin.user, discord_user, form)
         _update_user_from_social_account(discord_user, account, sociallogin.user)
+        _give_pronoun_roles(discord_user, form)
 
     def validate_disconnect(self, account, accounts):
         raise ValidationError("Can not disconnect")
+
+
+def _give_pronoun_roles(discord_user, form):
+    prefered_pronouns = form.cleaned_data["prefered_pronouns"]
+    uid = discord_user.uid
+    if prefered_pronouns == "they":
+        DiscordGuild.try_give_role(uid, 762405572136927242)
+    elif prefered_pronouns == "she":
+        DiscordGuild.try_give_role(uid, 762405484614910012)
+    elif prefered_pronouns == "he":
+        DiscordGuild.try_give_role(uid, 762404773512740905)
 
 
 def _update_discord_user(discord_user, account):

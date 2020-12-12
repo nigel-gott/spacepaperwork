@@ -331,6 +331,45 @@ class UserAuthTest(GooseToolsTestCase):
                 },
             )
 
+    def test_signing_up_gives_preffered_pronoun_role_if_specified(
+        self,
+    ):
+        with requests_mock.Mocker() as m:
+            DiscordGuild.objects.create(
+                active=True,
+                bot_token="bot_token",
+                guild_id="guildid",
+                member_role_id="memberroleid",
+            )
+            m.get(
+                "https://discord.com/api/guilds/guildid/members/3",
+                json={"meh": "what"},
+                headers={"content-type": "application/json"},
+            )
+            m.put(
+                "https://discord.com/api/guilds/guildid/members/3/roles/762405572136927242"
+            )
+            mock_discord_returns_with_uid(m, "3", roles=["1234"])
+            self.client.logout()
+            response = self.client.get(reverse("discord_login"), follow=True)
+            last_url, _ = response.redirect_chain[-1]
+            self.post(
+                last_url,
+                {
+                    "timezone": "Pacific/Niue",
+                    "transaction_tax": 14,
+                    "activity": "a",
+                    "previous_alliances": "a",
+                    "looking_for": "a",
+                    "broker_fee": 3,
+                    "prefered_pronouns": "they",
+                    "username": "test",
+                    "ingame_name": "My Main",
+                    "corp": self.corp.pk,
+                    "application_notes": "Hello please let me into goosefleet",
+                },
+            )
+
     def test_once_an_application_has_been_approved_it_disappears_from_the_applications_screen(
         self,
     ):
