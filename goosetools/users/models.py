@@ -25,6 +25,11 @@ class DiscordUser(models.Model):
     nick = models.TextField(null=True, blank=True)
     uid = models.TextField(unique=True, blank=True, null=True)
     avatar_hash = models.TextField(blank=True, null=True)
+    old_notes = models.TextField(blank=True, null=True)
+    sa_profile = models.TextField(blank=True, null=True)
+    voucher = models.ForeignKey(
+        "DiscordUser", on_delete=models.SET_NULL, blank=True, null=True
+    )
 
     pre_approved = models.BooleanField(default=False)
 
