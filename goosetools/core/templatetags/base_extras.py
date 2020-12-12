@@ -13,6 +13,7 @@ from goosetools.fleets.models import (
 )
 from goosetools.items.models import InventoryItem
 from goosetools.market.models import MarketOrder, SoldItem
+from goosetools.users.models import CorpApplication, UserApplication
 
 register = template.Library()
 
@@ -99,6 +100,21 @@ def nicemoney(value):
 @register.simple_tag
 def num_future_fleets():
     return len(future_fleets_query())
+
+
+@register.simple_tag
+def num_pending_user_apps():
+    return UserApplication.unapproved_applications().count()
+
+
+@register.simple_tag
+def num_pending_corp_apps():
+    return CorpApplication.unapproved_applications().count()
+
+
+@register.simple_tag
+def num_pending_apps():
+    return num_pending_corp_apps() + num_pending_user_apps()
 
 
 @register.simple_tag

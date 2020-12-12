@@ -62,10 +62,14 @@
 {% if user.is_staff %}
 <ul class="dropdown-content" id="dropdown_admin">
     <li>
-        <a href="{% url 'applications' %}">New User Applications</a>
+        <a href="{% url 'applications' %}">New User Applications
+        ({% num_pending_user_apps %})
+        </a>
     </li>
     <li>
-        <a href="{% url 'corp_applications' %}">Corp Applications</a>
+        <a href="{% url 'corp_applications' %}">Corp Applications
+        ({% num_pending_corp_apps %})
+        </a>
     </li>
     <li>
         <a href="{% url 'admin:index' %}">Site Admin</a>
@@ -103,6 +107,7 @@
             <li>
                 <a class="dropdown-trigger valign-wrapper" data-target="dropdown_admin" href="#!">
                     <i class="material-icons left">build</i>Admin
+                    ({% num_pending_apps %})
                     <i class="material-icons right">arrow_drop_down</i>
                 </a>
             </li>
