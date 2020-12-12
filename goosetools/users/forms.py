@@ -8,6 +8,27 @@ from goosetools.users.models import Character, Corp, DiscordUser
 
 
 class SignupFormWithTimezone(SignupForm):
+    previous_alliances = forms.CharField(
+        help_text="Have you been in any previous alliances? If so, what alliances?"
+    )
+    activity = forms.CharField(
+        help_text="How active would you say you are in-game and on discord?"
+    )
+    looking_for = forms.CharField(
+        help_text="What are you looking for in a corp and how does honking make you feel?"
+    )
+    application_notes = forms.CharField(
+        required=False,
+        help_text="Please fill in with anything else relevent to your application.",
+    )
+    ingame_name = forms.CharField(
+        help_text="The name of you main account you will be applying to Gooseflock with."
+    )
+    corp = forms.ModelChoiceField(
+        queryset=Corp.objects.all(),
+        help_text="The Gooseflock corp you wish to apply to. Please send an application in-game to this corp with the same character you have entered above after submitting this form.",
+    )
+
     timezone = TimeZoneFormField(display_GMT_offset=True)
     transaction_tax = forms.DecimalField(
         max_digits=5,
@@ -26,15 +47,19 @@ class SignupFormWithTimezone(SignupForm):
     default_character = forms.ModelChoiceField(
         queryset=Character.objects.all(), required=False
     )
-    application_notes = forms.CharField(required=False)
-    ingame_name = forms.CharField()
-    corp = forms.ModelChoiceField(queryset=Corp.objects.all())
 
     def _disable_field(self, field_name):
         field = self.fields[field_name]
         field.required = False
         field.widget = forms.HiddenInput()
         field.label = ""
+
+    @staticmethod
+    def corp_label_from_instance(corp):
+        if corp.full_name:
+            return f"[{corp}] {corp.full_name}"
+        else:
+            return f"[{corp}]"
 
     def __init__(self, *args, **kwargs):
         sociallogin = kwargs.get("sociallogin", None)
@@ -57,6 +82,9 @@ class SignupFormWithTimezone(SignupForm):
             | Q(required_discord_role__exact="")
         )
 
+        self.fields["corp"].label_from_instance = self.corp_label_from_instance
+        self.fields["corp"].initial = self.fields["corp"].queryset.first()
+
         existing_characters = Character.objects.filter(discord_user__uid=uid)
         default_character_field = self.fields["default_character"]
         if pre_approved and existing_characters.count() > 0:
@@ -66,6 +94,9 @@ class SignupFormWithTimezone(SignupForm):
             self._disable_field("default_character")
 
         if pre_approved:
+            self._disable_field("previous_alliances")
+            self._disable_field("activity")
+            self._disable_field("looking_for")
             self._disable_field("application_notes")
             self._disable_field("ingame_name")
             self._disable_field("corp")

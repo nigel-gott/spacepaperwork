@@ -52,6 +52,9 @@ def _create_application_if_not_approved(user, discord_user, form):
             created_at=timezone.now(),
             application_notes=form.cleaned_data["application_notes"],
             ingame_name=form.cleaned_data["ingame_name"],
+            previous_alliances=form.cleaned_data["previous_alliances"],
+            activity=form.cleaned_data["activity"],
+            looking_for=form.cleaned_data["looking_for"],
             corp=form.cleaned_data["corp"],
         )
         application.full_clean()

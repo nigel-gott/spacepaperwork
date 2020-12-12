@@ -13,6 +13,7 @@ from timezone_field import TimeZoneField
 
 class Corp(models.Model):
     name = models.TextField(primary_key=True)
+    full_name = models.TextField(unique=True, null=True, blank=True)
     required_discord_role = models.TextField(null=True, blank=True)
 
     def __str__(self):
@@ -227,6 +228,10 @@ class UserApplication(models.Model):
     application_notes = models.TextField(blank=True, null=True)
     ingame_name = models.TextField()
     corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
+
+    previous_alliances = models.TextField(blank=True, null=True)
+    activity = models.TextField(blank=True, null=True)
+    looking_for = models.TextField(blank=True, null=True)
 
     @staticmethod
     def unapproved_applications():

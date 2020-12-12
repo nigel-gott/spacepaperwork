@@ -13,17 +13,18 @@
                     src="{{ application.user.discord_avatar_url }}?size=32" style="width: 32px">
             {% endif %}
             <span class="title">Application for: {{application.user.discord_username}} ({{application.user.display_name}})</span>
-            <div class="divider"></div>
-            {% if application.user.discord_avatar_url %}
-            <img alt="" class="avatar"
-                    src="{{ application.user.discord_avatar_url }}?size=32" style="width: 32px">
-            {% endif %}
             <p>
+            <br/>
+            <br/>
                 <b>Discord ID:</b> {{application.user.discord_user.uid}}<br/>
                 <b>In Game Name:</b> {{application.ingame_name}}<br/>
                 <b>Corp Applying To:</b> {{application.corp}}<br/>
+                ----------------<br/>
+                <b>Their Previous Alliances:</b> <blockquote> {{application.previous_alliances}} </blockquote>
+                <b>How Active They Are</b> <blockquote> {{application.activity}} </blockquote>
+                <b>What They Are Looking For In Corp/HONK:</b> <blockquote> {{application.looking_for}} </blockquote>
                 {% if application.application_notes %}
-                <b>Notes From Applicant:</b> <blockquote>{{application.application_notes}}</blockquote>
+                <b>Extra Notes From Them:</b> <blockquote>{{application.application_notes}}</blockquote>
                 {% endif %}
             </p>
 
