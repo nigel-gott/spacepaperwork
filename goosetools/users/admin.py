@@ -23,6 +23,7 @@ class CharacterAdmin(admin.ModelAdmin):
         "discord_username",
         "status",
     ]
+    list_filter = ["corp"]
 
     # pylint: disable=no-self-use
     def discord_username(self, obj):
