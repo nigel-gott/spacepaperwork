@@ -47,7 +47,7 @@
             <li class="collection-item avatar">
                 {% if user.avatar_url %}
                     <img alt="" class="circle"
-                            src="{{ user.avatar_url }}?size=32" style="width: 32px"/>
+                            src="{{ user.avatar_url }}?size=32"/>
                 {% endif %}
                 <a href="{% url 'user_view' user.pk %}">{{user.username}} {% if user.nick %} / {{user.nick}} {% endif %}</a>
             </li>
