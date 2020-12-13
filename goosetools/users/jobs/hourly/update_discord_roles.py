@@ -21,14 +21,8 @@ def _setup_user_groups_from_discord_guild_roles(
         if "nick" in extra_data and extra_data["nick"] and extra_data["nick"].strip():
             user.discord_user.nick = extra_data["nick"]
             user.discord_user.save()
-        if guild.member_role_id:
-            has_member_role = False
-        else:
-            has_member_role = True
         if "roles" in extra_data:
             for role_id in extra_data["roles"]:
-                if guild.member_role_id == role_id:
-                    has_member_role = True
                 try:
                     group_mappings = DiscordRoleDjangoGroupMapping.objects.filter(
                         role_id=role_id, guild=guild
@@ -46,12 +40,6 @@ def _setup_user_groups_from_discord_guild_roles(
                 except DiscordRoleDjangoGroupMapping.DoesNotExist:
                     pass
             user.save()
-        if not has_member_role:
-            if log_output:
-                print(
-                    f"Marking {user} as rejected as they do not have the role {guild.member_role_id}"
-                )
-            user.rejected()
     except DiscordGuild.DoesNotExist:
         pass
 
