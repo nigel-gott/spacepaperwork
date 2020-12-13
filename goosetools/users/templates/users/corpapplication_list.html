@@ -6,6 +6,7 @@
 <div class="section">
     {% for corp, apps in applications_by_corp.items %}
         <h5>Applications For {{corp}}</h5>
+        <p>Remember the user might be having to wait for a 24 hour corp leaving timer before applying, wait until a few days have passed to reject it if missing ingame.</p>
         <ul class="collection" style="overflow: visible;">
         {% for application in apps %}
             <li class="collection-item avatar">
@@ -19,6 +20,7 @@
                 <h6>Application to Join: {{application.character}} into [{{application.corp}}]</h6>
                 {% endif %}
                 <p>
+                    <b>Created At: </b>{{application.created_at}} <br/>
                     <b>Discord Username: </b>{{application.character.discord_user.display_name}} <br/>
                     <b>Other Characters: </b> <br/>
                     <ol>
