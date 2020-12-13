@@ -197,11 +197,11 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
     def is_authed_and_approved(self):
         return self.is_authenticated and self.is_approved()
 
-    def approved(self):
+    def set_as_approved(self):
         self.status = "approved"
         self.save()
 
-    def rejected(self):
+    def set_as_rejected(self):
         self.status = "rejected"
         self.save()
 
@@ -266,7 +266,7 @@ class UserApplication(models.Model):
 
     def approve(self):
         self.status = "approved"
-        self.user.approved()
+        self.user.set_as_approved()
         self._create_character()
         self.full_clean()
         DiscordGuild.try_give_guild_member_role(self.user)
@@ -274,7 +274,7 @@ class UserApplication(models.Model):
 
     def reject(self):
         self.status = "rejected"
-        self.user.rejected()
+        self.user.set_as_rejected()
         self.full_clean()
         self.save()
 

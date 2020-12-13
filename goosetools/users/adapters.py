@@ -125,7 +125,7 @@ def _update_discord_user(discord_user, account):
 
 def _update_user_from_social_account(discord_user, account, gooseuser):
     if discord_user.pre_approved:
-        gooseuser.approved()
+        gooseuser.set_as_approved()
     try:
         guild = DiscordGuild.objects.get(active=True)
         _setup_user_groups_from_discord_guild_roles(
