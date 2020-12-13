@@ -1,3 +1,4 @@
+import logging
 from typing import Union
 
 import requests
@@ -9,6 +10,8 @@ from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
 from django_prometheus.models import ExportModelOperationsMixin
 from timezone_field import TimeZoneField
+
+logger = logging.getLogger(__name__)
 
 
 class Corp(models.Model):
@@ -290,7 +293,7 @@ class DiscordGuild(models.Model):
         try:
             guild = DiscordGuild.objects.get(active=True)
             if guild.member_role_id:
-                print(
+                logger.info(
                     f"Attempting to give member role: {guild.member_role_id} to {user.discord_uid()}"
                 )
                 DiscordGuild.try_give_role(user.discord_uid(), guild.member_role_id)
@@ -306,7 +309,7 @@ class DiscordGuild(models.Model):
             }
             url = f"https://discord.com/api/guilds/{guild.guild_id}/members/{uid}/roles/{role_id}"
             request = requests.put(url, headers=bot_headers)
-            print(f"Response from {url} is {request}")
+            logger.info(f"Response from {url} is {request}")
             request.raise_for_status()
         except DiscordGuild.DoesNotExist:
             pass
