@@ -17,7 +17,7 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
 # The ID and range of a sample spreadsheet.
 SAMPLE_SPREADSHEET_ID = "1YlJsd_HnHSRQBtmqkfGpB83Wle6PpbP0s5NGX_8PScw"
-SAMPLE_RANGE_NAME = "Profit Analysis!E13:N500"
+SAMPLE_RANGE_NAME = "Ship Pricing!A1:J700"
 
 
 class Job(HourlyJob):
