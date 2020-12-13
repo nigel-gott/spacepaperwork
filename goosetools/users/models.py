@@ -306,6 +306,7 @@ class DiscordGuild(models.Model):
                 }
                 url = f"https://discord.com/api/guilds/{guild.guild_id}/members/{uid}/roles/{role_id}"
                 request = requests.put(url, headers=bot_headers)
+                print(f"Response from {url} is {request}")
                 request.raise_for_status()
         except DiscordGuild.DoesNotExist:
             pass
