@@ -142,6 +142,10 @@ class AddEditCharacterForm(forms.Form):
     corp = forms.ModelChoiceField(queryset=Corp.objects.all(), initial=0)
 
 
+class CharacterUserSearchForm(forms.Form):
+    name = forms.CharField()
+
+
 class CharacterForm(forms.Form):
     FACTIONS = [
         ("All", "All"),

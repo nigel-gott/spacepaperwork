@@ -9,17 +9,21 @@ from goosetools.users.views import (
     character_edit,
     character_list,
     character_new,
+    character_search,
     corp_application_list,
     corp_application_update,
     settings_view,
     user_application_list,
+    user_view,
 )
 
 urlpatterns = [
     path("settings/", settings_view, name="settings"),
+    path("user/<int:pk>", user_view, name="user_view"),
     path("characters/edit/<int:pk>", character_edit, name="character_edit"),
     path("characters/new/", character_new, name="character_new"),
     path("characters/", character_list, name="characters"),
+    path("characters/search", character_search, name="character_search"),
     path("applications/", user_application_list, name="applications"),
     path("applications/corp", corp_application_list, name="corp_applications"),
     path(

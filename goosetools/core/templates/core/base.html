@@ -13,6 +13,15 @@
 </head>
 <body>
 {% if user.is_authenticated and user.is_approved %}
+<ul class="dropdown-content" id="dropdown_tools">
+    <li>
+        <a href="{% url 'mapbot:mapbot_index' %}">MapBot</a>
+    </li>
+    <li>
+        <a href="{% url 'character_search' %}">Char/User Search</a>
+    </li>
+    <li><a href="https://wiki.goosetools.com">HONK Wiki</a></li>
+</ul>
 <ul class="dropdown-content" id="dropdown_fleets">
     <li><a href="{% url 'fleet' %}">Active Fleets
         ({% num_active_fleets %})
@@ -93,10 +102,14 @@
                 <i class="material-icons left" style="margin-right:0px;">attach_money</i>Sales ({{all_sales_num}})
                 <i class="material-icons right">arrow_drop_down</i>
                 </a></li>
-            <li><a class="tab" href="{% url 'industry:shiporders_view' %}">Orders <i class="material-icons left">directions_boat</i>
+            <li><a  href="{% url 'industry:shiporders_view' %}">Orders <i class="material-icons left">directions_boat</i>
             </a></li>
-            <li><a class="tab" href="{% url 'mapbot:mapbot_index' %}">MapBot<i class="material-icons left">public</i>
-            </a></li>
+            <li>
+                <a class="dropdown-trigger valign-wrapper" data-target="dropdown_tools" href="#!">
+                    <i class="material-icons left">find_replace</i>Tools
+                    <i class="material-icons right">arrow_drop_down</i>
+                </a>
+            </li>
             <li>
                 <a class="dropdown-trigger valign-wrapper" data-target="dropdown_settings" href="#!">
                     <i class="material-icons left">settings</i>Settings
@@ -133,88 +146,116 @@
     </div>
 </nav>
 <ul class="sidenav" id="mobile-demo">
-    {% if user.is_staff %}
-    <li><a href="{% url 'admin:index' %}">Admin<i class="material-icons left">build</i></a></li>
-    <li>
-        <a href="{% url 'applications' %}">New User Applications</a>
-    </li>
-    <li>
-        <a href="{% url 'corp_applications' %}">Corp Applications</a>
-    </li>
+    {% if user.is_authenticated %}
+        <li class="center">
+            <form action="{% url 'account_logout' %}" method="post">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                <input name="{{ redirect_field_name }}" type="hidden" value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <button class="waves-effect waves-light btn" type="submit">{% trans 'Logout' %}</button>
+            </form>
+        </li>
     {% endif %}
+
+    {% if user.is_staff %}
+        <li><a class="subheader">Admin<i class="material-icons right">build</i></a></li>
+        <li><a href="{% url 'admin:index' %}">Admin</a></li>
+        <li>
+            <a href="{% url 'applications' %}">New User Applications</a>
+        </li>
+        <li>
+            <a href="{% url 'corp_applications' %}">Corp Applications</a>
+        </li>
+        <li><div class="divider"></div></li>
+    {% endif %}
+
     {% if user.is_authenticated and user.is_approved %}
-    <li class="tab"><a href="{% url 'industry:shiporders_view' %}">Orders
-    </a>
-    <li class="tab"><a href="{% url 'mapbot:mapbot_index' %}">MapBot
-    </a>
-    <li class="tab"><a href="{% url 'fleet' %}">Active Fleets
-        ({% num_active_fleets %})
-    </a>
-    </li>
-    <li class="tab"><a href="{% url 'fleet_past' %}">Past Fleets
-        ({% num_past_fleets %})
-    </a>
-    </li>
-    <li class="tab"><a href="{% url 'fleet_future' %}">Future Fleets
-        ({% num_future_fleets %})
-    </a>
-    </li>
-    <li><a href="{% url 'your_fleet_shares' %}">Your Fleet Shares/Loot</li>
-    </a>
-    {% num_items user as num_to_sell %}
-    <li class="tab"><a href="{% url 'items' %}">Your Loot To Sell
-        ({{ num_to_sell }})
-    </a>
-    </li>
-    {% num_orders user as num_active_orders %}
-    <li class="tab"><a href="{% url 'orders' %}">Market Orders
-        ({{ num_active_orders }})
-    </a>
-    </li>
-    {% num_sold user as num_already_sold %}
-    <li class="tab"><a href="{% url 'sold' %}">Sold Items
-        ({{ num_already_sold }})
-    </a>
-    </li>
-    <li class="tab"><a href="{% url 'transfered_items' %}">Transfered Items
-    </a>
-    </li>
-    <li class="tab"><a href="{% url 'contracts' %}">Your Contracts ({{contracts}})</a></li>
-    <li><a href="{% url 'all_items' %}">View Everyones Items
-    </a>
-    </li>
-    <li><a href="{% url 'grouped_items' %}">View Everyones Items Grouped
-    </a>
-    </li>
-    <li class="tab"><a href="{% url 'settings' %}">Settings</a></li>
-    <li class="tab"><a href="{% url 'characters' %}">Characters</a></li>
-    <li class="center">
-        <form action="{% url 'account_logout' %}" method="post">
-            {% csrf_token %}
-            {% if redirect_field_value %}
-            <input name="{{ redirect_field_name }}" type="hidden" value="{{ redirect_field_value }}"/>
-            {% endif %}
-            <button class="waves-effect waves-light btn" type="submit">{% trans 'Logout' %}</button>
-        </form>
-    </li>
+        <li >
+            <a href="{% url 'industry:shiporders_view' %}">Orders<i class="material-icons right">directions_boat</i></a>
+        </li>
+
+        <li><div class="divider"></div></li>
+        <li><a class="subheader">Fleets<i class="material-icons right">star</i></a></li>
+
+            <li ><a href="{% url 'fleet' %}">Active Fleets
+                ({% num_active_fleets %})
+            </a>
+            </li>
+            <li ><a href="{% url 'fleet_past' %}">Past Fleets
+                ({% num_past_fleets %})
+            </a>
+            </li>
+            <li ><a href="{% url 'fleet_future' %}">Future Fleets
+                ({% num_future_fleets %})
+            </a>
+            </li>
+
+            <li><a href="{% url 'your_fleet_shares' %}">Your Fleet Shares/Loot</li>
+            </a>
+
+        <li><div class="divider"></div></li>
+        <li><a class="subheader">Sales<i class="material-icons right">attach_money</i></a></li>
+
+        {% num_items user as num_to_sell %}
+        <li ><a href="{% url 'items' %}">Your Loot To Sell
+            ({{ num_to_sell }})
+        </a>
+
+        </li>
+        {% num_orders user as num_active_orders %}
+        <li ><a href="{% url 'orders' %}">Market Orders
+            ({{ num_active_orders }})
+        </a>
+        </li>
+        {% num_sold user as num_already_sold %}
+        <li ><a href="{% url 'sold' %}">Sold Items
+            ({{ num_already_sold }})
+        </a>
+        </li>
+        <li ><a href="{% url 'transfered_items' %}">Transfered Items
+        </a>
+        </li>
+        <li ><a href="{% url 'contracts' %}">Your Contracts ({{contracts}})</a></li>
+
+        <li><div class="divider"></div></li>
+        <li><a class="subheader">Tools<i class="material-icons right">find_replace</i></a></li>
+
+        <li >
+            <a href="{% url 'mapbot:mapbot_index' %}">MapBot</a>
+        </li>
+        <li>
+            <a href="{% url 'character_search' %}">Char/User Search</a>
+        </li>
+        <li>
+            <a href="https://wiki.goosetools.com">HONK Wiki</a>
+        </li>
+
+        <li><div class="divider"></div></li>
+        <li><a class="subheader">Settings<i class="material-icons right">settings</i></a></li>
+
+        <li ><a href="{% url 'settings' %}">Settings</a></li>
+        <li ><a href="{% url 'characters' %}">Characters</a></li>
+
     {% else %}
-    <li><a class="waves-effect waves-light btn" href="{% provider_login_url 'discord' %}">Login</a></li>
+        <li><a class="waves-effect waves-light btn" href="{% provider_login_url 'discord' %}">Login</a></li>
     {% endif %}
 </ul>
 
 <main class="container">
     {% if messages %}
-    <div class="section">
-        {% for m in messages %}
-        {% if m.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
-        <span class="red-text"><b>{{ m }}</b></span>
-
-        {% else %}
-        <span class="light-green-text"><b>{{ m }}</b></span>
-        {% endif %}
-        {% endfor %}
-    </div>
-    <div class="divider"></div>
+        <div class="section">
+            {% for m in messages %}
+                {% if m.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                    <span class="red-text"><b>{{ m }}</b></span>
+                {% elif m.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
+                    <span class="orange-text"><b>{{ m }}</b></span>
+                {% else %}
+                    <span class="light-green-text"><b>{{ m }}</b></span>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div class="divider"></div>
     {% endif %}
     {% block body %}
     {% endblock %}

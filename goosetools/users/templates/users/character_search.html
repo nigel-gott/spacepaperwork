@@ -1,0 +1,60 @@
+{% extends "core/base.html" %}
+{% block body %}
+<div class="section">
+    <h4>Character / User Search</h4>
+</div>
+<div class="section">
+    <form action="" method="get">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="row">
+            <div class="input-field col s12">
+                {{ field.errors }}
+                {{ field }}
+                {{ field.label_tag }}
+                {% if field.help_text %}
+                <p class="help">{{ field.help_text|safe }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% endfor %}
+        <label>
+        <button class="btn waves-effect waves-light" type="submit" value="Submit">Search
+            <i class="material-icons right">send</i>
+        </button>
+    </form>
+
+    {% if characters %}
+        <h6>Character Search Results:</h6>
+        <ul class="collection" style="overflow: visible;">
+        {% for character in characters %}
+            <li class="collection-item ">
+                <span class="title">[{{character.corp}}] {{character.ingame_name}}</span>
+                <div class="divider"></div>
+                <p>
+                    <b>Owner</b>: <a href="{% url 'user_view' character.discord_user.pk %}">{{character.discord_user.display_name}}</a>
+                </p>
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if users%}
+    <h6>User Search Results:</h6>
+        <ul class="collection" style="overflow: visible;">
+        {% for user in users%}
+            {% if user.discord_avatar_url %}
+            <img alt="" class="avatar"
+                    src="{{ user.discord_avatar_url }}?size=32" style="width: 32px"/>
+            {% endif %}
+            <li class="collection-item avatar">
+                    <a href="{% url 'user_view' user.pk %}">{{user.username}} / {{user.nick}}</a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+</div>
+
+{% endblock %}

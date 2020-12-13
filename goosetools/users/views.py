@@ -3,6 +3,7 @@ from itertools import groupby
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
 from django.db import transaction
+from django.db.models.query_utils import Q
 from django.http.response import (
     HttpResponseBadRequest,
     HttpResponseNotAllowed,
@@ -14,10 +15,16 @@ from django.views.generic import ListView
 
 from goosetools.users.forms import (
     AddEditCharacterForm,
+    CharacterUserSearchForm,
     SettingsForm,
     UserApplicationUpdateForm,
 )
-from goosetools.users.models import Character, CorpApplication, UserApplication
+from goosetools.users.models import (
+    Character,
+    CorpApplication,
+    DiscordUser,
+    UserApplication,
+)
 
 
 def settings_view(request):
@@ -185,6 +192,15 @@ def user_application_list(request):
     )
 
 
+def user_view(request, pk):
+    user = get_object_or_404(DiscordUser, pk=pk)
+    return render(
+        request,
+        "users/user_view.html",
+        {"viewed_user": user},
+    )
+
+
 def character_list(request):
     return render(
         request,
@@ -195,4 +211,26 @@ def character_list(request):
                 character__discord_user=request.user.discord_user,
             ).exclude(status="approved"),
         },
+    )
+
+
+def character_search(request):
+
+    characters = None
+    users = None
+    if request.GET and "name" in request.GET:
+        form = CharacterUserSearchForm(request.GET)
+        if form.is_valid():
+            name = form.cleaned_data["name"]
+            characters = Character.objects.filter(ingame_name__icontains=name)
+            users = DiscordUser.objects.filter(
+                Q(nick__icontains=name) | Q(username__icontains=name)
+            )
+    else:
+        form = CharacterUserSearchForm()
+
+    return render(
+        request,
+        "users/character_search.html",
+        {"form": form, "characters": characters, "users": users},
     )
