@@ -55,6 +55,14 @@ def application_update(request, pk):
     application = get_object_or_404(UserApplication, pk=pk)
     if request.method == "POST":
         if "approve" in request.POST:
+            if (
+                Character.objects.filter(ingame_name=application.ingame_name).count()
+                > 0
+            ):
+                error = f"Cannot approve this application with a in-game name of {application.ingame_name} as it already exists, please talk to the user and fix the application's ingame name using the site admin page."
+                messages.error(request, error)
+                return HttpResponseRedirect(reverse("applications"))
+
             application.approve()
         elif "reject" in request.POST:
             application.reject()
@@ -121,6 +129,11 @@ def character_new(request):
     if request.method == "POST":
         form = AddEditCharacterForm(request.POST)
         if form.is_valid():
+            ingame_name = form.cleaned_data["ingame_name"]
+            if Character.objects.filter(ingame_name=ingame_name).count() > 0:
+                error = f"Cannot create a character with a in-game name of {ingame_name} as it already exists."
+                messages.error(request, error)
+                return HttpResponseRedirect(reverse("characters"))
             new_corp = form.cleaned_data["corp"]
             character = Character.objects.create(
                 ingame_name=form.cleaned_data["ingame_name"],

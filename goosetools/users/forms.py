@@ -8,6 +8,7 @@ from goosetools.users.models import Character, Corp, DiscordUser
 
 
 class SignupFormWithTimezone(SignupForm):
+    username = forms.CharField(max_length=30, help_text="Your Goosetools Username")
     prefered_pronouns = forms.ChoiceField(
         choices=[
             ("blank", "----"),
@@ -15,21 +16,24 @@ class SignupFormWithTimezone(SignupForm):
             ("she", "She/Her"),
             ("he", "He/Him"),
         ],
-        help_text="Feel free not to say and leave this blank!",
+        help_text="Your Prefered Pronouns, feel free not to say and leave this blank.",
         required=False,
     )
     previous_alliances = forms.CharField(
         help_text="Have you been in any previous alliances? If so, what alliances?"
     )
     activity = forms.CharField(
-        help_text="How active would you say you are in-game and on discord?"
+        help_text="How active would you say you are in-game and on discord?",
+        widget=forms.Textarea(attrs={"class": "materialize-textarea"}),
     )
     looking_for = forms.CharField(
-        help_text="What are you looking for in a corp and how does honking make you feel?"
+        help_text="What are you looking for in a corp and how does honking make you feel?",
+        widget=forms.Textarea(attrs={"class": "materialize-textarea"}),
     )
     application_notes = forms.CharField(
         required=False,
         help_text="Please fill in with anything else relevent to your application.",
+        widget=forms.Textarea(attrs={"class": "materialize-textarea"}),
     )
     ingame_name = forms.CharField(
         help_text="The name of you main account you will be applying to Gooseflock with."
@@ -39,20 +43,24 @@ class SignupFormWithTimezone(SignupForm):
         help_text="The Gooseflock corp you wish to apply to. Please send an application in-game to this corp with the same character you have entered above after submitting this form.",
     )
 
-    timezone = TimeZoneFormField(display_GMT_offset=True)
+    timezone = TimeZoneFormField(
+        help_text="Your Timezone",
+        display_GMT_offset=True,
+        widget=forms.Select(attrs={"class": "browser-default"}),
+    )
     transaction_tax = forms.DecimalField(
         max_digits=5,
         decimal_places=2,
         label="Transaction Tax %",
         initial=15,
-        help_text="Used to calculate fees when you sell loot in goosetools.",
+        help_text="Your ingame Transaction Tax - Used to calculate fees when you sell loot in goosetools.",
     )
     broker_fee = forms.DecimalField(
         max_digits=5,
         decimal_places=2,
         label="Broker Fee %",
         initial=8,
-        help_text="Used to calculate fees when you sell loot in goosetools.",
+        help_text="Your ingame Broker Fee.",
     )
     default_character = forms.ModelChoiceField(
         queryset=Character.objects.all(), required=False

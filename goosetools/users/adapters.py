@@ -2,6 +2,7 @@ from allauth.account.adapter import DefaultAccountAdapter
 from allauth.account.signals import user_logged_in
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.models import SocialAccount
+from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.urls import reverse
@@ -10,7 +11,12 @@ from django.utils import timezone
 from goosetools.users.jobs.hourly.update_discord_roles import (
     _setup_user_groups_from_discord_guild_roles,
 )
-from goosetools.users.models import DiscordGuild, DiscordUser, UserApplication
+from goosetools.users.models import (
+    Character,
+    DiscordGuild,
+    DiscordUser,
+    UserApplication,
+)
 
 
 # pylint: disable=unused-argument
@@ -44,8 +50,14 @@ class AccountAdapter(DefaultAccountAdapter):
         user.save()
 
 
-def _create_application_if_not_approved(user, discord_user, form):
+def _create_application_if_not_approved(user, discord_user, form, request):
     if not discord_user.pre_approved:
+        ingame_name = form.cleaned_data["ingame_name"]
+        if Character.objects.filter(ingame_name=ingame_name).count() > 0:
+            error = f"You cannot apply with an in-game name of {ingame_name} as it already exists"
+            messages.error(request, error)
+            raise ValidationError(error)
+
         application = UserApplication(
             user=user,
             status="unapproved",
@@ -78,7 +90,9 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         sociallogin.user.discord_user = discord_user
         _update_discord_user(discord_user, account)
         super().save_user(request, sociallogin, form)
-        _create_application_if_not_approved(sociallogin.user, discord_user, form)
+        _create_application_if_not_approved(
+            sociallogin.user, discord_user, form, request
+        )
         _update_user_from_social_account(discord_user, account, sociallogin.user)
         _give_pronoun_roles(discord_user, form)
 
