@@ -178,8 +178,21 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
     notes = models.TextField(null=True, blank=True)
     email = models.EmailField(null=True, blank=True)  # type: ignore
 
+    def latest_app(self):
+        if hasattr(self, "userapplication"):
+            # pylint: disable=no-member
+            return self.userapplication
+        else:
+            return False
+
     def is_approved(self):
         return self.status == "approved"
+
+    def is_unapproved(self):
+        return self.status == "unapproved"
+
+    def is_rejected(self):
+        return self.status == "rejected"
 
     def is_authed_and_approved(self):
         return self.is_authenticated and self.is_approved()
@@ -276,6 +289,9 @@ class DiscordGuild(models.Model):
     def try_give_guild_member_role(user):
         try:
             guild = DiscordGuild.objects.get(active=True)
+            print(
+                f"Attempting to give member role: {guild.member_role_id} to {user.discord_uid()}"
+            )
             DiscordGuild.try_give_role(user.discord_uid(), guild.member_role_id)
         except DiscordGuild.DoesNotExist:
             pass
