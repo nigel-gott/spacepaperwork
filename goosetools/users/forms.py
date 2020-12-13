@@ -36,7 +36,7 @@ class SignupFormWithTimezone(SignupForm):
         widget=forms.Textarea(attrs={"class": "materialize-textarea"}),
     )
     ingame_name = forms.CharField(
-        help_text="The EXACT name of you main account you will be applying to Gooseflock and nothing else."
+        help_text="The EXACT name of you main account you will be applying to Gooseflock and nothing else. Once approved you will be able to auth alts under Settings->Characters."
     )
     corp = forms.ModelChoiceField(
         queryset=Corp.objects.all(),
