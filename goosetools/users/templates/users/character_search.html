@@ -44,12 +44,12 @@
     <h6>User Search Results:</h6>
         <ul class="collection" style="overflow: visible;">
         {% for user in users%}
-            {% if user.avatar_url %}
-            <img alt="" class="avatar"
-                    src="{{ user.avatar_url }}?size=32" style="width: 32px"/>
-            {% endif %}
             <li class="collection-item avatar">
-                    <a href="{% url 'user_view' user.pk %}">{{user.username}} {% if user.nick %} / {{user.nick}} {% endif %}</a>
+                {% if user.avatar_url %}
+                    <img alt="" class="avatar"
+                            src="{{ user.avatar_url }}?size=32" style="width: 32px"/>
+                {% endif %}
+                <a href="{% url 'user_view' user.pk %}">{{user.username}} {% if user.nick %} / {{user.nick}} {% endif %}</a>
             </li>
         {% endfor %}
         </ul>
