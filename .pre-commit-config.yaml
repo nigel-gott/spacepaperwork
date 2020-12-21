@@ -28,7 +28,7 @@ repos:
     hooks:
       - id: prospector
         # Exciting bash to support running inside docker or a local virtual env.
-        entry: bash -c "if [ -f venv/bin/python3 ]; then PYTHONPATH=$(pwd):$PYTHONPATH venv/bin/python3 -m prospector .; else PYTHONPATH=$(pwd):$PYTHONPATH /usr/local/bin/python -m prospector -X . ; fi"
+        entry: bash -c "poetry shell; python -m prospector -X . ;"
   - repo: https://github.com/psf/black
     rev: 20.8b1
     hooks:

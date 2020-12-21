@@ -38,6 +38,7 @@ LOCALE_PATHS = [str(ROOT_DIR / "locale")]
 
 SITE_ID = env("SITE_ID")
 SECRET_KEY = env("SECRET_KEY")
+URL_PREFIX = env("URL_PREFIX", default="")
 
 # DATABASES
 # ------------------------------------------------------------------------------
