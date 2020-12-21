@@ -1099,7 +1099,7 @@ pytest = ">=2.6.4"
 watchdog = ">=0.6.0"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Extensions to the standard Python datetime module"
 name = "python-dateutil"
 optional = false
@@ -1524,7 +1524,7 @@ python-versions = "*"
 version = "1.12.1"
 
 [metadata]
-content-hash = "04c2f1194f07fd17985c0daaeabb11e1dd2e508db8ab2b17dcf7670f5b3991d2"
+content-hash = "fa2672393b5f25f4336833b56b60acab7db9098a5f87247a6b5055b06a2504ef"
 lock-version = "1.0"
 python-versions = "^3.8"
 
