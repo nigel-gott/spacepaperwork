@@ -223,9 +223,6 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
     def display_name(self):
         return self.discord_user.display_name()
 
-    def discord_avatar_hash(self):
-        return self.discord_user.uid
-
     def discord_avatar_url(self):
         return self.discord_user.avatar_url()
 
