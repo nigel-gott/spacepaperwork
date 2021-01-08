@@ -28,21 +28,26 @@ class Job(HourlyJob):
                     f"Invalid datetime recieved from stats.csv: {datetime_str}"
                 )
             time = make_aware(datetime_from_csv, timezone=timezone.utc)
-            item = Item.objects.get(eve_echoes_market_id=market_id)
-            lowest_sell = decimal_or_none(line[5])
-            event = ItemMarketDataEvent(
-                item=item,
-                time=time,
-                sell=decimal_or_none(line[3]),
-                buy=decimal_or_none(line[4]),
-                lowest_sell=lowest_sell,
-                highest_buy=decimal_or_none(line[6]),
-            )
-            item.cached_lowest_sell = lowest_sell
-            item.save()
+            try:
+                item = Item.objects.get(eve_echoes_market_id=market_id)
+                lowest_sell = decimal_or_none(line[5])
+                event = ItemMarketDataEvent(
+                    item=item,
+                    time=time,
+                    sell=decimal_or_none(line[3]),
+                    buy=decimal_or_none(line[4]),
+                    lowest_sell=lowest_sell,
+                    highest_buy=decimal_or_none(line[6]),
+                )
+                item.cached_lowest_sell = lowest_sell
+                item.save()
 
-            event.full_clean()
-            event.save()
+                event.full_clean()
+                event.save()
+            except Item.DoesNotExist:
+                print(
+                    f"WARNING: Market Data Found for Item not in Goosetools - id:{market_id}"
+                )
 
 
 def decimal_or_none(val):
