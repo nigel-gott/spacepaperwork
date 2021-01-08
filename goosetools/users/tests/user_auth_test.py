@@ -14,7 +14,7 @@ from goosetools.users.models import (
 
 def mock_discord_returns_with_uid(m, uid, roles=None):
     m.post(
-        "http://localhost:8000/goosetools/stub_discord_auth/access_token_url",
+        "http://localhost:8000/stub_discord_auth/access_token_url",
         json={"access_token": "stub_access_code"},
         headers={"content-type": "application/json"},
     )
@@ -31,7 +31,7 @@ def mock_discord_returns_with_uid(m, uid, roles=None):
     if roles is not None:
         profile_json["roles"] = roles
     m.get(
-        "http://localhost:8000/goosetools/stub_discord_auth/profile_url",
+        "http://localhost:8000/stub_discord_auth/profile_url",
         json=profile_json,
         headers={"content-type": "application/json"},
     )
