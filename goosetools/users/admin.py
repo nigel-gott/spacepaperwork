@@ -45,9 +45,6 @@ class CustomDiscordUserAdmin(admin.ModelAdmin):
         "nick",
         "uid",
         "pre_approved",
-        "old_notes",
-        "sa_profile",
-        "voucher",
     ]
 
 
@@ -66,9 +63,9 @@ class CustomUserAdmin(UserAdmin):
         "groups_list",
         "status",
         "is_staff",
-        "notes_with_old",
+        "notes",
         "sa_profile",
-        "vouched_by",
+        "voucher",
         "vouches",
     ]
 
@@ -88,20 +85,8 @@ class CustomUserAdmin(UserAdmin):
     def groups_list(self, obj):
         return [str(group) for group in obj.groups.all()]
 
-    def notes_with_old(self, obj):
-        if obj.discord_user.old_notes:
-            return str(obj.notes) + "\n OLD NOTES: " + str(obj.discord_user.old_notes)
-        else:
-            return obj.notes
-
-    def sa_profile(self, obj):
-        return obj.discord_user.sa_profile
-
-    def vouched_by(self, obj):
-        return obj.discord_user.voucher
-
     def vouches(self, obj):
-        return [str(v.display_name()) for v in obj.discord_user.current_vouches.all()]
+        return [str(v.display_name()) for v in obj.current_vouches.all()]
 
     fieldsets = UserAdmin.fieldsets + (
         (

@@ -180,6 +180,14 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
     )
     notes = models.TextField(null=True, blank=True)
     email = models.EmailField(null=True, blank=True)  # type: ignore
+    sa_profile = models.TextField(blank=True, null=True)
+    voucher = models.ForeignKey(
+        "GooseUser",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="current_vouches",
+    )
 
     def latest_app(self):
         if hasattr(self, "userapplication"):
