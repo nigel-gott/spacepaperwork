@@ -7,7 +7,7 @@ import pickle
 from django.utils import timezone
 from django_extensions.management.jobs import HourlyJob
 from google.auth.transport.requests import Request
-from google_auth_oauthlib.flow import InstalledAppFlow  # pylint: disable=import-error
+from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 from goosetools.industry.models import Ship, to_isk
