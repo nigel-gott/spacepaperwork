@@ -7,7 +7,7 @@ import pickle
 from django.utils import timezone
 from django_extensions.management.jobs import HourlyJob
 from google.auth.transport.requests import Request
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google_auth_oauthlib.flow import InstalledAppFlow  # pylint: disable=import-error
 from googleapiclient.discovery import build
 
 from goosetools.industry.models import Ship, to_isk
@@ -64,12 +64,12 @@ class Job(HourlyJob):
             i = 0
             for row in values:
                 try:
-                    if len(row) > 9:
-                        ship_name = row[9]
+                    if len(row) > 2:
+                        ship_name = row[0]
                         ship = Ship.objects.get(name=ship_name.strip())
                         try:
-                            isk_price = parse_price(row[0])
-                            eggs_price = parse_price(row[1])
+                            isk_price = parse_price(row[1])
+                            eggs_price = parse_price(row[2])
                             ship.isk_price = to_isk(isk_price)
                             ship.eggs_price = to_isk(eggs_price)
                         except Exception as e:  # pylint: disable=broad-except
