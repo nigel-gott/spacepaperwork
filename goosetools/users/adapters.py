@@ -26,7 +26,7 @@ def user_login_handler(sender, request, user, **kwargs):
     # Keep the easier to use DiscordUser model upto date as the username, discriminator and avatar_hash fields could change between logins.
     discord_user = DiscordUser.objects.get(uid=account.uid)
     _update_discord_user(discord_user, account)
-    _update_user_from_social_account(discord_user, account, user)
+    _update_user_from_social_account(account, user)
 
 
 class AccountAdapter(DefaultAccountAdapter):
@@ -46,31 +46,29 @@ class AccountAdapter(DefaultAccountAdapter):
         user.timezone = form.cleaned_data["timezone"]
         user.broker_fee = form.cleaned_data["broker_fee"]
         user.transaction_tax = form.cleaned_data["transaction_tax"]
-        user.default_character = form.cleaned_data["default_character"]
         user.save()
 
 
-def _create_application_if_not_approved(user, discord_user, form, request):
-    if not discord_user.pre_approved:
-        ingame_name = form.cleaned_data["ingame_name"]
-        if Character.objects.filter(ingame_name=ingame_name).count() > 0:
-            error = f"You cannot apply with an in-game name of {ingame_name} as it already exists"
-            messages.error(request, error)
-            raise ValidationError(error)
+def _create_application_if_not_approved(user, form, request):
+    ingame_name = form.cleaned_data["ingame_name"]
+    if Character.objects.filter(ingame_name=ingame_name).count() > 0:
+        error = f"You cannot apply with an in-game name of {ingame_name} as it already exists"
+        messages.error(request, error)
+        raise ValidationError(error)
 
-        application = UserApplication(
-            user=user,
-            status="unapproved",
-            created_at=timezone.now(),
-            application_notes=form.cleaned_data["application_notes"],
-            ingame_name=form.cleaned_data["ingame_name"],
-            previous_alliances=form.cleaned_data["previous_alliances"],
-            activity=form.cleaned_data["activity"],
-            looking_for=form.cleaned_data["looking_for"],
-            corp=form.cleaned_data["corp"],
-        )
-        application.full_clean()
-        application.save()
+    application = UserApplication(
+        user=user,
+        status="unapproved",
+        created_at=timezone.now(),
+        application_notes=form.cleaned_data["application_notes"],
+        ingame_name=form.cleaned_data["ingame_name"],
+        previous_alliances=form.cleaned_data["previous_alliances"],
+        activity=form.cleaned_data["activity"],
+        looking_for=form.cleaned_data["looking_for"],
+        corp=form.cleaned_data["corp"],
+    )
+    application.full_clean()
+    application.save()
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -90,10 +88,8 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         sociallogin.user.discord_user = discord_user
         _update_discord_user(discord_user, account)
         super().save_user(request, sociallogin, form)
-        _create_application_if_not_approved(
-            sociallogin.user, discord_user, form, request
-        )
-        _update_user_from_social_account(discord_user, account, sociallogin.user)
+        _create_application_if_not_approved(sociallogin.user, form, request)
+        _update_user_from_social_account(account, sociallogin.user)
         _give_pronoun_roles(discord_user, form)
 
     def validate_disconnect(self, account, accounts):
@@ -123,9 +119,7 @@ def _update_discord_user(discord_user, account):
     discord_user.save()
 
 
-def _update_user_from_social_account(discord_user, account, gooseuser):
-    if discord_user.pre_approved:
-        gooseuser.set_as_approved()
+def _update_user_from_social_account(account, gooseuser):
     try:
         guild = DiscordGuild.objects.get(active=True)
         _setup_user_groups_from_discord_guild_roles(

@@ -4,7 +4,7 @@ from django import forms
 from django.db.models.query_utils import Q
 
 from goosetools.users.fields import TimeZoneFormField
-from goosetools.users.models import Character, Corp, DiscordUser
+from goosetools.users.models import Character, Corp
 
 
 class SignupFormWithTimezone(SignupForm):
@@ -62,9 +62,6 @@ class SignupFormWithTimezone(SignupForm):
         initial=8,
         help_text="Your ingame Broker Fee.",
     )
-    default_character = forms.ModelChoiceField(
-        queryset=Character.objects.all(), required=False
-    )
 
     def _disable_field(self, field_name):
         field = self.fields[field_name]
@@ -83,11 +80,6 @@ class SignupFormWithTimezone(SignupForm):
         sociallogin = kwargs.get("sociallogin", None)
         super().__init__(*args, **kwargs)
         self.fields.pop("email")
-        uid = sociallogin.account.uid
-        try:
-            pre_approved = DiscordUser.objects.get(uid=uid).pre_approved
-        except DiscordUser.DoesNotExist:
-            pre_approved = False
 
         roles = (
             sociallogin.account.extra_data["roles"]
@@ -102,22 +94,6 @@ class SignupFormWithTimezone(SignupForm):
 
         self.fields["corp"].label_from_instance = self.corp_label_from_instance
         self.fields["corp"].initial = self.fields["corp"].queryset.first()
-
-        existing_characters = Character.objects.filter(discord_user__uid=uid)
-        default_character_field = self.fields["default_character"]
-        if pre_approved and existing_characters.count() > 0:
-            default_character_field.queryset = existing_characters
-        else:
-            default_character_field.queryset = Character.objects.none()
-            self._disable_field("default_character")
-
-        if pre_approved:
-            self._disable_field("previous_alliances")
-            self._disable_field("activity")
-            self._disable_field("looking_for")
-            self._disable_field("application_notes")
-            self._disable_field("ingame_name")
-            self._disable_field("corp")
 
 
 class SettingsForm(forms.Form):

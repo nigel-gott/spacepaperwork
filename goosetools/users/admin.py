@@ -38,19 +38,9 @@ class CharacterAdmin(admin.ModelAdmin):
         return obj.discord_user.gooseuser.status
 
 
-class CustomDiscordUserAdmin(admin.ModelAdmin):
-    search_fields = ["username"]
-    list_display = [
-        "username",
-        "nick",
-        "uid",
-        "pre_approved",
-    ]
-
-
 admin.site.register(Corp)
 admin.site.register(Character, CharacterAdmin)
-admin.site.register(DiscordUser, CustomDiscordUserAdmin)
+admin.site.register(DiscordUser)
 admin.site.register(UserApplication)
 admin.site.register(CorpApplication)
 

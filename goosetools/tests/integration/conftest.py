@@ -58,7 +58,7 @@ def browser():
 @pytest.fixture(scope="session")
 def http_service():
     """Ensure that HTTP service is up and responsive."""
-    url = "http://{}:{}/goosetools/".format("django", 8000)
+    url = "http://{}:{}/".format("django", 8000)
     wait_for_url(url)
 
     return url

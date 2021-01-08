@@ -30,8 +30,6 @@ class DiscordUser(models.Model):
     uid = models.TextField(unique=True, blank=True, null=True)
     avatar_hash = models.TextField(blank=True, null=True)
 
-    pre_approved = models.BooleanField(default=False)
-
     def display_name(self):
         if self.nick:
             return self.nick

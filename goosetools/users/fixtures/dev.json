@@ -27,8 +27,7 @@
         "fields": {
             "username": "test_user#1234",
             "uid": "123456789",
-            "avatar_hash": "5f8e276e5c0adf248e7f1bf437721d50",
-            "pre_approved": true
+            "avatar_hash": "5f8e276e5c0adf248e7f1bf437721d50"
         }
     },
     {

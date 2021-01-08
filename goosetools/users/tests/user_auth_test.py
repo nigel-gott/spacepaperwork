@@ -4,12 +4,7 @@ from django.urls.base import reverse
 from freezegun import freeze_time
 
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
-from goosetools.users.models import (
-    DiscordGuild,
-    DiscordUser,
-    GooseUser,
-    UserApplication,
-)
+from goosetools.users.models import DiscordGuild, GooseUser, UserApplication
 
 
 def mock_discord_returns_with_uid(m, uid, roles=None):
@@ -57,30 +52,6 @@ class UserAuthTest(GooseToolsTestCase):
             response,
             [("error", "You are not yet approved and cannot access this page.")],
         )
-
-    def test_a_preapproved_discord_user_is_approved_after_signing_up(self):
-        with requests_mock.Mocker() as m:
-            mock_discord_returns_with_uid(m, "3")
-            DiscordUser.objects.create(
-                username="Preapproved Discord User", uid="3", pre_approved=True
-            )
-            self.client.logout()
-            response = self.client.get(reverse("discord_login"), follow=True)
-            last_url, _ = response.redirect_chain[-1]
-            self.post(
-                last_url,
-                {
-                    "timezone": "Pacific/Niue",
-                    "transaction_tax": 14,
-                    "broker_fee": 3,
-                    "username": "test",
-                },
-            )
-            response = self.client.get(reverse("fleet"))
-            self.assert_messages(
-                response, [("success", "Successfully signed in as test.")]
-            )
-            self.assertIn("Active Fleets", str(response.content, encoding="utf-8"))
 
     def test_an_unknown_discord_user_is_unapproved_after_signing_up(self):
         with requests_mock.Mocker() as m:
