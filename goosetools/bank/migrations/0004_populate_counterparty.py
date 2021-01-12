@@ -8,6 +8,7 @@ def apply_migration(apps, schema_editor):
     replacements = [
         ("TamagoPapi#8004", "[HONK] TamagoPapi#8004"),
         ("Kungfu [GOOP] Sampson Stone#5526", "Kungfu Trader#5526"),
+        ("[XBUX] Kungfu Trader#5526", "Kungfu Trader#5526"),
         ("wolfs", "wolfs#0162"),
     ]
     for b, a in replacements:
