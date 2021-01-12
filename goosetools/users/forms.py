@@ -8,7 +8,6 @@ from goosetools.users.models import Character, Corp
 
 
 class SignupFormWithTimezone(SignupForm):
-    username = forms.CharField(max_length=30, help_text="Your Goosetools Username")
     prefered_pronouns = forms.ChoiceField(
         choices=[
             ("blank", "----"),
@@ -80,6 +79,7 @@ class SignupFormWithTimezone(SignupForm):
         sociallogin = kwargs.get("sociallogin", None)
         super().__init__(*args, **kwargs)
         self.fields.pop("email")
+        self.fields.pop("username")
 
         roles = (
             sociallogin.account.extra_data["roles"]

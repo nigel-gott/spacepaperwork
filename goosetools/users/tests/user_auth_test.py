@@ -1,5 +1,7 @@
+import pytest
 import requests_mock
 from django.contrib.auth.models import Group
+from django.core.exceptions import ValidationError
 from django.urls.base import reverse
 from freezegun import freeze_time
 
@@ -7,7 +9,9 @@ from goosetools.tests.goosetools_test_case import GooseToolsTestCase
 from goosetools.users.models import DiscordGuild, GooseUser, UserApplication
 
 
-def mock_discord_returns_with_uid(m, uid, roles=None):
+def mock_discord_returns_with_uid(
+    m, uid, roles=None, profile_username="TEST USER", profile_discriminator="1234"
+):
     m.post(
         "http://localhost:8000/stub_discord_auth/access_token_url",
         json={"access_token": "stub_access_code"},
@@ -15,9 +19,9 @@ def mock_discord_returns_with_uid(m, uid, roles=None):
     )
     profile_json = {
         "id": uid,
-        "username": "TEST USER",
+        "username": profile_username,
         "avatar": "e71b856158d285d6ac6e8877d17bae45",
-        "discriminator": "1234",
+        "discriminator": profile_discriminator,
         "public_flags": 0,
         "flags": 0,
         "locale": "en-US",
@@ -53,6 +57,127 @@ class UserAuthTest(GooseToolsTestCase):
             [("error", "You are not yet approved and cannot access this page.")],
         )
 
+    def test_a_users_username_is_based_off_their_extra_profile_data(self):
+        with requests_mock.Mocker() as m:
+            mock_discord_returns_with_uid(
+                m, "3", profile_username="CUSTOMUSERNAME", profile_discriminator="1111"
+            )
+            self.client.logout()
+            response = self.client.get(reverse("discord_login"), follow=True)
+            last_url, _ = response.redirect_chain[-1]
+            self.post(
+                last_url,
+                {
+                    "timezone": "Pacific/Niue",
+                    "transaction_tax": 14,
+                    "broker_fee": 3,
+                    "ingame_name": "My Ingame Name",
+                    "activity": "a",
+                    "previous_alliances": "a",
+                    "looking_for": "a",
+                    "corp": self.corp.pk,
+                },
+            )
+            response = self.client.get(reverse("core:home"))
+            self.assert_messages(
+                response,
+                [
+                    ("success", "Successfully signed in as CUSTOMUSERNAME#1111."),
+                ],
+            )
+
+    def test_a_logging_in_with_a_different_username_updates_your_username(self):
+        with requests_mock.Mocker() as m:
+            mock_discord_returns_with_uid(
+                m, "3", profile_username="CUSTOMUSERNAME", profile_discriminator="1111"
+            )
+            self.client.logout()
+            response = self.client.get(reverse("discord_login"), follow=True)
+            last_url, _ = response.redirect_chain[-1]
+            self.post(
+                last_url,
+                {
+                    "timezone": "Pacific/Niue",
+                    "transaction_tax": 14,
+                    "broker_fee": 3,
+                    "ingame_name": "My Ingame Name",
+                    "activity": "a",
+                    "previous_alliances": "a",
+                    "looking_for": "a",
+                    "corp": self.corp.pk,
+                },
+            )
+            response = self.client.get(reverse("core:home"))
+            self.assert_messages(
+                response,
+                [
+                    ("success", "Successfully signed in as CUSTOMUSERNAME#1111."),
+                ],
+            )
+            mock_discord_returns_with_uid(
+                m, "3", profile_username="NEWUSERNAME", profile_discriminator="1111"
+            )
+            self.client.logout()
+            response = self.client.get(reverse("discord_login"), follow=True)
+            self.assert_messages(
+                response,
+                [
+                    ("success", "Successfully signed in as NEWUSERNAME#1111."),
+                ],
+            )
+
+    def test_signing_up_with_an_already_taken_username_errors(self):
+        with requests_mock.Mocker() as m:
+            mock_discord_returns_with_uid(
+                m, "3", profile_username="CUSTOMUSERNAME", profile_discriminator="1111"
+            )
+            self.client.logout()
+            response = self.client.get(reverse("discord_login"), follow=True)
+            last_url, _ = response.redirect_chain[-1]
+            self.post(
+                last_url,
+                {
+                    "timezone": "Pacific/Niue",
+                    "transaction_tax": 14,
+                    "broker_fee": 3,
+                    "ingame_name": "My Ingame Name",
+                    "activity": "a",
+                    "previous_alliances": "a",
+                    "looking_for": "a",
+                    "corp": self.corp.pk,
+                },
+            )
+            response = self.client.get(reverse("core:home"))
+            self.assert_messages(
+                response,
+                [
+                    ("success", "Successfully signed in as CUSTOMUSERNAME#1111."),
+                ],
+            )
+            mock_discord_returns_with_uid(
+                m, "4", profile_username="CUSTOMUSERNAME", profile_discriminator="1111"
+            )
+            self.client.logout()
+            response = self.client.get(reverse("discord_login"), follow=True)
+            last_url, _ = response.redirect_chain[-1]
+            with pytest.raises(
+                ValidationError,
+                match=r"User already exists with CUSTOMUSERNAME#1111 username cannot change CUSTOMUSERNAME to match.",
+            ):
+                self.post(
+                    last_url,
+                    {
+                        "timezone": "Pacific/Niue",
+                        "transaction_tax": 14,
+                        "broker_fee": 3,
+                        "ingame_name": "My Ingame Name 2",
+                        "activity": "a",
+                        "previous_alliances": "a",
+                        "looking_for": "a",
+                        "corp": self.corp.pk,
+                    },
+                )
+
     def test_an_unknown_discord_user_is_unapproved_after_signing_up(self):
         with requests_mock.Mocker() as m:
             mock_discord_returns_with_uid(m, "3")
@@ -65,7 +190,6 @@ class UserAuthTest(GooseToolsTestCase):
                     "timezone": "Pacific/Niue",
                     "transaction_tax": 14,
                     "broker_fee": 3,
-                    "username": "test",
                     "ingame_name": "My Ingame Name",
                     "activity": "a",
                     "previous_alliances": "a",
@@ -77,7 +201,7 @@ class UserAuthTest(GooseToolsTestCase):
             self.assert_messages(
                 response,
                 [
-                    ("success", "Successfully signed in as test."),
+                    ("success", "Successfully signed in as TEST USER#1234."),
                     ("error", "You are not yet approved and cannot access this page."),
                 ],
             )
@@ -98,7 +222,6 @@ class UserAuthTest(GooseToolsTestCase):
                     "timezone": "Pacific/Niue",
                     "transaction_tax": 14,
                     "broker_fee": 3,
-                    "username": "test",
                     "ingame_name": "My Main",
                     "activity": "a",
                     "previous_alliances": "a",
@@ -118,7 +241,7 @@ class UserAuthTest(GooseToolsTestCase):
             applications = self.get(reverse("applications")).context["object_list"]
             self.assertEqual(len(applications), 1)
             application = applications[0]
-            self.assertEqual(application.user.username, "test")
+            self.assertEqual(application.user.username, "TEST USER#1234")
             self.assertEqual(application.user.discord_uid(), "3")
             self.assertEqual(application.corp, self.corp)
             self.assertEqual(application.ingame_name, "My Main")
@@ -131,7 +254,7 @@ class UserAuthTest(GooseToolsTestCase):
                 reverse("application_update", args=[application.pk]),
                 {"approve": "", "notes": "Test Notes"},
             )
-            new_user = GooseUser.objects.get(username="test")
+            new_user = GooseUser.objects.get(username="TEST USER#1234")
             self.assertEqual(new_user.notes, "Test Notes")
             self.client.force_login(new_user)
             response = self.client.get(reverse("fleet"))
@@ -152,7 +275,6 @@ class UserAuthTest(GooseToolsTestCase):
                     "timezone": "Pacific/Niue",
                     "transaction_tax": 14,
                     "broker_fee": 3,
-                    "username": "test",
                     "activity": "a",
                     "previous_alliances": "a",
                     "looking_for": "a",
@@ -172,7 +294,7 @@ class UserAuthTest(GooseToolsTestCase):
             applications = self.get(reverse("applications")).context["object_list"]
             self.assertEqual(len(applications), 1)
             application = applications[0]
-            self.assertEqual(application.user.username, "test")
+            self.assertEqual(application.user.username, "TEST USER#1234")
             self.assertEqual(application.user.discord_uid(), "3")
             self.assertEqual(application.corp, self.corp)
             self.assertEqual(application.ingame_name, "My Main")
@@ -184,7 +306,7 @@ class UserAuthTest(GooseToolsTestCase):
             self.post(
                 reverse("application_update", args=[application.pk]), {"reject": ""}
             )
-            self.client.force_login(GooseUser.objects.get(username="test"))
+            self.client.force_login(GooseUser.objects.get(username="TEST USER#1234"))
             response = self.client.get(reverse("fleet"))
             self.assert_messages(
                 response,
@@ -213,7 +335,6 @@ class UserAuthTest(GooseToolsTestCase):
                     "previous_alliances": "a",
                     "looking_for": "a",
                     "broker_fee": 3,
-                    "username": "test",
                     "ingame_name": "My Main",
                     "corp": self.corp.pk,
                     "application_notes": "Hello please let me into goosefleet",
@@ -269,7 +390,6 @@ class UserAuthTest(GooseToolsTestCase):
                     "previous_alliances": "a",
                     "looking_for": "a",
                     "broker_fee": 3,
-                    "username": "test",
                     "ingame_name": "My Main",
                     "corp": self.corp.pk,
                     "application_notes": "Hello please let me into goosefleet",
@@ -295,7 +415,6 @@ class UserAuthTest(GooseToolsTestCase):
                     "previous_alliances": "a",
                     "looking_for": "a",
                     "broker_fee": 3,
-                    "username": "test",
                     "ingame_name": "My Main",
                     "corp": self.corp.pk,
                     "application_notes": "Hello please let me into goosefleet",
@@ -334,7 +453,6 @@ class UserAuthTest(GooseToolsTestCase):
                     "looking_for": "a",
                     "broker_fee": 3,
                     "prefered_pronouns": "they",
-                    "username": "test",
                     "ingame_name": "My Main",
                     "corp": self.corp.pk,
                     "application_notes": "Hello please let me into goosefleet",

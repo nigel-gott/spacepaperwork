@@ -31,3 +31,7 @@ def core_conduct(request):
         request,
         "core/conduct.html",
     )
+
+
+def core_handler500(request):
+    return render(request, "core/500.html", status=500)

@@ -15,6 +15,7 @@ from goosetools.users.models import (
     Character,
     DiscordGuild,
     DiscordUser,
+    GooseUser,
     UserApplication,
 )
 
@@ -25,7 +26,7 @@ def user_login_handler(sender, request, user, **kwargs):
     account = SocialAccount.objects.get(user=user, provider="discord")
     # Keep the easier to use DiscordUser model upto date as the username, discriminator and avatar_hash fields could change between logins.
     discord_user = DiscordUser.objects.get(uid=account.uid)
-    _update_discord_user(discord_user, account)
+    _update_discord_user(discord_user, account, user, request)
     _update_user_from_social_account(account, user)
 
 
@@ -86,7 +87,7 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
             discord_user = DiscordUser()
 
         sociallogin.user.discord_user = discord_user
-        _update_discord_user(discord_user, account)
+        _update_discord_user(discord_user, account, sociallogin.user, request)
         super().save_user(request, sociallogin, form)
         _create_application_if_not_approved(sociallogin.user, form, request)
         _update_user_from_social_account(account, sociallogin.user)
@@ -107,7 +108,7 @@ def _give_pronoun_roles(discord_user, form):
         DiscordGuild.try_give_role(uid, 762404773512740905)
 
 
-def _update_discord_user(discord_user, account):
+def _update_discord_user(discord_user, account, gooseuser, request):
     discord_user.uid = account.uid
     discord_user.shortened_uid = False
     discord_user.username = (
@@ -115,8 +116,20 @@ def _update_discord_user(discord_user, account):
     )
     discord_user.avatar_hash = account.extra_data["avatar"]
 
+    existing_user = GooseUser.objects.filter(username=discord_user.username)
+    if len(existing_user) > 0 and existing_user[0].id != gooseuser.id:
+        messages.error(
+            request,
+            f"ERROR: There is already a user signed up to goosetools with the exact same Discord Username as you '{discord_user.username}'. This should be impossible, please PM @thejanitor to get this fixed.",
+        )
+        raise ValidationError(
+            f"User already exists with {discord_user.username} username cannot change {gooseuser.username} to match."
+        )
+
     discord_user.full_clean()
     discord_user.save()
+    gooseuser.username = discord_user.username
+    gooseuser.save()
 
 
 def _update_user_from_social_account(account, gooseuser):
