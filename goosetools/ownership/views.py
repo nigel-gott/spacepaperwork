@@ -36,7 +36,7 @@ from goosetools.ownership.models import (
     to_isk,
 )
 from goosetools.users.forms import CharacterForm
-from goosetools.users.models import DiscordUser
+from goosetools.users.models import DiscordUser, GooseUser
 
 
 class ComplexEncoder(json.JSONEncoder):
@@ -582,6 +582,7 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
         total = total + total_isk
         count = count + quantity_to_transfer
         for discord_username, result in participation["participation"].items():
+            user = GooseUser.objects.get(username=discord_username)
             isk = result["total_isk"]
             floored_isk = to_isk(m.floor(isk.amount))
             if request.user.discord_username() == discord_username:
@@ -605,7 +606,7 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
                 time=current_now,
                 eggs=floored_isk,
                 debt=False,
-                counterparty_discord_username=discord_username,
+                counterparty=user,
             )
             egg_transaction.full_clean()
             egg_transaction.save()
@@ -641,7 +642,7 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
                 time=current_now,
                 eggs=left_over_floored,
                 debt=False,
-                counterparty_discord_username=request.user.discord_username(),
+                counterparty=request.user,
                 notes="Fractional leftovers assigned to the loot seller ",
             )
     deposit_command = make_deposit_command(

@@ -30,9 +30,9 @@ def profile_url(request):
     return JsonResponse(
         {
             "id": uid,
-            "username": "TEST USER",
+            "username": "TEST USER" + uid,
             "avatar": "e71b856158d285d6ac6e8877d17bae45",
-            "discriminator": "1000",
+            "discriminator": uid,
             "public_flags": 0,
             "flags": 0,
             "locale": "en-US",

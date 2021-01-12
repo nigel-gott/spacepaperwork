@@ -63,17 +63,18 @@ class EggTransaction(models.Model):
     time = models.DateTimeField()
     eggs = MoneyField(max_digits=20, decimal_places=2, default_currency="EEI")
     debt = models.BooleanField(default=True)
-    counterparty_discord_username = models.TextField()
+    counterparty_discord_username = models.TextField(blank=True, null=True)
+    counterparty = models.ForeignKey(
+        GooseUser, on_delete=models.CASCADE, blank=True, null=True
+    )
     notes = models.TextField(default="", blank=True)
 
     def __str__(self):
-        return f"{self.counterparty_discord_username} - {self.item.id} - {self.quantity} - {self.time} - {self.eggs} - Debt:{self.debt} - {self.notes}"
+        return f"{self.counterparty} - {self.item.id} - {self.quantity} - {self.time} - {self.eggs} - Debt:{self.debt} - {self.notes}"
 
     @staticmethod
     def user_egg_transactions(user: GooseUser):
-        return EggTransaction.objects.filter(
-            counterparty_discord_username=user.discord_username()
-        )
+        return EggTransaction.objects.filter(counterparty=user)
 
     class Meta:
         indexes = [models.Index(fields=["time"])]
@@ -93,9 +94,7 @@ def isk_balance(self):
 def debt_egg_balance(self):
     return to_isk(
         model_sum(
-            EggTransaction.objects.filter(
-                counterparty_discord_username=self.discord_username(), debt=True
-            ),
+            EggTransaction.objects.filter(counterparty=self, debt=True),
             "eggs",
         )
     )
@@ -104,9 +103,7 @@ def debt_egg_balance(self):
 def egg_balance(self):
     return to_isk(
         model_sum(
-            EggTransaction.objects.filter(
-                counterparty_discord_username=self.discord_username(), debt=False
-            ),
+            EggTransaction.objects.filter(counterparty=self, debt=False),
             "eggs",
         )
     )

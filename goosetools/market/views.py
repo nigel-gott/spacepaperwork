@@ -420,7 +420,7 @@ def split_off(item, new_quantity, new_stack=None):
             notes=egg_tran.notes,
             time=egg_tran.time,
             debt=egg_tran.debt,
-            counterparty_discord_username=egg_tran.counterparty_discord_username,
+            counterparty=egg_tran.counterparty,
         )
     item.quantity = updated_quantity
     item.full_clean()

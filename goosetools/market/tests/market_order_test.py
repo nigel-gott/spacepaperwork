@@ -3,7 +3,7 @@ from django.urls.base import reverse
 
 from goosetools.ownership.models import TransferLog
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase, isk
-from goosetools.users.models import Character, DiscordUser
+from goosetools.users.models import Character, DiscordUser, GooseUser
 
 
 class MarketOrderTestCase(GooseToolsTestCase):
@@ -89,13 +89,18 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         num_users = 200
         for i in range(0, num_users):
+            username = f"A Test Discord User {i:02d}"
             discord_user = DiscordUser.objects.create(
-                username=f"A Test Discord User {i:02d}", uid=str(10 + i)
+                uid=str(10 + i), username=username
             )
             char = Character.objects.create(
                 discord_user=discord_user,
                 ingame_name=f"A Test Char {i:02d}",
                 corp=self.corp,
+            )
+            GooseUser.objects.create(
+                username=username,
+                discord_user=discord_user,
             )
             self.a_loot_share(loot_group, char, share_quantity=1)
 

@@ -60,13 +60,13 @@ class GooseToolsTestCase(DjangoTestCase):
             corp=self.corp,
         )
         self.user = GooseUser.objects.create(
-            username="Test Goose User",
+            username="Test Discord User",
             discord_user=self.discord_user,
             default_character=self.char,
             status="approved",
         )
         self.other_user = GooseUser.objects.create(
-            username="Test Goose User 2",
+            username="Test Discord User 2",
             discord_user=self.other_discord_user,
             default_character=self.other_char,
             status="approved",
