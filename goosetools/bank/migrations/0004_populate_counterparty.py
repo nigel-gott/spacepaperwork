@@ -7,7 +7,7 @@ def apply_migration(apps, schema_editor):
     EggTransaction = apps.get_model("bank", "EggTransaction")
     replacements = [
         ("TamagoPapi#8004", "[HONK] TamagoPapi#8004"),
-        ("[XBUX] Kungfu Trader#5526", "Kungfu [GOOP] Sampson Stone#5526"),
+        ("Kungfu [GOOP] Sampson Stone#5526", "Kungfu Trader#5526"),
         ("wolfs", "wolfs#0162"),
     ]
     for b, a in replacements:
