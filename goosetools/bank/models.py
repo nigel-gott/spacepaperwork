@@ -63,10 +63,7 @@ class EggTransaction(models.Model):
     time = models.DateTimeField()
     eggs = MoneyField(max_digits=20, decimal_places=2, default_currency="EEI")
     debt = models.BooleanField(default=True)
-    counterparty_discord_username = models.TextField(blank=True, null=True)
-    counterparty = models.ForeignKey(
-        GooseUser, on_delete=models.CASCADE, blank=True, null=True
-    )
+    counterparty = models.ForeignKey(GooseUser, on_delete=models.CASCADE)
     notes = models.TextField(default="", blank=True)
 
     def __str__(self):
