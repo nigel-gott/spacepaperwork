@@ -141,7 +141,7 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
     username = models.CharField(
         max_length=150,
         unique=True,
-        validators=[UnicodeAndSpacesUsernameValidator()],
+        validators=[],
         error_messages={"unique": _("A user with that username already exists.")},
     )
 

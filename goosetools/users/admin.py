@@ -79,14 +79,19 @@ class CustomUserAdmin(UserAdmin):
     def vouches(self, obj):
         return [str(v.display_name()) for v in obj.current_vouches.all()]
 
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+
+        form.base_fields["username"].disabled = True
+
+        return form
+
     fieldsets = (
         (
             None,
             {
                 "fields": (
-                    "transaction_tax",
-                    "default_character",
-                    "broker_fee",
+                    "username",
                     "status",
                     "notes",
                 )
@@ -105,9 +110,6 @@ class CustomUserAdmin(UserAdmin):
             None,
             {
                 "fields": (
-                    "transaction_tax",
-                    "default_character",
-                    "broker_fee",
                     "status",
                     "notes",
                 )
