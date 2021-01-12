@@ -1,9 +1,6 @@
 from django.urls import path
 
-from goosetools.users.autocomplete import (
-    CharacterAutocomplete,
-    DiscordUsernameAutocomplete,
-)
+from goosetools.users.autocomplete import CharacterAutocomplete, UsernameAutocomplete
 from goosetools.users.views import (
     application_update,
     character_edit,
@@ -40,8 +37,8 @@ urlpatterns = [
         name="character-autocomplete",
     ),
     path(
-        r"discord-username-autocomplete/",
-        DiscordUsernameAutocomplete.as_view(),
-        name="discord-username-autocomplete",
+        r"username-autocomplete/",
+        UsernameAutocomplete.as_view(),
+        name="username-autocomplete",
     ),
 ]

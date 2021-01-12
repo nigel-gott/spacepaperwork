@@ -3,11 +3,11 @@ from django import forms
 from django.core.exceptions import ValidationError
 
 from goosetools.fleets.models import Fleet
-from goosetools.users.models import Character, DiscordUser
+from goosetools.users.models import Character, GooseUser
 
 
-def get_discord_names():
-    return DiscordUser.objects.values_list("username", flat=True).distinct()
+def get_usernames():
+    return GooseUser.objects.values_list("username", flat=True).distinct()
 
 
 class FleetForm(forms.Form):
@@ -60,17 +60,17 @@ class FleetAddMemberForm(forms.Form):
     fleet = forms.IntegerField(
         widget=forms.HiddenInput(), disabled=True, required=False
     )
-    discord_username = autocomplete.Select2ListCreateChoiceField(
-        choice_list=get_discord_names,
+    username = autocomplete.Select2ListCreateChoiceField(
+        choice_list=get_usernames,
         required=False,
-        widget=autocomplete.ListSelect2(url="discord-username-autocomplete"),
+        widget=autocomplete.ListSelect2(url="username-autocomplete"),
     )
     character = forms.ModelChoiceField(
         required=False,
         queryset=Character.objects.all(),
         initial=0,
         widget=autocomplete.ModelSelect2(
-            url="character-autocomplete", forward=["discord_username", "fleet"]
+            url="character-autocomplete", forward=["username", "fleet"]
         ),
     )
 

@@ -1,6 +1,6 @@
 from dal import autocomplete
 
-from goosetools.users.models import Character, DiscordUser
+from goosetools.users.models import Character, GooseUser
 
 
 class CharacterAutocomplete(autocomplete.Select2QuerySetView):
@@ -18,11 +18,11 @@ class CharacterAutocomplete(autocomplete.Select2QuerySetView):
             chars = fleet.fleetmember_set.values("character__id")
             qs = qs.exclude(pk__in=chars)
 
-        discord_username = self.forwarded.get("discord_username", None)
+        user = self.forwarded.get("username", None)
 
-        if discord_username:
-            discord_user = DiscordUser.objects.get(pk=discord_username)
-            qs = qs.filter(discord_user=discord_user)
+        if user:
+            user = GooseUser.objects.get(pk=user)
+            qs = qs.filter(discord_user__gooseuser=user)
 
         if self.q:
             qs = qs.filter(ingame_name__icontains=self.q)
@@ -30,7 +30,7 @@ class CharacterAutocomplete(autocomplete.Select2QuerySetView):
         return qs
 
 
-class DiscordUsernameAutocomplete(autocomplete.Select2QuerySetView):
+class UsernameAutocomplete(autocomplete.Select2QuerySetView):
     def get_result_label(self, result):
         return result.username
 
@@ -40,9 +40,9 @@ class DiscordUsernameAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authed_and_approved():
-            return Character.objects.none()
+            return GooseUser.objects.none()
 
-        qs = DiscordUser.objects.all()
+        qs = GooseUser.objects.all()
 
         if self.q:
             qs = qs.filter(username__icontains=self.q)
