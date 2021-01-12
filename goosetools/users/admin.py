@@ -1,6 +1,7 @@
 # mypy: ignore-errors
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.utils.translation import gettext_lazy as _
 
 from goosetools.users.models import (
     Character,
@@ -47,8 +48,8 @@ admin.site.register(CorpApplication)
 
 class CustomUserAdmin(UserAdmin):
     list_display = [
-        "discord_nickname",
         "discord_username",
+        "discord_nickname",
         "characters",
         "groups_list",
         "status",
@@ -78,13 +79,12 @@ class CustomUserAdmin(UserAdmin):
     def vouches(self, obj):
         return [str(v.display_name()) for v in obj.current_vouches.all()]
 
-    fieldsets = UserAdmin.fieldsets + (
+    fieldsets = (
         (
             None,
             {
                 "fields": (
                     "transaction_tax",
-                    "discord_user",
                     "default_character",
                     "broker_fee",
                     "status",
@@ -92,14 +92,20 @@ class CustomUserAdmin(UserAdmin):
                 )
             },
         ),
+        (
+            _("Permissions"),
+            {
+                "fields": ("is_staff", "is_superuser", "groups", "user_permissions"),
+            },
+        ),
+        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
     )
-    add_fieldsets = UserAdmin.add_fieldsets + (
+    add_fieldsets = (
         (
             None,
             {
                 "fields": (
                     "transaction_tax",
-                    "discord_user",
                     "default_character",
                     "broker_fee",
                     "status",
