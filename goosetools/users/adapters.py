@@ -24,7 +24,7 @@ from goosetools.users.models import (
 @receiver(user_logged_in)
 def user_login_handler(sender, request, user, **kwargs):
     account = SocialAccount.objects.get(user=user, provider="discord")
-    # Keep the easier to use DiscordUser model upto date as the username, discriminator and avatar_hash fields could change between logins.
+    # Keep the easier to use DiscordUser model upto date as the username and discriminator fields could change between logins.
     discord_user = DiscordUser.objects.get(uid=account.uid)
     _update_discord_user(discord_user, account, user, request)
     _update_user_from_social_account(account, user)
@@ -114,7 +114,6 @@ def _update_discord_user(discord_user, account, gooseuser, request):
     discord_user.username = (
         account.extra_data["username"] + "#" + account.extra_data["discriminator"]
     )
-    discord_user.avatar_hash = account.extra_data["avatar"]
 
     existing_user = GooseUser.objects.filter(username=discord_user.username)
     if len(existing_user) > 0 and existing_user[0].id != gooseuser.id:

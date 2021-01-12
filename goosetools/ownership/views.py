@@ -380,8 +380,9 @@ def fleet_shares(request, pk):
     all_your_real_share_isk = 0
     your_total_est_sales = 0
 
-    user = DiscordUser.objects.get(pk=pk)
-    for_you = user == request.user.discord_user
+    discorduser = DiscordUser.objects.get(pk=pk)
+    user = discorduser.gooseuser
+    for_you = user == request.user
     if for_you:
         prefix = "Your"
         prefix2 = "Your"
@@ -398,7 +399,7 @@ def fleet_shares(request, pk):
         seen_groups[loot_group.id] = True
 
         my_items = InventoryItem.objects.filter(
-            location__character_location__character__discord_user=user,
+            location__character_location__character__discord_user=discorduser,
             loot_group=loot_group,
         )
         estimated_profit = 0
@@ -413,21 +414,20 @@ def fleet_shares(request, pk):
         real_participation = loot_group.bucket.calculate_participation(
             real_profit, loot_group
         )
-        your_group_estimated_profit = estimated_participation["participation"][
-            user.username
-        ]["total_isk"]
-        your_real_profit = real_participation["participation"][user.username][
+        your_group_estimated_profit = estimated_participation["participation"][user.id][
             "total_isk"
         ]
+        your_real_profit = real_participation["participation"][user.id]["total_isk"]
         items.append(
             {
+                "username": user.username,
                 "fleet_id": loot_group.fleet_anom.fleet.id,
                 "loot_bucket": loot_group.bucket.id,
                 "loot_group_id": loot_group.id,
-                "your_shares": estimated_participation["participation"][user.username][
+                "your_shares": estimated_participation["participation"][user.id][
                     "shares"
                 ],
-                "your_cut": estimated_participation["participation"][user.username][
+                "your_cut": estimated_participation["participation"][user.id][
                     "flat_cut"
                 ],
                 "total_shares": estimated_participation["total_shares"],
@@ -520,17 +520,17 @@ def view_transfer_log(request, pk):
     )
 
 
-def make_transfer_command(total_participation, transfering_user):
+def make_transfer_command(total_participation, transfering_user: GooseUser):
     command = "$bulk\n"
     length_since_last_bulk = len(command)
     commands_issued = False
     deposit_total = 0
-    for discord_username, isk in total_participation.items():
+    for user_id, isk in total_participation.items():
         floored_isk = m.floor(isk.amount)
-        if discord_username != transfering_user.discord_username():
-            user = DiscordUser.objects.get(username=discord_username)
+        if user_id != transfering_user.id:
+            user = GooseUser.objects.get(id=user_id)
             commands_issued = True
-            next_user = f"<@{user.uid}> {floored_isk}\n"
+            next_user = f"<@{user.discord_uid()}> {floored_isk}\n"
             if length_since_last_bulk + len(next_user) > 1500:
                 new_bulk = "$bulk\n"
                 command = (
@@ -581,11 +581,11 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
         explaination[item_id]["transfered_quantity"] = quantity_to_transfer
         total = total + total_isk
         count = count + quantity_to_transfer
-        for discord_username, result in participation["participation"].items():
-            user = GooseUser.objects.get(username=discord_username)
+        for user_id, result in participation["participation"].items():
+            user = GooseUser.objects.get(id=user_id)
             isk = result["total_isk"]
             floored_isk = to_isk(m.floor(isk.amount))
-            if request.user.discord_username() == discord_username:
+            if request.user == user:
                 sellers_isk = sellers_isk + floored_isk
             else:
                 others_isk = others_isk + floored_isk
@@ -610,12 +610,12 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
             )
             egg_transaction.full_clean()
             egg_transaction.save()
-            if discord_username in total_participation:
-                total_participation[discord_username] = (
-                    total_participation[discord_username] + floored_isk
+            if user_id in total_participation:
+                total_participation[user_id] = (
+                    total_participation[user_id] + floored_isk
                 )
             else:
-                total_participation[discord_username] = floored_isk
+                total_participation[user_id] = floored_isk
         sold_item.transfered_quantity = sold_item.quantity
         sold_item.full_clean()
         sold_item.save()

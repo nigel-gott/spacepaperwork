@@ -62,7 +62,7 @@
         </thead>
         <tbody>
         {% for item_id, item_details in explaination.items %}
-        {% for discord_username, details in item_details.participation.items %}
+        {% for user_id, details in item_details.participation.items %}
         <tr>
             {% if forloop.first %}
             <td rowspan="{{item_details.participation.values|length}}">
@@ -76,7 +76,7 @@
             </td>
             {% endif %}
             <td>
-                {{discord_username}}
+                {{details.username}}
             </td>
             <td>
                 {{details.shares}}/{{item_details.total_shares}}

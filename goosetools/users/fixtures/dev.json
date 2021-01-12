@@ -21,31 +21,69 @@
       ]
     }
   },
-    {
-        "model": "users.DiscordUser",
-        "pk": 99999999,
-        "fields": {
-            "username": "test_user#1234",
-            "uid": "123456789",
-            "avatar_hash": "5f8e276e5c0adf248e7f1bf437721d50"
-        }
-    },
-    {
-        "model": "users.Character",
-        "pk": 99999999,
-        "fields": {
-            "discord_user": 99999999,
-            "ingame_name": "TEST USER 1",
-            "corp": "HONK"
-        }
-    },
-    {
-        "model": "users.Character",
-        "pk": 99999998,
-        "fields": {
-            "discord_user": 99999999,
-            "ingame_name": "TEST USER 2",
-            "corp": "MEAN"
-        }
+  {
+    "model": "users.DiscordUser",
+    "pk": 99999999,
+    "fields": {
+      "username": "test_user#1234",
+      "uid": "123456789"
     }
+  },
+  {
+    "model": "users.gooseuser",
+    "pk": 99999999,
+    "fields": {
+      "password": "",
+      "last_login": null,
+      "is_superuser": true,
+      "first_name": "",
+      "last_name": "",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2021-01-07T18:27:50.224Z",
+      "username": "test_user#1234",
+      "discord_user": 99999999,
+      "timezone": "Europe/London",
+      "broker_fee": "8.00",
+      "transaction_tax": "15.00",
+      "default_character": null,
+      "status": "approved",
+      "notes": "",
+      "email": null,
+      "sa_profile": "test",
+      "voucher": null,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "socialaccount.socialaccount",
+    "pk": 99999999,
+    "fields": {
+      "user": 99999999,
+      "provider": "discord",
+      "uid": "123456789",
+      "last_login": "2021-01-07T18:27:50.226Z",
+      "date_joined": "2021-01-07T18:27:50.226Z",
+      "extra_data": "{\"id\": \"123456789\", \"username\": \"test_user\", \"avatar\": \"\", \"discriminator\": \"1234\"}"
+    }
+  },
+  {
+    "model": "users.Character",
+    "pk": 99999999,
+    "fields": {
+      "discord_user": 99999999,
+      "ingame_name": "TEST USER 1",
+      "corp": "HONK"
+    }
+  },
+  {
+    "model": "users.Character",
+    "pk": 99999998,
+    "fields": {
+      "discord_user": 99999999,
+      "ingame_name": "TEST USER 2",
+      "corp": "MEAN"
+    }
+  }
 ]

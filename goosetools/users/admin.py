@@ -48,8 +48,8 @@ admin.site.register(CorpApplication)
 
 class CustomUserAdmin(UserAdmin):
     list_display = [
-        "discord_username",
-        "discord_nickname",
+        "username",
+        "display_name",
         "characters",
         "groups_list",
         "status",
@@ -59,14 +59,6 @@ class CustomUserAdmin(UserAdmin):
         "voucher",
         "vouches",
     ]
-
-    # pylint: disable=no-self-use
-    def discord_username(self, obj):
-        return obj.discord_user.username
-
-    # pylint: disable=no-self-use
-    def discord_nickname(self, obj):
-        return obj.discord_user.nick
 
     # pylint: disable=no-self-use
     def characters(self, obj):

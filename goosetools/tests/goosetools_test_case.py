@@ -1,6 +1,7 @@
 from decimal import Decimal
 from typing import List, Optional, Union
 
+from allauth.socialaccount.models import SocialAccount
 from django.http.response import HttpResponse
 from django.urls.base import reverse
 from djmoney.money import Money
@@ -40,10 +41,10 @@ class GooseToolsTestCase(DjangoTestCase):
         self.another_item = Item.objects.create(name="Condor", item_type=sub_sub_type)
 
         self.discord_user = DiscordUser.objects.create(
-            username="Test Discord User", uid="1"
+            username="Test Goose User", uid="1"
         )
         self.other_discord_user = DiscordUser.objects.create(
-            username="Test Discord User 2", uid="2"
+            username="Test Goose User 2", uid="2"
         )
         self.corp = Corp.objects.create(name="Test Corp")
         self.char = Character.objects.create(
@@ -60,16 +61,36 @@ class GooseToolsTestCase(DjangoTestCase):
             corp=self.corp,
         )
         self.user = GooseUser.objects.create(
-            username="Test Discord User",
+            username="Test Goose User#1234",
             discord_user=self.discord_user,
             default_character=self.char,
             status="approved",
         )
+        self.user_socialaccount = SocialAccount.objects.create(
+            uid="1",
+            provider="discord",
+            extra_data={
+                "username": "Test Goose User",
+                "nick": "Test Goose User",
+                "discriminator": "1234",
+            },
+            user=self.user,
+        )
         self.other_user = GooseUser.objects.create(
-            username="Test Discord User 2",
+            username="Test Goose User 2#1234",
             discord_user=self.other_discord_user,
             default_character=self.other_char,
             status="approved",
+        )
+        self.otheruser_socialaccount = SocialAccount.objects.create(
+            uid="2",
+            provider="discord",
+            extra_data={
+                "username": "Test Goose User 2",
+                "nick": "Test Goose User 2",
+                "discriminator": "1234",
+            },
+            user=self.other_user,
         )
         region = Region.objects.create(name="Test Region")
         self.system = System.objects.create(name="Test System", region=region)

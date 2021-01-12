@@ -1,3 +1,4 @@
+from allauth.socialaccount.models import SocialAccount
 from django.contrib.messages import get_messages
 from django.urls.base import reverse
 
@@ -89,7 +90,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         num_users = 200
         for i in range(0, num_users):
-            username = f"A Test Discord User {i:02d}"
+            username = f"A Test Goose User {i:02d}"
             discord_user = DiscordUser.objects.create(
                 uid=str(10 + i), username=username
             )
@@ -98,9 +99,20 @@ class MarketOrderTestCase(GooseToolsTestCase):
                 ingame_name=f"A Test Char {i:02d}",
                 corp=self.corp,
             )
-            GooseUser.objects.create(
-                username=username,
+            user = GooseUser.objects.create(
+                username=f"Test Goose User - {i}",
                 discord_user=discord_user,
+                default_character=char,
+                status="approved",
+            )
+            SocialAccount.objects.create(
+                uid=discord_user.uid,
+                provider="discord",
+                extra_data={
+                    "username": f"Test Goose User - {i}",
+                    "discriminator": "1",
+                },
+                user_id=user.pk,
             )
             self.a_loot_share(loot_group, char, share_quantity=1)
 
@@ -206,7 +218,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
         )
         self.assertEqual(
             str(messages[0]),
-            "Sold 1 of item Tritanium x 2 @ Space On Test Char(Test Discord User)",
+            "Sold 1 of item Tritanium x 2 @ Space On Test Char(Test Goose User)",
         )
         self.assertIn(
             "The following loot groups you are attempting to transfer isk for have no participation at all",
@@ -260,12 +272,12 @@ class MarketOrderTestCase(GooseToolsTestCase):
         )
         self.assertEqual(
             str(messages[0]),
-            "Sold 1 of item Tritanium x 2 @ Space On Test Char(Test Discord User)",
+            "Sold 1 of item Tritanium x 2 @ Space On Test Char(Test Goose User)",
         )
         self.assertIn("Market Price Was Reduced from 5000.00 to 1", str(messages[1]))
         self.assertEqual(
             str(messages[2]),
-            "Sold 2 of item Condor x 4 @ Space On Test Char(Test Discord User)",
+            "Sold 2 of item Condor x 4 @ Space On Test Char(Test Goose User)",
         )
         self.assertIn(
             "You are trying to transfer an item which has made a negative profit",
@@ -312,7 +324,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
         )
         self.assertEqual(
             str(messages[0]),
-            "Sold 5 of item Tritanium x 10 @ Space On Test Char(Test Discord User)",
+            "Sold 5 of item Tritanium x 10 @ Space On Test Char(Test Goose User)",
         )
         self.assertEqual(
             "Generated Deposit and Transfer commands for Ƶ 40,000.00 eggs from 5 sold items!.",

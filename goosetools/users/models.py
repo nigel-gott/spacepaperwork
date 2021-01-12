@@ -1,5 +1,4 @@
 import logging
-from typing import Union
 
 import requests
 from django.contrib.auth.models import AbstractUser, Group
@@ -28,34 +27,12 @@ class DiscordUser(models.Model):
     username = models.TextField(unique=True)
     nick = models.TextField(null=True, blank=True)
     uid = models.TextField(unique=True, blank=True, null=True)
-    avatar_hash = models.TextField(blank=True, null=True)
 
     def display_name(self):
         if self.nick:
             return self.nick
         else:
             return self.username
-
-    def avatar_url(self) -> Union[bool, str]:
-        return self._construct_avatar_url()
-
-    # default avatars look like this: https://cdn.discordapp.com/embed/avatars/3.png
-    # there is a bug with discord's size selecting mechanism for these, doing 3.png?size=16 still returns a full size default avatar.
-    def has_default_avatar(self):
-        return not self.avatar_hash or len(str(self.avatar_hash)) == 1
-
-    def has_custom_avatar(self):
-        return self.avatar_hash and self.uid and not self.has_default_avatar()
-
-    def _construct_avatar_url(self):
-        if self.has_default_avatar():
-            if "#" in self.username:
-                # TODO add discriminator as a real non null field on DiscordUser and just access it here.
-                avatar_number = int(self.username.split("#")[1]) % 5
-            else:
-                avatar_number = 1
-            return f"https://cdn.discordapp.com/embed/avatars/{avatar_number}.png"
-        return f"https://cdn.discordapp.com/avatars/{self.uid}/{self.avatar_hash}.png"
 
     def __str__(self):
         return self.username
@@ -75,13 +52,14 @@ class Character(models.Model):
         )
 
     def discord_avatar_url(self):
-        return self.discord_user and self.discord_user.avatar_url()
+        # Todo directly get from user when the Character FK -> Discord user is replaced with an FK -> Gooseuser.
+        return self.discord_user and self.discord_user.gooseuser.discord_avatar_url()
 
     def discord_username(self):
-        return self.discord_user and self.discord_user.username
+        return self.discord_user and self.discord_user.gooseuser.discord_username()
 
     def display_name(self):
-        return self.discord_user and self.discord_user.display_name()
+        return self.discord_user and self.discord_user.gooseuser.display_name()
 
     def __str__(self):
         if self.corp:
@@ -211,17 +189,50 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
         else:
             return Character.objects.none()
 
+    def _discord_account(self):
+        return self.socialaccount_set.get(provider="discord")
+
     def discord_uid(self):
-        return self.discord_user.uid
+        return self._discord_account().uid
 
     def discord_username(self):
-        return self.discord_user.username
+        username = self._extra_data().get("username")
+        discriminator = self._extra_data().get("discriminator")
+        return "{}#{}".format(username, discriminator)
 
     def display_name(self):
-        return self.discord_user.display_name()
+        if "nick" in self._extra_data():
+            nick = self._extra_data()["nick"]
+            if nick and nick.strip():
+                return nick.strip()
+        return self.discord_username()
 
     def discord_avatar_url(self):
-        return self.discord_user.avatar_url()
+        return self._construct_avatar_url()
+
+    def _extra_data(self):
+        return self._discord_account().extra_data
+
+    def _discord_discriminator(self):
+        return self._extra_data()["discriminator"]
+
+    def _avatar_hash(self):
+        return "avatar" in self._extra_data() and self._extra_data()["avatar"]
+
+    # default avatars look like this: https://cdn.discordapp.com/embed/avatars/3.png
+    # there is a bug with discord's size selecting mechanism for these, doing 3.png?size=16 still returns a full size default avatar.
+    def _has_default_avatar(self):
+        return not self._avatar_hash() or len(str(self._avatar_hash())) == 1
+
+    def _construct_avatar_url(self):
+        if self._has_default_avatar():
+            if "#" in self.discord_username():
+                # TODO add discriminator as a real non null field on DiscordUser and just access it here.
+                avatar_number = int(self._discord_discriminator()) % 5
+            else:
+                avatar_number = 1
+            return f"https://cdn.discordapp.com/embed/avatars/{avatar_number}.png"
+        return f"https://cdn.discordapp.com/avatars/{self.discord_uid()}/{self._avatar_hash()}.png"
 
 
 class UserApplication(models.Model):

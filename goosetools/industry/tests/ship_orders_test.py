@@ -89,7 +89,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "Thorax",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_1",
+        "uid": "Test Goose User#1234-mock_random_1",
         "needs_manual_price": true,
         "payment_taken": false,
         "price": null
@@ -122,7 +122,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "Thorax",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_1",
+        "uid": "Test Goose User#1234-mock_random_1",
         "needs_manual_price": true,
         "payment_taken": false,
         "price": null
@@ -140,7 +140,7 @@ class ShipOrderTest(GooseToolsTestCase):
         )
         self.assertEqual(
             str(response.content, encoding="utf-8"),
-            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Discord User","uid":"Test Discord User-mock_random_1"}}',
+            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Goose User#1234","uid":"Test Goose User#1234-mock_random_1"}}',
         )
 
     def test_cant_claim_ship_order_if_not_in_industry_group(self):
@@ -161,7 +161,7 @@ class ShipOrderTest(GooseToolsTestCase):
         )
         self.assertEqual(
             str(response.content, encoding="utf-8"),
-            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Discord User","uid":"Test Discord User-mock_random_1"}}',
+            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Goose User#1234","uid":"Test Goose User#1234-mock_random_1"}}',
         )
         self.client.force_login(self.other_user)
         response = self.client.put(
@@ -206,7 +206,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "Thorax",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_1",
+        "uid": "Test Goose User#1234-mock_random_1",
         "needs_manual_price": true,
         "payment_taken": false,
         "price": null
@@ -224,7 +224,7 @@ class ShipOrderTest(GooseToolsTestCase):
         )
         self.assertEqual(
             str(response.content, encoding="utf-8"),
-            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Discord User","uid":"Test Discord User-mock_random_1"}}',
+            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Goose User#1234","uid":"Test Goose User#1234-mock_random_1"}}',
         )
         response = self.put(
             reverse("industry:shiporder-unclaim", args=[ship_order.pk]),
@@ -261,7 +261,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_discord_user_pk": "{self.discord_user.pk}",
         "ship": "FreeShip",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_1",
+        "uid": "Test Goose User#1234-mock_random_1",
         "needs_manual_price": false,
         "payment_taken": true,
         "price": null
@@ -387,7 +387,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_1",
+        "uid": "Test Goose User#1234-mock_random_1",
         "needs_manual_price": false,
         "payment_taken": true,
         "price": null
@@ -412,7 +412,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_2",
+        "uid": "Test Goose User#1234-mock_random_2",
         "needs_manual_price": false,
         "payment_taken": true,
         "price": null
@@ -476,7 +476,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_1",
+        "uid": "Test Goose User#1234-mock_random_1",
         "needs_manual_price": false,
         "payment_taken": true,
         "price": null
@@ -501,7 +501,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_2",
+        "uid": "Test Goose User#1234-mock_random_2",
         "needs_manual_price": true,
         "payment_taken": false,
         "price": null
@@ -526,7 +526,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_3",
+        "uid": "Test Goose User#1234-mock_random_3",
         "needs_manual_price": true,
         "payment_taken": false,
         "price": null
@@ -573,7 +573,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_1",
+        "uid": "Test Goose User#1234-mock_random_1",
         "needs_manual_price": false,
         "payment_taken": true,
         "price": null
@@ -598,7 +598,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_2",
+        "uid": "Test Goose User#1234-mock_random_2",
         "needs_manual_price": false,
         "payment_taken": true,
         "price": null
@@ -623,7 +623,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
-        "uid": "Test Discord User-mock_random_3",
+        "uid": "Test Goose User#1234-mock_random_3",
         "needs_manual_price": false,
         "payment_taken": true,
         "price": null
@@ -771,7 +771,7 @@ class ShipOrderTest(GooseToolsTestCase):
             "recipient_character_name": "Test Char",
             "ship": "DailyShip",
             "state": "not_started",
-            "uid": "Test Discord User-mock_random_1",
+            "uid": "Test Goose User#1234-mock_random_1",
             "needs_manual_price": false,
             "payment_taken": true,
             "price": null
@@ -796,7 +796,7 @@ class ShipOrderTest(GooseToolsTestCase):
             "recipient_character_name": "Test Char",
             "ship": "DailyShip",
             "state": "not_started",
-            "uid": "Test Discord User-mock_random_2",
+            "uid": "Test Goose User#1234-mock_random_2",
             "needs_manual_price": false,
             "payment_taken": true,
             "price": null
@@ -853,7 +853,7 @@ class ShipOrderTest(GooseToolsTestCase):
             "recipient_character_name": "Test Char",
             "ship": "ShipWithNoPrice",
             "state": "not_started",
-            "uid": "Test Discord User-mock_random_1",
+            "uid": "Test Goose User#1234-mock_random_1",
             "needs_manual_price": false,
             "payment_taken": false,
             "price": "10.00"
@@ -908,7 +908,7 @@ class ShipOrderTest(GooseToolsTestCase):
             "recipient_character_name": "Test Char",
             "ship": "ShipWithNoPrice",
             "state": "not_started",
-            "uid": "Test Discord User-mock_random_1",
+            "uid": "Test Goose User#1234-mock_random_1",
             "needs_manual_price": false,
             "payment_taken": true,
             "price": null
@@ -967,7 +967,7 @@ class ShipOrderTest(GooseToolsTestCase):
             "recipient_character_name": "Test Char",
             "ship": "ShipWithNoPrice",
             "state": "not_started",
-            "uid": "Test Discord User-mock_random_1",
+            "uid": "Test Goose User#1234-mock_random_1",
             "needs_manual_price": false,
             "payment_taken": false,
             "price": "10.00"

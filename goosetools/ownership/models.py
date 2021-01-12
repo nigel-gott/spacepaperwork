@@ -56,16 +56,17 @@ class LootBucket(models.Model):
             raise forms.ValidationError(
                 f"The Loot Group {loot_group.id} is trying to give out a total of {total_flat_cuts}% of flat cuts. Please fix the participations as this is impossible."
             )
-        shares_by_username = shares.values(
-            "character__discord_user__username"
+        shares_by_user = shares.values(
+            "character__discord_user__gooseuser__id",
+            "character__discord_user__gooseuser__username",
         ).annotate(num_shares=Sum("share_quantity"))
-        flat_cuts_by_username_qs = flat_cuts.values(
-            "character__discord_user__username"
+        flat_cuts_by_user_qs = flat_cuts.values(
+            "character__discord_user__gooseuser__id"
         ).annotate(flat_cut=Sum("flat_percent_cut"))
-        flat_cuts_by_username = {}
-        for flat_cut in flat_cuts_by_username_qs:
-            flat_cuts_by_username[
-                flat_cut["character__discord_user__username"]
+        flat_cuts_by_user = {}
+        for flat_cut in flat_cuts_by_user_qs:
+            flat_cuts_by_user[
+                flat_cut["character__discord_user__gooseuser__id"]
             ] = Decimal(flat_cut["flat_cut"])
         result = {
             "total_shares": total_shares,
@@ -73,10 +74,11 @@ class LootBucket(models.Model):
             "participation": {},
         }
         total_after_cuts = isk * Decimal(100 - total_flat_cuts) / 100
-        for group in shares_by_username:
-            username = group["character__discord_user__username"]
-            flat_cut = Decimal(flat_cuts_by_username.get(username, 0))
-            result["participation"][username] = {
+        for group in shares_by_user:
+            user_id = group["character__discord_user__gooseuser__id"]
+            flat_cut = Decimal(flat_cuts_by_user.get(user_id, 0))
+            result["participation"][user_id] = {
+                "username": group["character__discord_user__gooseuser__username"],
                 "shares": group["num_shares"],
                 "flat_cut": flat_cut,
                 "flat_cut_isk": (flat_cut / 100) * isk,

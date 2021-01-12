@@ -23,7 +23,7 @@ class ShipOrderSerializer(serializers.ModelSerializer):
         source="recipient_character.discord_user.pk", read_only=True
     )
     assignee_name = serializers.CharField(
-        source="assignee.discord_user.username", read_only=True
+        source="assignee.discord_user.gooseuser.username", read_only=True
     )
     currently_blocked = serializers.BooleanField(read_only=True)
     needs_manual_price = serializers.BooleanField(read_only=True)

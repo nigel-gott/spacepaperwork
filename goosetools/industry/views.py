@@ -19,7 +19,7 @@ from rest_framework.viewsets import GenericViewSet
 from goosetools.industry.forms import ShipOrderForm
 from goosetools.industry.models import Ship, ShipOrder, to_isk
 from goosetools.industry.serializers import ShipOrderSerializer
-from goosetools.users.models import Character
+from goosetools.users.models import Character, GooseUser
 
 
 def forbidden(request):
@@ -58,14 +58,14 @@ def generate_contract_code(user):
     raise Exception(f"Failed to create a unique random contract code for {user}")
 
 
-def calculate_blocked_until_for_order(ship, username):
+def calculate_blocked_until_for_order(ship, recieving_user):
     order_limit_group = ship.order_limit_group
     if order_limit_group:
         limit_period = timezone.timedelta(days=order_limit_group.days_between_orders)
         limit = timezone.now() - limit_period
         prev_order_start = (
             ShipOrder.objects.filter(
-                recipient_character__discord_user__username=username,
+                recipient_character__discord_user__gooseuser=recieving_user,
                 payment_method="free",
                 contract_made=True,
                 ship__order_limit_group=order_limit_group,
@@ -85,7 +85,7 @@ def calculate_blocked_until_for_order(ship, username):
 
 def create_ship_order(
     ship: Ship,
-    username: str,
+    recieving_user: GooseUser,
     recipient_character: Character,
     quantity: int,
     payment_method: str,
@@ -105,7 +105,9 @@ def create_ship_order(
                 price = ship.isk_price
     else:
         if payment_method == "free":
-            blocked_until, message = calculate_blocked_until_for_order(ship, username)
+            blocked_until, message = calculate_blocked_until_for_order(
+                ship, recieving_user
+            )
             if message:
                 messages.warning(request, message)
         payment_taken = True
@@ -156,9 +158,7 @@ def populate_ship_data(user) -> Dict[str, Any]:
             "eggs_price": ship.eggs_price and ship.eggs_price.amount,
             "valid_price": ship.valid_price(),
         }
-        blocked_until, _ = calculate_blocked_until_for_order(
-            ship, user.discord_username()
-        )
+        blocked_until, _ = calculate_blocked_until_for_order(ship, user)
         if blocked_until is not None:
             current_ship_data["blocked_until"] = blocked_until.strftime(
                 "%Y-%m-%d %H:%M"
@@ -178,7 +178,6 @@ def shiporders_create(request):
         form = ShipOrderForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            username = request.user.discord_username()
             ship = data["ship"]
             payment_method = data["payment_method"]
             quantity = data["quantity"]
@@ -194,7 +193,7 @@ def shiporders_create(request):
             ):
                 ship_order = create_ship_order(
                     ship,
-                    username,
+                    request.user,
                     data["recipient_character"],
                     quantity,
                     payment_method,

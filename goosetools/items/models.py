@@ -127,9 +127,9 @@ class CharacterLocation(models.Model):
 
     def __str__(self):
         if not self.system:
-            return f"Space On {self.character.ingame_name}({self.character.discord_username()})"
+            return f"Space On {self.character.ingame_name}({self.character.display_name()})"
         else:
-            return f"{self.system.name} On {self.character.ingame_name}({self.character.discord_username()})"
+            return f"{self.system.name} On {self.character.ingame_name}({self.character.display_name()})"
 
 
 class ItemLocation(models.Model):

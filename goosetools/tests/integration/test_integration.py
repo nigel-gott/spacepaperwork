@@ -23,10 +23,12 @@ def wait_and_click(browser, element_id):
 
 
 @pytest.mark.slow
-def test_can_sign_up_and_create_new_fleet(http_service, browser):
+def test_can_sign_up(http_service, browser):
     response = requests.get(http_service)
     assert response.status_code == 200
 
+    # The default uid already has a user account setup from the users/fixture/dev.json fixture, switch to an unknown discord user to test signup.
+    browser.visit("http://django:8000/stub_discord_auth/set_uid/100001234")
     browser.visit("http://django:8000/accounts/discord/login/")
 
     wait_for(browser, "id_previous_alliances")

@@ -456,7 +456,7 @@ class FleetTest(GooseToolsTestCase):
         )
 
         new_discord_user = DiscordUser.objects.create(
-            username="A Brand New Test Discord User", avatar_hash=None
+            username="A Brand New Test Goose User"
         )
 
         new_char = Character.objects.create(
@@ -496,7 +496,7 @@ class FleetTest(GooseToolsTestCase):
         self.client.force_login(self.other_user)
 
         new_discord_user = DiscordUser.objects.create(
-            username="A Brand New Test Discord User", avatar_hash=None
+            username="A Brand New Test Goose User"
         )
 
         new_char = Character.objects.create(
@@ -518,7 +518,7 @@ class FleetTest(GooseToolsTestCase):
     def test_non_admin_cant_remove_other_fleet_members(self):
         fleet = self.a_fleet()
         new_discord_user = DiscordUser.objects.create(
-            username="A Brand New Test Discord User", avatar_hash=None
+            username="A Brand New Test Goose User"
         )
         new_char = Character.objects.create(
             discord_user=new_discord_user,
