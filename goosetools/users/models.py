@@ -38,73 +38,6 @@ class DiscordUser(models.Model):
         return self.username
 
 
-class Character(models.Model):
-    discord_user = models.ForeignKey(DiscordUser, on_delete=models.CASCADE)
-    ingame_name = models.TextField(unique=True)
-    corp = models.ForeignKey(Corp, on_delete=models.CASCADE, null=True, blank=True)
-
-    # pylint: disable=no-member
-    def gooseuser_or_false(self):
-        return (
-            self.discord_user
-            and hasattr(self.discord_user, "gooseuser")
-            and self.discord_user.gooseuser
-        )
-
-    def discord_avatar_url(self):
-        # Todo directly get from user when the Character FK -> Discord user is replaced with an FK -> Gooseuser.
-        return self.discord_user and self.discord_user.gooseuser.discord_avatar_url()
-
-    def discord_username(self):
-        return self.discord_user and self.discord_user.gooseuser.discord_username()
-
-    def display_name(self):
-        return self.discord_user and self.discord_user.gooseuser.display_name()
-
-    def __str__(self):
-        if self.corp:
-            return f"[{self.corp}] {self.ingame_name}"
-        else:
-            return f"{self.ingame_name}"
-
-
-class CorpApplication(models.Model):
-    corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
-    character = models.ForeignKey(Character, on_delete=models.CASCADE)
-    status = models.TextField(
-        choices=[
-            ("unapproved", "unapproved"),
-            ("approved", "approved"),
-            ("rejected", "rejected"),
-        ],
-        default="unapproved",
-    )
-    notes = models.TextField(null=True, blank=True)
-    created_at = models.DateTimeField(default=timezone.now)
-
-    def approve(self):
-        self.status = "approved"
-        self.character.corp = self.corp
-        self.character.save()
-        self.full_clean()
-        self.save()
-
-    def reject(self):
-        self.status = "rejected"
-        self.full_clean()
-        self.save()
-
-    @staticmethod
-    def unapproved_applications():
-        return CorpApplication.objects.filter(status="unapproved")
-
-
-# Add nullable discord_user FK to Character/GooseUser
-# Add new Discord User Model
-# Copy over character data into discord user model
-# Remove nullability and old fields from models + update code
-
-
 @deconstructible
 class UnicodeAndSpacesUsernameValidator(UnicodeUsernameValidator):
     regex = r"^[-\w.@+ ]+\Z"
@@ -135,7 +68,7 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
         default=15.0,
     )
     default_character = models.OneToOneField(
-        Character, on_delete=models.CASCADE, null=True, blank=True
+        "users.Character", on_delete=models.CASCADE, null=True, blank=True
     )
     status = models.TextField(
         choices=[
@@ -337,3 +270,67 @@ class DiscordRoleDjangoGroupMapping(models.Model):
     role_id = models.TextField()
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     grants_staff = models.BooleanField(default=False)
+
+
+class Character(models.Model):
+    discord_user = models.ForeignKey(
+        DiscordUser, on_delete=models.CASCADE, null=True, blank=True
+    )
+    user = models.ForeignKey(GooseUser, on_delete=models.CASCADE, null=True, blank=True)
+    ingame_name = models.TextField(unique=True)
+    corp = models.ForeignKey(Corp, on_delete=models.CASCADE, null=True, blank=True)
+
+    # pylint: disable=no-member
+    def gooseuser_or_false(self):
+        return (
+            self.discord_user
+            and hasattr(self.discord_user, "gooseuser")
+            and self.discord_user.gooseuser
+        )
+
+    def discord_avatar_url(self):
+        # Todo directly get from user when the Character FK -> Discord user is replaced with an FK -> Gooseuser.
+        return self.discord_user and self.discord_user.gooseuser.discord_avatar_url()
+
+    def discord_username(self):
+        return self.discord_user and self.discord_user.gooseuser.discord_username()
+
+    def display_name(self):
+        return self.discord_user and self.discord_user.gooseuser.display_name()
+
+    def __str__(self):
+        if self.corp:
+            return f"[{self.corp}] {self.ingame_name}"
+        else:
+            return f"{self.ingame_name}"
+
+
+class CorpApplication(models.Model):
+    corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
+    character = models.ForeignKey(Character, on_delete=models.CASCADE)
+    status = models.TextField(
+        choices=[
+            ("unapproved", "unapproved"),
+            ("approved", "approved"),
+            ("rejected", "rejected"),
+        ],
+        default="unapproved",
+    )
+    notes = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def approve(self):
+        self.status = "approved"
+        self.character.corp = self.corp
+        self.character.save()
+        self.full_clean()
+        self.save()
+
+    def reject(self):
+        self.status = "rejected"
+        self.full_clean()
+        self.save()
+
+    @staticmethod
+    def unapproved_applications():
+        return CorpApplication.objects.filter(status="unapproved")
