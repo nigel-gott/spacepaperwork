@@ -127,7 +127,7 @@
                 </td>
             </tr>
             {% endif %}
-            {% for discord_id, members in fleet_members_by_id.items %}
+            {% for user_id, members in fleet_members_by_id.items %}
             {% for member in members %}
             <tr>
                 {% if forloop.first %}
@@ -147,7 +147,7 @@
                 </td>
                 <td>
 
-                    {% if member.character.discord_user == user.discord_user or admin %}
+                    {% if member.character.user == user or admin %}
 
                     {% if admin %}
                     <a class="red-text text-darken-3"

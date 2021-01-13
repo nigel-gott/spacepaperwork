@@ -33,7 +33,7 @@
                 <span class="title">[{{character.corp}}] {{character.ingame_name}}</span>
                 <div class="divider"></div>
                 <p>
-                    <b>Owner</b>: <a href="{% url 'user_view' character.discord_user.pk %}">{{character.discord_user.display_name}}</a>
+                    <b>Owner</b>: <a href="{% url 'user_view' character.user.pk %}">{{character.display_name}}</a>
                 </p>
             </li>
         {% endfor %}

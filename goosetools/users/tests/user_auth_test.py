@@ -162,7 +162,7 @@ class UserAuthTest(GooseToolsTestCase):
             last_url, _ = response.redirect_chain[-1]
             with pytest.raises(
                 ValidationError,
-                match=r"User already exists with CUSTOMUSERNAME#1111 username cannot change CUSTOMUSERNAME to match.",
+                match=r"User already exists with CUSTOMUSERNAME#1111 username cannot change customusername to match.",
             ):
                 self.post(
                     last_url,

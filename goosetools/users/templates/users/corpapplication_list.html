@@ -21,10 +21,10 @@
                 {% endif %}
                 <p>
                     <b>Created At: </b>{{application.created_at}} <br/>
-                    <b>Discord Username: </b>{{application.character.discord_user.display_name}} <br/>
+                    <b>Discord Username: </b>{{application.character.user.display_name}} <br/>
                     <b>Other Characters: </b> <br/>
                     <ol>
-                    {% for char in application.character.discord_user.character_set.all %}
+                    {% for char in application.character.user.character_set.all %}
                         {% if char != application.character %}
                         <li>{{char}}</li>
                         {% endif %}

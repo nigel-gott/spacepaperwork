@@ -22,7 +22,7 @@ from goosetools.users.forms import (
 from goosetools.users.models import (
     Character,
     CorpApplication,
-    DiscordUser,
+    GooseUser,
     UserApplication,
 )
 
@@ -51,7 +51,7 @@ def settings_view(request):
         )
 
     form.fields["default_character"].queryset = Character.objects.filter(
-        discord_user=goose_user.discord_user
+        user=goose_user
     )
     return render(request, "users/settings.html", {"form": form})
 
@@ -104,7 +104,7 @@ def corp_application_update(request, pk):
 
 def character_edit(request, pk):
     character = get_object_or_404(Character, pk=pk)
-    if character.discord_user.gooseuser != request.user:
+    if character.user != request.user:
         messages.error(request, "You cannot edit someone elses character")
         return HttpResponseRedirect(reverse("characters"))
     initial = {"ingame_name": character.ingame_name, "corp": character.corp}
@@ -145,7 +145,7 @@ def character_new(request):
             character = Character.objects.create(
                 ingame_name=form.cleaned_data["ingame_name"],
                 corp=None,
-                discord_user=request.user.discord_user,
+                user=request.user,
             )
             messages.info(
                 request,
@@ -193,7 +193,7 @@ def user_application_list(request):
 
 
 def user_view(request, pk):
-    user = get_object_or_404(DiscordUser, pk=pk)
+    user = get_object_or_404(GooseUser, pk=pk)
     return render(
         request,
         "users/user_view.html",
@@ -208,7 +208,7 @@ def character_list(request):
         {
             "characters": request.user.characters(),
             "corp_apps": CorpApplication.objects.filter(
-                character__discord_user=request.user.discord_user,
+                character__user=request.user,
             ).exclude(status="approved"),
         },
     )
@@ -223,9 +223,7 @@ def character_search(request):
         if form.is_valid():
             name = form.cleaned_data["name"]
             characters = Character.objects.filter(ingame_name__icontains=name)
-            users = DiscordUser.objects.filter(
-                Q(nick__icontains=name) | Q(username__icontains=name)
-            )
+            users = GooseUser.objects.filter(Q(username__icontains=name))
     else:
         form = CharacterUserSearchForm()
 

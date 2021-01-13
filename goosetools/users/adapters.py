@@ -11,23 +11,14 @@ from django.utils import timezone
 from goosetools.users.jobs.hourly.update_discord_roles import (
     _setup_user_groups_from_discord_guild_roles,
 )
-from goosetools.users.models import (
-    Character,
-    DiscordGuild,
-    DiscordUser,
-    GooseUser,
-    UserApplication,
-)
+from goosetools.users.models import Character, DiscordGuild, GooseUser, UserApplication
 
 
 # pylint: disable=unused-argument
 @receiver(user_logged_in)
 def user_login_handler(sender, request, user, **kwargs):
     account = SocialAccount.objects.get(user=user, provider="discord")
-    # Keep the easier to use DiscordUser model upto date as the username and discriminator fields could change between logins.
-    discord_user = DiscordUser.objects.get(uid=account.uid)
-    _update_discord_user(discord_user, account, user, request)
-    _update_user_from_social_account(account, user)
+    _update_user_from_social_account(account, user, request)
 
 
 class AccountAdapter(DefaultAccountAdapter):
@@ -80,26 +71,17 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
         """
         account = sociallogin.account
 
-        existing_user_with_correct_uid = DiscordUser.objects.filter(uid=account.uid)
-        if len(existing_user_with_correct_uid) == 1:
-            discord_user = existing_user_with_correct_uid[0]
-        else:
-            discord_user = DiscordUser()
-
-        sociallogin.user.discord_user = discord_user
-        _update_discord_user(discord_user, account, sociallogin.user, request)
         super().save_user(request, sociallogin, form)
         _create_application_if_not_approved(sociallogin.user, form, request)
-        _update_user_from_social_account(account, sociallogin.user)
-        _give_pronoun_roles(discord_user, form)
+        _update_user_from_social_account(account, sociallogin.user, request)
+        _give_pronoun_roles(account.uid, form)
 
     def validate_disconnect(self, account, accounts):
         raise ValidationError("Can not disconnect")
 
 
-def _give_pronoun_roles(discord_user, form):
+def _give_pronoun_roles(uid, form):
     prefered_pronouns = form.cleaned_data["prefered_pronouns"]
-    uid = discord_user.uid
     if prefered_pronouns == "they":
         DiscordGuild.try_give_role(uid, 762405572136927242)
     elif prefered_pronouns == "she":
@@ -108,30 +90,8 @@ def _give_pronoun_roles(discord_user, form):
         DiscordGuild.try_give_role(uid, 762404773512740905)
 
 
-def _update_discord_user(discord_user, account, gooseuser, request):
-    discord_user.uid = account.uid
-    discord_user.shortened_uid = False
-    discord_user.username = (
-        account.extra_data["username"] + "#" + account.extra_data["discriminator"]
-    )
-
-    existing_user = GooseUser.objects.filter(username=discord_user.username)
-    if len(existing_user) > 0 and existing_user[0].id != gooseuser.id:
-        messages.error(
-            request,
-            f"ERROR: There is already a user signed up to goosetools with the exact same Discord Username as you '{discord_user.username}'. This should be impossible, please PM @thejanitor to get this fixed.",
-        )
-        raise ValidationError(
-            f"User already exists with {discord_user.username} username cannot change {gooseuser.username} to match."
-        )
-
-    discord_user.full_clean()
-    discord_user.save()
-    gooseuser.username = discord_user.username
-    gooseuser.save()
-
-
-def _update_user_from_social_account(account, gooseuser):
+def _update_user_from_social_account(account, gooseuser, request):
+    _update_gooseuser_username_to_match_discord(account, gooseuser, request)
     try:
         guild = DiscordGuild.objects.get(active=True)
         _setup_user_groups_from_discord_guild_roles(
@@ -139,3 +99,22 @@ def _update_user_from_social_account(account, gooseuser):
         )
     except DiscordGuild.DoesNotExist:
         pass
+
+
+def _update_gooseuser_username_to_match_discord(account, gooseuser, request):
+    new_username = (
+        account.extra_data["username"] + "#" + account.extra_data["discriminator"]
+    )
+
+    existing_user = GooseUser.objects.filter(username=new_username)
+    if len(existing_user) > 0 and existing_user[0].id != gooseuser.id:
+        messages.error(
+            request,
+            f"ERROR: There is already a user signed up to goosetools with the exact same Discord Username as you '{new_username}'. This should be impossible, please PM @thejanitor to get this fixed.",
+        )
+        raise ValidationError(
+            f"User already exists with {new_username} username cannot change {gooseuser.username} to match."
+        )
+
+    gooseuser.username = new_username
+    gooseuser.save()

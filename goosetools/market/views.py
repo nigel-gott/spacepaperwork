@@ -430,7 +430,7 @@ def split_off(item, new_quantity, new_stack=None):
 
 def sell_item(item, form, quantity_to_sell, new_stack=None):
     if item.quantity > quantity_to_sell:
-        item = item.split_off(quantity_to_sell, new_stack)
+        item = split_off(item, quantity_to_sell, new_stack)
     remaining_quantity_to_sell = quantity_to_sell - item.quantity
     price = Decimal(form.cleaned_data["listed_at_price"].replace(",", ""))
     total_isk_listed = item.quantity * price

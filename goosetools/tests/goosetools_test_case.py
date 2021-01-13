@@ -21,7 +21,7 @@ from goosetools.items.models import (
 from goosetools.market.models import MarketOrder, SoldItem
 from goosetools.ownership.models import LootGroup, LootShare
 from goosetools.tests.django_test_case import DjangoTestCase
-from goosetools.users.models import Character, Corp, DiscordUser, GooseUser
+from goosetools.users.models import Character, Corp, GooseUser
 
 
 def isk(number_str: Union[str, int]):
@@ -40,31 +40,13 @@ class GooseToolsTestCase(DjangoTestCase):
         self.item = Item.objects.create(name="Tritanium", item_type=sub_sub_type)
         self.another_item = Item.objects.create(name="Condor", item_type=sub_sub_type)
 
-        self.discord_user = DiscordUser.objects.create(
-            username="Test Goose User", uid="1"
-        )
-        self.other_discord_user = DiscordUser.objects.create(
-            username="Test Goose User 2", uid="2"
-        )
         self.corp = Corp.objects.create(name="Test Corp")
-        self.char = Character.objects.create(
-            discord_user=self.discord_user, ingame_name="Test Char", corp=self.corp
-        )
-        self.other_char = Character.objects.create(
-            discord_user=self.other_discord_user,
-            ingame_name="Test Char 2",
-            corp=self.corp,
-        )
-        self.other_alt_char = Character.objects.create(
-            discord_user=self.other_discord_user,
-            ingame_name="Test Alt Char 2",
-            corp=self.corp,
-        )
         self.user = GooseUser.objects.create(
             username="Test Goose User#1234",
-            discord_user=self.discord_user,
-            default_character=self.char,
             status="approved",
+        )
+        self.char = Character.objects.create(
+            user=self.user, ingame_name="Test Char", corp=self.corp
         )
         self.user_socialaccount = SocialAccount.objects.create(
             uid="1",
@@ -78,8 +60,6 @@ class GooseToolsTestCase(DjangoTestCase):
         )
         self.other_user = GooseUser.objects.create(
             username="Test Goose User 2#1234",
-            discord_user=self.other_discord_user,
-            default_character=self.other_char,
             status="approved",
         )
         self.otheruser_socialaccount = SocialAccount.objects.create(
@@ -91,6 +71,16 @@ class GooseToolsTestCase(DjangoTestCase):
                 "discriminator": "1234",
             },
             user=self.other_user,
+        )
+        self.other_char = Character.objects.create(
+            user=self.other_user,
+            ingame_name="Test Char 2",
+            corp=self.corp,
+        )
+        self.other_alt_char = Character.objects.create(
+            user=self.other_user,
+            ingame_name="Test Alt Char 2",
+            corp=self.corp,
         )
         region = Region.objects.create(name="Test Region")
         self.system = System.objects.create(name="Test System", region=region)

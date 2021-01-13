@@ -82,7 +82,7 @@
             <tr>
                 <td rowspan="{{loc_items.total_in_loc|add:'3'}}" style="vertical-align: top !important">
                 {% if loc_items.loc %}
-                <a href="{% url 'fleet_shares' loc_items.loc.character.discord_user.pk %}">{{loc_items.loc}}</a>
+                <a href="{% url 'fleet_shares' loc_items.loc.character.user.pk %}">{{loc_items.loc}}</a>
                 {% else %}
                 {{loc_items.loc}}
                 {% endif %}

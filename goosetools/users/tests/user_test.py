@@ -1,22 +1,13 @@
 from allauth.socialaccount.models import SocialAccount
 from django.test import TestCase
 
-from goosetools.users.models import Character, Corp, DiscordUser, GooseUser
+from goosetools.users.models import GooseUser
 
 
 class FleetTest(TestCase):
     def test_when_avatar_hash_is_null_default_avatar_is_returned(self):
-        discord_user = DiscordUser.objects.create(
-            username="Test Goose User",
-        )
-        corp = Corp.objects.create(name="Test Corp")
-        char = Character.objects.create(
-            discord_user=discord_user, ingame_name="Test Char", corp=corp
-        )
         user = GooseUser.objects.create(
             username="Test Goose User#1",
-            discord_user=discord_user,
-            default_character=char,
             status="approved",
         )
         SocialAccount.objects.create(
@@ -37,17 +28,8 @@ class FleetTest(TestCase):
     def test_when_user_has_default_discord_avatar_the_default_url_is_their_avatar_url(
         self,
     ):
-        discord_user = DiscordUser.objects.create(
-            username="Test Goose User",
-        )
-        corp = Corp.objects.create(name="Test Corp")
-        char = Character.objects.create(
-            discord_user=discord_user, ingame_name="Test Char", corp=corp
-        )
         user = GooseUser.objects.create(
             username="Test Goose User#1",
-            discord_user=discord_user,
-            default_character=char,
             status="approved",
         )
         SocialAccount.objects.create(
@@ -67,17 +49,8 @@ class FleetTest(TestCase):
         )
 
     def test_when_user_has_custom_avatar_it_is_their_avatar_url(self):
-        discord_user = DiscordUser.objects.create(
-            username="Test Goose User",
-        )
-        corp = Corp.objects.create(name="Test Corp")
-        char = Character.objects.create(
-            discord_user=discord_user, ingame_name="Test Char", corp=corp
-        )
         user = GooseUser.objects.create(
             username="Test Goose User#12345",
-            discord_user=discord_user,
-            default_character=char,
             status="approved",
         )
         SocialAccount.objects.create(

@@ -74,9 +74,6 @@ class FleetAddMemberForm(forms.Form):
         ),
     )
 
-    class Meta:
-        exclude = ("discord_username",)
-
 
 class JoinFleetForm(forms.Form):
     character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0)

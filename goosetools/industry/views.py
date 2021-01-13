@@ -30,7 +30,7 @@ def forbidden(request):
 @transaction.atomic
 def shiporders_contract_confirm(request, pk):
     ship_order = get_object_or_404(ShipOrder, pk=pk)
-    if ship_order.recipient_character.discord_user != request.user.discord_user:
+    if ship_order.recipient_character.user != request.user:
         return HttpResponseForbidden()
     if request.method == "POST":
         ship_order.contract_made = True
@@ -65,7 +65,7 @@ def calculate_blocked_until_for_order(ship, recieving_user):
         limit = timezone.now() - limit_period
         prev_order_start = (
             ShipOrder.objects.filter(
-                recipient_character__discord_user__gooseuser=recieving_user,
+                recipient_character__user=recieving_user,
                 payment_method="free",
                 contract_made=True,
                 ship__order_limit_group=order_limit_group,
@@ -272,7 +272,7 @@ class ShipOrderViewSet(
             {
                 "status": claim_status,
                 "assignee": ship_order.assignee.pk,
-                "assignee_name": ship_order.assignee.discord_username(),
+                "assignee_name": ship_order.assignee.display_name(),
                 "uid": uid,
             }
         )
@@ -339,7 +339,6 @@ def shiporders_view(request):
                     "industry.change_shiporder"
                 ),
                 "request_user_discord_username": request.user.discord_username(),
-                "request_discord_user_pk": request.user.discord_user.pk,
                 "request_user_pk": request.user.pk,
                 "request_user_character_pks": [
                     char.pk for char in request.user.characters()

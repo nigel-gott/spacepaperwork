@@ -1,6 +1,7 @@
 import time
 
 import requests
+from allauth.socialaccount.models import SocialAccount
 from django_extensions.management.jobs import HourlyJob
 from requests.models import HTTPError
 
@@ -18,9 +19,6 @@ def _setup_user_groups_from_discord_guild_roles(
         user.groups.clear()
         if not user.is_superuser:
             user.is_staff = False
-        if "nick" in extra_data and extra_data["nick"] and extra_data["nick"].strip():
-            user.discord_user.nick = extra_data["nick"]
-            user.discord_user.save()
         if "roles" in extra_data:
             for role_id in extra_data["roles"]:
                 try:
@@ -66,20 +64,23 @@ class Job(HourlyJob):
 
                 members_request = requests.get(url, headers=bot_headers)
                 members_request.raise_for_status()
-                users = members_request.json()
-                for user in users:
+                users_json = members_request.json()
+                for user_json in users_json:
                     time.sleep(1)
-                    uid = user["user"]["id"]
+                    uid = user_json["user"]["id"]
                     if int(uid) > highest_id_so_far:
                         highest_id_so_far = int(uid)
                     try:
-                        gooseuser = GooseUser.objects.get(discord_user__uid=uid)
+                        existing_socialaccount = SocialAccount.objects.get(uid=uid)
                         _setup_user_groups_from_discord_guild_roles(
-                            gooseuser, user, guild, log_output=True
+                            existing_socialaccount.user,
+                            user_json,
+                            guild,
+                            log_output=True,
                         )
                     except GooseUser.DoesNotExist:
                         print(
-                            f"Not doing anything for {user['user']['username']} as they are not in goosetools."
+                            f"Not doing anything for {user_json['user']['username']} as they are not in goosetools."
                         )
                     users_processed = users_processed + 1
                 time.sleep(10)

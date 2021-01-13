@@ -83,9 +83,7 @@ def fleet_future(request):
 def fleet_leave(request, pk):
     member = get_object_or_404(FleetMember, pk=pk)
     fleet = member.fleet
-    if member.character.discord_user == request.user.discord_user or fleet.has_admin(
-        request.user
-    ):
+    if member.character.user == request.user or fleet.has_admin(request.user):
         member.delete()
     else:
         messages.error(
@@ -97,18 +95,18 @@ def fleet_leave(request, pk):
 def fleet_view(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     fleet_members = f.fleetmember_set.all()
-    by_discord_user: Dict[int, List[FleetMember]] = {}
+    by_user: Dict[int, List[FleetMember]] = {}
     for member in fleet_members:
-        if member.character.discord_user.id not in by_discord_user:
-            by_discord_user[member.character.discord_user.id] = []
-        by_discord_user[member.character.discord_user.id].append(member)
+        if member.character.user.id not in by_user:
+            by_user[member.character.user.id] = []
+        by_user[member.character.user.id].append(member)
     loot_buckets = f.lootbucket_set.prefetch_related("lootgroup_set").all()
     return render(
         request,
         "fleets/fleet_view.html",
         {
             "fleet": f,
-            "fleet_members_by_id": by_discord_user,
+            "fleet_members_by_id": by_user,
             "loot_buckets": loot_buckets,
         },
     )
@@ -224,9 +222,7 @@ def fleet_join(request, pk):
 
 def non_member_chars(fleet_id, user):
     existing = FleetMember.objects.filter(fleet=fleet_id).values("character")
-    characters = Character.objects.filter(discord_user=user.discord_user).exclude(
-        pk__in=existing
-    )
+    characters = Character.objects.filter(user=user).exclude(pk__in=existing)
     return characters
 
 

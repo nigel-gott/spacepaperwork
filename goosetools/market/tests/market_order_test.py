@@ -4,7 +4,7 @@ from django.urls.base import reverse
 
 from goosetools.ownership.models import TransferLog
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase, isk
-from goosetools.users.models import Character, DiscordUser, GooseUser
+from goosetools.users.models import Character, GooseUser
 
 
 class MarketOrderTestCase(GooseToolsTestCase):
@@ -90,23 +90,17 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         num_users = 200
         for i in range(0, num_users):
-            username = f"A Test Goose User {i:02d}"
-            discord_user = DiscordUser.objects.create(
-                uid=str(10 + i), username=username
+            user = GooseUser.objects.create(
+                username=f"Test Goose User - {i}",
+                status="approved",
             )
             char = Character.objects.create(
-                discord_user=discord_user,
+                user=user,
                 ingame_name=f"A Test Char {i:02d}",
                 corp=self.corp,
             )
-            user = GooseUser.objects.create(
-                username=f"Test Goose User - {i}",
-                discord_user=discord_user,
-                default_character=char,
-                status="approved",
-            )
             SocialAccount.objects.create(
-                uid=discord_user.uid,
+                uid=i + 10,
                 provider="discord",
                 extra_data={
                     "username": f"Test Goose User - {i}",

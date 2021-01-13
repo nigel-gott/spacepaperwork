@@ -56,7 +56,9 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
         error_messages={"unique": _("A user with that username already exists.")},
     )
 
-    discord_user = models.OneToOneField(DiscordUser, on_delete=models.CASCADE)
+    discord_user = models.OneToOneField(
+        DiscordUser, on_delete=models.CASCADE, null=True, blank=True
+    )
     timezone = TimeZoneField(default="Europe/London")
     broker_fee = models.DecimalField(
         verbose_name="Your Broker Fee in %", max_digits=5, decimal_places=2, default=8.0
@@ -117,10 +119,7 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
         self.save()
 
     def characters(self):
-        if getattr(self, "discord_user"):
-            return Character.objects.filter(discord_user=self.discord_user)
-        else:
-            return Character.objects.none()
+        return self.character_set.all()
 
     def _discord_account(self):
         return self.socialaccount_set.get(provider="discord")
@@ -159,11 +158,7 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
 
     def _construct_avatar_url(self):
         if self._has_default_avatar():
-            if "#" in self.discord_username():
-                # TODO add discriminator as a real non null field on DiscordUser and just access it here.
-                avatar_number = int(self._discord_discriminator()) % 5
-            else:
-                avatar_number = 1
+            avatar_number = int(self._discord_discriminator()) % 5
             return f"https://cdn.discordapp.com/embed/avatars/{avatar_number}.png"
         return f"https://cdn.discordapp.com/avatars/{self.discord_uid()}/{self._avatar_hash()}.png"
 
@@ -193,7 +188,7 @@ class UserApplication(models.Model):
 
     def _create_character(self):
         main_char = Character(
-            discord_user=self.user.discord_user,
+            user=self.user,
             ingame_name=self.ingame_name,
             corp=None,
         )
@@ -280,23 +275,14 @@ class Character(models.Model):
     ingame_name = models.TextField(unique=True)
     corp = models.ForeignKey(Corp, on_delete=models.CASCADE, null=True, blank=True)
 
-    # pylint: disable=no-member
-    def gooseuser_or_false(self):
-        return (
-            self.discord_user
-            and hasattr(self.discord_user, "gooseuser")
-            and self.discord_user.gooseuser
-        )
-
     def discord_avatar_url(self):
-        # Todo directly get from user when the Character FK -> Discord user is replaced with an FK -> Gooseuser.
-        return self.discord_user and self.discord_user.gooseuser.discord_avatar_url()
+        return self.user.discord_avatar_url()
 
     def discord_username(self):
-        return self.discord_user and self.discord_user.gooseuser.discord_username()
+        return self.user.discord_username()
 
     def display_name(self):
-        return self.discord_user and self.discord_user.gooseuser.display_name()
+        return self.user.display_name()
 
     def __str__(self):
         if self.corp:

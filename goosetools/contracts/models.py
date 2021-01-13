@@ -23,7 +23,7 @@ class Contract(models.Model):
     log = models.JSONField(null=True, blank=True)  # type: ignore
 
     def can_accept_or_reject(self, user):
-        return self.status == "pending" and self.to_char.gooseuser_or_false() == user
+        return self.status == "pending" and self.to_char.user == user
 
     def can_cancel(self, user):
         return self.status == "pending" and self.from_user == user

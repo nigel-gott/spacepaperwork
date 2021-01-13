@@ -23,7 +23,7 @@
             {% can_join fleet user as can_join_fleet %}
             <div class="col s12 l8">
                 <div class="mb-3">
-                    <img class="avatar" src="{{ fleet.fc.discord_user.avatar_url }}" style="width: 42px"/>
+                    <img class="avatar" src="{{ fleet.fc.discord_avatar_url }}" style="width: 42px"/>
                     <a href="{% url 'fleet_view' fleet.id %}">
                         <h3 class="d-inline-block ml-2">
                             {{ fleet.name }} run by {{fleet.fc.display_name}}

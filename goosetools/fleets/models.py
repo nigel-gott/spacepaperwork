@@ -63,9 +63,7 @@ class Fleet(models.Model):
     expected_duration = models.TextField(blank=True, null=True)
 
     def members_for_user(self, user):
-        return FleetMember.objects.filter(
-            fleet=self, character__discord_user=user.discord_user
-        )
+        return FleetMember.objects.filter(fleet=self, character__user=user)
 
     def has_admin(self, user):
         if user.is_staff:
@@ -122,9 +120,9 @@ class Fleet(models.Model):
             )
 
     def member_can_be_added(self, character):
-        num_chars = character.discord_user.character_set.count()
+        num_chars = character.user.character_set.count()
         num_characters_in_fleet = self.fleetmember_set.filter(
-            character__discord_user=character.discord_user
+            character__user=character.user
         ).count()
         if self.gives_shares_to_alts:
             return (num_chars - num_characters_in_fleet) > 0
@@ -187,11 +185,7 @@ class FleetMember(models.Model):
     admin_permissions = models.BooleanField(default=False)
 
     def has_admin(self):
-        user = self.character.gooseuser_or_false()
-        if user:
-            return self.fleet.has_admin(user)
-        else:
-            return self.admin_permissions
+        return self.fleet.has_admin(self.character.user)
 
     class Meta:
         unique_together = (("character", "fleet"),)

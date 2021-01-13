@@ -57,17 +57,17 @@ class LootBucket(models.Model):
                 f"The Loot Group {loot_group.id} is trying to give out a total of {total_flat_cuts}% of flat cuts. Please fix the participations as this is impossible."
             )
         shares_by_user = shares.values(
-            "character__discord_user__gooseuser__id",
-            "character__discord_user__gooseuser__username",
+            "character__user__id",
+            "character__user__username",
         ).annotate(num_shares=Sum("share_quantity"))
-        flat_cuts_by_user_qs = flat_cuts.values(
-            "character__discord_user__gooseuser__id"
-        ).annotate(flat_cut=Sum("flat_percent_cut"))
+        flat_cuts_by_user_qs = flat_cuts.values("character__user__id").annotate(
+            flat_cut=Sum("flat_percent_cut")
+        )
         flat_cuts_by_user = {}
         for flat_cut in flat_cuts_by_user_qs:
-            flat_cuts_by_user[
-                flat_cut["character__discord_user__gooseuser__id"]
-            ] = Decimal(flat_cut["flat_cut"])
+            flat_cuts_by_user[flat_cut["character__user__id"]] = Decimal(
+                flat_cut["flat_cut"]
+            )
         result = {
             "total_shares": total_shares,
             "total_flat_cuts": total_flat_cuts,
@@ -75,10 +75,10 @@ class LootBucket(models.Model):
         }
         total_after_cuts = isk * Decimal(100 - total_flat_cuts) / 100
         for group in shares_by_user:
-            user_id = group["character__discord_user__gooseuser__id"]
+            user_id = group["character__user__id"]
             flat_cut = Decimal(flat_cuts_by_user.get(user_id, 0))
             result["participation"][user_id] = {
-                "username": group["character__discord_user__gooseuser__username"],
+                "username": group["character__user__username"],
                 "shares": group["num_shares"],
                 "flat_cut": flat_cut,
                 "flat_cut_isk": (flat_cut / 100) * isk,
@@ -137,7 +137,7 @@ class LootGroup(models.Model):
             self.alts_allowed()
             or len(
                 LootShare.objects.filter(
-                    loot_group=self, character__discord_user=character.discord_user
+                    loot_group=self, character__user=character.user
                 )
             )
             == 0
@@ -149,9 +149,7 @@ class LootGroup(models.Model):
     def still_can_join_alts(self, user):
         num_chars = len(user.characters())
         num_characters_in_group = len(
-            LootShare.objects.filter(
-                loot_group=self, character__discord_user=user.discord_user
-            )
+            LootShare.objects.filter(loot_group=self, character__user=user)
         )
         return (
             self.still_open()
@@ -211,7 +209,7 @@ class LootShare(models.Model):
         else:
             extra = ""
 
-        return f"{self.character.discord_username} has {self.share_quantity} shares {extra}"
+        return f"{self.character.user.display_name()} has {self.share_quantity} shares {extra}"
 
 
 class TransferLog(models.Model):

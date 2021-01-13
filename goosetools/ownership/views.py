@@ -36,7 +36,7 @@ from goosetools.ownership.models import (
     to_isk,
 )
 from goosetools.users.forms import CharacterForm
-from goosetools.users.models import DiscordUser, GooseUser
+from goosetools.users.models import GooseUser
 
 
 class ComplexEncoder(json.JSONEncoder):
@@ -60,7 +60,7 @@ def loot_group_create(request, pk):
 
 def non_participation_chars(loot_group, user):
     existing = LootShare.objects.filter(
-        loot_group=loot_group, character__discord_user=user.discord_user
+        loot_group=loot_group, character__user=user
     ).values("character")
     return user.characters().exclude(pk__in=existing)
 
@@ -355,33 +355,32 @@ def loot_group_edit(request, pk):
 
 def loot_group_view(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
-    by_discord_user: Dict[int, List[LootShare]] = {}
+    by_user: Dict[int, List[LootShare]] = {}
     for loot_share in loot_group.lootshare_set.all():
-        discord_user = loot_share.character.discord_user.id
-        if discord_user not in by_discord_user:
-            by_discord_user[discord_user] = []
-        by_discord_user[discord_user].append(loot_share)
+        user_id = loot_share.character.user.id
+        if user_id not in by_user:
+            by_user[user_id] = []
+        by_user[user_id].append(loot_share)
     return render(
         request,
         "ownership/loot_group_view.html",
-        {"loot_group": loot_group, "loot_shares_by_discord_id": by_discord_user},
+        {"loot_group": loot_group, "loot_shares_by_user_id": by_user},
     )
 
 
 def your_fleet_shares(request):
-    return fleet_shares(request, request.user.discord_user.pk)
+    return fleet_shares(request, request.user.pk)
 
 
 def fleet_shares(request, pk):
-    loot_shares = LootShare.objects.filter(character__discord_user_id=pk)
+    loot_shares = LootShare.objects.filter(character__user_id=pk)
     items = []
     seen_groups = {}
     all_your_estimated_share_isk = 0
     all_your_real_share_isk = 0
     your_total_est_sales = 0
 
-    discorduser = DiscordUser.objects.get(pk=pk)
-    user = discorduser.gooseuser
+    user = GooseUser.objects.get(pk=pk)
     for_you = user == request.user
     if for_you:
         prefix = "Your"
@@ -399,7 +398,7 @@ def fleet_shares(request, pk):
         seen_groups[loot_group.id] = True
 
         my_items = InventoryItem.objects.filter(
-            location__character_location__character__discord_user=discorduser,
+            location__character_location__character__user=user,
             loot_group=loot_group,
         )
         estimated_profit = 0
@@ -718,7 +717,7 @@ def transfer_eggs(request):
         form = DepositEggsForm(request.POST)
         if form.is_valid():
             to_transfer = SoldItem.objects.filter(
-                item__location__character_location__character__discord_user=request.user.discord_user,
+                item__location__character_location__character__user=request.user,
                 quantity__gt=F("transfered_quantity"),
             ).annotate(isk_balance=Sum("item__isktransaction__isk"))
             if not valid_transfer(to_transfer, request):

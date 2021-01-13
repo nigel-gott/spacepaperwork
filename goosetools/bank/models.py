@@ -50,7 +50,7 @@ class IskTransaction(models.Model):
     @staticmethod
     def user_isk_transactions(user: GooseUser):
         return IskTransaction.objects.filter(
-            item__location__character_location__character__discord_user=user.discord_user
+            item__location__character_location__character__user=user
         )
 
     class Meta:
@@ -81,7 +81,7 @@ def isk_balance(self):
     return to_isk(
         model_sum(
             IskTransaction.objects.filter(
-                item__location__character_location__character__discord_user=self.discord_user
+                item__location__character_location__character__user=self
             ),
             "isk",
         )

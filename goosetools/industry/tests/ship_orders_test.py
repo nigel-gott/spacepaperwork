@@ -85,7 +85,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "notes": "",
         "payment_method": "eggs",
         "quantity": 1,
-        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_user_pk": "{self.user.pk}",
         "recipient_character_name": "Test Char",
         "ship": "Thorax",
         "state": "not_started",
@@ -118,7 +118,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "notes": "",
         "payment_method": "eggs",
         "quantity": 1,
-        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_user_pk": "{self.user.pk}",
         "recipient_character_name": "Test Char",
         "ship": "Thorax",
         "state": "not_started",
@@ -140,7 +140,7 @@ class ShipOrderTest(GooseToolsTestCase):
         )
         self.assertEqual(
             str(response.content, encoding="utf-8"),
-            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Goose User#1234","uid":"Test Goose User#1234-mock_random_1"}}',
+            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Goose User","uid":"Test Goose User#1234-mock_random_1"}}',
         )
 
     def test_cant_claim_ship_order_if_not_in_industry_group(self):
@@ -161,7 +161,7 @@ class ShipOrderTest(GooseToolsTestCase):
         )
         self.assertEqual(
             str(response.content, encoding="utf-8"),
-            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Goose User#1234","uid":"Test Goose User#1234-mock_random_1"}}',
+            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Goose User","uid":"Test Goose User#1234-mock_random_1"}}',
         )
         self.client.force_login(self.other_user)
         response = self.client.put(
@@ -169,7 +169,7 @@ class ShipOrderTest(GooseToolsTestCase):
         )
         self.assertEqual(
             str(response.content, encoding="utf-8"),
-            f'{{"status":"already_claimed","assignee":{self.user.pk},"assignee_name":"{self.user.discord_username()}","uid":null}}',
+            f'{{"status":"already_claimed","assignee":{self.user.pk},"assignee_name":"{self.user.display_name()}","uid":null}}',
         )
 
     def test_list_of_ship_orders_shows_assignee_name_after_claiming(self):
@@ -202,7 +202,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "notes": "",
         "payment_method": "eggs",
         "quantity": 1,
-        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_user_pk": "{self.user.pk}",
         "recipient_character_name": "Test Char",
         "ship": "Thorax",
         "state": "not_started",
@@ -224,7 +224,7 @@ class ShipOrderTest(GooseToolsTestCase):
         )
         self.assertEqual(
             str(response.content, encoding="utf-8"),
-            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Goose User#1234","uid":"Test Goose User#1234-mock_random_1"}}',
+            f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Goose User","uid":"Test Goose User#1234-mock_random_1"}}',
         )
         response = self.put(
             reverse("industry:shiporder-unclaim", args=[ship_order.pk]),
@@ -258,7 +258,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "payment_method": "free",
         "quantity": 1,
         "recipient_character_name": "Test Char",
-        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_user_pk": "{self.user.pk}",
         "ship": "FreeShip",
         "state": "not_started",
         "uid": "Test Goose User#1234-mock_random_1",
@@ -383,7 +383,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "notes": "",
         "payment_method": "free",
         "quantity": 1,
-        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_user_pk": "{self.user.pk}",
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
@@ -408,7 +408,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "notes": "",
         "payment_method": "free",
         "quantity": 1,
-        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_user_pk": "{self.user.pk}",
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
@@ -472,7 +472,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "notes": "",
         "payment_method": "free",
         "quantity": 1,
-        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_user_pk": "{self.user.pk}",
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
@@ -497,7 +497,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "notes": "",
         "payment_method": "isk",
         "quantity": 1,
-        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_user_pk": "{self.user.pk}",
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
@@ -522,7 +522,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "notes": "",
         "payment_method": "eggs",
         "quantity": 1,
-        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_user_pk": "{self.user.pk}",
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
@@ -569,7 +569,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "notes": "",
         "payment_method": "free",
         "quantity": 1,
-        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_user_pk": "{self.user.pk}",
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
@@ -594,7 +594,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "notes": "",
         "payment_method": "free",
         "quantity": 1,
-        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_user_pk": "{self.user.pk}",
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
@@ -619,7 +619,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "notes": "",
         "payment_method": "free",
         "quantity": 1,
-        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_user_pk": "{self.user.pk}",
         "recipient_character_name": "Test Char",
         "ship": "DailyShip",
         "state": "not_started",
@@ -767,7 +767,7 @@ class ShipOrderTest(GooseToolsTestCase):
             "notes": "",
             "payment_method": "free",
             "quantity": 1,
-            "recipient_discord_user_pk": "{self.discord_user.pk}",
+            "recipient_user_pk": "{self.user.pk}",
             "recipient_character_name": "Test Char",
             "ship": "DailyShip",
             "state": "not_started",
@@ -792,7 +792,7 @@ class ShipOrderTest(GooseToolsTestCase):
             "notes": "",
             "payment_method": "free",
             "quantity": 1,
-            "recipient_discord_user_pk": "{self.discord_user.pk}",
+            "recipient_user_pk": "{self.user.pk}",
             "recipient_character_name": "Test Char",
             "ship": "DailyShip",
             "state": "not_started",
@@ -849,7 +849,7 @@ class ShipOrderTest(GooseToolsTestCase):
             "notes": "",
             "payment_method": "isk",
             "quantity": 1,
-            "recipient_discord_user_pk": "{self.discord_user.pk}",
+            "recipient_user_pk": "{self.user.pk}",
             "recipient_character_name": "Test Char",
             "ship": "ShipWithNoPrice",
             "state": "not_started",
@@ -904,7 +904,7 @@ class ShipOrderTest(GooseToolsTestCase):
             "notes": "",
             "payment_method": "isk",
             "quantity": 1,
-            "recipient_discord_user_pk": "{self.discord_user.pk}",
+            "recipient_user_pk": "{self.user.pk}",
             "recipient_character_name": "Test Char",
             "ship": "ShipWithNoPrice",
             "state": "not_started",
@@ -963,7 +963,7 @@ class ShipOrderTest(GooseToolsTestCase):
             "notes": "",
             "payment_method": "isk",
             "quantity": 1,
-            "recipient_discord_user_pk": "{self.discord_user.pk}",
+            "recipient_user_pk": "{self.user.pk}",
             "recipient_character_name": "Test Char",
             "ship": "ShipWithNoPrice",
             "state": "not_started",
@@ -1035,7 +1035,7 @@ class ShipOrderTest(GooseToolsTestCase):
         "notes": "",
         "payment_method": "eggs",
         "quantity": 1,
-        "recipient_discord_user_pk": "{self.discord_user.pk}",
+        "recipient_user_pk": "{self.user.pk}",
         "recipient_character_name": "Test Char",
         "ship": "Thorax",
         "state": "not_started",

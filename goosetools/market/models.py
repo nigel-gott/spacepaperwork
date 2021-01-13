@@ -144,7 +144,7 @@ class SoldItem(models.Model):
 def can_deposit(self):
     return (
         SoldItem.objects.filter(
-            item__location__character_location__character__discord_user=self.discord_user,
+            item__location__character_location__character__user=self,
             quantity__gt=F("transfered_quantity"),
         ).count()
         > 0

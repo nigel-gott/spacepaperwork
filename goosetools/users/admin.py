@@ -9,7 +9,6 @@ from goosetools.users.models import (
     CorpApplication,
     DiscordGuild,
     DiscordRoleDjangoGroupMapping,
-    DiscordUser,
     GooseUser,
     UserApplication,
 )
@@ -20,28 +19,27 @@ class CharacterAdmin(admin.ModelAdmin):
     list_display = [
         "ingame_name",
         "corp",
-        "discord_nickname",
         "discord_username",
+        "display_name",
         "status",
     ]
     list_filter = ["corp"]
 
     # pylint: disable=no-self-use
     def discord_username(self, obj):
-        return obj.discord_user.username
+        return obj.user.username
 
     # pylint: disable=no-self-use
-    def discord_nickname(self, obj):
-        return obj.discord_user.nick
+    def display_name(self, obj):
+        return obj.user.display_name()
 
     # pylint: disable=no-self-use
     def status(self, obj):
-        return obj.discord_user.gooseuser.status
+        return obj.user.status
 
 
 admin.site.register(Corp)
 admin.site.register(Character, CharacterAdmin)
-admin.site.register(DiscordUser)
 admin.site.register(UserApplication)
 admin.site.register(CorpApplication)
 

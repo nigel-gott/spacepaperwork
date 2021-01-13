@@ -2,7 +2,7 @@ from django.urls.base import reverse
 from freezegun import freeze_time
 
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
-from goosetools.users.models import Character, DiscordUser
+from goosetools.users.models import Character, GooseUser
 
 
 @freeze_time("2012-01-14 12:00:00")
@@ -123,8 +123,8 @@ class FleetTest(GooseToolsTestCase):
             reverse("fleet_view", args=[fleet.id]),
         )
         self.assertEqual(fleet.id, fleet_view.context["fleet"].id)
-        self.assertIn(self.discord_user.id, fleet_view.context["fleet_members_by_id"])
-        self.assertIn(self.discord_user.username, str(fleet_view.content))
+        self.assertIn(self.user.id, fleet_view.context["fleet_members_by_id"])
+        self.assertIn(self.user.display_name(), str(fleet_view.content))
 
     def test_can_join_fleet(self):
         fleet = self.an_open_fleet()
@@ -139,10 +139,8 @@ class FleetTest(GooseToolsTestCase):
             reverse("fleet_view", args=[fleet.id]),
         )
         self.assertEqual(fleet.id, fleet_view.context["fleet"].id)
-        self.assertIn(
-            self.other_discord_user.id, fleet_view.context["fleet_members_by_id"]
-        )
-        self.assertIn(self.other_discord_user.username, str(fleet_view.content))
+        self.assertIn(self.other_user.id, fleet_view.context["fleet_members_by_id"])
+        self.assertIn(self.other_user.display_name(), str(fleet_view.content))
         return fleet
 
     def test_can_leave_fleet(self):
@@ -155,16 +153,14 @@ class FleetTest(GooseToolsTestCase):
         # Then a fleet member leaves it
         fleet_member_to_leave = fleet_view_before_leaving.context[
             "fleet_members_by_id"
-        ][self.other_discord_user.id][0]
+        ][self.other_user.id][0]
         self.post(reverse("fleet_leave", args=[fleet_member_to_leave.id]))
 
         # They no longer are in the fleet as a member
         fleet_view = self.get(
             reverse("fleet_view", args=[fleet.id]),
         )
-        self.assertNotIn(
-            self.other_discord_user.id, fleet_view.context["fleet_members_by_id"]
-        )
+        self.assertNotIn(self.other_user.id, fleet_view.context["fleet_members_by_id"])
 
     @freeze_time("2012-01-14 03:00:01")
     def test_cant_join_a_fleet_which_has_ended(self):
@@ -325,9 +321,7 @@ class FleetTest(GooseToolsTestCase):
         self.assertEqual(
             [
                 c.character.ingame_name
-                for c in fleet_view.context["fleet_members_by_id"][
-                    self.other_discord_user.id
-                ]
+                for c in fleet_view.context["fleet_members_by_id"][self.other_user.id]
             ],
             ["Test Char 2", "Test Alt Char 2"],
         )
@@ -346,7 +340,7 @@ class FleetTest(GooseToolsTestCase):
         )
 
         other_users_fleet_members = self.get_fleet_members_for_user(
-            fleet, self.other_discord_user
+            fleet, self.other_user
         )
         self.assertEqual(
             [c.character.ingame_name for c in other_users_fleet_members],
@@ -356,20 +350,20 @@ class FleetTest(GooseToolsTestCase):
         self.post(reverse("fleet_leave", args=[other_users_fleet_members[0].id]))
 
         other_users_fleet_members = self.get_fleet_members_for_user(
-            fleet, self.other_discord_user
+            fleet, self.other_user
         )
         self.assertEqual(
             [c.character.ingame_name for c in other_users_fleet_members],
             ["Test Alt Char 2"],
         )
 
-    def get_fleet_members_for_user(self, fleet, discord_user):
+    def get_fleet_members_for_user(self, fleet, user):
         fleet_view = self.get(
             reverse("fleet_view", args=[fleet.id]),
         )
         fleet_members_by_id = fleet_view.context["fleet_members_by_id"]
-        if discord_user.id in fleet_members_by_id:
-            return fleet_members_by_id[discord_user.id]
+        if user.id in fleet_members_by_id:
+            return fleet_members_by_id[user.id]
         else:
             return []
 
@@ -383,7 +377,7 @@ class FleetTest(GooseToolsTestCase):
 
         self.client.force_login(self.user)
         other_users_fleet_members = self.get_fleet_members_for_user(
-            fleet, self.other_discord_user
+            fleet, self.other_user
         )
 
         member_to_make_admin = other_users_fleet_members[0]
@@ -395,7 +389,7 @@ class FleetTest(GooseToolsTestCase):
     def test_fc_can_remove_someone_as_fleet_admin(self):
         fleet = self.there_is_a_fleet_where_other_user_is_an_admin()
         other_users_fleet_members = self.get_fleet_members_for_user(
-            fleet, self.other_discord_user
+            fleet, self.other_user
         )
 
         admin = other_users_fleet_members[0]
@@ -413,7 +407,7 @@ class FleetTest(GooseToolsTestCase):
         )
 
         other_users_fleet_members = self.get_fleet_members_for_user(
-            fleet, self.other_discord_user
+            fleet, self.other_user
         )
 
         member_to_make_admin = other_users_fleet_members[0]
@@ -430,7 +424,7 @@ class FleetTest(GooseToolsTestCase):
             reverse("fleet_add", args=[fleet.id]), {"character": self.other_char.id}
         )
         other_users_fleet_members = self.get_fleet_members_for_user(
-            fleet, self.other_discord_user
+            fleet, self.other_user
         )
         self.assertEqual(
             [c.character.ingame_name for c in other_users_fleet_members],
@@ -442,25 +436,19 @@ class FleetTest(GooseToolsTestCase):
         self.post(
             reverse("fleet_add", args=[fleet.id]), {"character": self.other_char.id}
         )
-        new_fleet_members = self.get_fleet_members_for_user(
-            fleet, self.other_discord_user
-        )
+        new_fleet_members = self.get_fleet_members_for_user(fleet, self.other_user)
 
         member_to_make_admin = new_fleet_members[0]
         self.post(reverse("fleet_make_admin", args=[member_to_make_admin.id]))
 
         self.client.force_login(self.other_user)
 
-        new_fleet_members = self.get_fleet_members_for_user(
-            fleet, self.other_discord_user
-        )
+        new_fleet_members = self.get_fleet_members_for_user(fleet, self.other_user)
 
-        new_discord_user = DiscordUser.objects.create(
-            username="A Brand New Test Goose User"
-        )
+        new_user = GooseUser.objects.create(username="A Brand New Test Goose User")
 
         new_char = Character.objects.create(
-            discord_user=new_discord_user,
+            user=new_user,
             ingame_name="New Test Char",
             corp=self.corp,
         )
@@ -469,12 +457,10 @@ class FleetTest(GooseToolsTestCase):
             reverse("fleet_add", args=[fleet.id]),
             {"character": new_char.id},
         )
-        self.assert_fleet_members_for_user_are(
-            fleet, new_discord_user, ["New Test Char"]
-        )
+        self.assert_fleet_members_for_user_are(fleet, new_user, ["New Test Char"])
 
-    def assert_fleet_members_for_user_are(self, fleet, discord_user, expected_members):
-        members = self.get_fleet_members_for_user(fleet, discord_user)
+    def assert_fleet_members_for_user_are(self, fleet, user, expected_members):
+        members = self.get_fleet_members_for_user(fleet, user)
         self.assertEqual([c.character.ingame_name for c in members], expected_members)
         return members
 
@@ -484,7 +470,7 @@ class FleetTest(GooseToolsTestCase):
             reverse("fleet_add", args=[fleet.id]), {"character": self.other_char.id}
         )
         other_users_fleet_members = self.get_fleet_members_for_user(
-            fleet, self.other_discord_user
+            fleet, self.other_user
         )
 
         member_to_make_admin = other_users_fleet_members[0]
@@ -495,12 +481,10 @@ class FleetTest(GooseToolsTestCase):
         fleet = self.there_is_a_fleet_where_other_user_is_an_admin()
         self.client.force_login(self.other_user)
 
-        new_discord_user = DiscordUser.objects.create(
-            username="A Brand New Test Goose User"
-        )
+        new_user = GooseUser.objects.create(username="A Brand New Test Goose User")
 
         new_char = Character.objects.create(
-            discord_user=new_discord_user,
+            user=new_user,
             ingame_name="New Test Char",
             corp=self.corp,
         )
@@ -510,18 +494,16 @@ class FleetTest(GooseToolsTestCase):
             {"character": new_char.id},
         )
         members = self.assert_fleet_members_for_user_are(
-            fleet, new_discord_user, ["New Test Char"]
+            fleet, new_user, ["New Test Char"]
         )
         self.post(reverse("fleet_leave", args=[members[0].id]))
-        self.assert_fleet_members_for_user_are(fleet, new_discord_user, [])
+        self.assert_fleet_members_for_user_are(fleet, new_user, [])
 
     def test_non_admin_cant_remove_other_fleet_members(self):
         fleet = self.a_fleet()
-        new_discord_user = DiscordUser.objects.create(
-            username="A Brand New Test Goose User"
-        )
+        new_user = GooseUser.objects.create(username="A Brand New Test Goose User")
         new_char = Character.objects.create(
-            discord_user=new_discord_user,
+            user=new_user,
             ingame_name="New Test Char",
             corp=self.corp,
         )
@@ -533,7 +515,7 @@ class FleetTest(GooseToolsTestCase):
         self.client.force_login(self.other_user)
 
         members = self.assert_fleet_members_for_user_are(
-            fleet, new_discord_user, ["New Test Char"]
+            fleet, new_user, ["New Test Char"]
         )
         errors = self.post_expecting_error(reverse("fleet_leave", args=[members[0].id]))
         self.assertEqual(

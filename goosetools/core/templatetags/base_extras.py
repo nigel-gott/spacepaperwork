@@ -22,7 +22,7 @@ register = template.Library()
 def num_items(user):
     return InventoryItem.objects.filter(
         contract__isnull=True,
-        location__character_location__character__discord_user=user.discord_user,
+        location__character_location__character__user=user,
         quantity__gt=0,
     ).count()
 
@@ -30,14 +30,14 @@ def num_items(user):
 @register.simple_tag
 def num_orders(user):
     return MarketOrder.objects.filter(
-        item__location__character_location__character__discord_user=user.discord_user
+        item__location__character_location__character__user=user
     ).count()
 
 
 @register.simple_tag
 def num_sold(user):
     return SoldItem.objects.filter(
-        item__location__character_location__character__discord_user=user.discord_user,
+        item__location__character_location__character__user=user,
         transfered_quantity__lt=F("quantity"),
     ).count()
 
@@ -50,9 +50,7 @@ def can_accept_reject(user, contract):
 @register.simple_tag
 def num_contracts(user):
     return (
-        Contract.objects.filter(
-            to_char__discord_user=user.discord_user, status="pending"
-        ).count()
+        Contract.objects.filter(to_char__user=user, status="pending").count()
         + Contract.objects.filter(from_user=user, status="pending").count()
     )
 

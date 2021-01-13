@@ -22,7 +22,7 @@ class CharacterAutocomplete(autocomplete.Select2QuerySetView):
 
         if user:
             user = GooseUser.objects.get(pk=user)
-            qs = qs.filter(discord_user__gooseuser=user)
+            qs = qs.filter(user=user)
 
         if self.q:
             qs = qs.filter(ingame_name__icontains=self.q)

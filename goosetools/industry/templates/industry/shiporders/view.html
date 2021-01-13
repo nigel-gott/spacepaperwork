@@ -236,7 +236,7 @@ $(function() {
                 }
             },
             { "data": "availible_transition_names", "visible": false},
-            { "data": "recipient_discord_user_pk", "visible": false, "searchable": false},
+            { "data": "recipient_user_pk", "visible": false, "searchable": false},
             { "data": "assignee", "visible": false, "searchable": false},
             { "data": "uid", "title": "Contract Code"}
     ];
@@ -461,7 +461,7 @@ function add_filter(page_data){
             if(assigned_checked || unassigned_checked){
                 return assigned_checked && row_is_assigned_to_user || unassigned_checked && !row_has_assignee;
             } else if(requested_checked){
-                return parseInt(row['recipient_discord_user_pk']) === page_data['request_discord_user_pk'];
+                return parseInt(row['recipient_user_pk']) === page_data['request_user_pk'];
             } else {
                 return true;
             }
