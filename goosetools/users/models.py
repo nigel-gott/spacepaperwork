@@ -22,22 +22,6 @@ class Corp(models.Model):
         return str(self.name)
 
 
-# Represents a unique single person using their unique discord uid if known. They might not have ever have visited goosetools and hence will not have a GooseUser model.
-class DiscordUser(models.Model):
-    username = models.TextField(unique=True)
-    nick = models.TextField(null=True, blank=True)
-    uid = models.TextField(unique=True, blank=True, null=True)
-
-    def display_name(self):
-        if self.nick:
-            return self.nick
-        else:
-            return self.username
-
-    def __str__(self):
-        return self.username
-
-
 @deconstructible
 class UnicodeAndSpacesUsernameValidator(UnicodeUsernameValidator):
     regex = r"^[-\w.@+ ]+\Z"
@@ -56,9 +40,6 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
         error_messages={"unique": _("A user with that username already exists.")},
     )
 
-    discord_user = models.OneToOneField(
-        DiscordUser, on_delete=models.CASCADE, null=True, blank=True
-    )
     timezone = TimeZoneField(default="Europe/London")
     broker_fee = models.DecimalField(
         verbose_name="Your Broker Fee in %", max_digits=5, decimal_places=2, default=8.0
@@ -268,10 +249,7 @@ class DiscordRoleDjangoGroupMapping(models.Model):
 
 
 class Character(models.Model):
-    discord_user = models.ForeignKey(
-        DiscordUser, on_delete=models.CASCADE, null=True, blank=True
-    )
-    user = models.ForeignKey(GooseUser, on_delete=models.CASCADE, null=True, blank=True)
+    user = models.ForeignKey(GooseUser, on_delete=models.CASCADE)
     ingame_name = models.TextField(unique=True)
     corp = models.ForeignKey(Corp, on_delete=models.CASCADE, null=True, blank=True)
 
