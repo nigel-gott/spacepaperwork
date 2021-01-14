@@ -101,6 +101,7 @@ LOCAL_APPS = [
     "goosetools.industry.apps.IndustryConfig",
     "goosetools.mapbot.apps.MapBotConfig",
     "goosetools.core.apps.CoreConfig",
+    "goosetools.tenants.apps.TenantsConfig",
     # Goosetools apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

@@ -7,8 +7,9 @@ from django.db import models
 from django.utils import timezone
 from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
-from django_prometheus.models import ExportModelOperationsMixin
 from timezone_field import TimeZoneField
+
+from goosetools.tenants.models import SiteUser
 
 logger = logging.getLogger(__name__)
 
@@ -29,18 +30,19 @@ class UnicodeAndSpacesUsernameValidator(UnicodeUsernameValidator):
         "Enter a valid username. This value may contain only letters, "
         "numbers, and @/./+/-/_/space  characters."
     )
-    flags = 0
 
 
-class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type: ignore
+class GooseUser(AbstractUser):
     username = models.CharField(
         max_length=150,
         unique=True,
         validators=[],
         error_messages={"unique": _("A user with that username already exists.")},
     )
-
     timezone = TimeZoneField(default="Europe/London")
+    site_user = models.ForeignKey(
+        SiteUser, on_delete=models.CASCADE, null=True, blank=True
+    )
     broker_fee = models.DecimalField(
         verbose_name="Your Broker Fee in %", max_digits=5, decimal_places=2, default=8.0
     )
@@ -103,7 +105,7 @@ class GooseUser(ExportModelOperationsMixin("gooseuser"), AbstractUser):  # type:
         return self.character_set.all()
 
     def _discord_account(self):
-        return self.socialaccount_set.get(provider="discord")
+        return self.socialaccount_set.get(provider="discord")  # type: ignore
 
     def discord_uid(self):
         return self._discord_account().uid

@@ -152,7 +152,7 @@ def can_deposit(self):
 
 
 # TODO Fix dependency ordering instead of monkey patching
-GooseUser.can_deposit = can_deposit
+GooseUser.can_deposit = can_deposit  # type: ignore
 
 
 def marketorders(self):
