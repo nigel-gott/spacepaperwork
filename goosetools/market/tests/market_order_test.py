@@ -3,6 +3,7 @@ from django.contrib.messages import get_messages
 from django.urls.base import reverse
 
 from goosetools.ownership.models import TransferLog
+from goosetools.tenants.models import SiteUser
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase, isk
 from goosetools.users.models import Character, GooseUser
 
@@ -90,8 +91,11 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         num_users = 200
         for i in range(0, num_users):
+            username = f"Test Goose User - {i}"
+            s = SiteUser.create(username)
             user = GooseUser.objects.create(
-                username=f"Test Goose User - {i}",
+                site_user=s,
+                username=username,
                 status="approved",
             )
             char = Character.objects.create(

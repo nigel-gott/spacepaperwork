@@ -1,12 +1,15 @@
 from allauth.socialaccount.models import SocialAccount
 from django.test import TestCase
 
+from goosetools.tenants.models import SiteUser
 from goosetools.users.models import GooseUser
 
 
 class FleetTest(TestCase):
     def test_when_avatar_hash_is_null_default_avatar_is_returned(self):
+        s = SiteUser.create("Test Goose User#1")
         user = GooseUser.objects.create(
+            site_user=s,
             username="Test Goose User#1",
             status="approved",
         )
@@ -28,7 +31,9 @@ class FleetTest(TestCase):
     def test_when_user_has_default_discord_avatar_the_default_url_is_their_avatar_url(
         self,
     ):
+        s = SiteUser.create("Test Goose User#1")
         user = GooseUser.objects.create(
+            site_user=s,
             username="Test Goose User#1",
             status="approved",
         )
@@ -49,7 +54,9 @@ class FleetTest(TestCase):
         )
 
     def test_when_user_has_custom_avatar_it_is_their_avatar_url(self):
+        s = SiteUser.create("Test Goose User#1")
         user = GooseUser.objects.create(
+            site_user=s,
             username="Test Goose User#12345",
             status="approved",
         )

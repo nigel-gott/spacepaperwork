@@ -40,9 +40,7 @@ class GooseUser(AbstractUser):
         error_messages={"unique": _("A user with that username already exists.")},
     )
     timezone = TimeZoneField(default="Europe/London")
-    site_user = models.ForeignKey(
-        SiteUser, on_delete=models.CASCADE, null=True, blank=True
-    )
+    site_user = models.ForeignKey(SiteUser, on_delete=models.CASCADE)
     broker_fee = models.DecimalField(
         verbose_name="Your Broker Fee in %", max_digits=5, decimal_places=2, default=8.0
     )

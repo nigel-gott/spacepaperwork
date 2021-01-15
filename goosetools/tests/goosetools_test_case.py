@@ -20,6 +20,7 @@ from goosetools.items.models import (
 )
 from goosetools.market.models import MarketOrder, SoldItem
 from goosetools.ownership.models import LootGroup, LootShare
+from goosetools.tenants.models import SiteUser
 from goosetools.tests.django_test_case import DjangoTestCase
 from goosetools.users.models import Character, Corp, GooseUser
 
@@ -41,7 +42,9 @@ class GooseToolsTestCase(DjangoTestCase):
         self.another_item = Item.objects.create(name="Condor", item_type=sub_sub_type)
 
         self.corp = Corp.objects.create(name="Test Corp")
+        self.site_user = SiteUser.create("Test Goose User#1234")
         self.user = GooseUser.objects.create(
+            site_user=self.site_user,
             username="Test Goose User#1234",
             status="approved",
         )
@@ -58,7 +61,9 @@ class GooseToolsTestCase(DjangoTestCase):
             },
             user=self.user,
         )
+        self.other_site_user = SiteUser.create("Test Goose User 2#1234")
         self.other_user = GooseUser.objects.create(
+            site_user=self.other_site_user,
             username="Test Goose User 2#1234",
             status="approved",
         )

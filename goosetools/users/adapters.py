@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
 
+from goosetools.tenants.models import SiteUser
 from goosetools.users.jobs.hourly.update_discord_roles import (
     _setup_user_groups_from_discord_guild_roles,
 )
@@ -38,6 +39,8 @@ class AccountAdapter(DefaultAccountAdapter):
         user.timezone = form.cleaned_data["timezone"]
         user.broker_fee = form.cleaned_data["broker_fee"]
         user.transaction_tax = form.cleaned_data["transaction_tax"]
+        site_user = SiteUser.copy_from_user(user)
+        user.site_user = site_user
         user.save()
 
 
@@ -92,6 +95,7 @@ def _give_pronoun_roles(uid, form):
 
 def _update_user_from_social_account(account, gooseuser, request):
     _update_gooseuser_username_to_match_discord(account, gooseuser, request)
+    SiteUser.copy_from_user(gooseuser)
     try:
         guild = DiscordGuild.objects.get(active=True)
         _setup_user_groups_from_discord_guild_roles(

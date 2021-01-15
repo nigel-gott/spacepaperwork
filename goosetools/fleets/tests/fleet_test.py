@@ -1,6 +1,7 @@
 from django.urls.base import reverse
 from freezegun import freeze_time
 
+from goosetools.tenants.models import SiteUser
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
 from goosetools.users.models import Character, GooseUser
 
@@ -445,7 +446,10 @@ class FleetTest(GooseToolsTestCase):
 
         new_fleet_members = self.get_fleet_members_for_user(fleet, self.other_user)
 
-        new_user = GooseUser.objects.create(username="A Brand New Test Goose User")
+        s = SiteUser.create("A Brand New Test Goose User")
+        new_user = GooseUser.objects.create(
+            site_user=s, username="A Brand New Test Goose User"
+        )
 
         new_char = Character.objects.create(
             user=new_user,
@@ -481,7 +485,10 @@ class FleetTest(GooseToolsTestCase):
         fleet = self.there_is_a_fleet_where_other_user_is_an_admin()
         self.client.force_login(self.other_user)
 
-        new_user = GooseUser.objects.create(username="A Brand New Test Goose User")
+        s = SiteUser.create("A Brand New Test Goose User")
+        new_user = GooseUser.objects.create(
+            site_user=s, username="A Brand New Test Goose User"
+        )
 
         new_char = Character.objects.create(
             user=new_user,
@@ -501,7 +508,10 @@ class FleetTest(GooseToolsTestCase):
 
     def test_non_admin_cant_remove_other_fleet_members(self):
         fleet = self.a_fleet()
-        new_user = GooseUser.objects.create(username="A Brand New Test Goose User")
+        s = SiteUser.create("A Brand New Test Goose User")
+        new_user = GooseUser.objects.create(
+            site_user=s, username="A Brand New Test Goose User"
+        )
         new_char = Character.objects.create(
             user=new_user,
             ingame_name="New Test Char",
