@@ -10,19 +10,23 @@ class SiteUser(models.Model):
         validators=[],
         error_messages={"unique": _("A user with that username already exists.")},
     )
-    first_name = models.CharField(max_length=30, blank=True, default="")
-    last_name = models.CharField(max_length=150, blank=True, default="")
-    email = models.EmailField(blank=True, default="")
+    first_name = models.CharField(max_length=30, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
+    email = models.EmailField(blank=True)
     is_staff = models.BooleanField()
     is_active = models.BooleanField()
     date_joined = models.DateTimeField()
-    password = models.CharField(max_length=128, blank=True, null=True)
+    password = models.CharField(max_length=128, blank=True)
     last_login = models.DateTimeField(blank=True, null=True)
     is_superuser = models.BooleanField()
 
     @staticmethod
     def create(username):
         site_user = SiteUser(
+            first_name="",
+            last_name="",
+            email="",
+            password="",
             username=username,
             is_staff=False,
             is_active=True,
@@ -40,9 +44,12 @@ class SiteUser(models.Model):
                 "is_staff": user.is_staff,
                 "is_active": user.is_active,
                 "date_joined": user.date_joined,
-                "password": user.password,
+                "password": user.password or "",
                 "last_login": user.last_login,
                 "is_superuser": user.is_superuser,
+                "first_name": user.first_name or "",
+                "last_name": user.last_name or "",
+                "email": user.email or "",
             },
         )
         user.site_user_id = site_user.id
