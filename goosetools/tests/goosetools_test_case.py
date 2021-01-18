@@ -45,7 +45,6 @@ class GooseToolsTestCase(DjangoTestCase):
         self.site_user = SiteUser.create("Test Goose User#1234")
         self.user = GooseUser.objects.create(
             site_user=self.site_user,
-            username="Test Goose User#1234",
             status="approved",
         )
         self.char = Character.objects.create(
@@ -59,12 +58,11 @@ class GooseToolsTestCase(DjangoTestCase):
                 "nick": "Test Goose User",
                 "discriminator": "1234",
             },
-            user=self.user,
+            user=self.site_user,
         )
         self.other_site_user = SiteUser.create("Test Goose User 2#1234")
         self.other_user = GooseUser.objects.create(
             site_user=self.other_site_user,
-            username="Test Goose User 2#1234",
             status="approved",
         )
         self.otheruser_socialaccount = SocialAccount.objects.create(
@@ -75,7 +73,7 @@ class GooseToolsTestCase(DjangoTestCase):
                 "nick": "Test Goose User 2",
                 "discriminator": "1234",
             },
-            user=self.other_user,
+            user=self.other_site_user,
         )
         self.other_char = Character.objects.create(
             user=self.other_user,
@@ -89,7 +87,7 @@ class GooseToolsTestCase(DjangoTestCase):
         )
         region = Region.objects.create(name="Test Region")
         self.system = System.objects.create(name="Test System", region=region)
-        self.client.force_login(self.user)
+        self.client.force_login(self.site_user)
         self.logged_in_user = self.user
 
     def a_fleet(

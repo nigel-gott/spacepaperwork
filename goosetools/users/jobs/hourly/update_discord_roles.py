@@ -5,20 +5,17 @@ from allauth.socialaccount.models import SocialAccount
 from django_extensions.management.jobs import HourlyJob
 from requests.models import HTTPError
 
-from goosetools.users.models import (
-    DiscordGuild,
-    DiscordRoleDjangoGroupMapping,
-    GooseUser,
-)
+from goosetools.tenants.models import SiteUser
+from goosetools.users.models import DiscordGuild, DiscordRoleDjangoGroupMapping
 
 
 def _setup_user_groups_from_discord_guild_roles(
-    user, extra_data, guild, log_output=False
+    siteuser: SiteUser, extra_data, guild, log_output=False
 ):
     try:
-        user.groups.clear()
-        if not user.is_superuser:
-            user.is_staff = False
+        siteuser.groups.clear()
+        if not siteuser.is_superuser:
+            siteuser.is_staff = False
         if "roles" in extra_data:
             for role_id in extra_data["roles"]:
                 try:
@@ -27,17 +24,17 @@ def _setup_user_groups_from_discord_guild_roles(
                     )
                     for group_mapping in group_mappings.all():
                         if log_output:
-                            print(f"Giving {group_mapping.group} to {user}")
-                        user.groups.add(group_mapping.group)
+                            print(f"Giving {group_mapping.group} to {siteuser}")
+                        siteuser.groups.add(group_mapping.group)
                         if group_mapping.grants_staff:
                             if log_output:
                                 print(
-                                    f"Granting staff to {user} as they have group {group_mapping.group}"
+                                    f"Granting staff to {siteuser} as they have group {group_mapping.group}"
                                 )
-                            user.is_staff = True
+                            siteuser.is_staff = True
                 except DiscordRoleDjangoGroupMapping.DoesNotExist:
                     pass
-            user.save()
+            siteuser.save()
     except DiscordGuild.DoesNotExist:
         pass
 
@@ -78,7 +75,7 @@ class Job(HourlyJob):
                             guild,
                             log_output=True,
                         )
-                    except GooseUser.DoesNotExist:
+                    except SiteUser.DoesNotExist:
                         print(
                             f"Not doing anything for {user_json['user']['username']} as they are not in goosetools."
                         )

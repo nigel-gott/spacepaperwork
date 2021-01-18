@@ -4,7 +4,7 @@ import pytz
 from django.contrib import auth
 from django.utils import timezone
 
-from goosetools.users.models import GooseUser
+from goosetools.users.models import SiteUser
 
 logger = logging.getLogger(__name__)
 
@@ -14,9 +14,14 @@ class TimezoneMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        user: GooseUser = auth.get_user(request)  # type: ignore
-        if hasattr(user, "timezone"):
-            tzname = user.timezone
+        # TODO Move timezone upto SiteUser. Not done now as it would have to mean creating a SiteUser specific settings page?
+        user: SiteUser = auth.get_user(request)
+        if (
+            hasattr(user, "has_gooseuser")
+            and user.has_gooseuser()
+            and hasattr(user.gooseuser, "timezone")
+        ):
+            tzname = user.gooseuser.timezone
         else:
             tzname = pytz.timezone("UTC")
         if tzname:

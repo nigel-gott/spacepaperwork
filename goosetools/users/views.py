@@ -11,24 +11,111 @@ from django.http.response import (
 )
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.generic import ListView
 
 from goosetools.users.forms import (
     AddEditCharacterForm,
     CharacterUserSearchForm,
     SettingsForm,
+    SignupFormWithTimezone,
     UserApplicationUpdateForm,
 )
 from goosetools.users.models import (
     Character,
     CorpApplication,
+    DiscordGuild,
     GooseUser,
     UserApplication,
 )
 
 
+def user_signup(request):
+    site_user = request.user
+    if site_user.is_rejected():
+        messages.error(
+            request,
+            "You cannot signup to goosetools, please contact @AuthTeam on discord for more information.",
+        )
+        return HttpResponseRedirect(reverse("core:splash"))
+    elif site_user.is_approved():
+        messages.error(request, "You have already registered on goosetools")
+        return HttpResponseRedirect(reverse("core:home"))
+
+    has_characters_already = (
+        site_user.has_gooseuser() and len(site_user.gooseuser.characters()) > 0
+    )
+
+    if request.method == "POST":
+        form = SignupFormWithTimezone(
+            request.POST,
+            socialaccount=request.user.discord_socialaccount(),
+            has_characters_already=has_characters_already,
+        )
+        if form.is_valid():
+            data = form.cleaned_data
+            ingame_name = not has_characters_already and data["ingame_name"]
+            if (
+                ingame_name
+                and Character.objects.filter(ingame_name=ingame_name).count() > 0
+            ):
+                error = f"You cannot apply with an in-game name of {ingame_name} as it already exists"
+                messages.error(request, error)
+                print(error)
+            else:
+                gooseuser, _ = GooseUser.objects.update_or_create(
+                    site_user=site_user,
+                    defaults={
+                        "timezone": data["timezone"],
+                        "broker_fee": data["broker_fee"],
+                        "transaction_tax": data["transaction_tax"],
+                    },
+                )
+                application = UserApplication(
+                    user=gooseuser,
+                    status="unapproved",
+                    created_at=timezone.now(),
+                    application_notes=data["application_notes"],
+                    ingame_name=ingame_name or None,
+                    previous_alliances=data["previous_alliances"],
+                    activity=data["activity"],
+                    looking_for=data["looking_for"],
+                    corp=data["corp"],
+                )
+                _give_pronoun_roles(gooseuser.discord_uid(), data["prefered_pronouns"])
+                application.full_clean()
+                application.save()
+                print("MADE AND SAVED")
+                return HttpResponseRedirect(reverse("core:home"))
+    else:
+        initial = {}
+        if site_user.has_gooseuser():
+            gooseuser = site_user.gooseuser
+            initial = {
+                "timezone": gooseuser.timezone,
+                "broker_fee": gooseuser.broker_fee,
+                "transaction_tax": gooseuser.transaction_tax,
+            }
+        form = SignupFormWithTimezone(
+            initial=initial,
+            socialaccount=request.user.discord_socialaccount(),
+            has_characters_already=has_characters_already,
+        )
+
+    return render(request, "users/signup.html", {"form": form})
+
+
+def _give_pronoun_roles(uid, prefered_pronouns):
+    if prefered_pronouns == "they":
+        DiscordGuild.try_give_role(uid, 762405572136927242)
+    elif prefered_pronouns == "she":
+        DiscordGuild.try_give_role(uid, 762405484614910012)
+    elif prefered_pronouns == "he":
+        DiscordGuild.try_give_role(uid, 762404773512740905)
+
+
 def settings_view(request):
-    goose_user = request.user
+    goose_user = request.user.gooseuser
     if request.method == "POST":
         form = SettingsForm(request.POST)
         if form.is_valid():
@@ -104,7 +191,7 @@ def corp_application_update(request, pk):
 
 def character_edit(request, pk):
     character = get_object_or_404(Character, pk=pk)
-    if character.user != request.user:
+    if character.user != request.user.gooseuser:
         messages.error(request, "You cannot edit someone elses character")
         return HttpResponseRedirect(reverse("characters"))
     initial = {"ingame_name": character.ingame_name, "corp": character.corp}
@@ -145,7 +232,7 @@ def character_new(request):
             character = Character.objects.create(
                 ingame_name=form.cleaned_data["ingame_name"],
                 corp=None,
-                user=request.user,
+                user=request.user.gooseuser,
             )
             messages.info(
                 request,
@@ -206,9 +293,9 @@ def character_list(request):
         request,
         "users/character_list.html",
         {
-            "characters": request.user.characters(),
+            "characters": request.user.gooseuser.characters(),
             "corp_apps": CorpApplication.objects.filter(
-                character__user=request.user,
+                character__user=request.user.gooseuser,
             ).exclude(status="approved"),
         },
     )
@@ -223,7 +310,7 @@ def character_search(request):
         if form.is_valid():
             name = form.cleaned_data["name"]
             characters = Character.objects.filter(ingame_name__icontains=name)
-            users = GooseUser.objects.filter(Q(username__icontains=name))
+            users = GooseUser.objects.filter(Q(site_user__username__icontains=name))
     else:
         form = CharacterUserSearchForm()
 

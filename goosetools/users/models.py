@@ -1,12 +1,9 @@
 import logging
 
 import requests
-from django.contrib.auth.models import AbstractUser, Group
-from django.contrib.auth.validators import UnicodeUsernameValidator
+from django.contrib.auth.models import Group
 from django.db import models
 from django.utils import timezone
-from django.utils.deconstruct import deconstructible
-from django.utils.translation import gettext_lazy as _
 from timezone_field import TimeZoneField
 
 from goosetools.tenants.models import SiteUser
@@ -23,22 +20,7 @@ class Corp(models.Model):
         return str(self.name)
 
 
-@deconstructible
-class UnicodeAndSpacesUsernameValidator(UnicodeUsernameValidator):
-    regex = r"^[-\w.@+ ]+\Z"
-    message = _(
-        "Enter a valid username. This value may contain only letters, "
-        "numbers, and @/./+/-/_/space  characters."
-    )
-
-
-class GooseUser(AbstractUser):
-    username = models.CharField(
-        max_length=150,
-        unique=True,
-        validators=[],
-        error_messages={"unique": _("A user with that username already exists.")},
-    )
+class GooseUser(models.Model):
     timezone = TimeZoneField(default="Europe/London")
     site_user = models.OneToOneField(SiteUser, on_delete=models.CASCADE)
     broker_fee = models.DecimalField(
@@ -62,7 +44,7 @@ class GooseUser(AbstractUser):
         default="unapproved",
     )
     notes = models.TextField(null=True, blank=True)
-    email = models.EmailField(null=True, blank=True)  # type: ignore
+    email = models.EmailField(null=True, blank=True)
     sa_profile = models.TextField(blank=True, null=True)
     voucher = models.ForeignKey(
         "GooseUser",
@@ -71,6 +53,9 @@ class GooseUser(AbstractUser):
         null=True,
         related_name="current_vouches",
     )
+
+    def username(self):
+        return self.site_user.username
 
     def latest_app(self):
         if hasattr(self, "userapplication"):
@@ -89,7 +74,7 @@ class GooseUser(AbstractUser):
         return self.status == "rejected"
 
     def is_authed_and_approved(self):
-        return self.is_authenticated and self.is_approved()
+        return self.site_user.is_authenticated and self.is_approved()
 
     def set_as_approved(self):
         self.status = "approved"
@@ -103,7 +88,7 @@ class GooseUser(AbstractUser):
         return self.character_set.all()
 
     def _discord_account(self):
-        return self.socialaccount_set.get(provider="discord")  # type: ignore
+        return self.site_user.socialaccount_set.get(provider="discord")
 
     def discord_uid(self):
         return self._discord_account().uid
@@ -156,7 +141,7 @@ class UserApplication(models.Model):
     )
     created_at = models.DateTimeField(default=timezone.now)
     application_notes = models.TextField(blank=True, null=True)
-    ingame_name = models.TextField(null=True, blank=True)
+    ingame_name = models.TextField(blank=True, null=True)
     corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
 
     previous_alliances = models.TextField(blank=True, null=True)

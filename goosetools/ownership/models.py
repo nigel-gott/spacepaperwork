@@ -58,7 +58,7 @@ class LootBucket(models.Model):
             )
         shares_by_user = shares.values(
             "character__user__id",
-            "character__user__username",
+            "character__user__site_user__username",
         ).annotate(num_shares=Sum("share_quantity"))
         flat_cuts_by_user_qs = flat_cuts.values("character__user__id").annotate(
             flat_cut=Sum("flat_percent_cut")
@@ -78,7 +78,7 @@ class LootBucket(models.Model):
             user_id = group["character__user__id"]
             flat_cut = Decimal(flat_cuts_by_user.get(user_id, 0))
             result["participation"][user_id] = {
-                "username": group["character__user__username"],
+                "username": group["character__user__site_user__username"],
                 "shares": group["num_shares"],
                 "flat_cut": flat_cut,
                 "flat_cut_isk": (flat_cut / 100) * isk,

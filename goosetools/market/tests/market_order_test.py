@@ -95,7 +95,6 @@ class MarketOrderTestCase(GooseToolsTestCase):
             s = SiteUser.create(username)
             user = GooseUser.objects.create(
                 site_user=s,
-                username=username,
                 status="approved",
             )
             char = Character.objects.create(
@@ -107,10 +106,10 @@ class MarketOrderTestCase(GooseToolsTestCase):
                 uid=i + 10,
                 provider="discord",
                 extra_data={
-                    "username": f"Test Goose User - {i}",
+                    "username": username,
                     "discriminator": "1",
                 },
-                user_id=user.pk,
+                user_id=s.pk,
             )
             self.a_loot_share(loot_group, char, share_quantity=1)
 

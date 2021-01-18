@@ -7,7 +7,7 @@ from goosetools.items.models import Item, ItemSubSubType, ItemSubType, ItemType,
 class SystemAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authed_and_approved():
+        if not self.request.user.gooseuser.is_authed_and_approved():
             return System.objects.none()
 
         qs = System.objects.all()
@@ -21,7 +21,7 @@ class SystemAutocomplete(autocomplete.Select2QuerySetView):
 class ItemTypeAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authed_and_approved():
+        if not self.request.user.gooseuser.is_authed_and_approved():
             return ItemType.objects.none()
 
         qs = ItemType.objects.all()
@@ -35,7 +35,7 @@ class ItemTypeAutocomplete(autocomplete.Select2QuerySetView):
 class ItemSubTypeAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authed_and_approved():
+        if not self.request.user.gooseuser.is_authed_and_approved():
             return ItemSubType.objects.none()
 
         qs = ItemSubType.objects.all()
@@ -55,7 +55,7 @@ class ItemSubTypeAutocomplete(autocomplete.Select2QuerySetView):
 class ItemSubSubTypeAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.is_authed_and_approved():
+        if not self.request.user.gooseuser.is_authed_and_approved():
             return ItemSubSubType.objects.none()
 
         qs = ItemSubSubType.objects.all()
@@ -80,7 +80,7 @@ class ItemSubSubTypeAutocomplete(autocomplete.Select2QuerySetView):
 
 class ItemAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        if not self.request.user.is_authed_and_approved():
+        if not self.request.user.gooseuser.is_authed_and_approved():
             return Item.objects.none()
 
         qs = Item.objects.all()

@@ -27,7 +27,7 @@ def reject_contract(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if request.method == "POST":
         form = Form(request.POST)
-        if form.is_valid() and contract.can_accept_or_reject(request.user):
+        if form.is_valid() and contract.can_accept_or_reject(request.user.gooseuser):
             contract.status = "rejected"
             log = []
             for item in contract.inventoryitem_set.all():
@@ -51,7 +51,7 @@ def reject_contract(request, pk):
 def cancel_contract(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if request.method == "POST":
-        if contract.can_cancel(request.user):
+        if contract.can_cancel(request.user.gooseuser):
             change_contract_status(contract, "cancelled", False)
         else:
             messages.error(request, "You cannot cancel someone elses contract")
@@ -104,7 +104,7 @@ def accept_contract(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if request.method == "POST":
         form = Form(request.POST)
-        if form.is_valid() and contract.can_accept_or_reject(request.user):
+        if form.is_valid() and contract.can_accept_or_reject(request.user.gooseuser):
             change_contract_status(contract, "accepted", True)
     return HttpResponseRedirect(reverse("view_contract", args=[pk]))
 
@@ -115,7 +115,7 @@ def create_contract_item(request, pk):
     if request.method == "POST":
         form = ItemMoveAllForm(request.POST)
         if form.is_valid():
-            if not item.has_admin(request.user):
+            if not item.has_admin(request.user.gooseuser):
                 messages.error(
                     request, f"You do not have permission to move item {item}"
                 )
@@ -130,7 +130,7 @@ def create_contract_item(request, pk):
             character = form.cleaned_data["character"]
 
             contract = Contract(
-                from_user=request.user,
+                from_user=request.user.gooseuser,
                 to_char=character,
                 system=system,
                 created=timezone.now(),
@@ -157,7 +157,7 @@ def create_contract_for_loc(request, pk):
     if request.method == "POST":
         form = ItemMoveAllForm(request.POST)
         if form.is_valid():
-            if not loc.has_admin(request.user):
+            if not loc.has_admin(request.user.gooseuser):
                 messages.error(
                     request, f"You do not have permission to move items from {loc}"
                 )
@@ -176,7 +176,7 @@ def create_contract_for_loc(request, pk):
                 return forbidden(request)
 
             contract = Contract(
-                from_user=request.user,
+                from_user=request.user.gooseuser,
                 to_char=character,
                 system=system,
                 created=timezone.now(),
@@ -202,7 +202,7 @@ def create_contract_for_fleet(request, fleet_pk, loc_pk):
     if request.method == "POST":
         form = ItemMoveAllForm(request.POST)
         if form.is_valid():
-            if not loc.has_admin(request.user):
+            if not loc.has_admin(request.user.gooseuser):
                 messages.error(
                     request, f"You do not have permission to move items from {loc}"
                 )
@@ -222,7 +222,7 @@ def create_contract_for_fleet(request, fleet_pk, loc_pk):
                 return forbidden(request)
 
             contract = Contract(
-                from_user=request.user,
+                from_user=request.user.gooseuser,
                 to_char=character,
                 system=system,
                 created=timezone.now(),
@@ -250,7 +250,7 @@ def item_move_all(request):
             character = form.cleaned_data["character"]
             all_your_items = InventoryItem.objects.filter(
                 contract__isnull=True,
-                location__character_location__character__user=request.user,
+                location__character_location__character__user=request.user.gooseuser,
                 quantity__gt=0,
                 marketorder__isnull=True,
                 solditem__isnull=True,
@@ -260,7 +260,7 @@ def item_move_all(request):
                 return forbidden(request)
 
             contract = Contract(
-                from_user=request.user,
+                from_user=request.user.gooseuser,
                 to_char=character,
                 system=system,
                 created=timezone.now(),
@@ -308,16 +308,18 @@ def contracts(request):
         "contracts/contracts.html",
         {
             "my_contracts": Contract.objects.filter(
-                from_user=request.user, status="pending"
+                from_user=request.user.gooseuser, status="pending"
             ),
             "to_me_contracts": list(
-                Contract.objects.filter(to_char__user=request.user, status="pending")
+                Contract.objects.filter(
+                    to_char__user=request.user.gooseuser, status="pending"
+                )
             ),
-            "old_my_contracts": Contract.objects.filter(from_user=request.user).exclude(
-                status="pending"
-            ),
+            "old_my_contracts": Contract.objects.filter(
+                from_user=request.user.gooseuser
+            ).exclude(status="pending"),
             "old_to_me_contracts": Contract.objects.filter(
-                to_char__user=request.user
+                to_char__user=request.user.gooseuser
             ).exclude(status="pending"),
         },
     )

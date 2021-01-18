@@ -42,15 +42,6 @@
     "pk": 99999999,
     "fields": {
       "site_user": 99999999,
-      "password": "",
-      "last_login": null,
-      "is_superuser": true,
-      "first_name": "",
-      "last_name": "",
-      "is_staff": true,
-      "is_active": true,
-      "date_joined": "2021-01-07T18:27:50.224Z",
-      "username": "test_user#1234",
       "timezone": "Europe/London",
       "broker_fee": "8.00",
       "transaction_tax": "15.00",
@@ -59,9 +50,7 @@
       "notes": "",
       "email": null,
       "sa_profile": "test",
-      "voucher": null,
-      "groups": [],
-      "user_permissions": []
+      "voucher": null
     }
   },
   {

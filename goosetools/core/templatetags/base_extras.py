@@ -22,7 +22,7 @@ register = template.Library()
 def num_items(user):
     return InventoryItem.objects.filter(
         contract__isnull=True,
-        location__character_location__character__user=user,
+        location__character_location__character__user=user.gooseuser,
         quantity__gt=0,
     ).count()
 
@@ -30,28 +30,28 @@ def num_items(user):
 @register.simple_tag
 def num_orders(user):
     return MarketOrder.objects.filter(
-        item__location__character_location__character__user=user
+        item__location__character_location__character__user=user.gooseuser
     ).count()
 
 
 @register.simple_tag
 def num_sold(user):
     return SoldItem.objects.filter(
-        item__location__character_location__character__user=user,
+        item__location__character_location__character__user=user.gooseuser,
         transfered_quantity__lt=F("quantity"),
     ).count()
 
 
 @register.simple_tag
 def can_accept_reject(user, contract):
-    return contract.can_accept_or_reject(user)
+    return contract.can_accept_or_reject(user.gooseuser)
 
 
 @register.simple_tag
 def num_contracts(user):
     return (
-        Contract.objects.filter(to_char__user=user, status="pending").count()
-        + Contract.objects.filter(from_user=user, status="pending").count()
+        Contract.objects.filter(to_char__user=user.gooseuser, status="pending").count()
+        + Contract.objects.filter(from_user=user.gooseuser, status="pending").count()
     )
 
 
@@ -122,38 +122,38 @@ def num_fleet_members(fleet_id):
 
 @register.simple_tag
 def has_fleet_member(fleet, user):
-    return fleet.has_member(user)
+    return fleet.has_member(user.gooseuser)
 
 
 @register.simple_tag
 def still_can_join_alts(fleet, user):
-    return fleet.still_can_join_alts(user)
+    return fleet.still_can_join_alts(user.gooseuser)
 
 
 @register.simple_tag
 def loot_group_still_can_join_alts(loot_group, user):
-    return loot_group.still_can_join_alts(user)
+    return loot_group.still_can_join_alts(user.gooseuser)
 
 
 @register.simple_tag
 def can_join(fleet, user):
-    can_join_fleet, _ = fleet.can_join(user)
+    can_join_fleet, _ = fleet.can_join(user.gooseuser)
     return can_join_fleet
 
 
 @register.simple_tag
 def has_admin(fleet, user):
-    return fleet.has_admin(user)
+    return fleet.has_admin(user.gooseuser)
 
 
 @register.simple_tag
 def has_item_admin(item, user):
-    return item.has_admin(user)
+    return item.has_admin(user.gooseuser)
 
 
 @register.simple_tag
 def has_share(loot_group, user):
-    return loot_group.has_share(user)
+    return loot_group.has_share(user.gooseuser)
 
 
 @register.filter

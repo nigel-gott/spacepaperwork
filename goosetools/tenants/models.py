@@ -1,24 +1,30 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
-class SiteUser(models.Model):
+class SiteUser(AbstractUser):
     username = models.CharField(
         max_length=150,
         unique=True,
         validators=[],
         error_messages={"unique": _("A user with that username already exists.")},
     )
-    first_name = models.CharField(max_length=30, blank=True)
-    last_name = models.CharField(max_length=150, blank=True)
-    email = models.EmailField(blank=True)
-    is_staff = models.BooleanField()
-    is_active = models.BooleanField()
-    date_joined = models.DateTimeField()
-    password = models.CharField(max_length=128, blank=True)
-    last_login = models.DateTimeField(blank=True, null=True)
-    is_superuser = models.BooleanField()
+
+    def has_gooseuser(self):
+        return hasattr(self, "gooseuser")
+
+    def is_approved(self):
+        # pylint: disable=no-member
+        return self.has_gooseuser() and self.gooseuser.is_approved()
+
+    def is_rejected(self):
+        # pylint: disable=no-member
+        return self.has_gooseuser() and self.gooseuser.is_rejected()
+
+    def discord_socialaccount(self):
+        return self.socialaccount_set.get(provider="discord")
 
     @staticmethod
     def create(username):

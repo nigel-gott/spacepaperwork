@@ -11,6 +11,7 @@ from goosetools.users.views import (
     corp_application_update,
     settings_view,
     user_application_list,
+    user_signup,
     user_view,
 )
 
@@ -18,6 +19,7 @@ urlpatterns = [
     path("settings/", settings_view, name="settings"),
     path("user/<int:pk>", user_view, name="user_view"),
     path("characters/edit/<int:pk>", character_edit, name="character_edit"),
+    path("users/new/", user_signup, name="user_signup"),
     path("characters/new/", character_new, name="character_new"),
     path("characters/", character_list, name="characters"),
     path("characters/search", character_search, name="character_search"),

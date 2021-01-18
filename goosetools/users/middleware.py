@@ -14,7 +14,7 @@ IGNORE_PATHS += [
 
 IGNORE_VIEW_NAMES = getattr(settings, "LOGIN_REQUIRED_IGNORE_VIEW_NAMES", [])
 
-APPROVED_IGNORE = ["core:home", "settings"] + IGNORE_VIEW_NAMES
+APPROVED_IGNORE = ["core:home", "settings", "user_signup"] + IGNORE_VIEW_NAMES
 
 UNAPPROVED_REDIRECT_VIEW = getattr(
     settings, "LOGIN_REQUIRED_UNAPPROVED_USER_REDIRECT", "discord_login"
@@ -25,12 +25,15 @@ class LoginAndApprovedUserMiddleware(AuthenticationMiddleware):
     # pylint: disable=unused-argument,no-self-use,inconsistent-return-statements
     def process_view(self, request, view_func, view_args, view_kwargs):
         path = request.path
+        print(path)
         if request.user.is_authenticated:
-            if not request.user.is_approved():
+            if (
+                not request.user.has_gooseuser()
+                or not request.user.gooseuser.is_approved()
+            ):
                 resolver = resolve(path)
                 views = ((name == resolver.view_name) for name in APPROVED_IGNORE)
                 if not any(views):
-                    print("failed for " + resolver.view_name)
                     messages.error(
                         request, "You are not yet approved and cannot access this page."
                     )

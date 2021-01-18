@@ -130,7 +130,7 @@ class FleetTest(GooseToolsTestCase):
     def test_can_join_fleet(self):
         fleet = self.an_open_fleet()
 
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
 
         self.post(
             reverse("fleet_join", args=[fleet.id]), {"character": self.other_char.id}
@@ -171,7 +171,7 @@ class FleetTest(GooseToolsTestCase):
             end_date="Jan. 14, 2012",
             end_time="2:00 AM",
         )
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
         errors = self.post_expecting_error(
             reverse("fleet_join", args=[a_closed_fleet.id]),
             {"character": self.other_char.id},
@@ -199,7 +199,7 @@ class FleetTest(GooseToolsTestCase):
             start_date="Jan. 14, 2012",
             start_time="1:00 AM",
         )
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
         errors = self.post_expecting_error(
             reverse("fleet_join", args=[an_auto_closed_fleet.id]),
             {"character": self.other_char.id},
@@ -285,7 +285,7 @@ class FleetTest(GooseToolsTestCase):
     def test_cant_join_fleet_not_accepting_alts_with_two_characters(self):
         fleet = self.an_open_fleet(gives_shares_to_alts=False)
 
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
 
         self.post(
             reverse("fleet_join", args=[fleet.id]), {"character": self.other_char.id}
@@ -306,7 +306,7 @@ class FleetTest(GooseToolsTestCase):
     def test_can_join_fleet_accepting_alts_with_two_characters(self):
         fleet = self.an_open_fleet(gives_shares_to_alts=True)
 
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
 
         self.post(
             reverse("fleet_join", args=[fleet.id]), {"character": self.other_char.id}
@@ -330,7 +330,7 @@ class FleetTest(GooseToolsTestCase):
     def test_can_leave_a_fleet_with_just_one_alt(self):
         fleet = self.an_open_fleet(gives_shares_to_alts=True)
 
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
 
         self.post(
             reverse("fleet_join", args=[fleet.id]), {"character": self.other_char.id}
@@ -370,13 +370,13 @@ class FleetTest(GooseToolsTestCase):
 
     def test_fc_can_make_someone_a_fleet_admin(self):
         fleet = self.a_fleet()
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
 
         self.post(
             reverse("fleet_join", args=[fleet.id]), {"character": self.other_char.id}
         )
 
-        self.client.force_login(self.user)
+        self.client.force_login(self.site_user)
         other_users_fleet_members = self.get_fleet_members_for_user(
             fleet, self.other_user
         )
@@ -401,7 +401,7 @@ class FleetTest(GooseToolsTestCase):
 
     def test_non_admin_cant_make_someone_a_fleet_admin(self):
         fleet = self.a_fleet()
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
 
         self.post(
             reverse("fleet_join", args=[fleet.id]), {"character": self.other_char.id}
@@ -442,14 +442,12 @@ class FleetTest(GooseToolsTestCase):
         member_to_make_admin = new_fleet_members[0]
         self.post(reverse("fleet_make_admin", args=[member_to_make_admin.id]))
 
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
 
         new_fleet_members = self.get_fleet_members_for_user(fleet, self.other_user)
 
         s = SiteUser.create("A Brand New Test Goose User")
-        new_user = GooseUser.objects.create(
-            site_user=s, username="A Brand New Test Goose User"
-        )
+        new_user = GooseUser.objects.create(site_user=s)
 
         new_char = Character.objects.create(
             user=new_user,
@@ -483,12 +481,10 @@ class FleetTest(GooseToolsTestCase):
 
     def test_admin_can_remove_fleet_members(self):
         fleet = self.there_is_a_fleet_where_other_user_is_an_admin()
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
 
         s = SiteUser.create("A Brand New Test Goose User")
-        new_user = GooseUser.objects.create(
-            site_user=s, username="A Brand New Test Goose User"
-        )
+        new_user = GooseUser.objects.create(site_user=s)
 
         new_char = Character.objects.create(
             user=new_user,
@@ -509,9 +505,7 @@ class FleetTest(GooseToolsTestCase):
     def test_non_admin_cant_remove_other_fleet_members(self):
         fleet = self.a_fleet()
         s = SiteUser.create("A Brand New Test Goose User")
-        new_user = GooseUser.objects.create(
-            site_user=s, username="A Brand New Test Goose User"
-        )
+        new_user = GooseUser.objects.create(site_user=s)
         new_char = Character.objects.create(
             user=new_user,
             ingame_name="New Test Char",
@@ -522,7 +516,7 @@ class FleetTest(GooseToolsTestCase):
             {"character": new_char.id},
         )
 
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
 
         members = self.assert_fleet_members_for_user_are(
             fleet, new_user, ["New Test Char"]

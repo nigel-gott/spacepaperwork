@@ -12,7 +12,7 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 </head>
 <body>
-{% if user.is_authenticated and user.is_approved %}
+{% if user.is_authenticated and user.gooseuser.is_approved %}
 <ul class="dropdown-content" id="dropdown_tools">
     <li>
         <a href="{% url 'mapbot:mapbot_index' %}">MapBot</a>
@@ -88,7 +88,7 @@
 <nav class="nav-extended blue-grey darken-3">
     <div class="nav-wrapper">
         <a class="sidenav-trigger" data-target="mobile-demo" href="#"><i class="material-icons">menu</i></a>
-        {% if user.is_authenticated and user.is_approved %}
+        {% if user.is_authenticated and user.gooseuser.is_approved %}
         <ul class="left hide-on-med-and-down valign-wrapper">
 
             <li>
@@ -170,7 +170,7 @@
         <li><div class="divider"></div></li>
     {% endif %}
 
-    {% if user.is_authenticated and user.is_approved %}
+    {% if user.is_authenticated and user.gooseuser.is_approved %}
         <li >
             <a href="{% url 'industry:shiporders_view' %}">Orders<i class="material-icons right">directions_boat</i></a>
         </li>

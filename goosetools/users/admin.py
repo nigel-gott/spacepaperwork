@@ -1,7 +1,6 @@
 # mypy: ignore-errors
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from django.utils.translation import gettext_lazy as _
+from django.contrib.admin.options import ModelAdmin
 
 from goosetools.users.models import (
     Character,
@@ -27,7 +26,7 @@ class CharacterAdmin(admin.ModelAdmin):
 
     # pylint: disable=no-self-use
     def discord_username(self, obj):
-        return obj.user.username
+        return obj.user.discord_username()
 
     # pylint: disable=no-self-use
     def display_name(self, obj):
@@ -44,14 +43,12 @@ admin.site.register(UserApplication)
 admin.site.register(CorpApplication)
 
 
-class CustomUserAdmin(UserAdmin):
+class CustomUserAdmin(ModelAdmin):
     list_display = [
         "username",
         "display_name",
         "characters",
-        "groups_list",
         "status",
-        "is_staff",
         "notes",
         "sa_profile",
         "voucher",
@@ -59,53 +56,15 @@ class CustomUserAdmin(UserAdmin):
     ]
 
     # pylint: disable=no-self-use
+    def username(self, obj):
+        return obj.site_user.username
+
+    # pylint: disable=no-self-use
     def characters(self, obj):
         return [str(char) for char in obj.characters()]
 
-    # pylint: disable=no-self-use
-    def groups_list(self, obj):
-        return [str(group) for group in obj.groups.all()]
-
     def vouches(self, obj):
         return [str(v.display_name()) for v in obj.current_vouches.all()]
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-
-        form.base_fields["username"].disabled = True
-
-        return form
-
-    fieldsets = (
-        (
-            None,
-            {
-                "fields": (
-                    "username",
-                    "status",
-                    "notes",
-                )
-            },
-        ),
-        (
-            _("Permissions"),
-            {
-                "fields": ("is_staff", "is_superuser", "groups", "user_permissions"),
-            },
-        ),
-        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
-    )
-    add_fieldsets = (
-        (
-            None,
-            {
-                "fields": (
-                    "status",
-                    "notes",
-                )
-            },
-        ),
-    )
 
 
 admin.site.register(GooseUser, CustomUserAdmin)

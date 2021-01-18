@@ -53,7 +53,7 @@ class ComplexEncoder(json.JSONEncoder):
 # Buckets group up all shares in underlying groups and split all items in underlying groups by total shares
 def loot_group_create(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
-    if not f.has_admin(request.user):
+    if not f.has_admin(request.user.gooseuser):
         return forbidden(request)
     return loot_group_add(request, pk, False)
 
@@ -76,7 +76,7 @@ def loot_share_join(request, pk):
         form = LootJoinForm(request.POST)
         if form.is_valid():
             selected_character = form.cleaned_data["character"]
-            if selected_character not in request.user.characters():
+            if selected_character not in request.user.gooseuser.characters():
                 messages.error(
                     request,
                     f"{selected_character} is not your Character, you cannot join the loot group with it.",
@@ -97,22 +97,22 @@ def loot_share_join(request, pk):
                 ls.save()
             return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
     else:
-        can_still_join = non_participation_chars(loot_group, request.user)
+        can_still_join = non_participation_chars(loot_group, request.user.gooseuser)
         if len(can_still_join) == 0:
             messages.error(
                 request,
                 "You have no more characters that can join this loot group. Don't worry you have probably already been added check below to make sure!",
             )
             return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
-        if loot_group.has_share(request.user) and not loot_group.still_can_join_alts(
-            request.user
-        ):
+        if loot_group.has_share(
+            request.user.gooseuser
+        ) and not loot_group.still_can_join_alts(request.user.gooseuser):
             messages.error(
                 request,
                 "You cannot join with more characters as the fleet doesn't allow alts to have shares.",
             )
             return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
-        default_char = request.user.default_character
+        default_char = request.user.gooseuser.default_character
         if default_char not in can_still_join:
             default_char = can_still_join[0]
         form = LootJoinForm(initial={"character": default_char})
@@ -126,7 +126,7 @@ def loot_share_join(request, pk):
 
 def loot_share_add(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
-    if not loot_group.has_admin(request.user):
+    if not loot_group.has_admin(request.user.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         form = LootShareForm(request.POST)
@@ -153,7 +153,7 @@ def loot_share_add(request, pk):
 
 def loot_share_delete(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
-    if not loot_share.loot_group.fleet().has_admin(request.user):
+    if not loot_share.loot_group.fleet().has_admin(request.user.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         group_pk = loot_share.loot_group.pk
@@ -165,7 +165,7 @@ def loot_share_delete(request, pk):
 
 def loot_share_edit(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
-    if not loot_share.loot_group.fleet().has_admin(request.user):
+    if not loot_share.loot_group.fleet().has_admin(request.user.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         form = LootShareForm(request.POST)
@@ -212,7 +212,7 @@ def loot_share_add_fleet_members(request, pk):
 
 def loot_group_close(request, pk):
     lg = get_object_or_404(LootGroup, pk=pk)
-    if not lg.fleet().has_admin(request.user):
+    if not lg.fleet().has_admin(request.user.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         lg.closed = True
@@ -226,7 +226,7 @@ def loot_group_close(request, pk):
 
 def loot_group_open(request, pk):
     lg = get_object_or_404(LootGroup, pk=pk)
-    if not lg.fleet().has_admin(request.user):
+    if not lg.fleet().has_admin(request.user.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         lg.closed = False
@@ -369,7 +369,7 @@ def loot_group_view(request, pk):
 
 
 def your_fleet_shares(request):
-    return fleet_shares(request, request.user.pk)
+    return fleet_shares(request, request.user.gooseuser.pk)
 
 
 def fleet_shares(request, pk):
@@ -381,12 +381,12 @@ def fleet_shares(request, pk):
     your_total_est_sales = 0
 
     user = GooseUser.objects.get(pk=pk)
-    for_you = user == request.user
+    for_you = user == request.user.gooseuser
     if for_you:
         prefix = "Your"
         prefix2 = "Your"
     else:
-        prefix = f"{user.username}'s"
+        prefix = f"{user.discord_username()}'s"
         prefix2 = "Their"
 
     for loot_share in loot_shares:
@@ -419,7 +419,7 @@ def fleet_shares(request, pk):
         your_real_profit = real_participation["participation"][user.id]["total_isk"]
         items.append(
             {
-                "username": user.username,
+                "username": user.discord_username(),
                 "fleet_id": loot_group.fleet_anom.fleet.id,
                 "loot_bucket": loot_group.bucket.id,
                 "loot_group_id": loot_group.id,
@@ -461,7 +461,7 @@ def fleet_shares(request, pk):
 
 def loot_share_plus(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
-    if not loot_share.has_admin(request.user):
+    if not loot_share.has_admin(request.user.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         loot_share.increment()
@@ -472,7 +472,7 @@ def loot_share_plus(request, pk):
 
 def loot_share_minus(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
-    if not loot_share.has_admin(request.user):
+    if not loot_share.has_admin(request.user.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         loot_share.decrement()
@@ -482,7 +482,7 @@ def loot_share_minus(request, pk):
 
 
 def transfered_items(request):
-    characters = request.user.characters()
+    characters = request.user.gooseuser.characters()
     all_sold = []
     for char in characters:
         char_locs = CharacterLocation.objects.filter(character=char)
@@ -503,7 +503,9 @@ def completed_egg_transfers(request):
         request,
         "ownership/completed_egg_transfers.html",
         {
-            "transfer_logs": request.user.transferlog_set.filter(all_done=True)
+            "transfer_logs": request.user.gooseuser.transferlog_set.filter(
+                all_done=True
+            )
             .order_by("-time")
             .all()
         },
@@ -584,7 +586,7 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
             user = GooseUser.objects.get(id=user_id)
             isk = result["total_isk"]
             floored_isk = to_isk(m.floor(isk.amount))
-            if request.user == user:
+            if request.user.gooseuser == user:
                 sellers_isk = sellers_isk + floored_isk
             else:
                 others_isk = others_isk + floored_isk
@@ -641,19 +643,21 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
                 time=current_now,
                 eggs=left_over_floored,
                 debt=False,
-                counterparty=request.user,
+                counterparty=request.user.gooseuser,
                 notes="Fractional leftovers assigned to the loot seller ",
             )
     deposit_command = make_deposit_command(
         others_isk, sellers_isk, own_share_in_eggs, left_over
     )
-    transfer_command = make_transfer_command(total_participation, request.user)
+    transfer_command = make_transfer_command(
+        total_participation, request.user.gooseuser
+    )
     messages.success(
         request,
         f"Generated Deposit and Transfer commands for {total} eggs from {count} sold items!.",
     )
     log = TransferLog(
-        user=request.user,
+        user=request.user.gooseuser,
         time=timezone.now(),
         total=total,
         own_share=sellers_isk,
@@ -717,7 +721,7 @@ def transfer_eggs(request):
         form = DepositEggsForm(request.POST)
         if form.is_valid():
             to_transfer = SoldItem.objects.filter(
-                item__location__character_location__character__user=request.user,
+                item__location__character_location__character__user=request.user.gooseuser,
                 quantity__gt=F("transfered_quantity"),
             ).annotate(isk_balance=Sum("item__isktransaction__isk"))
             if not valid_transfer(to_transfer, request):
@@ -742,7 +746,7 @@ def transfer_eggs(request):
 def mark_transfer_as_done(request, pk):
     log = get_object_or_404(TransferLog, pk=pk)
     if request.method == "POST":
-        if log.user != request.user:
+        if log.user != request.user.gooseuser:
             messages.error(request, "You cannot mark someone else's transfer as done.")
             return HttpResponseRedirect(reverse("sold"))
         else:
@@ -761,7 +765,7 @@ def item_add(request, lg_pk):
     if not loot_group.fleet_anom:
         raise Exception(f"Missing fleet_anom from {loot_group}")
 
-    if not loot_group.fleet().has_admin(request.user):
+    if not loot_group.fleet().has_admin(request.user.gooseuser):
         return forbidden(request)
     initial = [{"quantity": 1} for x in range(0, extra)]
     if request.method == "POST":
@@ -810,8 +814,10 @@ def item_add(request, lg_pk):
             else:
                 return HttpResponseRedirect(reverse("loot_group_view", args=[lg_pk]))
     else:
-        char_form = CharacterForm(initial={"character": request.user.default_character})
-        char_form.fields["character"].queryset = request.user.characters()
+        char_form = CharacterForm(
+            initial={"character": request.user.gooseuser.default_character}
+        )
+        char_form.fields["character"].queryset = request.user.gooseuser.characters()
         formset = InventoryItemFormset(initial=initial)
     return render(
         request,

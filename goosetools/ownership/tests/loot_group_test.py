@@ -50,7 +50,7 @@ class LootGroupTest(GooseToolsTestCase):
     def test_can_join_a_loot_group_as_a_non_admin(self):
         fleet = self.an_open_fleet()
         loot_group = self.a_loot_group(fleet)
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
         response = self.get(reverse("loot_group_view", args=[loot_group.pk]))
         self.assertNotIn(
             self.other_char.ingame_name, str(response.content, encoding="utf-8")
@@ -78,7 +78,7 @@ class LootGroupTest(GooseToolsTestCase):
             ],
         )
 
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
         errors = self.post_expecting_error(
             reverse("loot_share_join", args=[loot_group.pk]),
             {"character": self.other_char.pk},
@@ -116,7 +116,7 @@ class LootGroupTest(GooseToolsTestCase):
         self.post(reverse("loot_group_close", args=[loot_group.pk]))
         self.post(reverse("loot_group_open", args=[loot_group.pk]))
 
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
         self.post(
             reverse("loot_share_join", args=[loot_group.pk]),
             {"character": self.other_char.pk},

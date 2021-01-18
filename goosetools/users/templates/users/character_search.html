@@ -45,11 +45,11 @@
         <ul class="collection" style="overflow: visible;">
         {% for user in users%}
             <li class="collection-item avatar">
-                {% if user.discord_avatar_url %}
+                {% if user.gooseuser.discord_avatar_url %}
                     <img alt="" class="circle"
-                            src="{{ user.discord_avatar_url }}?size=32"/>
+                            src="{{ user.gooseuser.discord_avatar_url }}?size=32"/>
                 {% endif %}
-                <a href="{% url 'user_view' user.pk %}">{{user.username}} {% if user.nick %} / {{user.nick}} {% endif %}</a>
+                <a href="{% url 'user_view' user.gooseuser.pk %}">{{user.gooseuser.discord_username}} {% if user.gooseuser.nick %} / {{user.gooseuser.nick}} {% endif %}</a>
             </li>
         {% endfor %}
         </ul>

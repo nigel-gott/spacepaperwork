@@ -122,7 +122,7 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
-AUTH_USER_MODEL = "users.GooseUser"
+AUTH_USER_MODEL = "tenants.SiteUser"
 
 # django-allauth
 # ------------------------------------------------------------------------------
@@ -132,7 +132,7 @@ SOCIALACCOUNT_FORMS = {"signup": "goosetools.users.forms.SignupFormWithTimezone"
 # We are identifying users based off their discord id soley so we don't need email
 ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = "username"
-SOCIALACCOUNT_AUTO_SIGNUP = False
+SOCIALACCOUNT_AUTO_SIGNUP = True
 # Override forms we want to disable in a discord auth only workflow
 # See: https://github.com/pennersr/django-allauth/issues/345
 ACCOUNT_FORMS = {
@@ -154,7 +154,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 ACCOUNT_LOGOUT_REDIRECT_URL = "/goosetools/"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
-LOGIN_REDIRECT_URL = "core:home"
+LOGIN_REDIRECT_URL = "core:splash"
 # LOGIN_REDIRECT_URL = 'fleet'
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
 LOGIN_URL = "account_login"

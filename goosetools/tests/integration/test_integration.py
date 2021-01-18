@@ -31,6 +31,9 @@ def test_can_sign_up(http_service, browser):
     browser.visit("http://django:8000/stub_discord_auth/set_uid/100001234")
     browser.visit("http://django:8000/accounts/discord/login/")
 
+    wait_and_click(browser, "conduct_button")
+    wait_and_click(browser, "agree_button")
+
     wait_for(browser, "id_previous_alliances")
 
     browser.fill("previous_alliances", "x")

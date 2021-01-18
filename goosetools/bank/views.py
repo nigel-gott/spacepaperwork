@@ -7,7 +7,9 @@ from goosetools.bank.models import EggTransaction, IskTransaction, to_isk
 
 
 def own_user_transactions(request):
-    return HttpResponseRedirect(reverse("user_transactions", args=[request.user.pk]))
+    return HttpResponseRedirect(
+        reverse("user_transactions", args=[request.user.gooseuser.pk])
+    )
 
 
 def user_transactions(request, pk):

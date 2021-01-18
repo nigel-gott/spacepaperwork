@@ -3,7 +3,6 @@ from django.db.models import Min
 from django.db.models.aggregates import Sum
 from django.forms import forms
 from django.utils import timezone
-from django_prometheus.models import ExportModelOperationsMixin
 from djmoney.money import Money
 
 from goosetools.contracts.models import Contract
@@ -268,7 +267,7 @@ class StackedInventoryItem(models.Model):
         return f"Stack of {self.item_info()} x ({self.total_quantity_display()})"
 
 
-class InventoryItem(ExportModelOperationsMixin("inventoryitem"), models.Model):  # type: ignore
+class InventoryItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField()
@@ -287,10 +286,10 @@ class InventoryItem(ExportModelOperationsMixin("inventoryitem"), models.Model): 
         return self.location.has_admin(user)
 
     def isk_balance(self):
-        return to_isk(model_sum(self.isktransaction_set, "isk"))
+        return to_isk(model_sum(self.isktransaction_set, "isk"))  # type: ignore
 
     def egg_balance(self):
-        return to_isk(model_sum(self.eggtransaction_set, "eggs"))
+        return to_isk(model_sum(self.eggtransaction_set, "eggs"))  # type: ignore
 
     def isk_and_eggs_balance(self):
         return self.isk_balance() + self.egg_balance()

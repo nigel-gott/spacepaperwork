@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.urls.base import reverse
 from freezegun import freeze_time
 
+from goosetools.tenants.models import SiteUser
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
 from goosetools.users.models import DiscordGuild, GooseUser, UserApplication
 
@@ -64,21 +65,6 @@ class UserAuthTest(GooseToolsTestCase):
             )
             self.client.logout()
             response = self.client.get(reverse("discord_login"), follow=True)
-            last_url, _ = response.redirect_chain[-1]
-            self.post(
-                last_url,
-                {
-                    "timezone": "Pacific/Niue",
-                    "transaction_tax": 14,
-                    "broker_fee": 3,
-                    "ingame_name": "My Ingame Name",
-                    "activity": "a",
-                    "previous_alliances": "a",
-                    "looking_for": "a",
-                    "corp": self.corp.pk,
-                },
-            )
-            response = self.client.get(reverse("core:home"))
             self.assert_messages(
                 response,
                 [
@@ -93,21 +79,7 @@ class UserAuthTest(GooseToolsTestCase):
             )
             self.client.logout()
             response = self.client.get(reverse("discord_login"), follow=True)
-            last_url, _ = response.redirect_chain[-1]
-            self.post(
-                last_url,
-                {
-                    "timezone": "Pacific/Niue",
-                    "transaction_tax": 14,
-                    "broker_fee": 3,
-                    "ingame_name": "My Ingame Name",
-                    "activity": "a",
-                    "previous_alliances": "a",
-                    "looking_for": "a",
-                    "corp": self.corp.pk,
-                },
-            )
-            response = self.client.get(reverse("core:home"))
+
             self.assert_messages(
                 response,
                 [
@@ -133,59 +105,37 @@ class UserAuthTest(GooseToolsTestCase):
             )
             self.client.logout()
             response = self.client.get(reverse("discord_login"), follow=True)
-            last_url, _ = response.redirect_chain[-1]
-            self.post(
-                last_url,
-                {
-                    "timezone": "Pacific/Niue",
-                    "transaction_tax": 14,
-                    "broker_fee": 3,
-                    "ingame_name": "My Ingame Name",
-                    "activity": "a",
-                    "previous_alliances": "a",
-                    "looking_for": "a",
-                    "corp": self.corp.pk,
-                },
-            )
-            response = self.client.get(reverse("core:home"))
             self.assert_messages(
                 response,
                 [
                     ("success", "Successfully signed in as CUSTOMUSERNAME#1111."),
                 ],
             )
+
             mock_discord_returns_with_uid(
                 m, "4", profile_username="CUSTOMUSERNAME", profile_discriminator="1111"
             )
             self.client.logout()
-            response = self.client.get(reverse("discord_login"), follow=True)
-            last_url, _ = response.redirect_chain[-1]
             with pytest.raises(
                 ValidationError,
-                match=r"User already exists with CUSTOMUSERNAME#1111 username cannot change customusername to match.",
+                match=r"User already exists with CUSTOMUSERNAME#1111 username cannot change CUSTOMUSERNAME to match.",
             ):
-                self.post(
-                    last_url,
-                    {
-                        "timezone": "Pacific/Niue",
-                        "transaction_tax": 14,
-                        "broker_fee": 3,
-                        "ingame_name": "My Ingame Name 2",
-                        "activity": "a",
-                        "previous_alliances": "a",
-                        "looking_for": "a",
-                        "corp": self.corp.pk,
-                    },
-                )
+                self.client.get(reverse("discord_login"), follow=True)
 
     def test_an_unknown_discord_user_is_unapproved_after_signing_up(self):
         with requests_mock.Mocker() as m:
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
             response = self.client.get(reverse("discord_login"), follow=True)
-            last_url, _ = response.redirect_chain[-1]
+            self.assert_messages(
+                response,
+                [
+                    ("success", "Successfully signed in as TEST USER#1234."),
+                ],
+            )
+
             self.post(
-                last_url,
+                reverse("user_signup"),
                 {
                     "timezone": "Pacific/Niue",
                     "transaction_tax": 14,
@@ -201,7 +151,6 @@ class UserAuthTest(GooseToolsTestCase):
             self.assert_messages(
                 response,
                 [
-                    ("success", "Successfully signed in as TEST USER#1234."),
                     ("error", "You are not yet approved and cannot access this page."),
                 ],
             )
@@ -214,10 +163,10 @@ class UserAuthTest(GooseToolsTestCase):
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
             # When an unknown and hence unapproved user applies to the corp
-            response = self.client.get(reverse("discord_login"), follow=True)
-            last_url, _ = response.redirect_chain[-1]
+            self.client.get(reverse("discord_login"), follow=True)
+
             self.post(
-                last_url,
+                reverse("user_signup"),
                 {
                     "timezone": "Pacific/Niue",
                     "transaction_tax": 14,
@@ -232,16 +181,16 @@ class UserAuthTest(GooseToolsTestCase):
             )
 
             self.client.logout()
-            self.client.force_login(self.user)
+            self.client.force_login(self.site_user)
 
             user_admin_group = Group.objects.get(name="user_admin")
-            self.user.groups.add(user_admin_group)
+            self.site_user.groups.add(user_admin_group)
 
             # Their application can been seen by a user_admin
             applications = self.get(reverse("applications")).context["object_list"]
             self.assertEqual(len(applications), 1)
             application = applications[0]
-            self.assertEqual(application.user.username, "TEST USER#1234")
+            self.assertEqual(application.user.username(), "TEST USER#1234")
             self.assertEqual(application.user.discord_uid(), "3")
             self.assertEqual(application.corp, self.corp)
             self.assertEqual(application.ingame_name, "My Main")
@@ -254,9 +203,9 @@ class UserAuthTest(GooseToolsTestCase):
                 reverse("application_update", args=[application.pk]),
                 {"approve": "", "notes": "Test Notes"},
             )
-            new_user = GooseUser.objects.get(username="TEST USER#1234")
+            new_user = GooseUser.objects.get(site_user__username="TEST USER#1234")
             self.assertEqual(new_user.notes, "Test Notes")
-            self.client.force_login(new_user)
+            self.client.force_login(new_user.site_user)
             response = self.client.get(reverse("fleet"))
             self.assertIn("Active Fleets", str(response.content, encoding="utf-8"))
 
@@ -267,10 +216,9 @@ class UserAuthTest(GooseToolsTestCase):
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
             # When an unknown and hence unapproved user applies to the corp
-            response = self.client.get(reverse("discord_login"), follow=True)
-            last_url, _ = response.redirect_chain[-1]
+            self.client.get(reverse("discord_login"), follow=True)
             self.post(
-                last_url,
+                reverse("user_signup"),
                 {
                     "timezone": "Pacific/Niue",
                     "transaction_tax": 14,
@@ -285,16 +233,19 @@ class UserAuthTest(GooseToolsTestCase):
             )
 
             self.client.logout()
-            self.client.force_login(self.user)
+            self.client.force_login(self.site_user)
 
             user_admin_group = Group.objects.get(name="user_admin")
-            self.user.groups.add(user_admin_group)
+            self.site_user.groups.add(user_admin_group)
+            self.assertEqual(
+                UserApplication.objects.filter(status="unapproved").count(), 1
+            )
 
             # Their application can been seen by a user_admin
             applications = self.get(reverse("applications")).context["object_list"]
             self.assertEqual(len(applications), 1)
             application = applications[0]
-            self.assertEqual(application.user.username, "TEST USER#1234")
+            self.assertEqual(application.user.username(), "TEST USER#1234")
             self.assertEqual(application.user.discord_uid(), "3")
             self.assertEqual(application.corp, self.corp)
             self.assertEqual(application.ingame_name, "My Main")
@@ -306,7 +257,7 @@ class UserAuthTest(GooseToolsTestCase):
             self.post(
                 reverse("application_update", args=[application.pk]), {"reject": ""}
             )
-            self.client.force_login(GooseUser.objects.get(username="TEST USER#1234"))
+            self.client.force_login(SiteUser.objects.get(username="TEST USER#1234"))
             response = self.client.get(reverse("fleet"))
             self.assert_messages(
                 response,
@@ -322,12 +273,12 @@ class UserAuthTest(GooseToolsTestCase):
         with requests_mock.Mocker() as m:
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
-            response = self.client.get(reverse("discord_login"), follow=True)
-            last_url, _ = response.redirect_chain[-1]
+            self.client.get(reverse("discord_login"), follow=True)
+
             self.corp.required_discord_role = "1234"
             self.corp.save()
             errors = self.client.post(
-                last_url,
+                reverse("user_signup"),
                 {
                     "timezone": "Pacific/Niue",
                     "transaction_tax": 14,
@@ -351,12 +302,12 @@ class UserAuthTest(GooseToolsTestCase):
         with requests_mock.Mocker() as m:
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
-            response = self.client.get(reverse("discord_login"), follow=True)
-            last_url, _ = response.redirect_chain[-1]
+            self.client.get(reverse("discord_login"), follow=True)
+
             self.corp.required_discord_role = None
             self.corp.save()
             self.post(
-                last_url,
+                reverse("user_signup"),
                 {
                     "timezone": "Pacific/Niue",
                     "transaction_tax": 14,
@@ -377,12 +328,12 @@ class UserAuthTest(GooseToolsTestCase):
         with requests_mock.Mocker() as m:
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
-            response = self.client.get(reverse("discord_login"), follow=True)
-            last_url, _ = response.redirect_chain[-1]
+            self.client.get(reverse("discord_login"), follow=True)
+
             self.corp.required_discord_role = ""
             self.corp.save()
             self.post(
-                last_url,
+                reverse("user_signup"),
                 {
                     "timezone": "Pacific/Niue",
                     "transaction_tax": 14,
@@ -402,12 +353,12 @@ class UserAuthTest(GooseToolsTestCase):
         with requests_mock.Mocker() as m:
             mock_discord_returns_with_uid(m, "3", roles=["1234"])
             self.client.logout()
-            response = self.client.get(reverse("discord_login"), follow=True)
-            last_url, _ = response.redirect_chain[-1]
+            self.client.get(reverse("discord_login"), follow=True)
+
             self.corp.required_discord_role = "1234"
             self.corp.save()
             self.post(
-                last_url,
+                reverse("user_signup"),
                 {
                     "timezone": "Pacific/Niue",
                     "transaction_tax": 14,
@@ -441,10 +392,10 @@ class UserAuthTest(GooseToolsTestCase):
             )
             mock_discord_returns_with_uid(m, "3", roles=["1234"])
             self.client.logout()
-            response = self.client.get(reverse("discord_login"), follow=True)
-            last_url, _ = response.redirect_chain[-1]
+            self.client.get(reverse("discord_login"), follow=True)
+
             self.post(
-                last_url,
+                reverse("user_signup"),
                 {
                     "timezone": "Pacific/Niue",
                     "transaction_tax": 14,
@@ -463,7 +414,7 @@ class UserAuthTest(GooseToolsTestCase):
         self,
     ):
         user_admin_group = Group.objects.get(name="user_admin")
-        self.user.groups.add(user_admin_group)
+        self.site_user.groups.add(user_admin_group)
         UserApplication.objects.create(
             user=self.other_user,
             corp=self.corp,
@@ -496,7 +447,7 @@ class UserAuthTest(GooseToolsTestCase):
                 },
             )
             user_admin_group = Group.objects.get(name="user_admin")
-            self.user.groups.add(user_admin_group)
+            self.site_user.groups.add(user_admin_group)
             UserApplication.objects.create(
                 user=self.other_user,
                 corp=self.corp,

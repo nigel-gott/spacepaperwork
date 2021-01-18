@@ -31,7 +31,7 @@ def forbidden(request):
 
 
 def junk(request):
-    characters = request.user.characters()
+    characters = request.user.gooseuser.characters()
     all_junked = []
     for char in characters:
         char_locs = CharacterLocation.objects.filter(character=char)
@@ -55,7 +55,7 @@ def junk(request):
 
 
 def items_view(request):
-    characters = request.user.characters()
+    characters = request.user.gooseuser.characters()
     return render_item_view(
         request,
         characters,
@@ -205,7 +205,7 @@ def stack_view(request, pk):
 def stack_delete(request, pk):
     stack = get_object_or_404(StackedInventoryItem, pk=pk)
     if request.method == "POST":
-        if not stack.has_admin(request.user):
+        if not stack.has_admin(request.user.gooseuser):
             messages.error(
                 request, f"You do not have permission to delete stack {stack.id}"
             )
@@ -224,7 +224,7 @@ def stack_delete(request, pk):
 @transaction.atomic
 def unjunk_item(request, pk):
     junked_item = get_object_or_404(JunkedItem, pk=pk)
-    if not junked_item.item.has_admin(request.user):
+    if not junked_item.item.has_admin(request.user.gooseuser):
         messages.error(request, "You do not have permission to unjunk this item.")
         return HttpResponseRedirect(reverse("items"))
     if request.method == "POST":
@@ -240,7 +240,7 @@ def unjunk_item(request, pk):
 @transaction.atomic
 def junk_stack(request, pk):
     stack = get_object_or_404(StackedInventoryItem, pk=pk)
-    if not stack.has_admin(request.user):
+    if not stack.has_admin(request.user.gooseuser):
         messages.error(request, "You do not have permission to junk this item.")
         return HttpResponseRedirect(reverse("items"))
     if request.method == "POST":
@@ -258,7 +258,7 @@ def junk_stack(request, pk):
 @transaction.atomic
 def junk_item(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
-    if not item.has_admin(request.user):
+    if not item.has_admin(request.user.gooseuser):
         messages.error(request, "You do not have permission to junk this item.")
         return HttpResponseRedirect(reverse("items"))
     if request.method == "POST":
@@ -276,7 +276,7 @@ def junk_item(request, pk):
 @transaction.atomic
 def junk_items(request, pk):
     loc = get_object_or_404(ItemLocation, pk=pk)
-    if not loc.has_admin(request.user):
+    if not loc.has_admin(request.user.gooseuser):
         messages.error(request, "You do not have permission to junk items here.")
         return HttpResponseRedirect(reverse("items"))
     items = get_items_in_location(
@@ -325,7 +325,7 @@ def stack_items(request, pk):
     loc = get_object_or_404(ItemLocation, pk=pk)
     items_in_location = get_items_in_location(loc.character_location)
     if request.method == "POST":
-        if not loc.has_admin(request.user):
+        if not loc.has_admin(request.user.gooseuser):
             messages.error(
                 request, f"You do not have permission to stack items in {loc}"
             )
@@ -350,7 +350,7 @@ def item_view(request, pk):
 
 def item_minus(request, pk):
     inventory_item = get_object_or_404(InventoryItem, pk=pk)
-    if not inventory_item.has_admin(request.user):
+    if not inventory_item.has_admin(request.user.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         result = inventory_item.add(-1)
@@ -368,7 +368,7 @@ def item_minus(request, pk):
 
 def item_plus(request, pk):
     inventory_item = get_object_or_404(InventoryItem, pk=pk)
-    if not inventory_item.has_admin(request.user):
+    if not inventory_item.has_admin(request.user.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         result = inventory_item.add(1)
@@ -386,7 +386,7 @@ def item_plus(request, pk):
 
 def item_edit(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
-    if not item.has_admin(request.user):
+    if not item.has_admin(request.user.gooseuser):
         return forbidden(request)
     if not item.can_edit():
         messages.error(
@@ -417,8 +417,10 @@ def item_edit(request, pk):
             )
     else:
         form = InventoryItemForm(initial={"item": item.item, "quantity": item.quantity})
-        char_form = CharacterForm(initial={"character": request.user.default_character})
-        char_form.fields["character"].queryset = request.user.characters()
+        char_form = CharacterForm(
+            initial={"character": request.user.gooseuser.default_character}
+        )
+        char_form.fields["character"].queryset = request.user.gooseuser.characters()
     return render(
         request,
         "items/item_edit_form.html",
@@ -428,7 +430,7 @@ def item_edit(request, pk):
 
 def item_delete(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
-    if not item.has_admin(request.user):
+    if not item.has_admin(request.user.gooseuser):
         return forbidden(request)
     if not item.can_edit():
         messages.error(

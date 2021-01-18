@@ -65,7 +65,7 @@ class Fleet(models.Model):
         return FleetMember.objects.filter(fleet=self, character__user=user)
 
     def has_admin(self, user):
-        if user.is_staff:
+        if user.site_user.is_staff:
             return True
         for member in self.members_for_user(user):
             if member.admin_permissions:

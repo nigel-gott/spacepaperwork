@@ -83,7 +83,9 @@ def fleet_future(request):
 def fleet_leave(request, pk):
     member = get_object_or_404(FleetMember, pk=pk)
     fleet = member.fleet
-    if member.character.user == request.user or fleet.has_admin(request.user):
+    if member.character.user == request.user.gooseuser or fleet.has_admin(
+        request.user.gooseuser
+    ):
         member.delete()
     else:
         messages.error(
@@ -115,7 +117,7 @@ def fleet_view(request, pk):
 @transaction.atomic
 def fleet_open(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
-    if f.has_admin(request.user):
+    if f.has_admin(request.user.gooseuser):
         if not f.is_open():
             f.end = None
             f.start = timezone.now()
@@ -131,7 +133,7 @@ def fleet_open(request, pk):
 @transaction.atomic
 def fleet_end(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
-    if f.has_admin(request.user):
+    if f.has_admin(request.user.gooseuser):
         if f.is_open():
             f.end = timezone.now()
             f.full_clean()
@@ -148,7 +150,7 @@ def fleet_end(request, pk):
 
 def fleet_make_admin(request, pk):
     f = get_object_or_404(FleetMember, pk=pk)
-    if f.fleet.has_admin(request.user):
+    if f.fleet.has_admin(request.user.gooseuser):
         f.admin_permissions = True
         f.full_clean()
         f.save()
@@ -159,7 +161,7 @@ def fleet_make_admin(request, pk):
 
 def fleet_remove_admin(request, pk):
     f = get_object_or_404(FleetMember, pk=pk)
-    if f.fleet.has_admin(request.user):
+    if f.fleet.has_admin(request.user.gooseuser):
         f.admin_permissions = False
         f.full_clean()
         f.save()
@@ -170,7 +172,7 @@ def fleet_remove_admin(request, pk):
 
 def fleet_add(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
-    if not f.has_admin(request.user):
+    if not f.has_admin(request.user.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         form = FleetAddMemberForm(request.POST)
@@ -199,7 +201,7 @@ def fleet_join(request, pk):
     if request.method == "POST":
         form = JoinFleetForm(request.POST)
         if form.is_valid():
-            can_join, error_message = f.can_join(request.user)
+            can_join, error_message = f.can_join(request.user.gooseuser)
             if can_join:
                 new_fleet = FleetMember(
                     character=form.cleaned_data["character"],
@@ -213,8 +215,10 @@ def fleet_join(request, pk):
                 messages.error(request, f"Error Joining Fleet: {error_message}")
                 return HttpResponseRedirect(reverse("fleet_view", args=[pk]))
     else:
-        form = JoinFleetForm(initial={"character": request.user.default_character})
-    characters = non_member_chars(pk, request.user)
+        form = JoinFleetForm(
+            initial={"character": request.user.gooseuser.default_character}
+        )
+    characters = non_member_chars(pk, request.user.gooseuser)
     form.fields["character"].queryset = characters
 
     return render(request, "fleets/join_fleet_form.html", {"form": form, "fleet": f})
@@ -250,7 +254,7 @@ def fleet_create(request):
                 )
             else:
                 new_fleet = Fleet(
-                    fc=request.user,
+                    fc=request.user.gooseuser,
                     loot_type=form.cleaned_data["loot_type"],
                     name=form.cleaned_data["name"],
                     description=form.cleaned_data["description"],
@@ -279,11 +283,11 @@ def fleet_create(request):
             initial={
                 "start_date": now.date(),
                 "start_time": now.time(),
-                "fc_character": request.user.default_character,
+                "fc_character": request.user.gooseuser.default_character,
             }
         )
 
-        form.fields["fc_character"].queryset = request.user.characters()
+        form.fields["fc_character"].queryset = request.user.gooseuser.characters()
 
     return render(
         request, "fleets/fleet_form.html", {"form": form, "title": "Create Fleet"}
@@ -292,7 +296,7 @@ def fleet_create(request):
 
 def fleet_edit(request, pk):
     existing_fleet = Fleet.objects.get(pk=pk)
-    if not existing_fleet.has_admin(request.user):
+    if not existing_fleet.has_admin(request.user.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         form = FleetForm(request.POST)

@@ -7,7 +7,7 @@ from goosetools.users.models import Character, GooseUser
 
 
 def get_usernames():
-    return GooseUser.objects.values_list("username", flat=True).distinct()
+    return GooseUser.objects.values_list("site_user__username", flat=True).distinct()
 
 
 class FleetForm(forms.Form):

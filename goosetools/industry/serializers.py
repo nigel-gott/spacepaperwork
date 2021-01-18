@@ -6,7 +6,7 @@ from goosetools.industry.models import ShipOrder
 # pylint: disable=abstract-method
 class AssigneeOnlyContractCodeField(serializers.ReadOnlyField):
     def get_attribute(self, instance):
-        user = self.context["request"].user
+        user = self.context["request"].user.gooseuser
         if user in (instance.assignee, instance.recipient_character.user):
             return super().get_attribute(instance)
         return None

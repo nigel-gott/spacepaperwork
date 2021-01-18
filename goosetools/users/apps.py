@@ -1,5 +1,6 @@
 import requests
 from django.apps import AppConfig
+from django.db.models.signals import post_migrate
 
 
 def _try_lookup_guild_roles(user_id):
@@ -18,12 +19,43 @@ def _try_lookup_guild_roles(user_id):
         return {}
 
 
+# pylint: disable=unused-argument
+def populate_models(sender, **kwargs):
+    from django.contrib.auth.models import Group, Permission
+    from django.contrib.contenttypes.models import ContentType
+
+    from goosetools.users.models import Character, GooseUser
+
+    user_admin, _ = Group.objects.get_or_create(name="user_admin")
+    content_type = ContentType.objects.get_for_model(GooseUser)
+    change_userapplication, _ = Permission.objects.get_or_create(
+        codename="change_userapplication", content_type=content_type
+    )
+    user_admin.permissions.add(change_userapplication)
+    change_ship_order, _ = Permission.objects.get_or_create(
+        codename="change_gooseuser", content_type=content_type
+    )
+    user_admin.permissions.add(change_ship_order)
+
+    content_type = ContentType.objects.get_for_model(Character)
+    change_character, _ = Permission.objects.get_or_create(
+        codename="change_character", content_type=content_type
+    )
+    user_admin.permissions.add(change_character)
+
+
+class IndustryConfig(AppConfig):
+    name = "goosetools.industry"
+
+
 class UsersConfig(AppConfig):
     name = "goosetools.users"
     verbose_name = "Users"
 
     def ready(self):
         from allauth.socialaccount.providers.discord.views import DiscordOAuth2Adapter
+
+        post_migrate.connect(populate_models, sender=self)
 
         def complete_login_with_guild_roles(self, request, _app, token, **_kwargs):
             headers = {

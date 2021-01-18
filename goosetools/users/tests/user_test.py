@@ -10,7 +10,6 @@ class FleetTest(TestCase):
         s = SiteUser.create("Test Goose User#1")
         user = GooseUser.objects.create(
             site_user=s,
-            username="Test Goose User#1",
             status="approved",
         )
         SocialAccount.objects.create(
@@ -20,7 +19,7 @@ class FleetTest(TestCase):
                 "username": "Test Goose User",
                 "discriminator": "1",
             },
-            user_id=user.pk,
+            user_id=s.pk,
         )
         user.refresh_from_db()
         self.assertEqual(
@@ -34,7 +33,6 @@ class FleetTest(TestCase):
         s = SiteUser.create("Test Goose User#1")
         user = GooseUser.objects.create(
             site_user=s,
-            username="Test Goose User#1",
             status="approved",
         )
         SocialAccount.objects.create(
@@ -45,7 +43,7 @@ class FleetTest(TestCase):
                 "avatar": "1",  # When a user has a default avatar the hash is just a single number
                 "discriminator": "1",
             },
-            user=user,
+            user=s,
         )
         user.refresh_from_db()
         self.assertEqual(
@@ -57,7 +55,6 @@ class FleetTest(TestCase):
         s = SiteUser.create("Test Goose User#1")
         user = GooseUser.objects.create(
             site_user=s,
-            username="Test Goose User#12345",
             status="approved",
         )
         SocialAccount.objects.create(
@@ -68,7 +65,7 @@ class FleetTest(TestCase):
                 "avatar": "custom",
                 "discriminator": "12345",
             },
-            user=user,
+            user=s,
         )
         user.refresh_from_db()
         self.assertEqual(

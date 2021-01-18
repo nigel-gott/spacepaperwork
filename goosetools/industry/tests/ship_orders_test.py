@@ -62,7 +62,7 @@ class ShipOrderTest(GooseToolsTestCase):
     def test_can_get_detail_on_model(self):
         ship_order = self.a_ship_order()
         group = Group.objects.get(name="industry")
-        self.user.groups.add(group)
+        self.site_user.groups.add(group)
 
         response = self.get(
             reverse("industry:shiporder-detail", args=[ship_order.pk]),
@@ -133,7 +133,7 @@ class ShipOrderTest(GooseToolsTestCase):
     def test_can_claim_ship_order_if_in_industry_group(self):
         ship_order = self.a_ship_order()
         group = Group.objects.get(name="industry")
-        self.user.groups.add(group)
+        self.site_user.groups.add(group)
 
         response = self.put(
             reverse("industry:shiporder-claim", args=[ship_order.pk]),
@@ -153,8 +153,8 @@ class ShipOrderTest(GooseToolsTestCase):
     def test_cant_claim_already_claimed_ship(self):
         ship_order = self.a_ship_order()
         group = Group.objects.get(name="industry")
-        self.user.groups.add(group)
-        self.other_user.groups.add(group)
+        self.site_user.groups.add(group)
+        self.other_site_user.groups.add(group)
 
         response = self.put(
             reverse("industry:shiporder-claim", args=[ship_order.pk]),
@@ -163,7 +163,7 @@ class ShipOrderTest(GooseToolsTestCase):
             str(response.content, encoding="utf-8"),
             f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Goose User","uid":"Test Goose User#1234-mock_random_1"}}',
         )
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
         response = self.client.put(
             reverse("industry:shiporder-claim", args=[ship_order.pk]),
         )
@@ -175,8 +175,8 @@ class ShipOrderTest(GooseToolsTestCase):
     def test_list_of_ship_orders_shows_assignee_name_after_claiming(self):
         ship_order = self.a_ship_order()
         group = Group.objects.get(name="industry")
-        self.user.groups.add(group)
-        self.other_user.groups.add(group)
+        self.site_user.groups.add(group)
+        self.other_site_user.groups.add(group)
 
         response = self.put(
             reverse("industry:shiporder-claim", args=[ship_order.pk]),
@@ -217,7 +217,7 @@ class ShipOrderTest(GooseToolsTestCase):
     def test_can_unassign_yourself_from_a_ship_order(self):
         ship_order = self.a_ship_order()
         group = Group.objects.get(name="industry")
-        self.user.groups.add(group)
+        self.site_user.groups.add(group)
 
         response = self.put(
             reverse("industry:shiporder-claim", args=[ship_order.pk]),
@@ -677,7 +677,7 @@ class ShipOrderTest(GooseToolsTestCase):
     @freeze_time("2012-01-14 12:00:00")
     def test_cant_claim_a_blocked_ship(self):
         group = Group.objects.get(name="industry")
-        self.user.groups.add(group)
+        self.site_user.groups.add(group)
         order_limit_group = OrderLimitGroup.objects.create(
             days_between_orders=1, name="Free Tech 6 and Below"
         )
@@ -699,7 +699,7 @@ class ShipOrderTest(GooseToolsTestCase):
     def test_after_past_blocked_until_then_can_claim_previously_blocked_ship(self):
         with freeze_time("2012-01-14 12:00:00") as frozen_time:
             group = Group.objects.get(name="industry")
-            self.user.groups.add(group)
+            self.site_user.groups.add(group)
             order_limit_group = OrderLimitGroup.objects.create(
                 days_between_orders=1, name="Free Tech 6 and Below"
             )
@@ -721,7 +721,7 @@ class ShipOrderTest(GooseToolsTestCase):
             self.assertEqual(r.status_code, 400)
             frozen_time.move_to("2014-01-15 12:00:01")
             # Tokens expire when moving time in tests!
-            self.client.force_login(self.user)
+            self.client.force_login(self.site_user)
             self.put(
                 reverse("industry:shiporder-claim", args=[blocked_ship.pk]),
             )
@@ -746,7 +746,7 @@ class ShipOrderTest(GooseToolsTestCase):
 
             frozen_time.move_to("2014-01-15 12:00:01")
             # Tokens expire when moving time in tests!
-            self.client.force_login(self.user)
+            self.client.force_login(self.site_user)
             response = self.get(reverse("industry:shiporder-list"))
             self.json_matches(
                 response,
@@ -807,7 +807,7 @@ class ShipOrderTest(GooseToolsTestCase):
     @freeze_time("2012-01-14 12:00:00")
     def test_ship_with_no_price_can_have_manual_price_entered(self):
         group = Group.objects.get(name="industry")
-        self.user.groups.add(group)
+        self.site_user.groups.add(group)
         unpriced_ship = Ship.objects.create(
             name="ShipWithNoPrice",
             tech_level=6,
@@ -863,7 +863,7 @@ class ShipOrderTest(GooseToolsTestCase):
     @freeze_time("2012-01-14 12:00:00")
     def test_can_mark_a_ship_as_paid_for(self):
         group = Group.objects.get(name="industry")
-        self.user.groups.add(group)
+        self.site_user.groups.add(group)
         unpriced_ship = Ship.objects.create(
             name="ShipWithNoPrice",
             tech_level=6,
@@ -918,7 +918,7 @@ class ShipOrderTest(GooseToolsTestCase):
     @freeze_time("2012-01-14 12:00:00")
     def test_ship_with_valid_price_doesnt_need_price(self):
         group = Group.objects.get(name="industry")
-        self.user.groups.add(group)
+        self.site_user.groups.add(group)
         unpriced_ship = Ship.objects.create(
             name="ShipWithNoPrice",
             tech_level=6,
@@ -977,7 +977,7 @@ class ShipOrderTest(GooseToolsTestCase):
     @freeze_time("2012-01-14 12:00:00")
     def test_ship_submitting_with_old_prices_generates_error(self):
         group = Group.objects.get(name="industry")
-        self.user.groups.add(group)
+        self.site_user.groups.add(group)
         unpriced_ship = Ship.objects.create(
             name="ShipWithNoPrice",
             tech_level=6,
@@ -1014,7 +1014,7 @@ class ShipOrderTest(GooseToolsTestCase):
     @freeze_time("2012-01-14 12:00:00")
     def test_cant_see_another_users_contract_code(self):
         ship_order = self.a_ship_order()
-        self.client.force_login(self.other_user)
+        self.client.force_login(self.other_site_user)
         response = self.get(reverse("industry:shiporder-list"))
         self.json_matches(
             response,

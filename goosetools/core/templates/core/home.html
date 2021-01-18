@@ -5,16 +5,16 @@
 {% block body %}
 <div class="section">
     <h4>Home</h4>
-    <p>You are logged in as {{request.user.display_name}}.
-    {% if request.user.is_unapproved %}
+    <p>You are logged in as {{request.user.gooseuser.display_name}}.
+    {% if request.user.gooseuser.is_unapproved %}
         <br/><b>Your application is currently waiting confirmation by a member of the @AuthTeam, please go and make the following application in-game now: </b>
-        {% if request.user.latest_app %}
-            <blockquote>Apply with: {{request.user.latest_app.ingame_name}} to [{{request.user.latest_app.corp}}] {{request.user.latest_app.corp.full_name}}</blockquote>
+        {% if request.user.gooseuser.latest_app %}
+            <blockquote>Apply with: {{request.user.gooseuser.latest_app.ingame_name}} to [{{request.user.gooseuser.latest_app.corp}}] {{request.user.gooseuser.latest_app.corp.full_name}}</blockquote>
         {% else %}
             <br/><b class="red-text">Error: cannot find an application for you, please contact a member of the @AuthTeam in discord.</b>
         {% endif %}
 
-    {% elif request.user.is_rejected %}
+    {% elif request.user.gooseuser.is_rejected %}
         <br/><b class="red-text">Your application has been rejected, please ask a member of @AuthTeam for more details.</b>
     {% endif %}
     </p>

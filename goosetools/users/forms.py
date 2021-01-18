@@ -1,4 +1,3 @@
-from allauth.socialaccount.forms import SignupForm
 from dal import autocomplete
 from django import forms
 from django.db.models.query_utils import Q
@@ -7,7 +6,7 @@ from goosetools.users.fields import TimeZoneFormField
 from goosetools.users.models import Character, Corp
 
 
-class SignupFormWithTimezone(SignupForm):
+class SignupFormWithTimezone(forms.Form):
     prefered_pronouns = forms.ChoiceField(
         choices=[
             ("blank", "----"),
@@ -76,14 +75,16 @@ class SignupFormWithTimezone(SignupForm):
             return f"[{corp}]"
 
     def __init__(self, *args, **kwargs):
-        sociallogin = kwargs.get("sociallogin", None)
+        socialaccount = kwargs.pop("socialaccount", None)
+        has_characters_already = kwargs.pop("has_characters_already", False)
         super().__init__(*args, **kwargs)
-        self.fields.pop("email")
-        self.fields.pop("username")
+
+        if has_characters_already:
+            self._disable_field("ingame_name")
 
         roles = (
-            sociallogin.account.extra_data["roles"]
-            if "roles" in sociallogin.account.extra_data
+            socialaccount.extra_data["roles"]
+            if "roles" in socialaccount.extra_data
             else []
         )
         self.fields["corp"].queryset = Corp.objects.filter(
