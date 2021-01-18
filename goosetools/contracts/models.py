@@ -1,13 +1,12 @@
-from django.conf import settings
 from django.db import models
 
 from goosetools.core.models import System
-from goosetools.users.models import Character
+from goosetools.users.models import Character, GooseUser
 
 
 class Contract(models.Model):
     from_user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="my_contracts"
+        GooseUser, on_delete=models.CASCADE, related_name="my_contracts"
     )
     to_char = models.ForeignKey(Character, on_delete=models.CASCADE)
     system = models.ForeignKey(System, on_delete=models.CASCADE)

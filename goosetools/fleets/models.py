@@ -1,12 +1,11 @@
 from dateutil.relativedelta import relativedelta
 from django import forms
-from django.conf import settings
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
 from goosetools.core.models import System
-from goosetools.users.models import Character
+from goosetools.users.models import Character, GooseUser
 
 
 def human_readable_relativedelta(delta):
@@ -52,7 +51,7 @@ class Fleet(models.Model):
         ("Master Looter", "Master Looter"),
         ("Free For All", "Free For All"),
     ]
-    fc = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    fc = models.ForeignKey(GooseUser, on_delete=models.CASCADE)
     name = models.TextField()
     loot_type = models.TextField(choices=LOOT_TYPE_CHOICES, default="Master Looter")
     gives_shares_to_alts = models.BooleanField(default=False)

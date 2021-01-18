@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
@@ -7,7 +6,7 @@ from django_fsm import FSMField, transition
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 
-from goosetools.users.models import Character
+from goosetools.users.models import Character, GooseUser
 
 
 def to_isk(num):
@@ -75,7 +74,7 @@ class ShipOrder(models.Model):
     ]
     recipient_character = models.ForeignKey(Character, on_delete=models.CASCADE)
     assignee = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True
+        GooseUser, on_delete=models.CASCADE, null=True, blank=True
     )
     contract_made = models.BooleanField(default=False)
     ship = models.ForeignKey(Ship, on_delete=models.CASCADE)
