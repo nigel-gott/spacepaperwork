@@ -156,7 +156,7 @@ class UserApplication(models.Model):
     )
     created_at = models.DateTimeField(default=timezone.now)
     application_notes = models.TextField(blank=True, null=True)
-    ingame_name = models.TextField()
+    ingame_name = models.TextField(null=True, blank=True)
     corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
 
     previous_alliances = models.TextField(blank=True, null=True)
@@ -168,18 +168,19 @@ class UserApplication(models.Model):
         return UserApplication.objects.filter(status="unapproved")
 
     def _create_character(self):
-        main_char = Character(
-            user=self.user,
-            ingame_name=self.ingame_name,
-            corp=None,
-        )
-        main_char.full_clean()
-        main_char.save()
-        CorpApplication.objects.create(
-            status="unapproved",
-            corp=self.corp,
-            character=main_char,
-        )
+        if self.ingame_name:
+            main_char = Character(
+                user=self.user,
+                ingame_name=self.ingame_name,
+                corp=None,
+            )
+            main_char.full_clean()
+            main_char.save()
+            CorpApplication.objects.create(
+                status="unapproved",
+                corp=self.corp,
+                character=main_char,
+            )
 
     def approve(self):
         self.status = "approved"
