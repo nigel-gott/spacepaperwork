@@ -41,7 +41,7 @@
             <form action="{% url 'application_update' application.pk %}" method="post">
                 {% csrf_token %}
                 <label>Notes:</label>
-                        <textarea class="materialize-textarea" id="id_notes" name="notes"></textarea>
+                        <textarea class="materialize-textarea" id="id_notes" name="notes">{{application.user.notes}}</textarea>
                 <button name="approve" class="btn green waves-effect waves-light" type="submit" value="Submit">Approve
                     <i class="material-icons right">send</i>
                 </button>
