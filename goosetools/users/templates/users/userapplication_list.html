@@ -22,7 +22,12 @@
                 <b>Corp Applying To:</b> {{application.corp}}<br/>
                 {% else %}
                 <b>Returning Member, they will have to manually make character corp applications once accepted.</b><br/>
-                <b>Their current characters are:</b> {{application.user.characters}}<br/>
+                <b>Their current characters are:</b> <br/>
+                    <ol>
+                    {% for char in application.user.character_set.all %}
+                        <li>{{char}}</li>
+                    {% endfor %}
+                    </ol>
                 {% endif %}
                 ----------------<br/>
                 <b>Their Previous Alliances:</b> <blockquote> {{application.previous_alliances}} </blockquote>
