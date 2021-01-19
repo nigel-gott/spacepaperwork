@@ -44,6 +44,8 @@ admin.site.register(CorpApplication)
 
 
 class CustomUserAdmin(ModelAdmin):
+    fields = ("site_user", "status", "notes", "sa_profile", "voucher")
+    readonly_fields = ("site_user", "voucher")
     list_display = [
         "username",
         "display_name",
@@ -63,6 +65,7 @@ class CustomUserAdmin(ModelAdmin):
     def characters(self, obj):
         return [str(char) for char in obj.characters()]
 
+    # pylint: disable=no-self-use
     def vouches(self, obj):
         return [str(v.display_name()) for v in obj.current_vouches.all()]
 

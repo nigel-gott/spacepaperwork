@@ -337,7 +337,7 @@ def shiporders_view(request):
         "industry/shiporders/view.html",
         context={
             "page_data": {
-                "has_industry_permission": request.user.gooseuser.has_perm(
+                "has_industry_permission": request.user.has_perm(
                     "industry.change_shiporder"
                 ),
                 "request_user_discord_username": request.user.gooseuser.discord_username(),

@@ -127,6 +127,9 @@ class GooseUser(models.Model):
             return f"https://cdn.discordapp.com/embed/avatars/{avatar_number}.png"
         return f"https://cdn.discordapp.com/avatars/{self.discord_uid()}/{self._avatar_hash()}.png"
 
+    def __str__(self) -> str:
+        return self.display_name()
+
 
 class UserApplication(models.Model):
     user = models.OneToOneField(GooseUser, on_delete=models.CASCADE)
