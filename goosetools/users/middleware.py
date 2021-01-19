@@ -14,7 +14,12 @@ IGNORE_PATHS += [
 
 IGNORE_VIEW_NAMES = getattr(settings, "LOGIN_REQUIRED_IGNORE_VIEW_NAMES", [])
 
-APPROVED_IGNORE = ["core:home", "settings", "user_signup"] + IGNORE_VIEW_NAMES
+APPROVED_IGNORE = [
+    "user_signup",
+    "core:splash",
+    "core:home",
+    "core:conduct",
+] + IGNORE_VIEW_NAMES
 
 UNAPPROVED_REDIRECT_VIEW = getattr(
     settings, "LOGIN_REQUIRED_UNAPPROVED_USER_REDIRECT", "discord_login"
@@ -37,11 +42,11 @@ class LoginAndApprovedUserMiddleware(AuthenticationMiddleware):
                     messages.error(
                         request, "You are not yet approved and cannot access this page."
                     )
-                    return HttpResponseRedirect(reverse("core:home"))
+                    return HttpResponseRedirect(reverse("core:splash"))
             return
 
         resolver = resolve(path)
         views = ((name == resolver.view_name) for name in IGNORE_VIEW_NAMES)
 
         if not any(views) and not any(url.match(path) for url in IGNORE_PATHS):
-            return HttpResponseRedirect(reverse("core:splash"))
+            return HttpResponseRedirect(reverse("discord_login"))

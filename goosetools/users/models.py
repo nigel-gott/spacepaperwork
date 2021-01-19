@@ -44,7 +44,6 @@ class GooseUser(models.Model):
         default="unapproved",
     )
     notes = models.TextField(null=True, blank=True)
-    email = models.EmailField(null=True, blank=True)
     sa_profile = models.TextField(blank=True, null=True)
     voucher = models.ForeignKey(
         "GooseUser",

@@ -4,8 +4,8 @@ IFS=$'\n\t'
 
 ./manage.py dbshell <<EOF
 
-alter table socialaccount drop constraint if exists socialaccount_social_user_id_8146e70c_fk_core_goos;
-update socialaccount sa set user_id=gooseuser.site_user_id from users_gooseuser gooseuser where gooseuser.id = sa.user_id;
+alter table socialaccount_socialaccount drop constraint if exists socialaccount_social_user_id_8146e70c_fk_core_goos;
+update socialaccount_socialaccount sa set user_id=gooseuser.site_user_id from users_gooseuser gooseuser where gooseuser.id = sa.user_id;
 ALTER TABLE "socialaccount_socialaccount" ADD CONSTRAINT "socialaccount_social_user_id_8146e70c_fk_tenants_s" FOREIGN KEY ("user_id") REFERENCES "tenants_siteuser" ("id") DEFERRABLE INITIALLY DEFERRED;
 
 BEGIN;
@@ -14,7 +14,6 @@ BEGIN;
 --
 CREATE TABLE "tenants_siteuser_groups" ("id" serial NOT NULL PRIMARY KEY, "siteuser_id" integer NOT NULL, "group_id" integer NOT NULL);
 CREATE TABLE "tenants_siteuser_user_permissions" ("id" serial NOT NULL PRIMARY KEY, "siteuser_id" integer NOT NULL, "permission_id" integer NOT NULL);
-CREATE INDEX "tenants_siteuser_username_f74c842b_like" ON "tenants_siteuser" ("username" varchar_pattern_ops);
 ALTER TABLE "tenants_siteuser_groups" ADD CONSTRAINT "tenants_siteuser_groups_siteuser_id_group_id_404af03a_uniq" UNIQUE ("siteuser_id", "group_id");
 ALTER TABLE "tenants_siteuser_groups" ADD CONSTRAINT "tenants_siteuser_gro_siteuser_id_8ca1df89_fk_tenants_s" FOREIGN KEY ("siteuser_id") REFERENCES "tenants_siteuser" ("id") DEFERRABLE INITIALLY DEFERRED;
 ALTER TABLE "tenants_siteuser_groups" ADD CONSTRAINT "tenants_siteuser_groups_group_id_d9edf5d1_fk_auth_group_id" FOREIGN KEY ("group_id") REFERENCES "auth_group" ("id") DEFERRABLE INITIALLY DEFERRED;
@@ -27,14 +26,25 @@ CREATE INDEX "tenants_siteuser_user_permissions_siteuser_id_7c98aedc" ON "tenant
 CREATE INDEX "tenants_siteuser_user_permissions_permission_id_67a881ec" ON "tenants_siteuser_user_permissions" ("permission_id");
 COMMIT;
 
+
+TRUNCATE TABLE django_migrations;
+
 DROP TABLE public.users_gooseuser_user_permissions;
 DROP TABLE public.users_gooseuser_groups;
 
-ALTER TABLE public.users_gooseuser DROP COLUMN "password";
-ALTER TABLE public.users_gooseuser DROP COLUMN "password";
+ALTER TABLE public.users_gooseuser DROP CONSTRAINT core_gooseuser_username_key;
+DROP INDEX public.core_gooseuser_username_6d391dfc_like;
 
-
-TRUNCATE TABLE django_migrations;
+ALTER TABLE public.users_gooseuser DROP COLUMN "password";
+ALTER TABLE public.users_gooseuser DROP COLUMN "last_login";
+ALTER TABLE public.users_gooseuser DROP COLUMN "is_superuser";
+ALTER TABLE public.users_gooseuser DROP COLUMN "username";
+ALTER TABLE public.users_gooseuser DROP COLUMN "email";
+ALTER TABLE public.users_gooseuser DROP COLUMN "first_name";
+ALTER TABLE public.users_gooseuser DROP COLUMN "last_name";
+ALTER TABLE public.users_gooseuser DROP COLUMN "is_staff";
+ALTER TABLE public.users_gooseuser DROP COLUMN "is_active";
+ALTER TABLE public.users_gooseuser DROP COLUMN "date_joined";
 EOF
 
 # Update all usages of request.user and template -> user
