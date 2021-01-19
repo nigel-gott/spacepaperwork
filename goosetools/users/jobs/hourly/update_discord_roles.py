@@ -75,7 +75,7 @@ class Job(HourlyJob):
                             guild,
                             log_output=True,
                         )
-                    except SiteUser.DoesNotExist:
+                    except SocialAccount.DoesNotExist:
                         print(
                             f"Not doing anything for {user_json['user']['username']} as they are not in goosetools."
                         )
