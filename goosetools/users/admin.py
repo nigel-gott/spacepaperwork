@@ -46,6 +46,8 @@ admin.site.register(CorpApplication)
 class CustomUserAdmin(ModelAdmin):
     fields = ("site_user", "status", "notes", "sa_profile", "voucher")
     readonly_fields = ("site_user", "voucher")
+    search_fields = ["site_user__username"]
+    list_filter = ["status"]
     list_display = [
         "username",
         "display_name",
