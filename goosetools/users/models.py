@@ -57,9 +57,10 @@ class GooseUser(models.Model):
         return self.site_user.username
 
     def latest_app(self):
-        if hasattr(self, "userapplication"):
-            # pylint: disable=no-member
-            return self.userapplication
+        # pylint: disable=no-member
+        userapp_query = self.userapplication_set.filter(status="unapproved")
+        if userapp_query.count() == 1:
+            return userapp_query.only()
         else:
             return False
 
@@ -132,7 +133,7 @@ class GooseUser(models.Model):
 
 
 class UserApplication(models.Model):
-    user = models.OneToOneField(GooseUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(GooseUser, on_delete=models.CASCADE)
     status = models.TextField(
         choices=[
             ("unapproved", "unapproved"),
@@ -182,6 +183,9 @@ class UserApplication(models.Model):
         self.user.set_as_rejected()
         self.full_clean()
         self.save()
+
+    def __str__(self) -> str:
+        return f"{self.status} User App for {self.user} made on {self.created_at}"
 
 
 class DiscordGuild(models.Model):

@@ -42,7 +42,10 @@ class LoginAndApprovedUserMiddleware(AuthenticationMiddleware):
                     messages.error(
                         request, "You are not yet approved and cannot access this page."
                     )
-                    return HttpResponseRedirect(reverse("core:splash"))
+                    if not request.user.has_gooseuser():
+                        return HttpResponseRedirect(reverse("core:splash"))
+                    else:
+                        return HttpResponseRedirect(reverse("core:home"))
             return
 
         resolver = resolve(path)

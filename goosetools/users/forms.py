@@ -61,8 +61,9 @@ class SignupFormWithTimezone(forms.Form):
         help_text="Your ingame Broker Fee.",
     )
 
-    def _disable_field(self, field_name):
+    def _disable_field(self, field_name, help_text):
         field = self.fields[field_name]
+        field.help_text = help_text
         field.required = False
         field.widget = forms.HiddenInput()
         field.label = ""
@@ -80,7 +81,10 @@ class SignupFormWithTimezone(forms.Form):
         super().__init__(*args, **kwargs)
 
         if has_characters_already:
-            self._disable_field("ingame_name")
+            self._disable_field(
+                "ingame_name",
+                "You already have characters in goosetools, to get them back into the corps please go to Settings->Characters after this app has been accepted",
+            )
 
         roles = (
             socialaccount.extra_data["roles"]

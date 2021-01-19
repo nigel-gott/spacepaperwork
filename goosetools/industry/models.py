@@ -151,3 +151,6 @@ class ShipOrder(models.Model):
     @transition(field=state, source="*", target="not_started")
     def reset(self):
         pass
+
+    # class Meta:
+    #     indexes = [models.Index(fields=["-created_at"])]

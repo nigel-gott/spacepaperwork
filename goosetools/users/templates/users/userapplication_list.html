@@ -17,8 +17,13 @@
             <br/>
             <br/>
                 <b>Discord ID:</b> {{application.user.discord_uid}}<br/>
+                {% if application.ingame_name %}
                 <b>In Game Name:</b> {{application.ingame_name}}<br/>
                 <b>Corp Applying To:</b> {{application.corp}}<br/>
+                {% else %}
+                <b>Returning Member, they will have to manually make character corp applications once accepted.</b><br/>
+                <b>Their current characters are:</b> {{application.user.characters}}<br/>
+                {% endif %}
                 ----------------<br/>
                 <b>Their Previous Alliances:</b> <blockquote> {{application.previous_alliances}} </blockquote>
                 <b>How Active They Are</b> <blockquote> {{application.activity}} </blockquote>

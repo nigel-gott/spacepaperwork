@@ -10,7 +10,7 @@ def forbidden(request):
 
 
 def core_splash(request):
-    if hasattr(request.user, "is_approved") and request.user.is_approved():
+    if hasattr(request.user, "gooseuser"):
         return HttpResponseRedirect(reverse("core:home"))
     else:
         return render(
