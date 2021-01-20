@@ -124,9 +124,13 @@ $(function() {
             },
             { "data": "assignee_name", "title" : "Claim/UnClaim", "defaultContent": "Nobody",
                 render: function ( data, type, row ) {
-                    if(page_data["has_industry_permission"] && !row['currently_blocked']){
+                    if(page_data["has_industry_permission"] ){
                         if(!row["assignee_name"]){
-                            return '<button class="claim-btn waves-btn btn green">Claim</button>';
+                            if(row['currently_blocked']){
+                                return '<button class="claim-btn waves-btn btn grey">Claim <i class="material-icons right red-text">lock</i></button>';
+                            } else {
+                                return '<button class="claim-btn waves-btn btn green">Claim</button>';
+                            }
                         } else if(row["assignee"]===page_data["request_user_pk"]){
                             return '<button class="unclaim-btn waves-btn btn red">UnClaim</button>';
                         }
@@ -245,7 +249,7 @@ $(function() {
             "title": "Action",
             "data": null,
             render: function ( data, type, row ) {
-                if(row["assignee"]===page_data["request_user_pk"] && !row['currently_blocked']){
+                if(row["assignee"]===page_data["request_user_pk"]){
                     buttons = "";
                     reset_found = false;
                     for(const t of row['availible_transition_names']){

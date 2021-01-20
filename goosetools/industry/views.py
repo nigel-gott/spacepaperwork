@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.db import transaction
 from django.db.models.aggregates import Max
 from django.db.models.functions import Coalesce
+from django.db.models.query_utils import Q
 from django.http.request import HttpRequest
 from django.http.response import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -224,9 +225,16 @@ def shiporders_create(request):
 class ShipOrderViewSet(
     mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet
 ):
-    queryset = (
-        ShipOrder.objects.filter(contract_made=True).all().order_by("-created_at")
-    )
+    queryset = ShipOrder.objects.all()
+
+    def get_queryset(self):
+        three_weeks_ago = timezone.now() - timezone.timedelta(days=21)
+        qs = ShipOrder.objects.filter(
+            Q(contract_made=True)
+            & (Q(created_at__gt=three_weeks_ago) | ~Q(state="sent"))
+        ).order_by("-created_at")
+        return qs
+
     serializer_class = ShipOrderSerializer
     permission_classes = [permissions.DjangoModelPermissions]
 
@@ -260,8 +268,6 @@ class ShipOrderViewSet(
     # pylint: disable=unused-argument
     def claim(self, request, pk=None):
         ship_order = self.get_object()
-        if ship_order.currently_blocked():
-            return Response(status=status.HTTP_400_BAD_REQUEST)
         if ship_order.assignee is None:
             ship_order.assignee = request.user.gooseuser
             ship_order.save()

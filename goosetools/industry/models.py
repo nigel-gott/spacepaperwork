@@ -152,5 +152,5 @@ class ShipOrder(models.Model):
     def reset(self):
         pass
 
-    # class Meta:
-    #     indexes = [models.Index(fields=["-created_at"])]
+    class Meta:
+        indexes = [models.Index(fields=["-created_at"])]
