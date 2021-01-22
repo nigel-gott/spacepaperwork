@@ -10,6 +10,8 @@
     <link href="{% static 'core/css/materialize.css' %}" rel="stylesheet" type="text/css">
     <link href="{% static 'core/css/core.css' %}" rel="stylesheet" type="text/css">
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    {% block extraheader %}
+    {% endblock %}
 </head>
 <body>
 {% if user.is_authenticated and user.gooseuser.is_approved %}
@@ -82,6 +84,9 @@
     </li>
     <li>
         <a href="{% url 'admin:index' %}">Site Admin</a>
+    </li>
+    <li>
+        <a href="{% url 'auth_settings' %}">Site Auth Settings</a>
     </li>
 </ul>
 {% endif %}
@@ -161,6 +166,7 @@
     {% if user.is_staff %}
         <li><a class="subheader">Admin<i class="material-icons right">build</i></a></li>
         <li><a href="{% url 'admin:index' %}">Admin</a></li>
+        <li><a href="{% url 'auth_settings' %}">Site Auth Settings</a></li>
         <li>
             <a href="{% url 'applications' %}">New User Applications</a>
         </li>

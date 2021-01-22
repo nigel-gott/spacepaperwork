@@ -1,9 +1,16 @@
 from dal import autocomplete
 from django import forms
 from django.db.models.query_utils import Q
+from tinymce.widgets import TinyMCE
 
 from goosetools.users.fields import TimeZoneFormField
 from goosetools.users.models import Character, Corp
+
+
+class AuthConfigForm(forms.Form):
+    code_of_conduct = forms.CharField(
+        widget=TinyMCE(attrs={"cols": 80, "rows": 30}), required=False
+    )
 
 
 class SignupFormWithTimezone(forms.Form):

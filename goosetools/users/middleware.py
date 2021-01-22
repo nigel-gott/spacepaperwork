@@ -29,8 +29,10 @@ UNAPPROVED_REDIRECT_VIEW = getattr(
 class LoginAndApprovedUserMiddleware(AuthenticationMiddleware):
     # pylint: disable=unused-argument,no-self-use,inconsistent-return-statements
     def process_view(self, request, view_func, view_args, view_kwargs):
+        request.gooseuser = (
+            hasattr(request.user, "gooseuser") and request.user.gooseuser
+        )
         path = request.path
-        print(path)
         if request.user.is_authenticated:
             if (
                 not request.user.has_gooseuser()

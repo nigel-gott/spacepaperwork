@@ -22,7 +22,13 @@ from goosetools.market.models import MarketOrder, SoldItem
 from goosetools.ownership.models import LootGroup, LootShare
 from goosetools.tenants.models import SiteUser
 from goosetools.tests.django_test_case import DjangoTestCase
-from goosetools.users.models import Character, Corp, GooseUser
+from goosetools.users.models import (
+    USER_ADMIN_PERMISSION,
+    Character,
+    Corp,
+    GooseUser,
+    UserPermissionGroup,
+)
 
 
 def isk(number_str: Union[str, int]):
@@ -43,6 +49,10 @@ class GooseToolsTestCase(DjangoTestCase):
 
         self.corp = Corp.objects.create(name="Test Corp")
         self.site_user = SiteUser.create("Test Goose User#1234")
+        self.user_admin_group = UserPermissionGroup.objects.create(
+            name="user_admin_group"
+        )
+        self.user_admin_group.link_permission(USER_ADMIN_PERMISSION)
         self.user = GooseUser.objects.create(
             site_user=self.site_user,
             status="approved",

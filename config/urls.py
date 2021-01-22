@@ -28,6 +28,7 @@ urlpatterns = [
                     "api/", include("rest_framework.urls", namespace="rest_framework")
                 ),
                 path("", include("django_prometheus.urls")),
+                path("tinymce/", include("tinymce.urls")),
             ]
             + settings.ENV_SPECIFIC_URLS
         ),

@@ -3,6 +3,8 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls.base import reverse
 
+from goosetools.users.models import AuthConfig
+
 
 def forbidden(request):
     messages.error(request, "You are forbidden to access this.")
@@ -30,6 +32,7 @@ def core_conduct(request):
     return render(
         request,
         "core/conduct.html",
+        {"code_of_conduct": AuthConfig.get_active().code_of_conduct},
     )
 
 

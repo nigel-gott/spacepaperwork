@@ -1,8 +1,10 @@
 import logging
+from functools import wraps
 
 import requests
 from django.contrib.auth.models import Group
 from django.db import models
+from django.http.response import HttpResponseForbidden
 from django.utils import timezone
 from timezone_field import TimeZoneField
 
@@ -11,13 +13,164 @@ from goosetools.tenants.models import SiteUser
 logger = logging.getLogger(__name__)
 
 
+class DiscordRole(models.Model):
+    name = models.TextField(unique=True)
+    discord_role_uid = models.TextField(unique=True)
+
+
+class AuthConfig(models.Model):
+    signup_required = models.BooleanField(default=True)
+    active = models.BooleanField(default=True)
+    connected_discord_server_id = models.TextField(null=True, blank=True)
+    code_of_conduct = models.TextField(null=True, blank=True)
+    sign_up_introduction = models.TextField(null=True, blank=True)
+    new_user_discord_role = models.ForeignKey(
+        DiscordRole, on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    # pylint: disable=signature-differs
+    def save(self, *args, **kwargs):
+        if self.active:
+            try:
+                other_active = AuthConfig.objects.get(active=True)
+                if self != other_active:
+                    other_active.active = False
+                    other_active.save()
+            except AuthConfig.DoesNotExist:
+                pass
+        super().save(*args, **kwargs)
+
+    @staticmethod
+    def get_active():
+        return AuthConfig.objects.get(active=True)
+
+    @staticmethod
+    def ensure_exists():
+        if AuthConfig.objects.filter(active=True).count() == 0:
+            AuthConfig.objects.create(
+                active=True,
+                signup_required=True,
+            )
+
+
+class SignUpQuestion(models.Model):
+    auth_config = models.ForeignKey(AuthConfig, on_delete=models.CASCADE)
+    question_text = models.TextField()
+    question_type = models.TextField(
+        choices=[
+            ("text", "text"),
+            ("number", "number"),
+            ("textarea", "large text area"),
+            ("multichoice_dropdown", "multiple choice dropdown"),
+        ]
+    )
+
+
+class SignUpQuestionChoice(models.Model):
+    signup_question = models.ForeignKey(SignUpQuestion, on_delete=models.CASCADE)
+    choice = models.TextField()
+    linked_discord_role = models.ForeignKey(
+        DiscordRole, on_delete=models.SET_NULL, blank=True, null=True
+    )
+
+
 class Corp(models.Model):
     name = models.TextField(primary_key=True)
     full_name = models.TextField(unique=True, null=True, blank=True)
+    # TODO map to Discord Role
     required_discord_role = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return str(self.name)
+
+
+class UserPermissionGroup(models.Model):
+    name = models.TextField(unique=True)
+    linked_discord_role = models.ForeignKey(
+        DiscordRole, on_delete=models.CASCADE, null=True, blank=True
+    )
+
+    def link_permission(self, permission_name):
+        perm, _ = UserPermission.objects.get_or_create(permission=permission_name)
+        UserPermissionGroupMapping.objects.get_or_create(
+            group=self, permission_id=perm.id
+        )
+
+    def __str__(self) -> str:
+        return f"{self.name}"
+
+
+USER_ADMIN_PERMISSION = "user_admin"
+
+
+def has_perm(perm: str):
+    """
+    Decorator for views that checks that the user has the specified permission otherwise returning HttpForbidden
+    """
+
+    def outer_wrapper(function):
+        @wraps(function)
+        def wrap(request, *args, **kwargs):
+            print(f"CHECKING {request}")
+            if request.gooseuser.has_perm(perm):
+                return function(request, *args, **kwargs)
+            else:
+                return HttpResponseForbidden()
+
+        return wrap
+
+    return outer_wrapper
+
+
+class UserPermission(models.Model):
+    USER_PERMISSION_CHOICES = [
+        (
+            "basic_access",
+            "Able to Apply to join and view the home page and other basic registered user pages",
+        ),
+        ("loot_tracker", "Able to use the loot tracker"),
+        (
+            "loot_tracker_admin",
+            "Automatically an admin in every fleet and able to do loot buyback",
+        ),
+        (
+            USER_ADMIN_PERMISSION,
+            "Able to approve user applications and manage users",
+        ),
+        (
+            "single_corp_admin",
+            "Able to approve corp applications for a specific corp",
+        ),
+        (
+            "all_corp_admin",
+            "Able to approve corp applications for all corps and manage characters in that corp",
+        ),
+        ("ship_orderer", "Able to place ship orders"),
+        ("free_ship_orderer", "Able to place free ship orders"),
+        ("ship_order_admin", "Able to claim and work on ship orders"),
+        (
+            "ship_order_price_admin",
+            "Able to add/remove ship types and set if they are free or not",
+        ),
+    ]
+    permission = models.TextField(unique=True, choices=USER_PERMISSION_CHOICES)
+    corp = models.OneToOneField(Corp, on_delete=models.CASCADE, null=True, blank=True)
+
+    @staticmethod
+    def ensure_populated():
+        for choice, _ in UserPermission.USER_PERMISSION_CHOICES:
+            UserPermission.objects.get_or_create(permission=choice)
+
+    def __str__(self) -> str:
+        return self.permission
+
+
+class UserPermissionGroupMapping(models.Model):
+    group = models.ForeignKey(UserPermissionGroup, on_delete=models.CASCADE)
+    permission = models.ForeignKey(UserPermission, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f"Permission: {self.permission}, Group: {self.group}"
 
 
 class GooseUser(models.Model):
@@ -52,6 +205,18 @@ class GooseUser(models.Model):
         null=True,
         related_name="current_vouches",
     )
+
+    def has_perm(self, permission_name):
+        # pylint: disable=no-member
+        return (
+            self.usergroup_set.filter(
+                group__userpermissiongroupmapping__permission__permission=permission_name
+            ).count()
+            > 0
+        )
+
+    def give_group(self, group):
+        return UserGroup.objects.get_or_create(user=self, group=group)
 
     def username(self):
         return self.site_user.username
@@ -130,6 +295,11 @@ class GooseUser(models.Model):
 
     def __str__(self) -> str:
         return self.display_name()
+
+
+class UserGroup(models.Model):
+    group = models.ForeignKey(UserPermissionGroup, on_delete=models.CASCADE)
+    user = models.ForeignKey(GooseUser, on_delete=models.CASCADE)
 
 
 class UserApplication(models.Model):

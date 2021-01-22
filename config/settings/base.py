@@ -87,6 +87,7 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "django_fsm",
     "django_prometheus",
+    "tinymce",
 ]
 
 LOCAL_APPS = [

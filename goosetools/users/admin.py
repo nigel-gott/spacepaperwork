@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.contrib.admin.options import ModelAdmin
 
 from goosetools.users.models import (
+    AuthConfig,
     Character,
     Corp,
     CorpApplication,
@@ -10,6 +11,10 @@ from goosetools.users.models import (
     DiscordRoleDjangoGroupMapping,
     GooseUser,
     UserApplication,
+    UserGroup,
+    UserPermission,
+    UserPermissionGroup,
+    UserPermissionGroupMapping,
 )
 
 
@@ -41,6 +46,11 @@ admin.site.register(Corp)
 admin.site.register(Character, CharacterAdmin)
 admin.site.register(UserApplication)
 admin.site.register(CorpApplication)
+admin.site.register(AuthConfig)
+admin.site.register(UserPermission)
+admin.site.register(UserPermissionGroup)
+admin.site.register(UserGroup)
+admin.site.register(UserPermissionGroupMapping)
 
 
 class CustomUserAdmin(ModelAdmin):

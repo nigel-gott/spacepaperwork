@@ -3,6 +3,7 @@ from django.urls import path
 from goosetools.users.autocomplete import CharacterAutocomplete, UsernameAutocomplete
 from goosetools.users.views import (
     application_update,
+    auth_settings_view,
     character_edit,
     character_list,
     character_new,
@@ -16,6 +17,7 @@ from goosetools.users.views import (
 )
 
 urlpatterns = [
+    path("auth/settings/", auth_settings_view, name="auth_settings"),
     path("settings/", settings_view, name="settings"),
     path("user/<int:pk>", user_view, name="user_view"),
     path("characters/edit/<int:pk>", character_edit, name="character_edit"),

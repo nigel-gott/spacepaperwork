@@ -16,17 +16,21 @@ from django.views.generic import ListView
 
 from goosetools.users.forms import (
     AddEditCharacterForm,
+    AuthConfigForm,
     CharacterUserSearchForm,
     SettingsForm,
     SignupFormWithTimezone,
     UserApplicationUpdateForm,
 )
 from goosetools.users.models import (
+    USER_ADMIN_PERMISSION,
+    AuthConfig,
     Character,
     CorpApplication,
     DiscordGuild,
     GooseUser,
     UserApplication,
+    has_perm,
 )
 
 
@@ -112,6 +116,25 @@ def _give_pronoun_roles(uid, prefered_pronouns):
         DiscordGuild.try_give_role(uid, 762405484614910012)
     elif prefered_pronouns == "he":
         DiscordGuild.try_give_role(uid, 762404773512740905)
+
+
+@has_perm(perm=USER_ADMIN_PERMISSION)
+def auth_settings_view(request):
+    auth_config = AuthConfig.get_active()
+    if request.method == "POST":
+        form = AuthConfigForm(request.POST)
+        if form.is_valid():
+            messages.success(request, "Updated your settings!")
+            auth_config.code_of_conduct = form.data["code_of_conduct"]
+            auth_config.full_clean()
+            auth_config.save()
+            return HttpResponseRedirect(reverse("auth_settings"))
+    else:
+        form = AuthConfigForm(initial={"code_of_conduct": auth_config.code_of_conduct})
+
+    return render(
+        request, "users/auth_config.html", {"form": form, "auth_config": auth_config}
+    )
 
 
 def settings_view(request):
