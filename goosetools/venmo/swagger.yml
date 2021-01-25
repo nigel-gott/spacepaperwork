@@ -1,0 +1,427 @@
+swagger: "2.0"
+info:
+  description: "The API endpoints to be implemented for Goose Venmo."
+  version: "1.0.0"
+  title: "Goose Venmo"
+basePath: "/dev"
+host: "nqx7ff7l1h.execute-api.us-east-1.amazonaws.com"
+tags:
+  - name: "users"
+    description: "Everything about Users"
+  - name: "transactions"
+    description: "Access to Transactions"
+  - name: "deposits"
+    description: "Access to Deposits"
+  - name: "transfers"
+    description: "Access to Transfer"
+  - name: "withdrawals"
+    description: "Access to Withdrawals"
+schemes:
+  - "https"
+paths:
+  /users/{discordId}:
+    get:
+      tags:
+        - "users"
+      summary: "Get User balance"
+      description: ""
+      operationId: "getUserBalance"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "discordId"
+          in: "path"
+          description: "ID of user to return"
+          required: true
+          type: "string"
+      security:
+        - api_key: []
+      responses:
+        "200":
+          description: "A user"
+          schema:
+            $ref: "#/definitions/User"
+        "201":
+          description: "A newly created user"
+          schema:
+            $ref: "#/definitions/User"
+  /users/{discordId}/deposit:
+    post:
+      tags:
+        - "deposits"
+      summary: "Create deposit"
+      description: ""
+      operationId: "createDeposit"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "discordId"
+          in: "path"
+          description: "ID of user to return"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "deposit detail tuples"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              value:
+                type: "integer"
+                format : "int64"
+                minimum: 1
+                example: 69420
+              note:
+                type: "string"
+                example: "Arby CovOps"
+            example: [["<@!123456789012345650>", 69420],["<@!123456789012345651>", 42069]]
+      security:
+        - api_key: []
+      responses:
+        "201":
+          description: "A transactions on the system"
+          schema:
+            $ref: "#/definitions/Transaction"
+  /users/{discordId}/withdraw:
+    post:
+      tags:
+        - "withdrawals"
+      summary: "Create withdrawals"
+      description: ""
+      operationId: "createWithdrawal"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "discordId"
+          in: "path"
+          description: "ID of user to withdraw from"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "withdrawal details"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              value:
+                type: "integer"
+                format : "int64"
+                minimum: 1
+                example: 69
+      security:
+        - api_key: []
+      responses:
+        "201":
+          description: "A transactions on the system"
+          schema:
+            $ref: "#/definitions/Transaction"
+  /deposit:
+    post:
+      tags:
+        - "deposits"
+      summary: "Bulk create deposits"
+      description: ""
+      operationId: "bulkDeposit"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "deposit detail tuples"
+          required: true
+          schema:
+            type: "array"
+            items:
+              type: "array"
+              items:
+                type: "string"
+            example: [["<@!123456789012345650>", 69420],["<@!123456789012345651>", 42069]]
+      security:
+        - api_key: []
+      responses:
+        "201":
+          description: "A transactions on the system"
+          schema:
+            $ref: "#/definitions/Transaction"
+  /users/{discordId}/transfer:
+    post:
+      tags:
+        - "transfers"
+      summary: "Bulk create transfers"
+      description: ""
+      operationId: "bulkTransfer"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "discordId"
+          in: "path"
+          description: "ID of user to return"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "transfer detail tuples"
+          required: true
+          schema:
+            type: "array"
+            items:
+              type: "array"
+              items:
+                type: "string"
+            example: [["<@!123456789012345650>", 69420],["<@!123456789012345651>", 42069]]
+      security:
+        - api_key: []
+      responses:
+        "201":
+          description: "A list of transactions on the system"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Transaction"
+  /users/{discordId}/transfer/{toDiscordId}:
+    post:
+      tags:
+        - "transfers"
+      summary: "Transfer funds"
+      description: ""
+      operationId: "transferToUser"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "discordId"
+          in: "path"
+          description: "ID of user to transfer from"
+          required: true
+          type: "string"
+        - name: "toDiscordId"
+          in: "path"
+          description: "ID of user to transfer to"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "transfer detail tuples"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              value:
+                type: "integer"
+                format : "int64"
+                example: 42069
+      security:
+        - api_key: []
+      responses:
+        "201":
+          description: "A list of transactions on the system"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Transaction"
+  /transactions:
+    get:
+      tags:
+        - "transactions"
+      summary: "List all transactions"
+      description: ""
+      operationId: "listTransactions"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "source_discord_id"
+          in: "query"
+          description: "source_discord_id"
+          required: false
+          type: "string"
+        - name: "target_discord_id"
+          in: "query"
+          description: "target_discord_id"
+          required: false
+          type: "string"
+        - name: "transaction_status"
+          in: "query"
+          description: "transaction_status"
+          required: false
+          type: "string"
+        - name: "transaction_type"
+          in: "query"
+          description: "transaction_type"
+          required: false
+          type: "string"
+      security:
+        - api_key: []
+      responses:
+        "200":
+          description: "A list of transactions on the system"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Transaction"
+    put:
+      tags:
+        - "transactions"
+      summary: "Bulk update Transactions"
+      description: ""
+      operationId: "bulkUpdateTransaction"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "transaction details"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              query:
+                type: "object"
+                properties:
+                  source_discord_id:
+                    type: "string"
+                    example: "<@!123456789012345678>"
+                  target_discord_id:
+                    type: "string"
+                    example: "<@!123456789012345678>"
+                  transaction_status:
+                    type: "string"
+                    example: "pending"
+                  transaction_type:
+                    type: "string"
+                    example: "deposit"
+              transaction_status:
+                type: "string"
+                example: "complete"
+      security:
+        - api_key: []
+      responses:
+        "200":
+          description: "The updated transaction"
+          schema:
+            $ref: "#/definitions/Transaction"
+  /transactions/{transactionId}:
+    put:
+      tags:
+        - "transactions"
+      summary: "Update a Transaction"
+      description: ""
+      operationId: "updateTransaction"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "transactionId"
+          in: "path"
+          description: "The Transaction ID of the Transaction to be modified"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "transaction details"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              transaction_status:
+                type: "string"
+                example: "complete"
+      security:
+        - api_key: []
+      responses:
+        "200":
+          description: "The updated transaction"
+          schema:
+            $ref: "#/definitions/Transaction"
+  /ledger/import:
+    post:
+      tags:
+        - "ledger"
+      summary: "Bulk import the ledger"
+      description: ""
+      operationId: "importLedger"
+      produces:
+        - "application/json"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "ledger import controls"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              spreadsheetId:
+                type: "string"
+                example: "rdutyiuboi_r76124gy2408assju8_124nu81248"
+              truncate:
+                type: boolean
+      security:
+        - api_key: []
+      responses:
+        "200":
+          description: "A transactions on the system"
+          schema:
+            $ref: "#/definitions/Transaction"
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "x-api-key"
+    in: "header"
+definitions:
+  Transaction:
+    type: "object"
+    properties:
+      transaction_id:
+        type: "integer"
+        format : "int64"
+        minimum: 0
+        example: 42069
+      source_discord_id:
+        type: "string"
+        example: "<@!123456789012345678>"
+      target_discord_id:
+        type: "string"
+        example: "<@!123456789012345678>"
+      value:
+        type: "integer"
+        format : "int64"
+        minimum: 1
+        example: 69420
+      createdAt:
+        type: "string"
+        format: "date-time"
+      updatedAt:
+        type: "string"
+        format: "date-time"
+      transaction_status:
+        type: "string"
+        description: "Transaction Status"
+        enum:
+          - "created"
+          - "pending"
+          - "approved"
+          - "rejected"
+          - "cancelled"
+  User:
+    type: "object"
+    properties:
+      discordId:
+        type: "string"
+        example: "<@!123456789012345678>"
+      balance:
+        type: "integer"
+        format : "int64"
+        example: 69420
+      netPendingChange:
+        type: "integer"
+        format : "int64"
+        example: -420
+      availableBalance:
+        type: "integer"
+        format : "int64"
+        example: 69000
+      createdAt:
+        type: "string"
+        example: "2021-01-24T19:44:21.123Z"
+      updatedAt:
+        type: "string"
+        example: "2021-01-24T19:44:21.456Z"

@@ -103,6 +103,7 @@ LOCAL_APPS = [
     "goosetools.mapbot.apps.MapBotConfig",
     "goosetools.core.apps.CoreConfig",
     "goosetools.tenants.apps.TenantsConfig",
+    "goosetools.venmo.apps.VenmoConfig",
     # Goosetools apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -322,3 +323,6 @@ REST_FRAMEWORK = {
 
 PROMETHEUS_METRICS_EXPORT_PORT_RANGE = range(8001, 8050)
 PROMETHEUS_METRICS_EXPORT_ADDRESS = ""
+
+VENMO_HOST_URL = env("VENMO_HOST_URL")
+VENMO_API_TOKEN = env("VENMO_API_TOKEN")
