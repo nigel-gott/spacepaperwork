@@ -282,9 +282,44 @@ paths:
         "201":
           description: "A list of transactions on the system"
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Transaction"
+            type: "object"
+            properties:
+              toUser:
+                type: "object"
+                properties:
+                  createdAt:
+                    type: "string"
+                    format: "date-time"
+                  updatedAt:
+                    type: "string"
+                    format: "date-time"
+                  balance:
+                    type: "integer"
+                    format : "int64"
+                    example: 42069
+                  discord_id:
+                    type: "string"
+                    example: "<@!123456789012345678>"
+              fromUser:
+                type: "object"
+                properties:
+                  createdAt:
+                    type: "string"
+                    format: "date-time"
+                  updatedAt:
+                    type: "string"
+                    format: "date-time"
+                  balance:
+                    type: "integer"
+                    format : "int64"
+                    example: 42069
+                  discord_id:
+                    type: "string"
+                    example: "<@!123456789012345678>"
+              transactions:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Transaction"
         "400":
           description: "Invalid request"
           schema:
