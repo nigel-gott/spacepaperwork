@@ -76,6 +76,11 @@ def formatmoney(value):
 
 
 @register.filter()
+def commanumber(value):
+    return "{:,}".format(value)
+
+
+@register.filter()
 def nicemoney(value):
     if isinstance(value, numbers.Number):
         floored = m.floor(value)  # type: ignore

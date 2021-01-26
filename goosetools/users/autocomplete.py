@@ -32,10 +32,10 @@ class CharacterAutocomplete(autocomplete.Select2QuerySetView):
 
 class UsernameAutocomplete(autocomplete.Select2QuerySetView):
     def get_result_label(self, result):
-        return result.username
+        return result.username()
 
     def get_selected_result_label(self, result):
-        return result.username
+        return result.username()
 
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !

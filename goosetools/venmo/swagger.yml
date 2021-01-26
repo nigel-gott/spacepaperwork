@@ -24,7 +24,10 @@ paths:
       tags:
         - "users"
       summary: "Get User balance"
-      description: ""
+      description: |
+        This method retrieves the balance for a given discordId.
+
+        If a user account isn't currently on file for the user then a new one is created with 0 balance and a 201 is returned, otherwise a 200.
       operationId: "getUserBalance"
       produces:
         - "application/json"
@@ -50,7 +53,10 @@ paths:
       tags:
         - "deposits"
       summary: "Create deposit"
-      description: ""
+      description: |
+        This method creates a pending deposit for the given discordId.
+
+        If the user doesn't currently exist that's not an issue, this method will handle creating the user and deposit their space bucks once the transaction is updated to be complete.
       operationId: "createDeposit"
       produces:
         - "application/json"
@@ -62,7 +68,7 @@ paths:
           type: "string"
         - in: "body"
           name: "body"
-          description: "deposit detail tuples"
+          description: "deposit"
           required: true
           schema:
             type: "object"
@@ -75,20 +81,30 @@ paths:
               note:
                 type: "string"
                 example: "Arby CovOps"
-            example: [["<@!123456789012345650>", 69420],["<@!123456789012345651>", 42069]]
       security:
         - api_key: []
       responses:
         "201":
-          description: "A transactions on the system"
+          description: "A transaction on the system"
           schema:
             $ref: "#/definitions/Transaction"
+        "400":
+          description: "Invalid request"
+          schema:
+            $ref: "#/definitions/DepositError"
   /users/{discordId}/withdraw:
     post:
       tags:
         - "withdrawals"
       summary: "Create withdrawals"
-      description: ""
+      description: |
+        This method creates a pending withdrawal for the given discordId.
+
+        If the originating discordId doesn't have enough space bucks either in raw balance of they have pending transactions then a 409 error is returned.
+
+        If there's a validation error with the input then a 400 error is returned instead.
+
+        Otherwise it returns a 201 when completed successfully.
       operationId: "createWithdrawal"
       produces:
         - "application/json"
@@ -117,12 +133,21 @@ paths:
           description: "A transactions on the system"
           schema:
             $ref: "#/definitions/Transaction"
+        "400":
+          description: "Invalid request"
+          schema:
+            $ref: "#/definitions/WithdrawError"
   /deposit:
     post:
       tags:
         - "deposits"
       summary: "Bulk create deposits"
-      description: ""
+      description: |
+        This method allows multiple deposits to be made in bulk for multiple users (it also supports making multiple deposits for the same user).
+
+        If there's a validation error with the input then a 400 error is returned instead.
+
+        Otherwise it returns a 201 when completed successfully.
       operationId: "bulkDeposit"
       produces:
         - "application/json"
@@ -144,13 +169,32 @@ paths:
         "201":
           description: "A transactions on the system"
           schema:
-            $ref: "#/definitions/Transaction"
+            type: "array"
+            items:
+              $ref: "#/definitions/Transaction"
+        "400":
+          description: "Invalid request"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/DepositError"
   /users/{discordId}/transfer:
     post:
       tags:
         - "transfers"
       summary: "Bulk create transfers"
-      description: ""
+      description: |
+        This method allows multiple instant transfers from a single originating discordId to be created which sends space bucks from the originating users to one more other discordIds.
+
+        If any of the destination discordIds don't currently exist that's not an issue, this method will handle creating the users and adding their space bucks from the transfer.
+
+        If the originating discordId doesn't have enough space bucks either in raw balance of they have pending transactions then a 409 error is returned.
+
+        If there's a validation error with the input then a 400 error is returned instead.
+
+        If any errors are hit updating the any of the transactions in the batch then the entire transaction is rolledback.
+
+        Otherwise it returns a 201 when completed successfully.
       operationId: "bulkTransfer"
       produces:
         - "application/json"
@@ -180,12 +224,33 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Transaction"
+        "400":
+          description: "Invalid request"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/TransferError"
+        "409":
+          description: "Insufficient funds"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/TransferError"
   /users/{discordId}/transfer/{toDiscordId}:
     post:
       tags:
         - "transfers"
       summary: "Transfer funds"
-      description: ""
+      description: |
+        This method allows an instant transfer to be created which sends space bucks from one user to another.
+
+        If the destination discordId doesn't currently exist that's not an issue, this method will handle creating the user and adding their space bucks from the transfer.
+
+        If the originating discordId doesn't have enough space bucks either in raw balance of they have pending transactions then a 409 error is returned.
+
+        If there's a validation error with the input then a 400 error is returned instead.
+
+        Otherwise it returns a 201 when completed successfully.
       operationId: "transferToUser"
       produces:
         - "application/json"
@@ -220,12 +285,25 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Transaction"
+        "400":
+          description: "Invalid request"
+          schema:
+            $ref: "#/definitions/TransferError"
+        "409":
+          description: "Insufficient funds"
+          schema:
+            $ref: "#/definitions/TransferError"
   /transactions:
     get:
       tags:
         - "transactions"
       summary: "List all transactions"
-      description: ""
+      description: |
+        Provides the ability to list transactions in the system based on one or more attributes.
+
+        If there's a validation error with the input then a 400 error is returned instead.
+
+        Otherwise it returns a 200 when completed successfully.
       operationId: "listTransactions"
       produces:
         - "application/json"
@@ -245,11 +323,21 @@ paths:
           description: "transaction_status"
           required: false
           type: "string"
+          enum:
+            - "pending"
+            - "complete"
+            - "rejected"
+            - "cancelled"
         - name: "transaction_type"
           in: "query"
           description: "transaction_type"
           required: false
           type: "string"
+          enum:
+            - "credit"
+            - "debit"
+            - "withdrawal"
+            - "deposit"
       security:
         - api_key: []
       responses:
@@ -259,11 +347,24 @@ paths:
             type: "array"
             items:
               $ref: "#/definitions/Transaction"
+        "400":
+          description: "Invalid input error"
+          schema:
+            $ref: "#/definitions/TransactionSearchError"
     put:
       tags:
         - "transactions"
       summary: "Bulk update Transactions"
-      description: ""
+      description: |
+        This method allows bulk updating transactions which are in the "pending" transaction_state only (this is enforced in the backend) in bulk.
+
+        If the destination discordId doesn't currently exist that's not an issue, this method will handle creating the user and adding their space bucks from the transfer.
+
+        If the originating discordId doesn't have enough space bucks either in raw balance of they have pending transactions then a 409 error is returned.
+
+        If any errors are hit updating the any of the transactions in the batch then the entire transaction is rolledback.
+
+        Otherwise it returns a 200 when completed successfully.
       operationId: "bulkUpdateTransaction"
       produces:
         - "application/json"
@@ -287,9 +388,19 @@ paths:
                   transaction_status:
                     type: "string"
                     example: "pending"
+                    enum:
+                      - "pending"
+                      - "complete"
+                      - "rejected"
+                      - "cancelled"
                   transaction_type:
                     type: "string"
                     example: "deposit"
+                    enum:
+                      - "credit"
+                      - "debit"
+                      - "withdrawal"
+                      - "deposit"
               transaction_status:
                 type: "string"
                 example: "complete"
@@ -300,12 +411,25 @@ paths:
           description: "The updated transaction"
           schema:
             $ref: "#/definitions/Transaction"
+        "404":
+          description: "Transaction not found"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/TransactionError"
   /transactions/{transactionId}:
     put:
       tags:
         - "transactions"
       summary: "Update a Transaction"
-      description: ""
+      description: |
+        This method allows updating an individual transaction which is in the "pending" transaction_state only (this is enforced in the backend).
+
+        If the destination discordId doesn't currently exist that's not an issue, this method will handle creating the user and adding their space bucks from the transaction.
+
+        If there the transactionId can't be found then a 404 is returned.
+
+        Otherwise it returns a 200 when completed successfully.
       operationId: "updateTransaction"
       produces:
         - "application/json"
@@ -324,6 +448,11 @@ paths:
             properties:
               transaction_status:
                 type: "string"
+                enum:
+                  - "pending"
+                  - "complete"
+                  - "rejected"
+                  - "cancelled"
                 example: "complete"
       security:
         - api_key: []
@@ -332,12 +461,19 @@ paths:
           description: "The updated transaction"
           schema:
             $ref: "#/definitions/Transaction"
+        "404":
+          description: "Transaction not found"
+          schema:
+            $ref: "#/definitions/TransactionError"
   /ledger/import:
     post:
       tags:
         - "ledger"
       summary: "Bulk import the ledger"
-      description: ""
+      description: |
+        This method allows us to truncate the entire database and re-run the import from the ledger in Google docs.
+
+        Returns a 200 when successful, otherwise it returns something >= 400 depending on the error.
       operationId: "importLedger"
       produces:
         - "application/json"
@@ -384,23 +520,31 @@ definitions:
       value:
         type: "integer"
         format : "int64"
-        minimum: 1
         example: 69420
+      note:
+        type: "string"
+      transaction_type:
+        type: "string"
+        description: "Transaction Type"
+        enum:
+          - "credit"
+          - "debit"
+          - "withdrawal"
+          - "deposit"
+      transaction_status:
+        type: "string"
+        description: "Transaction Status"
+        enum:
+          - "pending"
+          - "complete"
+          - "rejected"
+          - "cancelled"
       createdAt:
         type: "string"
         format: "date-time"
       updatedAt:
         type: "string"
         format: "date-time"
-      transaction_status:
-        type: "string"
-        description: "Transaction Status"
-        enum:
-          - "created"
-          - "pending"
-          - "approved"
-          - "rejected"
-          - "cancelled"
   User:
     type: "object"
     properties:
@@ -425,3 +569,79 @@ definitions:
       updatedAt:
         type: "string"
         example: "2021-01-24T19:44:21.456Z"
+  TransactionError:
+    type: "object"
+    properties:
+      transaction_id:
+        type: "integer"
+        format : "int64"
+        example: 69420
+      transaction_status:
+        type: "string"
+        example: "complete"
+      message:
+        type: "string"
+        example: "No pending transaction found."
+  TransactionSearchError:
+    type: "object"
+    properties:
+      source_discord_id:
+        type: "string"
+        example: "<@!123456789012345678>"
+      target_discord_id:
+        type: "string"
+        example: "<@!123456789012345678>"
+      transaction_status:
+        type: "string"
+        example: "pending"
+      transaction_type:
+        type: "string"
+        example: "withdrawal"
+  DepositError:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+        example: "Invalid deposit amount must be greater than or equal to 0."
+      discord_id:
+        type: "string"
+        example: "<@!123456789012345678>"
+      note:
+        type: "string"
+        example: "deposit"
+      value:
+        type: "integer"
+        format : "int64"
+        example: -420
+  WithdrawError:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+        example: "Invalid withdrawal amount must be greater than or equal to 0."
+      discord_id:
+        type: "string"
+        example: "<@!123456789012345678>"
+      note:
+        type: "string"
+        example: "withdrawal"
+      value:
+        type: "integer"
+        format : "int64"
+        example: -420
+  TransferError:
+    type: "object"
+    properties:
+      message:
+        type: "string"
+        example: "Initiating user has insufficient balance for the transaction"
+      from_discord_id:
+        type: "string"
+        example: "<@!123456789012345678>"
+      to_discord_id:
+        type: "string"
+        example: "<@!123456789012345678>"
+      value:
+        type: "integer"
+        format : "int64"
+        example: -420

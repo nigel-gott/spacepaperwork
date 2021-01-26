@@ -1,0 +1,44 @@
+{% extends "core/base.html" %}
+{% load base_extras %}
+{% load static %}
+{% load materializecss %}
+{% block body %}
+<div class="row">
+    <div class="col s12 m12">
+        <h5>Deposit Eggs</h5>
+        <div class="divider"></div>
+        <p>To deposit eggs (turn your in-game isk into eggs) you must:</p>
+        <ol>
+            <li>Donate the isk you want to turn into eggs to any of the in-game corps (MEAN,HONK,XBUX,HAUS,GOOP).</li>
+            <li> Take a screenshot of the donation making sure the quantity, corp and time of donation are visible.</li>
+            <li>Upload the screenshot to an image sharing website like imgur.</li>
+            <li>Paste a link to the image in the notes section below.</li>
+            <li>Enter the same quantity in the field below.</li>
+            <li>Click submit and wait for approval from an admin who will check the donation.</li>
+        </ol>
+    </div>
+</div>
+<div class="row">
+    <div class="col s12 m12">
+        <form action="" method="post">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="row">
+                <div class="input-field col s12">
+                    {{ field.errors }}
+                    {{ field }}
+                    {{ field.label_tag }}
+                    {% if field.help_text %}
+                    <p class="help">{{ field.help_text|safe }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% endfor %}
+            <button class="btn waves-effect waves-light" type="submit" value="Submit">Submit
+                <i class="material-icons right">send</i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

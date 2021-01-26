@@ -1,0 +1,141 @@
+{% extends "core/base.html" %}
+{% load base_extras %}
+{% load static %}
+{% load materializecss %}
+{% block body %}
+<div class="row">
+    <div class="col s12 m12">
+        <h5>Pending Transactions</h5>
+        <a href="{% url 'venmo:dashboard' %}">Back To Venmo Dashboard</a>
+        <div class="divider"></div>
+    </div>
+</div>
+    <div class="col s12 m12">
+        <table id="transactions_table"></table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrafooter %}
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"> </script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+{{ page_data|json_script:"page-data" }}
+<script>
+function numberWithCommas(x) {
+    var x = x.toString();
+    var x = x.replace(/,/g, '');
+    return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+function render_link(prefix, row){
+    discord_id = row[prefix+'_discord_id'];
+    gooseuser_id = row[prefix+'_gooseuser_id'];
+    if(gooseuser_id){
+        return `<a href="/venmo/user/${gooseuser_id}/dashboard">${discord_id}</a>`;
+    } else{
+        return discord_id;
+    }
+}
+$(function() {
+    const page_data = JSON.parse(document.getElementById('page-data').textContent);
+    columns = [
+            { "data": "transaction_status", "title": "Status" },
+            { "data": "transaction_type", "title": "Type" },
+            { "data": "createdAt", "title":"createdAt" },
+            { "data": "updatedAt", "title":"updatedAt"},
+            { "data": "source_discord_id", "title": "From -> To",
+                render: function ( data, type, row ) {
+                    source = render_link('source', row);
+                    target = render_link('target', row);
+                    if(source===target){
+                        return 'N/A';
+                    } else {
+                        return `From ${source} to ${target}`;
+                    }
+                }
+            } ,
+            { "data": "note", "title":"Note"} ,
+            { "data": "value", "title":"Quantity",
+                render: function ( data, type, row ) {
+                    value = row['value']
+                    return `Ƶ ${numberWithCommas(value)}`;
+                },
+                className: "right-align"
+
+            } ,
+            { "data": "transaction_id", "title":"Approve/Deny",
+                render: function ( data, type, row ) {
+                    return '<button class="approve-btn waves-btn btn green">Approve</button><button class="deny-btn waves-btn btn red">Deny</button>';
+                }
+           } ,
+    ];
+    table = $('#transactions_table').DataTable( {
+        pageLength: 50,
+        ajax: {
+            url: "{% url 'venmo:pending-list' %}",
+            dataSrc: 'result',
+        },
+        columns: columns,
+        order: [[ 3, "desc" ]]
+    } );
+    $('#transactions_table').on( 'click', '.approve-btn', function () {
+        const row = table.row( $(this).parents('tr') );
+        var data = row.data();
+        approve(row, table);
+    });
+
+    $('#transactions_table').on( 'click', '.deny-btn', function () {
+        const row = table.row( $(this).parents('tr') );
+        var data = row.data();
+        deny(row, table);
+    });
+
+
+
+});
+
+function django_request(url){
+    const csrftoken = Cookies.get('csrftoken');
+    return new Request(
+        url,
+        {headers: {'X-CSRFToken': csrftoken}}
+    );
+}
+function json_django_request(url){
+    const csrftoken = Cookies.get('csrftoken');
+    return new Request(
+        url,
+        {headers: {'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json'
+        }}
+    );
+}
+function approve(row, table){
+    update(row, table, "/approve");
+}
+function deny(row, table, type){
+    update(row, table, "/deny");
+}
+
+function update(row, table, type){
+    const id = row.data()['transaction_id'];
+    const request = django_request(id + type);
+    fetch(request, {
+        method: 'PUT',
+        mode: 'same-origin'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw Error(response.statusText);
+        }
+        row.remove();
+        table.draw();
+    }).catch(function(error) {
+        console.log(error);
+    });
+}
+
+</script>
+
+{% endblock %}

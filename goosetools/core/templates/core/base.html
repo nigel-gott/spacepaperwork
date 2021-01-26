@@ -104,9 +104,10 @@
             </li>
             {% all_sales user as all_sales_num %}
             <li><a class="dropdown-trigger valign-wrapper" data-target="dropdown_sales" href="#!">
-                <i class="material-icons left" style="margin-right:0px;">attach_money</i>Sales ({{all_sales_num}})
+                <i class="material-icons left" style="margin-right:0px;">shopping_cart</i>Sales ({{all_sales_num}})
                 <i class="material-icons right">arrow_drop_down</i>
                 </a></li>
+            <li><a  href="{% url 'venmo:dashboard' %}">Eggs<i class="material-icons left">attach_money</i>
             <li><a  href="{% url 'industry:shiporders_view' %}">Orders <i class="material-icons left">directions_boat</i>
             </a></li>
             <li>
@@ -180,6 +181,9 @@
         <li >
             <a href="{% url 'industry:shiporders_view' %}">Orders<i class="material-icons right">directions_boat</i></a>
         </li>
+        <li >
+            <a href="{% url 'venmo:dashboard' %}">Eggs<i class="material-icons right">attach_money</i></a>
+        </li>
 
         <li><div class="divider"></div></li>
         <li><a class="subheader">Fleets<i class="material-icons right">star</i></a></li>
@@ -201,7 +205,7 @@
             </a>
 
         <li><div class="divider"></div></li>
-        <li><a class="subheader">Sales<i class="material-icons right">attach_money</i></a></li>
+        <li><a class="subheader">Sales<i class="material-icons right">shopping_cart</i></a></li>
 
         {% num_items user as num_to_sell %}
         <li ><a href="{% url 'items' %}">Your Loot To Sell

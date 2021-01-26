@@ -1,0 +1,130 @@
+{% extends "core/base.html" %}
+{% load base_extras %}
+{% load static %}
+{% load materializecss %}
+{% block body %}
+<div class="row">
+    <div class="col s12 m12">
+        {% if gooseuser == user.gooseuser %}
+            <h5>Your Venmo Dashboard</h5>
+        {% else %}
+            <h5>{{gooseuser.display_name}}'s Venmo Transactions</h5>
+            <a href="{% url 'venmo:dashboard' %}">Back To Your Venmo Dashboard</a>
+        {% endif %}
+        <div class="divider"></div>
+    </div>
+</div>
+<div class="row">
+    <div class="col s12 m1">
+        <img class="avatar" src="{{gooseuser.discord_avatar_url}}" style="width: 100%"/>
+    </div>
+    <div class="col s12 m8">
+        <b>{{gooseuser.display_name}}</b><br/>
+        Current Balance:  Ƶ {{venmo_user_balance.balance|nicemoney}} / ({{venmo_user_balance.balance|commanumber}})<br/>
+        Available Balance: Ƶ {{venmo_user_balance.balance|nicemoney}} / ({{venmo_user_balance.availableBalance|commanumber}})<br/>
+        Pending Balance : Ƶ {{venmo_user_balance.netPendingChange|nicemoney}} / ({{venmo_user_balance.netPendingChange|commanumber}})<br/>
+    </div>
+    <div class="col s12 m3">
+        <b>Available Actions</b><br/>
+        <a href="{% url 'venmo:withdraw' %}">Withdraw Eggs as Isk</a><br/>
+        <a href="{% url 'venmo:transfer' %}">Transfer Eggs to Someone</a><br/>
+        <a href="{% url 'venmo:deposit' %}">Deposit Eggs</a><br/>
+        {% if user.is_superuser %}
+            <a href="{% url 'venmo:pending' %}">Approve/Deny Pending Transactions</a><br/>
+        {% endif %}
+    </div>
+    <div class="col s12 m12">
+        <table id="transactions_table"></table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrafooter %}
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"> </script>
+{{ page_data|json_script:"page-data" }}
+<script>
+function numberWithCommas(x) {
+    var x = x.toString();
+    var x = x.replace(/,/g, '');
+    return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+function render_link_if_other_user(page_data, prefix, row){
+    discord_id = row[prefix+'_discord_id'];
+    gooseuser_id = row[prefix+'_gooseuser_id'];
+    if(gooseuser_id && gooseuser_id != page_data['gooseuser_id']){
+        return `<a href="/venmo/user/${gooseuser_id}/dashboard">${discord_id}</a>`;
+    } else{
+        return discord_id;
+    }
+}
+$(function() {
+    const page_data = JSON.parse(document.getElementById('page-data').textContent);
+    columns = [
+            { "data": "transaction_status", "title": "Status" },
+            { "data": "transaction_type", "title": "Type" },
+            { "data": "updatedAt", "title":"Time",
+                render: function ( data, type, row ) {
+                    createdAt = row['createdAt'];
+                    updatedAt = row['updatedAt'];
+                    if(createdAt < updatedAt){
+                        return updatedAt;
+                    } else {
+                        return createdAt;
+                    }
+                }
+            },
+            { "data": "source_discord_id", "title": "From -> To",
+                render: function ( data, type, row ) {
+                    source = render_link_if_other_user(page_data, 'source', row);
+                    target = render_link_if_other_user(page_data, 'target', row);
+                    if(source===target){
+                        return 'N/A';
+                    } else {
+                        return `From ${source} to ${target}`;
+                    }
+                }
+            } ,
+            { "data": "note", "title":"Note"} ,
+            { "data": "value", "title":"Quantity",
+                render: function ( data, type, row ) {
+                    value = row['value'];
+                    return `Ƶ ${numberWithCommas(value)}`;
+                },
+                className: "right-align"
+
+            } ,
+    ];
+    table = $('#transactions_table').DataTable( {
+        pageLength: 50,
+        ajax: {
+            url: "{% url 'venmo:transactions-list' gooseuser.pk %}",
+            dataSrc: 'result',
+        },
+        columns: columns,
+        order: [[ 2, "desc" ]]
+    } );
+
+
+});
+
+function django_request(url){
+    const csrftoken = Cookies.get('csrftoken');
+    return new Request(
+        url,
+        {headers: {'X-CSRFToken': csrftoken}}
+    );
+}
+function json_django_request(url){
+    const csrftoken = Cookies.get('csrftoken');
+    return new Request(
+        url,
+        {headers: {'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json'
+        }}
+    );
+}
+</script>
+
+{% endblock %}

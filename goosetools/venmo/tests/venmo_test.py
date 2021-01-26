@@ -39,8 +39,10 @@ class VenmoTest(GooseToolsTestCase):
                     },
                     additional_matcher=match_api_token_header,
                 )
-                response = self.get(reverse("venmo:transactions"))
-                self.assertEqual(response.context["balance"], 10)
+                response = self.get(reverse("venmo:dashboard"))
+                self.assertIn(
+                    "Current Balance:  Ƶ 10", str(response.content, encoding="utf-8")
+                )
 
     def test_when_displaying_the_users_transactions_venmo_server_is_queried_for_the_users_balance(
         self,
@@ -61,5 +63,7 @@ class VenmoTest(GooseToolsTestCase):
                     "content-type": "application/json",
                 },
             )
-            response = self.get(reverse("venmo:transactions"))
-            self.assertEqual(response.context["balance"], 10)
+            response = self.get(reverse("venmo:dashboard"))
+            self.assertIn(
+                "Current Balance:  Ƶ 10", str(response.content, encoding="utf-8")
+            )
