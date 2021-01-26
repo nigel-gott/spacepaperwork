@@ -60,7 +60,7 @@ function render_link_if_other_user(page_data, prefix, row){
     discord_id = row[prefix+'_discord_id'];
     gooseuser_id = row[prefix+'_gooseuser_id'];
     if(gooseuser_id && gooseuser_id != page_data['gooseuser_id']){
-        return `<a href="/venmo/user/${gooseuser_id}/dashboard">${discord_id}</a>`;
+        return `<a href="${page_data['site_prefix']}venmo/user/${gooseuser_id}/dashboard">${discord_id}</a>`;
     } else{
         return discord_id;
     }

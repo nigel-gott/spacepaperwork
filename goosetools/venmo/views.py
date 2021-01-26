@@ -48,7 +48,10 @@ def dashboard(request, gooseuser):
         request,
         "venmo/dashboard.html",
         {
-            "page_data": {"gooseuser_id": gooseuser.id},
+            "page_data": {
+                "gooseuser_id": gooseuser.id,
+                "site_prefix": settings.URL_PREFIX or "/",
+            },
             "gooseuser": gooseuser,
             "venmo_user_balance": venmo_user_balance,
         },

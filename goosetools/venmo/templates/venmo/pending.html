@@ -28,11 +28,11 @@ function numberWithCommas(x) {
     var x = x.replace(/,/g, '');
     return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
-function render_link(prefix, row){
+function render_link(page_data, prefix, row){
     discord_id = row[prefix+'_discord_id'];
     gooseuser_id = row[prefix+'_gooseuser_id'];
     if(gooseuser_id){
-        return `<a href="/venmo/user/${gooseuser_id}/dashboard">${discord_id}</a>`;
+        return `<a href="${page_data['site_prefix']}venmo/user/${gooseuser_id}/dashboard">${discord_id}</a>`;
     } else{
         return discord_id;
     }
@@ -46,8 +46,8 @@ $(function() {
             { "data": "updatedAt", "title":"updatedAt"},
             { "data": "source_discord_id", "title": "From -> To",
                 render: function ( data, type, row ) {
-                    source = render_link('source', row);
-                    target = render_link('target', row);
+                    source = render_link(page_data, 'source', row);
+                    target = render_link(page_data, 'target', row);
                     if(source===target){
                         return 'N/A';
                     } else {
