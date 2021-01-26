@@ -75,6 +75,12 @@ $(function() {
         ajax: {
             url: "{% url 'venmo:pending-list' %}",
             dataSrc: 'result',
+            error: function (xhr, error, code)
+            {
+                console.log(xhr);
+                console.log(code);
+                alert("An error occured getting the data from venmo.")
+            }
         },
         columns: columns,
         order: [[ 3, "desc" ]]
