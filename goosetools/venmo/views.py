@@ -50,7 +50,7 @@ def dashboard(request, gooseuser):
         {
             "page_data": {
                 "gooseuser_id": gooseuser.id,
-                "site_prefix": settings.URL_PREFIX or "/",
+                "site_prefix": f"/{settings.URL_PREFIX}",
             },
             "gooseuser": gooseuser,
             "venmo_user_balance": venmo_user_balance,
