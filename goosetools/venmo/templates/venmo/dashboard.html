@@ -23,6 +23,12 @@
         Current Balance:  Ƶ {{venmo_user_balance.balance|nicemoney}} / ({{venmo_user_balance.balance|commanumber}})<br/>
         Available Balance: Ƶ {{venmo_user_balance.balance|nicemoney}} / ({{venmo_user_balance.availableBalance|commanumber}})<br/>
         Pending Balance : Ƶ {{venmo_user_balance.netPendingChange|nicemoney}} / ({{venmo_user_balance.netPendingChange|commanumber}})<br/>
+        {% if gooseuser != user.gooseuser %}
+            Their Characters:
+            {% for character in gooseuser.characters %}
+                [{{character.corp}}] {{character.ingame_name}}{% if not forloop.last %}, {%endif%}
+            {% endfor %}
+        {% endif %}
     </div>
     <div class="col s12 m3">
         <b>Available Actions</b><br/>
