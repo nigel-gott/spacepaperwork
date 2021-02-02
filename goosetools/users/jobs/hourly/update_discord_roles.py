@@ -39,6 +39,10 @@ def _setup_user_groups_from_discord_guild_roles(
 
 def _setup_new_permissions(role_id: str, gooseuser: GooseUser, log_output: bool):
     groups = GooseGroup.objects.filter(linked_discord_role__discord_role_uid=role_id)
+    if log_output:
+        print(
+            f"Setting up new permissions for {role_id}, {gooseuser}, and found {groups}"
+        )
     for group in groups.all():
         if log_output:
             print(f"New: Giving {group.name} to {gooseuser}")
