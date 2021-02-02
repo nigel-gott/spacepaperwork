@@ -99,6 +99,8 @@ class GooseToolsTestCase(DjangoTestCase):
         self.system = System.objects.create(name="Test System", region=region)
         self.client.force_login(self.site_user)
         self.logged_in_user = self.user
+        self.user.cache_fields_from_social_account()
+        self.other_user.cache_fields_from_social_account()
 
     def a_fleet(
         self,

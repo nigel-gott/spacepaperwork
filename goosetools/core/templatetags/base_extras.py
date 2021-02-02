@@ -77,7 +77,10 @@ def formatmoney(value):
 
 @register.filter()
 def commanumber(value):
-    return "{:,}".format(value)
+    if value:
+        return "{:,}".format(value)
+    else:
+        return ""
 
 
 @register.filter()

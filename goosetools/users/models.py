@@ -1,11 +1,12 @@
 import logging
-from functools import wraps
+from functools import partial, wraps
 
 import requests
 from django.contrib.auth.models import Group
 from django.db import models
 from django.http.response import HttpResponseForbidden
 from django.utils import timezone
+from rest_framework.permissions import BasePermission
 from timezone_field import TimeZoneField
 
 from goosetools.tenants.models import SiteUser
@@ -111,7 +112,6 @@ def has_perm(perm: str):
     def outer_wrapper(function):
         @wraps(function)
         def wrap(request, *args, **kwargs):
-            print(f"CHECKING {request}")
             if request.gooseuser.has_perm(perm):
                 return function(request, *args, **kwargs)
             else:
@@ -120,6 +120,19 @@ def has_perm(perm: str):
         return wrap
 
     return outer_wrapper
+
+
+class HasGooseToolsPerm(BasePermission):
+    @staticmethod
+    def of(perm):
+        return partial(HasGooseToolsPerm, perm)
+
+    def __init__(self, perm: str) -> None:
+        super().__init__()
+        self.perm = perm
+
+    def has_permission(self, request, view):
+        return request.gooseuser and request.gooseuser.has_perm(self.perm)
 
 
 class UserPermission(models.Model):
@@ -196,6 +209,10 @@ class GooseUser(models.Model):
         ],
         default="unapproved",
     )
+    cached_username = models.TextField()
+    uid = models.TextField()
+    nick = models.TextField()
+    avatar_hash = models.TextField()
     notes = models.TextField(null=True, blank=True)
     sa_profile = models.TextField(blank=True, null=True)
     voucher = models.ForeignKey(
@@ -219,7 +236,7 @@ class GooseUser(models.Model):
         return UserGroup.objects.get_or_create(user=self, group=group)
 
     def username(self):
-        return self.site_user.username
+        return self.cached_username
 
     def latest_app(self):
         # pylint: disable=no-member
@@ -255,43 +272,49 @@ class GooseUser(models.Model):
     def _discord_account(self):
         return self.site_user.socialaccount_set.get(provider="discord")
 
+    def cache_fields_from_social_account(self):
+        discord_account = self._discord_account()
+        self.uid = discord_account.uid
+        extra_data = discord_account.extra_data
+        username = extra_data.get("username")
+        discriminator = extra_data.get("discriminator")
+        self.cached_username = "{}#{}".format(username, discriminator)
+        self.nick = self.cached_username
+        if "nick" in extra_data:
+            nick = extra_data["nick"]
+            if nick and nick.strip():
+                self.nick = nick.strip()
+        self.avatar_hash = GooseUser._construct_avatar_url(
+            extra_data, discord_account.uid
+        )
+        self.save()
+
     def discord_uid(self):
-        return self._discord_account().uid
+        return self.uid
 
     def discord_username(self):
-        username = self._extra_data().get("username")
-        discriminator = self._extra_data().get("discriminator")
-        return "{}#{}".format(username, discriminator)
+        return self.cached_username
 
     def display_name(self):
-        if "nick" in self._extra_data():
-            nick = self._extra_data()["nick"]
-            if nick and nick.strip():
-                return nick.strip()
-        return self.discord_username()
+        return self.nick
 
     def discord_avatar_url(self):
-        return self._construct_avatar_url()
-
-    def _extra_data(self):
-        return self._discord_account().extra_data
-
-    def _discord_discriminator(self):
-        return self._extra_data()["discriminator"]
-
-    def _avatar_hash(self):
-        return "avatar" in self._extra_data() and self._extra_data()["avatar"]
+        return self.avatar_hash
 
     # default avatars look like this: https://cdn.discordapp.com/embed/avatars/3.png
     # there is a bug with discord's size selecting mechanism for these, doing 3.png?size=16 still returns a full size default avatar.
-    def _has_default_avatar(self):
-        return not self._avatar_hash() or len(str(self._avatar_hash())) == 1
+    @staticmethod
+    def _has_default_avatar(avatar_hash):
+        return not avatar_hash or len(str(avatar_hash)) == 1
 
-    def _construct_avatar_url(self):
-        if self._has_default_avatar():
-            avatar_number = int(self._discord_discriminator()) % 5
+    @staticmethod
+    def _construct_avatar_url(extra_data, uid):
+        avatar_hash = "avatar" in extra_data and extra_data["avatar"]
+        discriminator = extra_data.get("discriminator")
+        if GooseUser._has_default_avatar(avatar_hash):
+            avatar_number = int(discriminator) % 5
             return f"https://cdn.discordapp.com/embed/avatars/{avatar_number}.png"
-        return f"https://cdn.discordapp.com/avatars/{self.discord_uid()}/{self._avatar_hash()}.png"
+        return f"https://cdn.discordapp.com/avatars/{uid}/{avatar_hash}.png"
 
     def __str__(self) -> str:
         return self.display_name()

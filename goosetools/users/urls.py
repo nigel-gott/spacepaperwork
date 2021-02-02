@@ -1,7 +1,10 @@
 from django.urls import path
+from django.urls.conf import include
+from rest_framework import routers
 
 from goosetools.users.autocomplete import CharacterAutocomplete, UsernameAutocomplete
 from goosetools.users.views import (
+    GooseUserQuerySet,
     application_update,
     auth_settings_view,
     character_edit,
@@ -12,13 +15,18 @@ from goosetools.users.views import (
     corp_application_update,
     settings_view,
     user_application_list,
+    user_dashboard,
     user_signup,
     user_view,
 )
 
+router = routers.DefaultRouter()
+router.register(r"gooseuser", GooseUserQuerySet)
+
 urlpatterns = [
     path("auth/settings/", auth_settings_view, name="auth_settings"),
     path("settings/", settings_view, name="settings"),
+    path("user/dashboard", user_dashboard, name="user_dashboard"),
     path("user/<int:pk>", user_view, name="user_view"),
     path("characters/edit/<int:pk>", character_edit, name="character_edit"),
     path("users/new/", user_signup, name="user_signup"),
@@ -45,4 +53,5 @@ urlpatterns = [
         UsernameAutocomplete.as_view(),
         name="username-autocomplete",
     ),
+    path("gooseuser/", include((router.urls))),
 ]

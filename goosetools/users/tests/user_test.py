@@ -21,7 +21,7 @@ class FleetTest(TestCase):
             },
             user_id=s.pk,
         )
-        user.refresh_from_db()
+        user.cache_fields_from_social_account()
         self.assertEqual(
             user.discord_avatar_url(),
             "https://cdn.discordapp.com/embed/avatars/1.png",
@@ -45,7 +45,7 @@ class FleetTest(TestCase):
             },
             user=s,
         )
-        user.refresh_from_db()
+        user.cache_fields_from_social_account()
         self.assertEqual(
             user.discord_avatar_url(),
             "https://cdn.discordapp.com/embed/avatars/1.png",
@@ -67,7 +67,7 @@ class FleetTest(TestCase):
             },
             user=s,
         )
-        user.refresh_from_db()
+        user.cache_fields_from_social_account()
         self.assertEqual(
             user.discord_avatar_url(),
             "https://cdn.discordapp.com/avatars/1/custom.png",

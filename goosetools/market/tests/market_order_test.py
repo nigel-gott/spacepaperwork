@@ -111,6 +111,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
                 },
                 user_id=s.pk,
             )
+            user.cache_fields_from_social_account()
             self.a_loot_share(loot_group, char, share_quantity=1)
 
         # When the item gets sold and the profit transfered

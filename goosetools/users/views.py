@@ -1,8 +1,13 @@
 from itertools import groupby
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import permission_required
+from django.contrib.postgres.aggregates import StringAgg
 from django.db import transaction
+from django.db.models.expressions import F, Value
+from django.db.models.fields import CharField
+from django.db.models.functions import Concat
 from django.db.models.query_utils import Q
 from django.http.response import (
     HttpResponseBadRequest,
@@ -13,6 +18,10 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import ListView
+from rest_framework import mixins
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 
 from goosetools.users.forms import (
     AddEditCharacterForm,
@@ -29,9 +38,11 @@ from goosetools.users.models import (
     CorpApplication,
     DiscordGuild,
     GooseUser,
+    HasGooseToolsPerm,
     UserApplication,
     has_perm,
 )
+from goosetools.users.serializers import GooseUserSerializer
 
 
 def user_signup(request):
@@ -75,6 +86,7 @@ def user_signup(request):
                         "transaction_tax": data["transaction_tax"],
                     },
                 )
+                gooseuser.cache_fields_from_social_account()
                 application = UserApplication(
                     user=gooseuser,
                     status="unapproved",
@@ -89,7 +101,6 @@ def user_signup(request):
                 _give_pronoun_roles(gooseuser.discord_uid(), data["prefered_pronouns"])
                 application.full_clean()
                 application.save()
-                print("MADE AND SAVED")
                 return HttpResponseRedirect(reverse("core:home"))
     else:
         initial = {}
@@ -342,3 +353,67 @@ def character_search(request):
         "users/character_search.html",
         {"form": form, "characters": characters, "users": users},
     )
+
+
+@has_perm(perm=USER_ADMIN_PERMISSION)
+def user_dashboard(request):
+    return render(
+        request,
+        "users/dashboard.html",
+        {
+            "page_data": {
+                "gooseuser_id": request.gooseuser.id,
+                "site_prefix": f"/{settings.URL_PREFIX}",
+            },
+            "gooseuser": request.gooseuser,
+        },
+    )
+
+
+def build_query_for_all_users_annotated_with_their_characters():
+    return GooseUser.objects.annotate(
+        char_names=StringAgg(
+            Concat(
+                Value("["),
+                F("character__corp"),
+                Value("] "),
+                F("character__ingame_name"),
+                output_field=CharField(),
+            ),
+            delimiter=", ",
+        )
+    ).all()
+
+
+class GooseUserQuerySet(
+    mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet
+):
+    permission_classes = [HasGooseToolsPerm.of(USER_ADMIN_PERMISSION)]
+    queryset = build_query_for_all_users_annotated_with_their_characters()
+
+    serializer_class = GooseUserSerializer
+
+    @action(detail=True, methods=["PUT"])
+    @transaction.atomic
+    # pylint: disable=unused-argument
+    def ban(self, request, pk=None):
+        return self._change_status("rejected")
+
+    @action(detail=True, methods=["PUT"])
+    @transaction.atomic
+    # pylint: disable=unused-argument
+    def approve(self, request, pk=None):
+        return self._change_status("approved")
+
+    @action(detail=True, methods=["PUT"])
+    @transaction.atomic
+    # pylint: disable=unused-argument
+    def unapprove(self, request, pk=None):
+        return self._change_status("unapproved")
+
+    def _change_status(self, status):
+        goose_user = self.get_object()
+        goose_user.status = status
+        goose_user.save()
+        serializer = self.get_serializer(goose_user)
+        return Response(serializer.data)

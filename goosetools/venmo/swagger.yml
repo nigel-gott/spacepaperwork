@@ -137,6 +137,10 @@ paths:
           description: "Invalid request"
           schema:
             $ref: "#/definitions/WithdrawError"
+        "409":
+          description: "Insufficient balance"
+          schema:
+            $ref: "#/definitions/WithdrawError"
   /deposit:
     post:
       tags:
@@ -221,9 +225,18 @@ paths:
         "201":
           description: "A list of transactions on the system"
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Transaction"
+            type: "object"
+            properties:
+              fromUser:
+                $ref: "#/definitions/User"
+              toUsers:
+                type: "array"
+                items:
+                  $ref: "#/definitions/User"
+              transactions:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Transaction"
         "400":
           description: "Invalid request"
           schema:
@@ -529,9 +542,28 @@ paths:
         - api_key: []
       responses:
         "200":
-          description: "A transactions on the system"
+          description: "Summary of what was imported from the ledger"
           schema:
-            $ref: "#/definitions/Transaction"
+            $ref: "#/definitions/LedgerImport"
+  /assets/report:
+    get:
+      tags:
+        - "ledger"
+      summary: "Summarize assets"
+      description: |
+        Runs a summarized report on the current assets held within the Goose Venmo database.
+
+        Returns a 200 when successful, otherwise it returns something >= 400 depending on the error.
+      operationId: "assetsReport"
+      produces:
+        - "application/json"
+      security:
+        - api_key: [ ]
+      responses:
+        "200":
+          description: "The assets report"
+          schema:
+            $ref: "#/definitions/AssetsReport"
 securityDefinitions:
   api_key:
     type: "apiKey"
@@ -604,6 +636,72 @@ definitions:
       updatedAt:
         type: "string"
         example: "2021-01-24T19:44:21.456Z"
+  LedgerImport:
+    type: "object"
+    properties:
+      numUsers:
+        type: "integer"
+        format: "int64"
+        description: A count of the number of unique users added to the system from the import
+        example: 229
+      numTransactions:
+        type: "integer"
+        format: "int64"
+        description: A count of the total number of all transactions added to the system from the import
+        example: 9529
+      importedBalance:
+        type: "integer"
+        format: "int64"
+        description: The total balance added to the system from the import
+        example: 9529
+  AssetsReport:
+    type: "object"
+    properties:
+      total_user_count:
+        type: "integer"
+        format: "int64"
+        description: A count of the number of unique users in the system with any balance (including negative and 0)
+        example: 229
+      total_transaction_count:
+        type: "integer"
+        format: "int64"
+        description: A count of the total number of all transactions recorded on the system
+        example: 9529
+      transaction_complete_count:
+        type: "integer"
+        format: "int64"
+        description: A count of the total number of all transactions recorded on the system with the status "complete"
+        example: 9529
+      transaction_pending_count:
+        type: "integer"
+        format: "int64"
+        description: A count of the total number of all transactions recorded on the system with the status "pending"
+        example: 0
+      transaction_other_count:
+        type: "integer"
+        format: "int64"
+        description: A count of the total number of all transactions recorded on the system without the status "pending" or "complete"
+        example: 0
+      accounts_total_balance:
+        type: "integer"
+        format: "int64"
+        description: The sum of all of the current balances for all users in the system
+        example: 293734463284
+      transactions_total_pending:
+        type: "integer"
+        format: "int64"
+        description: The sum of all transactions on the system with the status "pending"
+        example: 293734463284
+      transactions_total_complete:
+        type: "integer"
+        format: "int64"
+        description: The sum of all transactions on the system with the status "complete"
+        example: 293734463284
+      weird_users:
+        type: "array"
+        description: An array of any accounts which are not currently in good standing where the account balance is < 0
+        items:
+          $ref: "#/definitions/User"
   TransactionError:
     type: "object"
     properties:

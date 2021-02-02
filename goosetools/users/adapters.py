@@ -45,6 +45,8 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
 
 def _update_user_from_social_account(account, siteuser: SiteUser, request):
     _update_username_to_match_discord(account, siteuser, request)
+    if siteuser.has_gooseuser():
+        siteuser.gooseuser.cache_fields_from_social_account()
     try:
         guild = DiscordGuild.objects.get(active=True)
         _setup_user_groups_from_discord_guild_roles(siteuser, account.extra_data, guild)

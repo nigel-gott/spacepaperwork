@@ -44,18 +44,15 @@ def dashboard(request, gooseuser):
         discordId=discord_uid,
     )
     venmo_user_balance = venmo_user_balance_future.response().result
-    return render(
-        request,
-        "venmo/dashboard.html",
-        {
-            "page_data": {
-                "gooseuser_id": gooseuser.id,
-                "site_prefix": f"/{settings.URL_PREFIX}",
-            },
-            "gooseuser": gooseuser,
-            "venmo_user_balance": venmo_user_balance,
+    context = {
+        "page_data": {
+            "gooseuser_id": gooseuser.id,
+            "site_prefix": f"/{settings.URL_PREFIX}",
         },
-    )
+        "gooseuser": gooseuser,
+        "venmo_user_balance": venmo_user_balance,
+    }
+    return render(request, "venmo/dashboard.html", context=context)
 
 
 def other_dashboard(request, pk: int):
