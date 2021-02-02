@@ -40,7 +40,7 @@ $(function() {
             { "data": "display_name", "title": "Display Name"
             } ,
             { "data": "char_names", "title": "Characters" },
-            { "data": "status", "title": "Status"},
+            { "data": "status", "title": "Status", "give_filter":true},
             { "data": "sa_profile", "title": "SA Profile",
                 render: function ( data, type, row ) {
                     if(data){
@@ -88,7 +88,34 @@ $(function() {
         buttons: [
             'excelHtml5',
             'csvHtml5',
-        ]
+        ],
+        initComplete: function () {
+            const columns = table.settings().init().columns;
+            this.api().columns().every( function (index) {
+                const column_info = columns[index]
+                var column = this;
+                if(column_info["give_filter"]){
+                    var select = $('<label class="black-text">Status</label>')
+                        .appendTo( $(column.header()).empty() )
+                    var select = $('<select class="browser-default"><option value=""></option></select>')
+                        .appendTo( $(column.header()) )
+                        .on( 'change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                            column
+                                .search( val ? '^'+val+'$' : '', true, false )
+                                .draw();
+                        } );
+
+                    column.data().unique().sort().each( function ( d, j ) {
+                        select.append( '<option value="'+d+'">'+d+'</option>' )
+                    } );
+
+                }
+            } );
+        }
     } );
 
     function put_user_action(action){
