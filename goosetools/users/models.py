@@ -18,6 +18,9 @@ class DiscordRole(models.Model):
     name = models.TextField(unique=True)
     discord_role_uid = models.TextField(unique=True)
 
+    def __str__(self) -> str:
+        return f"{self.name} : {self.discord_role_uid}"
+
 
 class AuthConfig(models.Model):
     signup_required = models.BooleanField(default=True)
