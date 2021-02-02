@@ -9,12 +9,12 @@ from goosetools.users.models import (
     CorpApplication,
     DiscordGuild,
     DiscordRoleDjangoGroupMapping,
+    GooseGroup,
+    GoosePermission,
     GooseUser,
+    GroupMember,
+    GroupPermission,
     UserApplication,
-    UserGroup,
-    UserPermission,
-    UserPermissionGroup,
-    UserPermissionGroupMapping,
 )
 
 
@@ -47,10 +47,10 @@ admin.site.register(Character, CharacterAdmin)
 admin.site.register(UserApplication)
 admin.site.register(CorpApplication)
 admin.site.register(AuthConfig)
-admin.site.register(UserPermission)
-admin.site.register(UserPermissionGroup)
-admin.site.register(UserGroup)
-admin.site.register(UserPermissionGroupMapping)
+admin.site.register(GoosePermission)
+admin.site.register(GooseGroup)
+admin.site.register(GroupMember)
+admin.site.register(GroupPermission)
 
 
 class CustomUserAdmin(ModelAdmin):

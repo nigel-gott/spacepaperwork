@@ -85,17 +85,15 @@ class Corp(models.Model):
         return str(self.name)
 
 
-class UserPermissionGroup(models.Model):
+class GooseGroup(models.Model):
     name = models.TextField(unique=True)
     linked_discord_role = models.ForeignKey(
         DiscordRole, on_delete=models.CASCADE, null=True, blank=True
     )
 
-    def link_permission(self, permission_name):
-        perm, _ = UserPermission.objects.get_or_create(permission=permission_name)
-        UserPermissionGroupMapping.objects.get_or_create(
-            group=self, permission_id=perm.id
-        )
+    def link_permission(self, permission_name: str):
+        perm, _ = GoosePermission.objects.get_or_create(name=permission_name)
+        GroupPermission.objects.get_or_create(group=self, permission_id=perm.id)
 
     def __str__(self) -> str:
         return f"{self.name}"
@@ -135,7 +133,7 @@ class HasGooseToolsPerm(BasePermission):
         return request.gooseuser and request.gooseuser.has_perm(self.perm)
 
 
-class UserPermission(models.Model):
+class GoosePermission(models.Model):
     USER_PERMISSION_CHOICES = [
         (
             "basic_access",
@@ -166,21 +164,23 @@ class UserPermission(models.Model):
             "Able to add/remove ship types and set if they are free or not",
         ),
     ]
-    permission = models.TextField(unique=True, choices=USER_PERMISSION_CHOICES)
+    name = models.TextField(unique=True, choices=USER_PERMISSION_CHOICES)
     corp = models.OneToOneField(Corp, on_delete=models.CASCADE, null=True, blank=True)
 
     @staticmethod
     def ensure_populated():
-        for choice, _ in UserPermission.USER_PERMISSION_CHOICES:
-            UserPermission.objects.get_or_create(permission=choice)
+        for choice, _ in GoosePermission.USER_PERMISSION_CHOICES:
+            GoosePermission.objects.get_or_create(name=choice)
+            goose_group, _ = GooseGroup.objects.get_or_create(name=f"{choice} group")
+            goose_group.link_permission(choice)
 
     def __str__(self) -> str:
-        return self.permission
+        return self.name
 
 
-class UserPermissionGroupMapping(models.Model):
-    group = models.ForeignKey(UserPermissionGroup, on_delete=models.CASCADE)
-    permission = models.ForeignKey(UserPermission, on_delete=models.CASCADE)
+class GroupPermission(models.Model):
+    group = models.ForeignKey(GooseGroup, on_delete=models.CASCADE)
+    permission = models.ForeignKey(GoosePermission, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
         return f"Permission: {self.permission}, Group: {self.group}"
@@ -226,14 +226,14 @@ class GooseUser(models.Model):
     def has_perm(self, permission_name):
         # pylint: disable=no-member
         return (
-            self.usergroup_set.filter(
-                group__userpermissiongroupmapping__permission__permission=permission_name
+            self.groupmember_set.filter(
+                group__grouppermission__permission__name=permission_name
             ).count()
             > 0
         )
 
     def give_group(self, group):
-        return UserGroup.objects.get_or_create(user=self, group=group)
+        return GroupMember.objects.get_or_create(user=self, group=group)
 
     def username(self):
         return self.cached_username
@@ -320,8 +320,8 @@ class GooseUser(models.Model):
         return self.display_name()
 
 
-class UserGroup(models.Model):
-    group = models.ForeignKey(UserPermissionGroup, on_delete=models.CASCADE)
+class GroupMember(models.Model):
+    group = models.ForeignKey(GooseGroup, on_delete=models.CASCADE)
     user = models.ForeignKey(GooseUser, on_delete=models.CASCADE)
 
 

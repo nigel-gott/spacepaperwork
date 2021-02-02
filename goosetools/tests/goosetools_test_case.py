@@ -26,8 +26,8 @@ from goosetools.users.models import (
     USER_ADMIN_PERMISSION,
     Character,
     Corp,
+    GooseGroup,
     GooseUser,
-    UserPermissionGroup,
 )
 
 
@@ -49,9 +49,7 @@ class GooseToolsTestCase(DjangoTestCase):
 
         self.corp = Corp.objects.create(name="Test Corp")
         self.site_user = SiteUser.create("Test Goose User#1234")
-        self.user_admin_group = UserPermissionGroup.objects.create(
-            name="user_admin_group"
-        )
+        self.user_admin_group = GooseGroup.objects.create(name="user_admin_group")
         self.user_admin_group.link_permission(USER_ADMIN_PERMISSION)
         self.user = GooseUser.objects.create(
             site_user=self.site_user,

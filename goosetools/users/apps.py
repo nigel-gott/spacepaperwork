@@ -24,7 +24,12 @@ def populate_models(sender, **kwargs):
     from django.contrib.auth.models import Group, Permission
     from django.contrib.contenttypes.models import ContentType
 
-    from goosetools.users.models import AuthConfig, Character, GooseUser, UserPermission
+    from goosetools.users.models import (
+        AuthConfig,
+        Character,
+        GoosePermission,
+        GooseUser,
+    )
 
     user_admin, _ = Group.objects.get_or_create(name="user_admin")
     content_type = ContentType.objects.get_for_model(GooseUser)
@@ -43,7 +48,7 @@ def populate_models(sender, **kwargs):
     )
     user_admin.permissions.add(change_character)
 
-    UserPermission.ensure_populated()
+    GoosePermission.ensure_populated()
     AuthConfig.ensure_exists()
 
 
