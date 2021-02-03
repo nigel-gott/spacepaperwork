@@ -11,6 +11,7 @@ from django.db.models.functions import Concat
 from django.db.models.query_utils import Q
 from django.http.response import (
     HttpResponseBadRequest,
+    HttpResponseForbidden,
     HttpResponseNotAllowed,
     HttpResponseRedirect,
 )
@@ -27,16 +28,21 @@ from goosetools.users.forms import (
     AddEditCharacterForm,
     AuthConfigForm,
     CharacterUserSearchForm,
+    EditGroupForm,
     SettingsForm,
     SignupFormWithTimezone,
     UserApplicationUpdateForm,
 )
+from goosetools.users.jobs.hourly.update_discord_roles import refresh_from_discord
 from goosetools.users.models import (
     USER_ADMIN_PERMISSION,
+    USER_GROUP_ADMIN_PERMISSION,
     AuthConfig,
     Character,
     CorpApplication,
     DiscordGuild,
+    GooseGroup,
+    GoosePermission,
     GooseUser,
     HasGooseToolsPerm,
     UserApplication,
@@ -364,6 +370,10 @@ def user_dashboard(request):
             "page_data": {
                 "gooseuser_id": request.gooseuser.id,
                 "site_prefix": f"/{settings.URL_PREFIX}",
+                "all_group_names": list(
+                    GooseGroup.objects.all().values_list("name", flat=True)
+                ),
+                "group_filter": request.GET.get("group_filter", ""),
             },
             "gooseuser": request.gooseuser,
         },
@@ -371,7 +381,7 @@ def user_dashboard(request):
 
 
 def build_query_for_all_users_annotated_with_their_characters():
-    return GooseUser.objects.annotate(
+    q = GooseUser.objects.annotate(
         char_names=StringAgg(
             Concat(
                 Value("["),
@@ -381,8 +391,9 @@ def build_query_for_all_users_annotated_with_their_characters():
                 output_field=CharField(),
             ),
             delimiter=", ",
-        )
+        ),
     ).all()
+    return q
 
 
 class GooseUserQuerySet(
@@ -417,3 +428,93 @@ class GooseUserQuerySet(
         goose_user.save()
         serializer = self.get_serializer(goose_user)
         return Response(serializer.data)
+
+
+@has_perm(perm=USER_GROUP_ADMIN_PERMISSION)
+def groups_view(request):
+    groups = [
+        {
+            "name": g.name,
+            "id": g.id,
+            "member_count": g.groupmember_set.count(),
+            "description": g.description,
+            "linked_discord_role": g.linked_discord_role,
+            "editable": g.editable,
+            "permissions": ", ".join(g.permissions()),
+        }
+        for g in GooseGroup.objects.all().order_by("editable", "name")
+    ]
+    return render(
+        request,
+        "users/goosegroup_view.html",
+        {"groups": groups},
+    )
+
+
+@has_perm(perm=USER_GROUP_ADMIN_PERMISSION)
+def edit_group(request, pk):
+    group = get_object_or_404(GooseGroup, pk=pk)
+    if not group.editable:
+        return HttpResponseForbidden()
+    if request.method == "POST":
+        form = EditGroupForm(request.POST)
+        if form.is_valid():
+            delete = request.POST.get("delete", False)
+            if delete:
+                group.delete()
+                messages.success(request, f"Succesfully deleted group {group.name}")
+            else:
+                group.name = form.cleaned_data["name"]
+                group.description = form.cleaned_data["description"]
+                group.linked_discord_role = form.cleaned_data["linked_discord_role_id"]
+                group.grouppermission_set.all().delete()
+                group.save()
+                for perm in form.cleaned_data["permissions"]:
+                    group.link_permission(perm.name)
+                messages.success(request, f"Succesfully edited group {group.name}")
+            return HttpResponseRedirect(reverse("groups_view"))
+    else:
+        permissions = list(
+            GoosePermission.objects.filter(grouppermission__group=group).values_list(
+                "pk", flat=True
+            )
+        )
+
+        form = EditGroupForm(
+            initial={
+                "name": group.name,
+                "description": group.description,
+                "linked_discord_role_id": group.linked_discord_role,
+                "permissions": permissions,
+            }
+        )
+    return render(request, "users/edit_group.html", {"form": form})
+
+
+@has_perm(perm=USER_GROUP_ADMIN_PERMISSION)
+def new_group(request):
+    if request.method == "POST":
+        form = EditGroupForm(request.POST)
+        if form.is_valid():
+            group = GooseGroup(
+                name=form.cleaned_data["name"],
+                description=form.cleaned_data["description"],
+                linked_discord_role=form.cleaned_data["linked_discord_role_id"],
+            )
+            group.save()
+            for p in form.cleaned_data["permissions"]:
+                group.link_permission(p.name)
+            messages.success(request, f"Succesfully created group {group.name}")
+
+            return HttpResponseRedirect(reverse("groups_view"))
+    else:
+        form = EditGroupForm()
+    return render(request, "users/new_group.html", {"form": form})
+
+
+@has_perm(perm=USER_GROUP_ADMIN_PERMISSION)
+def refresh_discord_groups(request):
+    output = False
+    if request.method == "POST":
+        output = refresh_from_discord()
+    return render(request, "users/refresh_discord_groups.html", {"output": output})

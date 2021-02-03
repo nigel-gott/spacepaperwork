@@ -13,6 +13,10 @@ from goosetools.users.views import (
     character_search,
     corp_application_list,
     corp_application_update,
+    edit_group,
+    groups_view,
+    new_group,
+    refresh_discord_groups,
     settings_view,
     user_application_list,
     user_dashboard,
@@ -54,4 +58,10 @@ urlpatterns = [
         name="username-autocomplete",
     ),
     path("gooseuser/", include((router.urls))),
+    path("groups/", groups_view, name="groups_view"),
+    path("groups/<int:pk>/edit", edit_group, name="edit_group"),
+    path("groups/new", new_group, name="new_group"),
+    path(
+        "groups/refresh_discord", refresh_discord_groups, name="refresh_discord_groups"
+    ),
 ]

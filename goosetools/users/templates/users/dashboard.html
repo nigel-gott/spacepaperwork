@@ -50,6 +50,7 @@ $(function() {
                     }
                 }
             },
+            { "data": "groups", "title": "Groups", "filter_values": page_data["all_group_names"], "initial_filter_value": page_data["group_filter"]},
             { "data": "notes", "title": "Notes"},
             { "data": "voucher_username", "title": "Voucher", "defaultContent":""},
             { "data": "uid", "title": "Actions",
@@ -94,24 +95,41 @@ $(function() {
             this.api().columns().every( function (index) {
                 const column_info = columns[index]
                 var column = this;
-                if(column_info["give_filter"]){
-                    var select = $('<label class="black-text">Status</label>')
+                if(column_info["give_filter"] || column_info["filter_values"]){
+                    var select = $(`<label class="black-text">${column_info["title"]}</label>`)
                         .appendTo( $(column.header()).empty() )
+
+                    function filter_column(){
+                        var val = $.fn.dataTable.util.escapeRegex(
+                            $(this).val()
+                        );
+
+                        column
+                            .search( val ? val : '', true, false )
+                            .draw();
+                    }
                     var select = $('<select class="browser-default"><option value=""></option></select>')
                         .appendTo( $(column.header()) )
-                        .on( 'change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
+                        .on( 'change', filter_column
+                        );
 
-                            column
-                                .search( val ? '^'+val+'$' : '', true, false )
-                                .draw();
+                    if(column_info["filter_values"]){
+                        column_info["filter_values"].forEach( function ( d ) {
+                            if(column_info["initial_filter_value"] === d){
+                                select.append( '<option value="'+d+'" selected>'+d+'</option>' )
+                                column
+                                    .search( d ? d : '', true, false )
+                                    .draw();
+                            } else {
+                                select.append( '<option value="'+d+'">'+d+'</option>' )
+                            }
                         } );
 
-                    column.data().unique().sort().each( function ( d, j ) {
-                        select.append( '<option value="'+d+'">'+d+'</option>' )
-                    } );
+                    } else {
+                        column.data().unique().sort().each( function ( d, j ) {
+                            select.append( '<option value="'+d+'">'+d+'</option>' )
+                        } );
+                    }
 
                 }
             } );

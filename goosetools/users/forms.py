@@ -4,7 +4,7 @@ from django.db.models.query_utils import Q
 from tinymce.widgets import TinyMCE
 
 from goosetools.users.fields import TimeZoneFormField
-from goosetools.users.models import Character, Corp
+from goosetools.users.models import Character, Corp, GoosePermission
 
 
 class AuthConfigForm(forms.Form):
@@ -153,4 +153,13 @@ class CharacterForm(forms.Form):
         queryset=Character.objects.all(),
         initial=0,
         widget=autocomplete.ModelSelect2(url="character-autocomplete"),
+    )
+
+
+class EditGroupForm(forms.Form):
+    name = forms.CharField()
+    description = forms.CharField()
+    linked_discord_role_id = forms.CharField(required=False)
+    permissions = forms.ModelMultipleChoiceField(
+        GoosePermission.objects.all(), widget=forms.CheckboxSelectMultiple
     )

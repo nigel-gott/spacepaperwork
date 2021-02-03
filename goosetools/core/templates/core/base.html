@@ -73,9 +73,15 @@
 {% if user.is_staff %}
 <ul class="dropdown-content" id="dropdown_admin">
     {% has_perm user "user_admin" as is_user_admin %}
+    {% has_perm user "user_group_admin" as is_user_group_admin %}
     {% if is_user_admin %}
     <li>
             <a href="{% url 'user_dashboard' %}">User Dashboard</a>
+    </li>
+    {% endif %}
+    {% if is_user_group_admin %}
+    <li>
+            <a href="{% url 'groups_view' %}">User Groups Admin</a>
     </li>
     {% endif %}
     <li>
@@ -175,6 +181,11 @@
         {% if is_user_admin %}
         <li>
             <a href="{% url 'user_dashboard' %}">User Dashboard</a>
+        </li>
+        {% endif %}
+        {% if is_user_group_admin %}
+        <li>
+                <a href="{% url 'groups_view' %}">User Groups Admin</a>
         </li>
         {% endif %}
         <li><a href="{% url 'admin:index' %}">Admin</a></li>

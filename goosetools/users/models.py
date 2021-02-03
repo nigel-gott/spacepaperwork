@@ -2,7 +2,7 @@ import logging
 from functools import partial, wraps
 
 import requests
-from django.contrib.auth.models import Group
+from django.contrib.postgres.aggregates.general import StringAgg
 from django.db import models
 from django.http.response import HttpResponseForbidden
 from django.utils import timezone
@@ -14,23 +14,13 @@ from goosetools.tenants.models import SiteUser
 logger = logging.getLogger(__name__)
 
 
-class DiscordRole(models.Model):
-    name = models.TextField(unique=True)
-    discord_role_uid = models.TextField(unique=True)
-
-    def __str__(self) -> str:
-        return f"{self.name} : {self.discord_role_uid}"
-
-
 class AuthConfig(models.Model):
     signup_required = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
     connected_discord_server_id = models.TextField(null=True, blank=True)
     code_of_conduct = models.TextField(null=True, blank=True)
     sign_up_introduction = models.TextField(null=True, blank=True)
-    new_user_discord_role = models.ForeignKey(
-        DiscordRole, on_delete=models.SET_NULL, null=True, blank=True
-    )
+    new_user_discord_role = models.TextField(null=True, blank=True)
 
     # pylint: disable=signature-differs
     def save(self, *args, **kwargs):
@@ -73,9 +63,7 @@ class SignUpQuestion(models.Model):
 class SignUpQuestionChoice(models.Model):
     signup_question = models.ForeignKey(SignUpQuestion, on_delete=models.CASCADE)
     choice = models.TextField()
-    linked_discord_role = models.ForeignKey(
-        DiscordRole, on_delete=models.SET_NULL, blank=True, null=True
-    )
+    linked_discord_role = models.TextField(blank=True, null=True)
 
 
 class Corp(models.Model):
@@ -90,19 +78,27 @@ class Corp(models.Model):
 
 class GooseGroup(models.Model):
     name = models.TextField(unique=True)
-    linked_discord_role = models.ForeignKey(
-        DiscordRole, on_delete=models.CASCADE, null=True, blank=True
-    )
+    description = models.TextField()
+    editable = models.BooleanField(default=True)
+    linked_discord_role = models.TextField(null=True, blank=True)
 
     def link_permission(self, permission_name: str):
         perm, _ = GoosePermission.objects.get_or_create(name=permission_name)
         GroupPermission.objects.get_or_create(group=self, permission_id=perm.id)
 
+    def permissions(self):
+        return list(
+            GoosePermission.objects.filter(grouppermission__group=self)
+            .all()
+            .values_list("name", flat=True)
+        )
+
     def __str__(self) -> str:
         return f"{self.name}"
 
-
-USER_ADMIN_PERMISSION = "user_admin"
+    @staticmethod
+    def superuser_group():
+        return GooseGroup.objects.get(name=SUPERUSER_GROUP_NAME)
 
 
 def has_perm(perm: str):
@@ -136,6 +132,11 @@ class HasGooseToolsPerm(BasePermission):
         return request.gooseuser and request.gooseuser.has_perm(self.perm)
 
 
+SUPERUSER_GROUP_NAME = "superuser group"
+USER_ADMIN_PERMISSION = "user_admin"
+USER_GROUP_ADMIN_PERMISSION = "user_group_admin"
+
+
 class GoosePermission(models.Model):
     USER_PERMISSION_CHOICES = [
         (
@@ -150,6 +151,10 @@ class GoosePermission(models.Model):
         (
             USER_ADMIN_PERMISSION,
             "Able to approve user applications and manage users",
+        ),
+        (
+            USER_GROUP_ADMIN_PERMISSION,
+            "Able to edit/add user groups and their permissions",
         ),
         (
             "single_corp_admin",
@@ -168,14 +173,23 @@ class GoosePermission(models.Model):
         ),
     ]
     name = models.TextField(unique=True, choices=USER_PERMISSION_CHOICES)
+    description = models.TextField()
     corp = models.OneToOneField(Corp, on_delete=models.CASCADE, null=True, blank=True)
 
     @staticmethod
     def ensure_populated():
-        for choice, _ in GoosePermission.USER_PERMISSION_CHOICES:
-            GoosePermission.objects.get_or_create(name=choice)
-            goose_group, _ = GooseGroup.objects.get_or_create(name=f"{choice} group")
-            goose_group.link_permission(choice)
+        superuser_group, _ = GooseGroup.objects.update_or_create(
+            name=SUPERUSER_GROUP_NAME,
+            defaults={
+                "description": "An uneditable group which has all goosetool permissions.",
+                "editable": False,
+            },
+        )
+        for choice, description in GoosePermission.USER_PERMISSION_CHOICES:
+            GoosePermission.objects.update_or_create(
+                name=choice, defaults={"description": description}
+            )
+            superuser_group.link_permission(choice)
 
     def __str__(self) -> str:
         return self.name
@@ -226,6 +240,14 @@ class GooseUser(models.Model):
         related_name="current_vouches",
     )
 
+    def groups(self):
+        return self.groupmember_set.aggregate(
+            groups=StringAgg(
+                "group__name",
+                delimiter=", ",
+            )
+        )["groups"]
+
     def has_perm(self, permission_name):
         # pylint: disable=no-member
         return (
@@ -274,6 +296,9 @@ class GooseUser(models.Model):
 
     def _discord_account(self):
         return self.site_user.socialaccount_set.get(provider="discord")
+
+    def extra_data(self):
+        return self._discord_account().extra_data
 
     def cache_fields_from_social_account(self):
         discord_account = self._discord_account()
@@ -326,6 +351,9 @@ class GooseUser(models.Model):
 class GroupMember(models.Model):
     group = models.ForeignKey(GooseGroup, on_delete=models.CASCADE)
     user = models.ForeignKey(GooseUser, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = (("group", "user"),)
 
 
 class UserApplication(models.Model):
@@ -427,13 +455,6 @@ class DiscordGuild(models.Model):
             except DiscordGuild.DoesNotExist:
                 pass
         super().save(*args, **kwargs)
-
-
-class DiscordRoleDjangoGroupMapping(models.Model):
-    guild = models.ForeignKey(DiscordGuild, on_delete=models.CASCADE)
-    role_id = models.TextField()
-    group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    grants_staff = models.BooleanField(default=False)
 
 
 class Character(models.Model):

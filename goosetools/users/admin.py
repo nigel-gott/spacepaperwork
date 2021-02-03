@@ -8,8 +8,6 @@ from goosetools.users.models import (
     Corp,
     CorpApplication,
     DiscordGuild,
-    DiscordRole,
-    DiscordRoleDjangoGroupMapping,
     GooseGroup,
     GoosePermission,
     GooseUser,
@@ -52,7 +50,6 @@ admin.site.register(GoosePermission)
 admin.site.register(GooseGroup)
 admin.site.register(GroupMember)
 admin.site.register(GroupPermission)
-admin.site.register(DiscordRole)
 
 
 class CustomUserAdmin(ModelAdmin):
@@ -86,4 +83,3 @@ class CustomUserAdmin(ModelAdmin):
 
 admin.site.register(GooseUser, CustomUserAdmin)
 admin.site.register(DiscordGuild)
-admin.site.register(DiscordRoleDjangoGroupMapping)

@@ -1,0 +1,27 @@
+{% extends "core/base.html" %}
+{% block body %}
+<div class="section">
+    <h4>User Group Admin</h4>
+</div>
+<div class="section">
+    <a class="waves-btn btn" href="{% url 'new_group' %}">Create New Group</a>
+    <a class="waves-btn btn red" href="{% url 'refresh_discord_groups' %}">Manually Sync Groups From Discord Roles</a>
+    <ul class="collection" style="overflow: visible;">
+    {% for group in groups %}
+        <li class="collection-item ">
+            <span class="title"><b>{{group.name}}</b> - <a href="{% url 'user_dashboard' %}?group_filter={{group.name}}">{{group.member_count}} Members</a><br/>
+            </span>
+            <p>
+                {% if group.editable %}
+                    <a href="{% url 'edit_group' group.id %}" class="waves-btn btn secondary-content">Edit Group</a>
+                {% endif %}
+                {{group.description}}<br/>
+                Permissions: {{group.permissions}}<br/>
+                {% if group.linked_discord_role %} Discord Role:  {{group.linked_discord_role}} <br/> {% endif %}
+            </p>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}
