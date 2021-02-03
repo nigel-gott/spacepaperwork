@@ -22,9 +22,6 @@
     <li>
         <a href="{% url 'character_search' %}">Char/User Search</a>
     </li>
-    <li>
-            <a href="{% url 'user_dashboard' %}">User Dashboard</a>
-    </li>
     <li><a href="https://wiki.goosetools.com">HONK Wiki</a></li>
 </ul>
 <ul class="dropdown-content" id="dropdown_fleets">
@@ -75,6 +72,12 @@
 {% endif %}
 {% if user.is_staff %}
 <ul class="dropdown-content" id="dropdown_admin">
+    {% has_perm user "user_admin" as is_user_admin %}
+    {% if is_user_admin %}
+    <li>
+            <a href="{% url 'user_dashboard' %}">User Dashboard</a>
+    </li>
+    {% endif %}
     <li>
         <a href="{% url 'applications' %}">New User Applications
         ({% num_pending_user_apps %})
@@ -169,6 +172,11 @@
 
     {% if user.is_staff %}
         <li><a class="subheader">Admin<i class="material-icons right">build</i></a></li>
+        {% if is_user_admin %}
+        <li>
+            <a href="{% url 'user_dashboard' %}">User Dashboard</a>
+        </li>
+        {% endif %}
         <li><a href="{% url 'admin:index' %}">Admin</a></li>
         <li><a href="{% url 'auth_settings' %}">Site Auth Settings</a></li>
         <li>
@@ -239,9 +247,6 @@
         </li>
         <li>
             <a href="{% url 'character_search' %}">Char/User Search</a>
-        </li>
-        <li>
-            <a href="{% url 'user_dashboard' %}">User Dashboard</a>
         </li>
         <li>
             <a href="https://wiki.goosetools.com">HONK Wiki</a>

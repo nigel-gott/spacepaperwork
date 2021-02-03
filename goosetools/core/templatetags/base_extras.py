@@ -61,6 +61,11 @@ def all_sales(user):
 
 
 @register.simple_tag
+def has_perm(user, perm):
+    return user.gooseuser.has_perm(perm)
+
+
+@register.simple_tag
 def num_active_fleets():
     return len(active_fleets_query())
 
