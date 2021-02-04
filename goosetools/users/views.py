@@ -30,6 +30,7 @@ from goosetools.users.forms import (
     AdminEditUserForm,
     AuthConfigForm,
     CharacterUserSearchForm,
+    CorpForm,
     EditGroupForm,
     SettingsForm,
     SignupFormWithTimezone,
@@ -248,14 +249,14 @@ def character_edit(request, pk):
             else:
                 character.ingame_name = form.cleaned_data["ingame_name"]
                 character.save()
-                new_corp = form.cleaned_data["corp"]
-                if character.corp != new_corp:
+                corp = form.cleaned_data["corp"]
+                if character.corp != corp:
                     messages.info(
                         request,
-                        f"Corp application for {character} to {new_corp} registered in goosetools pending approval from @AuthTeam.",
+                        f"Corp application for {character} to {corp} registered in goosetools pending approval from @AuthTeam.",
                     )
                     CorpApplication.objects.create(
-                        character=character, status="unapproved", corp=new_corp
+                        character=character, status="unapproved", corp=corp
                     )
                 return HttpResponseRedirect(reverse("characters"))
 
@@ -273,7 +274,7 @@ def character_new(request):
                 error = f"Cannot create a character with a in-game name of {ingame_name} as it already exists."
                 messages.error(request, error)
                 return HttpResponseRedirect(reverse("characters"))
-            new_corp = form.cleaned_data["corp"]
+            corp = form.cleaned_data["corp"]
             character = Character.objects.create(
                 ingame_name=form.cleaned_data["ingame_name"],
                 corp=Corp.unknown_corp(),
@@ -281,10 +282,10 @@ def character_new(request):
             )
             messages.info(
                 request,
-                f"Corp application for {character} to {new_corp} registered in goosetools pending approval from @AuthTeam.",
+                f"Corp application for {character} to {corp} registered in goosetools pending approval from @AuthTeam.",
             )
             CorpApplication.objects.create(
-                character=character, status="unapproved", corp=new_corp
+                character=character, status="unapproved", corp=corp
             )
             return HttpResponseRedirect(reverse("characters"))
 
@@ -622,4 +623,87 @@ def user_admin_view(request, pk):
         request,
         "users/user_admin_view.html",
         {"viewed_user": user, "form": form},
+    )
+
+
+@has_perm(perm=[ALL_CORP_ADMIN, SINGLE_CORP_ADMIN])
+def corps_list(request):
+    corps = [
+        {
+            "name": c.name,
+            "full_name": c.full_name,
+            "name_with_ticker": c.name_with_corp_tag(),
+            "member_count": c.character_set.count(),
+            "required_discord_role": c.required_discord_role,
+        }
+        for c in Corp.objects.all().order_by("name")
+    ]
+    return render(
+        request,
+        "users/corp_list.html",
+        {"corps": corps},
+    )
+
+
+@has_perm(perm=[ALL_CORP_ADMIN, SINGLE_CORP_ADMIN])
+def new_corp(request):
+    if request.method == "POST":
+        form = CorpForm(request.POST)
+        if form.is_valid():
+            corp = Corp(
+                full_name=form.cleaned_data["full_name"],
+                name=form.cleaned_data["ticker"],
+                required_discord_role=form.cleaned_data["required_discord_role"],
+            )
+            corp.save()
+            messages.success(request, f"Succesfully Created {corp.name}")
+            return HttpResponseRedirect(reverse("corps_list"))
+    else:
+        form = CorpForm()
+    return render(
+        request,
+        "users/corp_new.html",
+        {"form": form},
+    )
+
+
+@has_perm(perm=[ALL_CORP_ADMIN, SINGLE_CORP_ADMIN])
+def edit_corp(request, pk):
+    corp = get_object_or_404(Corp, pk=pk)
+    if request.method == "POST":
+        form = CorpForm(request.POST)
+        form.fields["ticker"].disabled = True
+        form.fields["ticker"].required = False
+        if form.is_valid():
+            delete = request.POST.get("delete", False)
+            if delete:
+                if corp.character_set.count() == 0:
+                    corp.delete()
+                    messages.success(request, f"Succesfully deleted corp {corp.name}")
+                else:
+                    messages.error(
+                        request,
+                        f"Cannot delete {corp.name} until all characters in goosetools with that corp have been moved to a new corp.",
+                    )
+            else:
+                corp.full_name = form.cleaned_data["full_name"]
+                corp.required_discord_role = form.cleaned_data["required_discord_role"]
+                corp.save()
+                messages.success(request, f"Succesfully Edited {corp.name}")
+
+            return HttpResponseRedirect(reverse("corps_list"))
+    else:
+        form = CorpForm(
+            initial={
+                "ticker": corp.name,
+                "full_name": corp.full_name,
+                "required_discord_role": corp.required_discord_role,
+            }
+        )
+        form.fields["ticker"].disabled = True
+        form.fields["ticker"].required = False
+    return render(
+        request,
+        "users/corp_edit.html",
+        {"form": form},
     )

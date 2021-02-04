@@ -1,0 +1,22 @@
+{% extends "core/base.html" %}
+{% block body %}
+<div class="section">
+    <h4>Corp Admin</h4>
+</div>
+<div class="section">
+    <a class="waves-btn btn" href="{% url 'new_corp' %}">Create New Corp</a>
+    <ul class="collection" style="overflow: visible;">
+    {% for corp in corps%}
+        <li class="collection-item ">
+                <a href="{% url 'edit_corp' corp.name %}" class="waves-btn btn secondary-content">Edit Corp</a>
+            <span class="title"><b>{{corp.name_with_ticker}}</b> - <a href="{% url 'character_dashboard' %}?corp_filter={{corp.name}}">{{corp.member_count}} Members</a><br/>
+            </span>
+            <p>
+                {% if corp.required_discord_role %} Required Discord Role For Applying Via Sign Up Form:  {{corp.required_discord_role}} <br/> {% endif %}
+            </p>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

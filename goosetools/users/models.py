@@ -75,6 +75,12 @@ class Corp(models.Model):
     # TODO map to Discord Role
     required_discord_role = models.TextField(null=True, blank=True)
 
+    def name_with_corp_tag(self):
+        if self.full_name:
+            return f"[{self.name}] {self.full_name}"
+        else:
+            return f"[{self.name}]"
+
     def __str__(self):
         return str(self.name)
 

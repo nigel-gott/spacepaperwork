@@ -8,7 +8,7 @@ $(function () {
                 {
                     "data": "owner_display_name", "title": "Display Name"
                 },
-                { "data": "corp", "title": "Corp", "give_filter": true },
+                { "data": "corp", "title": "Corp", "give_filter": true, "initial_filter_value": page_data["corp_filter"], },
                 { "data": "ingame_name", "title": "In Game Character Name" },
                 { "data": "owner_status", "title": "Status", "give_filter": true },
                 {

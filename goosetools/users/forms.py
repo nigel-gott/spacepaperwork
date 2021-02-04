@@ -77,10 +77,7 @@ class SignupFormWithTimezone(forms.Form):
 
     @staticmethod
     def corp_label_from_instance(corp):
-        if corp.full_name:
-            return f"[{corp}] {corp.full_name}"
-        else:
-            return f"[{corp}]"
+        return corp.name_with_corp_tag()
 
     def __init__(self, *args, **kwargs):
         socialaccount = kwargs.pop("socialaccount", None)
@@ -144,6 +141,14 @@ class AdminEditUserForm(forms.Form):
     status = forms.ChoiceField(
         choices=GooseUser.USER_STATUS_CHOICES,
     )
+
+
+class CorpForm(forms.Form):
+    full_name = forms.CharField()
+    ticker = forms.CharField(
+        help_text="The ticker cannot be renamed once the corp has been created."
+    )
+    required_discord_role = forms.CharField(required=False)
 
 
 class CharacterUserSearchForm(forms.Form):

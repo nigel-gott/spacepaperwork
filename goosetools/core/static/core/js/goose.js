@@ -39,7 +39,12 @@ GooseJs = function () {
 
                 } else {
                     column.data().unique().sort().each(function (d, j) {
-                        select.append('<option value="' + d + '">' + d + '</option>')
+                        if (column_info["initial_filter_value"] === d) {
+                            select.append('<option value="' + d + '" selected>' + d + '</option>')
+                            filterColumn(column, d, column_info["include_partial_matches"]);
+                        } else {
+                            select.append('<option value="' + d + '">' + d + '</option>')
+                        }
                     });
                 }
 

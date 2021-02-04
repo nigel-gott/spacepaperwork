@@ -85,6 +85,9 @@
     <li>
             <a href="{% url 'character_dashboard' %}">Character Dashboard</a>
     </li>
+    <li>
+            <a href="{% url 'corps_list' %}">Corp Admin</a>
+    </li>
     {% endif %}
     {% if is_user_group_admin %}
     <li>
@@ -193,6 +196,9 @@
         {% if is_single_corp_admin or is_all_corp_admin %}
         <li>
                 <a href="{% url 'character_dashboard' %}">Character Dashboard</a>
+        </li>
+        <li>
+                <a href="{% url 'corps_list' %}">Corp Admin</a>
         </li>
         {% endif %}
         {% if is_user_group_admin %}
