@@ -287,6 +287,17 @@ tags = ["django-taggit"]
 
 [[package]]
 category = "main"
+description = "The code formerly known as django.contrib.comments."
+name = "django-contrib-comments"
+optional = false
+python-versions = "*"
+version = "2.0.0"
+
+[package.dependencies]
+Django = ">=1.11"
+
+[[package]]
+category = "main"
 description = "Management commands to help backup and restore a project database and media"
 name = "django-dbbackup"
 optional = false
@@ -1713,7 +1724,7 @@ python-versions = "*"
 version = "1.12.1"
 
 [metadata]
-content-hash = "35019330e88e01a1f2d7298e5ec7a9fdd133ba2e6e405654e424d91f547a7b66"
+content-hash = "d377210f3731c4ecc3e28e59a96f4c8b060440a6622abaebc1e82d86521ed5ca"
 lock-version = "1.0"
 python-versions = "^3.8"
 
@@ -1852,6 +1863,10 @@ django-allauth = [
 ]
 django-autocomplete-light = [
     {file = "django-autocomplete-light-3.8.1.tar.gz", hash = "sha256:4e84a6d95d272b0d7221614332e2bd54ffff15ec06e78947279398f6507ce225"},
+]
+django-contrib-comments = [
+    {file = "django-contrib-comments-2.0.0.tar.gz", hash = "sha256:26350b2c353816570a74b7fb19c558ce00288625ac32886a5274f4f931c098f9"},
+    {file = "django_contrib_comments-2.0.0-py3-none-any.whl", hash = "sha256:d15ce050c6b1589ec3086c4f5db3e4dec8adf54bb0d9d6b7efc1372669773752"},
 ]
 django-dbbackup = [
     {file = "django-dbbackup-3.3.0.tar.gz", hash = "sha256:bb109735cae98b64ad084e5b461b7aca2d7b39992f10c9ed9435e3ebb6fb76c8"},

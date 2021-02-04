@@ -30,6 +30,7 @@ urlpatterns = [
                 ),
                 path("", include("django_prometheus.urls")),
                 path("tinymce/", include("tinymce.urls")),
+                path("comments/", include("django_comments.urls")),
             ]
             + settings.ENV_SPECIFIC_URLS
         ),

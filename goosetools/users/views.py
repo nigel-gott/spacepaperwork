@@ -27,6 +27,7 @@ from rest_framework.viewsets import GenericViewSet
 from goosetools.users.forms import (
     AddEditCharacterForm,
     AdminEditCharacterForm,
+    AdminEditUserForm,
     AuthConfigForm,
     CharacterUserSearchForm,
     EditGroupForm,
@@ -201,9 +202,9 @@ def application_update(request, pk):
                 messages.error(request, error)
                 return HttpResponseRedirect(reverse("applications"))
 
-            application.approve()
+            application.approve(request.gooseuser)
         elif "reject" in request.POST:
-            application.reject()
+            application.reject(request.gooseuser)
         else:
             return HttpResponseBadRequest()
 
@@ -375,6 +376,7 @@ def user_dashboard(request):
                 "gooseuser_id": request.gooseuser.id,
                 "site_prefix": f"/{settings.URL_PREFIX}",
                 "ajax_url": reverse("gooseuser-list"),
+                "user_admin_view_url": reverse("user_admin_view", args=[0]),
                 "all_group_names": list(
                     GooseGroup.objects.all().values_list("name", flat=True)
                 ),
@@ -463,23 +465,24 @@ class GooseUserQuerySet(
     @transaction.atomic
     # pylint: disable=unused-argument
     def ban(self, request, pk=None):
-        return self._change_status("rejected")
+        return self._change_status(request, "rejected")
 
     @action(detail=True, methods=["PUT"])
     @transaction.atomic
     # pylint: disable=unused-argument
     def approve(self, request, pk=None):
-        return self._change_status("approved")
+        return self._change_status(request, "approved")
 
     @action(detail=True, methods=["PUT"])
     @transaction.atomic
     # pylint: disable=unused-argument
     def unapprove(self, request, pk=None):
-        return self._change_status("unapproved")
+        return self._change_status(request, "unapproved")
 
-    def _change_status(self, status):
+    def _change_status(self, request, status):
         goose_user = self.get_object()
-        goose_user.status = status
+        requesting_gooseuser = request.gooseuser
+        goose_user.change_status(requesting_gooseuser, status)
         goose_user.save()
         serializer = self.get_serializer(goose_user)
         return Response(serializer.data)
@@ -600,3 +603,23 @@ def admin_character_edit(request, pk):
         form = AdminEditCharacterForm(initial=initial)
     form.fields["gooseuser"].initial = character.user
     return render(request, "users/admin_character_edit.html", {"form": form})
+
+
+@has_perm(perm=USER_ADMIN_PERMISSION)
+def user_admin_view(request, pk):
+    user = get_object_or_404(GooseUser, pk=pk)
+    if request.method == "POST":
+        form = AdminEditUserForm(request.POST)
+        if form.is_valid():
+            user.notes = form.cleaned_data["notes"]
+            user.change_status(request.gooseuser, form.cleaned_data["status"])
+            user.save()
+            messages.success(request, "Succesfully Editted the User")
+            return HttpResponseRedirect(reverse("user_admin_view", args=[user.pk]))
+    else:
+        form = AdminEditUserForm(initial={"notes": user.notes, "status": user.status})
+    return render(
+        request,
+        "users/user_admin_view.html",
+        {"viewed_user": user, "form": form},
+    )

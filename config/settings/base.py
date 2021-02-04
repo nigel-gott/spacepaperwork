@@ -88,6 +88,7 @@ THIRD_PARTY_APPS = [
     "django_fsm",
     "django_prometheus",
     "tinymce",
+    "django_comments",
 ]
 
 LOCAL_APPS = [
@@ -104,6 +105,7 @@ LOCAL_APPS = [
     "goosetools.core.apps.CoreConfig",
     "goosetools.tenants.apps.TenantsConfig",
     "goosetools.venmo.apps.VenmoConfig",
+    "goosetools.goose_comments.apps.GooseCommentsConfig",
     # Goosetools apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -113,6 +115,8 @@ INSTALLED_APPS = (
     + THIRD_PARTY_APPS
     + LOCAL_APPS
 )
+
+COMMENTS_APP = "goosetools.goose_comments"
 
 # AUTHENTICATION
 # ------------------------------------------------------------------------------

@@ -21,6 +21,7 @@ from goosetools.users.views import (
     new_group,
     refresh_discord_groups,
     settings_view,
+    user_admin_view,
     user_application_list,
     user_dashboard,
     user_signup,
@@ -37,6 +38,7 @@ urlpatterns = [
     path("user/dashboard", user_dashboard, name="user_dashboard"),
     path("character/dashboard", character_dashboard, name="character_dashboard"),
     path("user/<int:pk>", user_view, name="user_view"),
+    path("user/<int:pk>/admin", user_admin_view, name="user_admin_view"),
     path(
         "characters/edit/<int:pk>/admin",
         admin_character_edit,

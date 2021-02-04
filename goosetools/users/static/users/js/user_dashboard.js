@@ -27,7 +27,16 @@ $(function () {
                     }
                 },
                 { "data": "groups", "title": "Groups", "filter_values": page_data["all_group_names"], "initial_filter_value": page_data["group_filter"] },
-                { "data": "notes", "title": "Notes" },
+                {
+                    "data": "notes", "title": "Notes",
+                },
+                {
+                    "data": "id", "title": "Edit/Comments Page",
+                    render: function (data, type, row) {
+                        comment_url = page_data['user_admin_view_url'].replace("0", data)
+                        return `<a href="${comment_url}">Edit/Comments</a>`;
+                    }
+                },
                 { "data": "voucher_username", "title": "Voucher", "defaultContent": "" },
                 {
                     "data": "uid", "title": "Actions",

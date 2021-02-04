@@ -4,9 +4,11 @@ from typing import List, Union
 
 import requests
 from django.contrib.postgres.aggregates.general import StringAgg
+from django.contrib.sites.models import Site
 from django.db import models
 from django.http.response import HttpResponseForbidden
 from django.utils import timezone
+from django_comments.models import Comment
 from rest_framework.permissions import BasePermission
 from timezone_field import TimeZoneField
 
@@ -219,6 +221,11 @@ class GroupPermission(models.Model):
 
 
 class GooseUser(models.Model):
+    USER_STATUS_CHOICES = [
+        ("unapproved", "unapproved"),
+        ("approved", "approved"),
+        ("rejected", "rejected"),
+    ]
     timezone = TimeZoneField(default="Europe/London")
     site_user = models.OneToOneField(SiteUser, on_delete=models.CASCADE)
     broker_fee = models.DecimalField(
@@ -234,11 +241,7 @@ class GooseUser(models.Model):
         "users.Character", on_delete=models.CASCADE, null=True, blank=True
     )
     status = models.TextField(
-        choices=[
-            ("unapproved", "unapproved"),
-            ("approved", "approved"),
-            ("rejected", "rejected"),
-        ],
+        choices=USER_STATUS_CHOICES,
         default="unapproved",
     )
     cached_username = models.TextField()
@@ -254,6 +257,17 @@ class GooseUser(models.Model):
         null=True,
         related_name="current_vouches",
     )
+
+    def change_status(self, admin_making_change, new_status):
+        Comment.objects.create(
+            content_object=self,
+            site=Site.objects.get_current(),
+            user=admin_making_change.site_user,
+            comment=f"Changed status from {self.status} to {new_status}",
+            submit_date=timezone.now(),
+        )
+        self.status = new_status
+        self.save()
 
     def groups(self):
         return self.groupmember_set.aggregate(
@@ -301,14 +315,6 @@ class GooseUser(models.Model):
 
     def is_authed_and_approved(self):
         return self.site_user.is_authenticated and self.is_approved()
-
-    def set_as_approved(self):
-        self.status = "approved"
-        self.save()
-
-    def set_as_rejected(self):
-        self.status = "rejected"
-        self.save()
 
     def characters(self):
         return self.character_set.all()
@@ -411,17 +417,17 @@ class UserApplication(models.Model):
                 character=main_char,
             )
 
-    def approve(self):
+    def approve(self, approving_user):
         self.status = "approved"
-        self.user.set_as_approved()
+        self.user.change_status(approving_user, "approved")
         self._create_character()
         self.full_clean()
         DiscordGuild.try_give_guild_member_role(self.user)
         self.save()
 
-    def reject(self):
+    def reject(self, rejecting_user):
         self.status = "rejected"
-        self.user.set_as_rejected()
+        self.user.change_status(rejecting_user, "rejected")
         self.full_clean()
         self.save()
 

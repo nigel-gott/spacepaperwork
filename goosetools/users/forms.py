@@ -139,6 +139,13 @@ class AdminEditCharacterForm(forms.Form):
     )
 
 
+class AdminEditUserForm(forms.Form):
+    notes = forms.CharField()
+    status = forms.ChoiceField(
+        choices=GooseUser.USER_STATUS_CHOICES,
+    )
+
+
 class CharacterUserSearchForm(forms.Form):
     name = forms.CharField()
 
