@@ -274,7 +274,7 @@ def character_new(request):
             new_corp = form.cleaned_data["corp"]
             character = Character.objects.create(
                 ingame_name=form.cleaned_data["ingame_name"],
-                corp=None,
+                corp=Corp.unknown_corp(),
                 user=request.user.gooseuser,
             )
             messages.info(

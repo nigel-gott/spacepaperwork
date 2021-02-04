@@ -401,9 +401,7 @@ class UserApplication(models.Model):
     def _create_character(self):
         if self.ingame_name:
             main_char = Character(
-                user=self.user,
-                ingame_name=self.ingame_name,
-                corp=None,
+                user=self.user, ingame_name=self.ingame_name, corp=Corp.unknown_corp()
             )
             main_char.full_clean()
             main_char.save()
@@ -479,7 +477,7 @@ class DiscordGuild(models.Model):
 class Character(models.Model):
     user = models.ForeignKey(GooseUser, on_delete=models.CASCADE)
     ingame_name = models.TextField(unique=True)
-    corp = models.ForeignKey(Corp, on_delete=models.CASCADE, null=True, blank=True)
+    corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
 
     def discord_avatar_url(self):
         return self.user.discord_avatar_url()

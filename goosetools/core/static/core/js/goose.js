@@ -1,4 +1,11 @@
 GooseJs = function () {
+    function filterColumn(column, val, include_partial_matches){
+        search_regex = include_partial_matches ? val : `^${val}$`;
+
+        column
+            .search(val ? search_regex : '', true, false)
+            .draw();
+    }
     function dataTableColumnFilterInit(settings, json) {
         table = settings.oInstance.api();
         const columns = table.settings().init().columns;
@@ -13,10 +20,7 @@ GooseJs = function () {
                     var val = $.fn.dataTable.util.escapeRegex(
                         $(this).val()
                     );
-
-                    column
-                        .search(val ? val : '', true, false)
-                        .draw();
+                    filterColumn(column, val, column_info["include_partial_matches"]);
                 }
                 var select = $('<select class="browser-default"><option value=""></option></select>')
                     .appendTo($(column.header()))
@@ -27,9 +31,7 @@ GooseJs = function () {
                     column_info["filter_values"].forEach(function (d) {
                         if (column_info["initial_filter_value"] === d) {
                             select.append('<option value="' + d + '" selected>' + d + '</option>')
-                            column
-                                .search(d ? d : '', true, false)
-                                .draw();
+                            filterColumn(column, d, column_info["include_partial_matches"]);
                         } else {
                             select.append('<option value="' + d + '">' + d + '</option>')
                         }
