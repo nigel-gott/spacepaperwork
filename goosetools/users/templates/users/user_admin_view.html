@@ -1,0 +1,59 @@
+{% extends "core/base.html" %}
+{% load comments %}
+{% block body %}
+<div class="section">
+    <h4>Admin View for {{viewed_user.display_name}}</h4>
+    <a href="{% url 'user_dashboard' %}">Back to Users Dashboard</a>
+</div>
+<div class="section">
+    <h6>Their Characters:</h6>
+    <ul class="collection" style="overflow: visible;">
+    {% for character in viewed_user.character_set.all %}
+        <li class="collection-item ">
+            <span class="title"><a href="{% url 'admin_character_edit' character.pk %}">[{{character.corp}}] {{character.ingame_name}}</a></span>
+        </li>
+    {% endfor %}
+    </ul>
+    <h6>User Notes</h6>
+    <p> Use these to add a useful top level message about this user which will be visible from the user dashboard. See the comment section below for a history of this user and other admin's discussion on them.</p>
+    <form action="" method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="row">
+            <div class="input-field col s12">
+                {{ field.errors }}
+                {{ field }}
+                {{ field.label_tag }}
+                {% if field.help_text %}
+                <p class="help">{{ field.help_text|safe }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% endfor %}
+        <label>
+        <button class="btn waves-effect waves-light" type="submit" value="Submit">Edit User
+            <i class="material-icons right">send</i>
+        </button>
+    </form>
+</div>
+<div class="divider">
+</div>
+<div class="section">
+    <h6>Admin Comments On User:</h6>
+{% render_comment_list for viewed_user %}
+    {% get_comment_form for viewed_user as form %}
+    <form action="{% comment_form_target %}" method="POST">
+    {% csrf_token %}
+    {{ form.comment }}
+    {{ form.honeypot }}
+    {{ form.content_type }}
+    {{ form.object_pk }}
+    {{ form.timestamp }}
+    {{ form.security_hash }}
+    <input type="hidden" name="next" value="{% url 'user_admin_view' viewed_user.id %}" />
+    <input type="submit" value="Add comment" id="id_submit" />
+    </form>
+</div>
+
+{% endblock %}
