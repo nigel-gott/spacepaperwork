@@ -1,0 +1,10 @@
+{% extends "core/datatable.html" %}
+{% load static %}
+
+{% block datatable_title %}
+    Users Dashboard
+{% endblock %}
+
+{% block datatable_footer %}
+    <script src="{% static 'users/js/character_dashboard.js' %}" type="text/javascript"></script>
+{% endblock %}

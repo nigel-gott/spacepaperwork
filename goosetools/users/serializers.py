@@ -1,6 +1,25 @@
 from rest_framework import serializers
 
-from goosetools.users.models import GooseUser
+from goosetools.users.models import Character, GooseUser
+
+
+class CharacterSerializer(serializers.ModelSerializer):
+    owner_display_name = serializers.CharField(
+        source="user.display_name", read_only=True
+    )
+    owner_uid = serializers.CharField(source="user.uid", read_only=True)
+    owner_status = serializers.CharField(source="user.status", read_only=True)
+
+    class Meta:
+        model = Character
+        fields = [
+            "id",
+            "ingame_name",
+            "corp",
+            "owner_uid",
+            "owner_display_name",
+            "owner_status",
+        ]
 
 
 class GooseUserSerializer(serializers.ModelSerializer):

@@ -74,9 +74,16 @@
 <ul class="dropdown-content" id="dropdown_admin">
     {% has_perm user "user_admin" as is_user_admin %}
     {% has_perm user "user_group_admin" as is_user_group_admin %}
+    {% has_perm user "single_corp_admin" as is_single_corp_admin %}
+    {% has_perm user "all_corp_admin" as is_all_corp_admin %}
     {% if is_user_admin %}
     <li>
             <a href="{% url 'user_dashboard' %}">User Dashboard</a>
+    </li>
+    {% endif %}
+    {% if is_single_corp_admin or is_all_corp_admin %}
+    <li>
+            <a href="{% url 'character_dashboard' %}">Character Dashboard</a>
     </li>
     {% endif %}
     {% if is_user_group_admin %}
@@ -181,6 +188,11 @@
         {% if is_user_admin %}
         <li>
             <a href="{% url 'user_dashboard' %}">User Dashboard</a>
+        </li>
+        {% endif %}
+        {% if is_single_corp_admin or is_all_corp_admin %}
+        <li>
+                <a href="{% url 'character_dashboard' %}">Character Dashboard</a>
         </li>
         {% endif %}
         {% if is_user_group_admin %}

@@ -35,10 +35,13 @@ from goosetools.users.forms import (
 )
 from goosetools.users.jobs.hourly.update_discord_roles import refresh_from_discord
 from goosetools.users.models import (
+    ALL_CORP_ADMIN,
+    SINGLE_CORP_ADMIN,
     USER_ADMIN_PERMISSION,
     USER_GROUP_ADMIN_PERMISSION,
     AuthConfig,
     Character,
+    Corp,
     CorpApplication,
     DiscordGuild,
     GooseGroup,
@@ -48,7 +51,7 @@ from goosetools.users.models import (
     UserApplication,
     has_perm,
 )
-from goosetools.users.serializers import GooseUserSerializer
+from goosetools.users.serializers import CharacterSerializer, GooseUserSerializer
 
 
 def user_signup(request):
@@ -365,15 +368,36 @@ def character_search(request):
 def user_dashboard(request):
     return render(
         request,
-        "users/dashboard.html",
+        "users/user_dashboard.html",
         {
             "page_data": {
                 "gooseuser_id": request.gooseuser.id,
                 "site_prefix": f"/{settings.URL_PREFIX}",
+                "ajax_url": reverse("gooseuser-list"),
                 "all_group_names": list(
                     GooseGroup.objects.all().values_list("name", flat=True)
                 ),
                 "group_filter": request.GET.get("group_filter", ""),
+            },
+            "gooseuser": request.gooseuser,
+        },
+    )
+
+
+@has_perm(perm=[ALL_CORP_ADMIN, SINGLE_CORP_ADMIN])
+def character_dashboard(request):
+    return render(
+        request,
+        "users/character_dashboard.html",
+        {
+            "page_data": {
+                "gooseuser_id": request.gooseuser.id,
+                "ajax_url": reverse("character-list"),
+                "site_prefix": f"/{settings.URL_PREFIX}",
+                "all_corp_names": list(
+                    Corp.objects.all().values_list("name", flat=True)
+                ),
+                "corp_filter": request.GET.get("corp_filter", ""),
             },
             "gooseuser": request.gooseuser,
         },
@@ -394,6 +418,35 @@ def build_query_for_all_users_annotated_with_their_characters():
         ),
     ).all()
     return q
+
+
+class CharacterQuerySet(
+    mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet
+):
+    permission_classes = [HasGooseToolsPerm.of([ALL_CORP_ADMIN, SINGLE_CORP_ADMIN])]
+    queryset = Character.objects.all()
+
+    serializer_class = CharacterSerializer
+
+    @action(detail=True, methods=["PUT"])
+    @transaction.atomic
+    # pylint: disable=unused-argument
+    def delete(self, request, pk=None):
+        char = self.get_object()
+        char.corp = Corp.deleted_corp()
+        char.save()
+        serializer = self.get_serializer(char)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["PUT"])
+    @transaction.atomic
+    # pylint: disable=unused-argument
+    def unknown(self, request, pk=None):
+        char = self.get_object()
+        char.corp = Corp.unknown_corp()
+        char.save()
+        serializer = self.get_serializer(char)
+        return Response(serializer.data)
 
 
 class GooseUserQuerySet(

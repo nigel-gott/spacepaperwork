@@ -27,6 +27,7 @@ def populate_models(sender, **kwargs):
     from goosetools.users.models import (
         AuthConfig,
         Character,
+        Corp,
         GoosePermission,
         GooseUser,
     )
@@ -49,6 +50,7 @@ def populate_models(sender, **kwargs):
     user_admin.permissions.add(change_character)
 
     GoosePermission.ensure_populated()
+    Corp.ensure_populated()
     AuthConfig.ensure_exists()
 
 

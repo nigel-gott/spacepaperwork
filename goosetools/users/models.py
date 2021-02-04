@@ -1,5 +1,6 @@
 import logging
 from functools import partial, wraps
+from typing import List, Union
 
 import requests
 from django.contrib.postgres.aggregates.general import StringAgg
@@ -75,6 +76,19 @@ class Corp(models.Model):
     def __str__(self):
         return str(self.name)
 
+    @staticmethod
+    def deleted_corp():
+        return Corp.objects.get(name="DELETED")
+
+    @staticmethod
+    def unknown_corp():
+        return Corp.objects.get(name="UNKNOWN")
+
+    @staticmethod
+    def ensure_populated():
+        Corp.objects.get_or_create(name="DELETED", full_name="DELETED")
+        Corp.objects.get_or_create(name="UNKNOWN", full_name="UNKNOWN")
+
 
 class GooseGroup(models.Model):
     name = models.TextField(unique=True)
@@ -101,7 +115,7 @@ class GooseGroup(models.Model):
         return GooseGroup.objects.get(name=SUPERUSER_GROUP_NAME)
 
 
-def has_perm(perm: str):
+def has_perm(perm: Union[str, List[str]]):
     """
     Decorator for views that checks that the user has the specified permission otherwise returning HttpForbidden
     """
@@ -111,8 +125,7 @@ def has_perm(perm: str):
         def wrap(request, *args, **kwargs):
             if request.gooseuser.has_perm(perm):
                 return function(request, *args, **kwargs)
-            else:
-                return HttpResponseForbidden()
+            return HttpResponseForbidden()
 
         return wrap
 
@@ -124,7 +137,7 @@ class HasGooseToolsPerm(BasePermission):
     def of(perm):
         return partial(HasGooseToolsPerm, perm)
 
-    def __init__(self, perm: str) -> None:
+    def __init__(self, perm: Union[str, List[str]]) -> None:
         super().__init__()
         self.perm = perm
 
@@ -135,6 +148,8 @@ class HasGooseToolsPerm(BasePermission):
 SUPERUSER_GROUP_NAME = "superuser group"
 USER_ADMIN_PERMISSION = "user_admin"
 USER_GROUP_ADMIN_PERMISSION = "user_group_admin"
+ALL_CORP_ADMIN = "all_corp_admin"
+SINGLE_CORP_ADMIN = "single_corp_admin"
 
 
 class GoosePermission(models.Model):
@@ -157,12 +172,12 @@ class GoosePermission(models.Model):
             "Able to edit/add user groups and their permissions",
         ),
         (
-            "single_corp_admin",
-            "Able to approve corp applications for a specific corp",
+            SINGLE_CORP_ADMIN,
+            "Able to approve corp applications for a specific corp and manage characters in that corp",
         ),
         (
-            "all_corp_admin",
-            "Able to approve corp applications for all corps and manage characters in that corp",
+            ALL_CORP_ADMIN,
+            "Able to approve corp applications for all corps and manage characters in all corps",
         ),
         ("ship_orderer", "Able to place ship orders"),
         ("free_ship_orderer", "Able to place free ship orders"),
@@ -248,11 +263,15 @@ class GooseUser(models.Model):
             )
         )["groups"]
 
-    def has_perm(self, permission_name):
+    def has_perm(self, name_or_list: Union[str, List[str]]):
+        if isinstance(name_or_list, str):
+            perm_list = [name_or_list]
+        else:
+            perm_list = name_or_list
         # pylint: disable=no-member
         return (
             self.groupmember_set.filter(
-                group__grouppermission__permission__name=permission_name
+                group__grouppermission__permission__name__in=perm_list
             ).count()
             > 0
         )
