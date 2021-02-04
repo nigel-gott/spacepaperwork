@@ -6,10 +6,6 @@ from goosetools.fleets.models import Fleet
 from goosetools.users.models import Character, GooseUser
 
 
-def get_usernames():
-    return GooseUser.objects.values_list("site_user__username", flat=True).distinct()
-
-
 class FleetForm(forms.Form):
     fc_character = forms.ModelChoiceField(queryset=Character.objects.all(), initial=0)
     name = forms.CharField(max_length=100)
@@ -60,10 +56,10 @@ class FleetAddMemberForm(forms.Form):
     fleet = forms.IntegerField(
         widget=forms.HiddenInput(), disabled=True, required=False
     )
-    username = autocomplete.Select2ListCreateChoiceField(
-        choice_list=get_usernames,
+    username = forms.ModelChoiceField(
+        queryset=GooseUser.objects.all(),
         required=False,
-        widget=autocomplete.ListSelect2(url="username-autocomplete"),
+        widget=autocomplete.ModelSelect2(url="username-autocomplete"),
     )
     character = forms.ModelChoiceField(
         required=False,

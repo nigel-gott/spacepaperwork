@@ -26,6 +26,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from goosetools.users.forms import (
     AddEditCharacterForm,
+    AdminEditCharacterForm,
     AuthConfigForm,
     CharacterUserSearchForm,
     EditGroupForm,
@@ -392,6 +393,7 @@ def character_dashboard(request):
         {
             "page_data": {
                 "gooseuser_id": request.gooseuser.id,
+                "edit_url": reverse("admin_character_edit", args=[0]),
                 "ajax_url": reverse("character-list"),
                 "site_prefix": f"/{settings.URL_PREFIX}",
                 "all_corp_names": list(
@@ -571,3 +573,30 @@ def refresh_discord_groups(request):
     if request.method == "POST":
         output = refresh_from_discord()
     return render(request, "users/refresh_discord_groups.html", {"output": output})
+
+
+@has_perm(perm=[ALL_CORP_ADMIN, SINGLE_CORP_ADMIN])
+def admin_character_edit(request, pk):
+    character = get_object_or_404(Character, pk=pk)
+    initial = {
+        "ingame_name": character.ingame_name,
+        "corp": character.corp,
+        "gooseuser": character.user,
+    }
+    if request.method == "POST":
+        form = AdminEditCharacterForm(request.POST, initial=initial)
+        if form.is_valid():
+            if not form.has_changed():
+                messages.error(request, "You must make a change to the character!")
+            else:
+                character.ingame_name = form.cleaned_data["ingame_name"]
+                character.corp = form.cleaned_data["corp"]
+                character.user_id = form.cleaned_data["gooseuser"]
+                character.save()
+                messages.success(request, "Succesfully Editted the User")
+                return HttpResponseRedirect(reverse("character_dashboard"))
+
+    else:
+        form = AdminEditCharacterForm(initial=initial)
+    form.fields["gooseuser"].initial = character.user
+    return render(request, "users/admin_character_edit.html", {"form": form})

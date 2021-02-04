@@ -16,7 +16,8 @@ $(function () {
                     "class": "right-align",
                     "width": "18em",
                     render: function (data, type, row) {
-                        return '<a class="unknown-btn grey-text" href="#">Move to Unknown</a> / <a class="delete-btn red-text" href="#">Delete</a> / <a class="edit-btn orange-text" href="#">Edit</a>';
+                        edit_url = page_data["edit_url"].replace("0", data);
+                        return `<a class="unknown-btn grey-text" href="#">Move to Unknown</a> / <a class="delete-btn red-text" href="#">Delete</a> / <a class="edit-btn orange-text" href="${edit_url}">Edit</a>`;
                     }
                 },
             ]

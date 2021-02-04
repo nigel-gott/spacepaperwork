@@ -421,6 +421,7 @@ def item_edit(request, pk):
             initial={"character": request.user.gooseuser.default_character}
         )
         char_form.fields["character"].queryset = request.user.gooseuser.characters()
+        char_form.fields["character"].initial = request.user.gooseuser.default_character
     return render(
         request,
         "items/item_edit_form.html",

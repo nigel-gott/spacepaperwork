@@ -189,9 +189,7 @@ def transfer(request):
         if form.is_valid():
             venmo_server_client = venmo_client()
             discord_uid = f"<@!{request.gooseuser.discord_uid()}>"
-            to_discord_uid = GooseUser.objects.get(
-                id=form.cleaned_data["username"]
-            ).discord_uid()
+            to_discord_uid = form.cleaned_data["user"].discord_uid()
             transfer_request = venmo_server_client.transfers.transferToUser(
                 discordId=discord_uid,
                 toDiscordId=to_discord_uid,

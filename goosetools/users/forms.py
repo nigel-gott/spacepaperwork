@@ -4,7 +4,7 @@ from django.db.models.query_utils import Q
 from tinymce.widgets import TinyMCE
 
 from goosetools.users.fields import TimeZoneFormField
-from goosetools.users.models import Character, Corp, GoosePermission
+from goosetools.users.models import Character, Corp, GoosePermission, GooseUser
 
 
 class AuthConfigForm(forms.Form):
@@ -128,6 +128,15 @@ class UserApplicationUpdateForm(forms.Form):
 class AddEditCharacterForm(forms.Form):
     ingame_name = forms.CharField()
     corp = forms.ModelChoiceField(queryset=Corp.objects.all(), initial=0)
+
+
+class AdminEditCharacterForm(forms.Form):
+    ingame_name = forms.CharField()
+    corp = forms.ModelChoiceField(queryset=Corp.objects.all(), initial=0)
+    gooseuser = forms.ModelChoiceField(
+        queryset=GooseUser.objects.all(),
+        widget=autocomplete.ModelSelect2(url="username-autocomplete"),
+    )
 
 
 class CharacterUserSearchForm(forms.Form):

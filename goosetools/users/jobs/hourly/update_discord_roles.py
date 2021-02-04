@@ -149,7 +149,6 @@ def merge(a, b, path=None):
 
 # adding ships
 # changing the free ship groups
-# seeing characters / removing / editing
 # add user notes
 
 

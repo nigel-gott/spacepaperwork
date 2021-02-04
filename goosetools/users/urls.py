@@ -6,6 +6,7 @@ from goosetools.users.autocomplete import CharacterAutocomplete, UsernameAutocom
 from goosetools.users.views import (
     CharacterQuerySet,
     GooseUserQuerySet,
+    admin_character_edit,
     application_update,
     auth_settings_view,
     character_dashboard,
@@ -36,6 +37,11 @@ urlpatterns = [
     path("user/dashboard", user_dashboard, name="user_dashboard"),
     path("character/dashboard", character_dashboard, name="character_dashboard"),
     path("user/<int:pk>", user_view, name="user_view"),
+    path(
+        "characters/edit/<int:pk>/admin",
+        admin_character_edit,
+        name="admin_character_edit",
+    ),
     path("characters/edit/<int:pk>", character_edit, name="character_edit"),
     path("users/new/", user_signup, name="user_signup"),
     path("characters/new/", character_new, name="character_new"),

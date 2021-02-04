@@ -1,7 +1,7 @@
 from dal import autocomplete
 from django import forms
 
-from goosetools.fleets.forms import get_usernames
+from goosetools.users.models import GooseUser
 
 
 class WithdrawForm(forms.Form):
@@ -25,10 +25,9 @@ class DepositForm(forms.Form):
 
 
 class TransferForm(forms.Form):
-    username = autocomplete.Select2ListCreateChoiceField(
-        choice_list=get_usernames,
-        required=False,
-        widget=autocomplete.ListSelect2(url="username-autocomplete"),
+    user = forms.ModelChoiceField(
+        queryset=GooseUser.objects.all(),
+        widget=autocomplete.ModelSelect2(url="username-autocomplete"),
     )
     quantity = forms.DecimalField(
         max_digits=20,
