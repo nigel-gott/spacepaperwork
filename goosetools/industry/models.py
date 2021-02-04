@@ -138,7 +138,15 @@ class ShipOrder(models.Model):
 
     @transition(
         field=state,
-        source=["audit", "missing_contract", "not_started"],
+        source=["audit", "missing_contract"],
+        target="waiting_on_gift_quota",
+    )
+    def waiting_on_gift_quota(self):
+        pass
+
+    @transition(
+        field=state,
+        source=["audit", "missing_contract", "not_started", "waiting_on_gift_quota"],
         target="sent",
     )
     def sent(self):
