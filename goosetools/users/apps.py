@@ -21,33 +21,7 @@ def _try_lookup_guild_roles(user_id):
 
 # pylint: disable=unused-argument
 def populate_models(sender, **kwargs):
-    from django.contrib.auth.models import Group, Permission
-    from django.contrib.contenttypes.models import ContentType
-
-    from goosetools.users.models import (
-        AuthConfig,
-        Character,
-        Corp,
-        GoosePermission,
-        GooseUser,
-    )
-
-    user_admin, _ = Group.objects.get_or_create(name="user_admin")
-    content_type = ContentType.objects.get_for_model(GooseUser)
-    change_userapplication, _ = Permission.objects.get_or_create(
-        codename="change_userapplication", content_type=content_type
-    )
-    user_admin.permissions.add(change_userapplication)
-    change_ship_order, _ = Permission.objects.get_or_create(
-        codename="change_gooseuser", content_type=content_type
-    )
-    user_admin.permissions.add(change_ship_order)
-
-    content_type = ContentType.objects.get_for_model(Character)
-    change_character, _ = Permission.objects.get_or_create(
-        codename="change_character", content_type=content_type
-    )
-    user_admin.permissions.add(change_character)
+    from goosetools.users.models import AuthConfig, Corp, GoosePermission
 
     GoosePermission.ensure_populated()
     Corp.ensure_populated()

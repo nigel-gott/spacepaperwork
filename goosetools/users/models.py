@@ -142,15 +142,21 @@ def has_perm(perm: Union[str, List[str]]):
 
 class HasGooseToolsPerm(BasePermission):
     @staticmethod
-    def of(perm):
-        return partial(HasGooseToolsPerm, perm)
+    def of(perm, exclude_get=False):
+        return partial(HasGooseToolsPerm, perm, exclude_get)
 
-    def __init__(self, perm: Union[str, List[str]]) -> None:
+    def __init__(self, perm: Union[str, List[str]], exclude_get=False) -> None:
         super().__init__()
         self.perm = perm
+        self.exclude_get = exclude_get
 
     def has_permission(self, request, view):
-        return request.gooseuser and request.gooseuser.has_perm(self.perm)
+        return (
+            request.method == "GET"
+            and self.exclude_get
+            or request.gooseuser
+            and request.gooseuser.has_perm(self.perm)
+        )
 
 
 SUPERUSER_GROUP_NAME = "superuser group"
@@ -158,6 +164,7 @@ USER_ADMIN_PERMISSION = "user_admin"
 USER_GROUP_ADMIN_PERMISSION = "user_group_admin"
 ALL_CORP_ADMIN = "all_corp_admin"
 SINGLE_CORP_ADMIN = "single_corp_admin"
+SHIP_ORDER_ADMIN = "ship_order_admin"
 
 
 class GoosePermission(models.Model):
@@ -191,7 +198,7 @@ class GoosePermission(models.Model):
         ("free_ship_orderer", "Able to place free ship orders"),
         ("ship_order_admin", "Able to claim and work on ship orders"),
         (
-            "ship_order_price_admin",
+            SHIP_ORDER_ADMIN,
             "Able to add/remove ship types and set if they are free or not",
         ),
     ]

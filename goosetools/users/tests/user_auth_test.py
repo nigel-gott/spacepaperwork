@@ -1,13 +1,18 @@
 import pytest
 import requests_mock
-from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.urls.base import reverse
 from freezegun import freeze_time
 
 from goosetools.tenants.models import SiteUser
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
-from goosetools.users.models import DiscordGuild, GooseUser, UserApplication
+from goosetools.users.models import (
+    USER_ADMIN_PERMISSION,
+    DiscordGuild,
+    GooseGroup,
+    GooseUser,
+    UserApplication,
+)
 
 
 def mock_discord_returns_with_uid(
@@ -40,6 +45,12 @@ def mock_discord_returns_with_uid(
 @freeze_time("2012-01-14 12:00:00")
 class UserAuthTest(GooseToolsTestCase):
     fixtures = ["goosetools/users/fixtures/test/test.json"]
+
+    def setUp(self):
+        super().setUp()
+        user_admin_group, _ = GooseGroup.objects.get_or_create(name="user_admin_group")
+        user_admin_group.link_permission(USER_ADMIN_PERMISSION)
+        self.user_admin_group = user_admin_group
 
     def test_approved_user_can_see_non_whitelisted_page(self):
         response = self.client.get(reverse("fleet"))
@@ -183,8 +194,7 @@ class UserAuthTest(GooseToolsTestCase):
             self.client.logout()
             self.client.force_login(self.site_user)
 
-            user_admin_group = Group.objects.get(name="user_admin")
-            self.site_user.groups.add(user_admin_group)
+            self.user.give_group(self.user_admin_group)
 
             # Their application can been seen by a user_admin
             applications = self.get(reverse("applications")).context["object_list"]
@@ -235,8 +245,7 @@ class UserAuthTest(GooseToolsTestCase):
             self.client.logout()
             self.client.force_login(self.site_user)
 
-            user_admin_group = Group.objects.get(name="user_admin")
-            self.site_user.groups.add(user_admin_group)
+            self.user.give_group(self.user_admin_group)
             self.assertEqual(
                 UserApplication.objects.filter(status="unapproved").count(), 1
             )
@@ -413,8 +422,7 @@ class UserAuthTest(GooseToolsTestCase):
     def test_once_an_application_has_been_approved_it_disappears_from_the_applications_screen(
         self,
     ):
-        user_admin_group = Group.objects.get(name="user_admin")
-        self.site_user.groups.add(user_admin_group)
+        self.user.give_group(self.user_admin_group)
         UserApplication.objects.create(
             user=self.other_user,
             corp=self.corp,
@@ -446,8 +454,7 @@ class UserAuthTest(GooseToolsTestCase):
                     "Authorization": "Bot bot_token",
                 },
             )
-            user_admin_group = Group.objects.get(name="user_admin")
-            self.site_user.groups.add(user_admin_group)
+            self.user.give_group(self.user_admin_group)
             UserApplication.objects.create(
                 user=self.other_user,
                 corp=self.corp,

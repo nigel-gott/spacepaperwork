@@ -2,7 +2,6 @@ from itertools import groupby
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import permission_required
 from django.contrib.postgres.aggregates import StringAgg
 from django.db import transaction
 from django.db.models.expressions import F, Value
@@ -189,7 +188,7 @@ def settings_view(request):
     return render(request, "users/settings.html", {"form": form})
 
 
-@permission_required("users.change_userapplication")
+@has_perm(USER_ADMIN_PERMISSION)
 @transaction.atomic
 def application_update(request, pk):
     application = get_object_or_404(UserApplication, pk=pk)
@@ -218,7 +217,7 @@ def application_update(request, pk):
         return HttpResponseNotAllowed("POST")
 
 
-@permission_required("users.change_userapplication")
+@has_perm([SINGLE_CORP_ADMIN, ALL_CORP_ADMIN])
 @transaction.atomic
 def corp_application_update(request, pk):
     application = get_object_or_404(CorpApplication, pk=pk)
@@ -301,7 +300,7 @@ class UserApplicationListView(ListView):
         return UserApplication.unapproved_applications()
 
 
-@permission_required("users.change_userapplication")
+@has_perm([SINGLE_CORP_ADMIN, ALL_CORP_ADMIN])
 def corp_application_list(request):
     grouped_by_corp = {
         key: list(result)
@@ -316,7 +315,7 @@ def corp_application_list(request):
     )
 
 
-@permission_required("users.change_userapplication")
+@has_perm([USER_ADMIN_PERMISSION])
 def user_application_list(request):
     return render(
         request,

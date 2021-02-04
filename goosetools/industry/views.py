@@ -12,7 +12,7 @@ from django.http.response import HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
-from rest_framework import mixins, permissions, status
+from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -20,7 +20,12 @@ from rest_framework.viewsets import GenericViewSet
 from goosetools.industry.forms import ShipOrderForm
 from goosetools.industry.models import Ship, ShipOrder, to_isk
 from goosetools.industry.serializers import ShipOrderSerializer
-from goosetools.users.models import Character, GooseUser
+from goosetools.users.models import (
+    SHIP_ORDER_ADMIN,
+    Character,
+    GooseUser,
+    HasGooseToolsPerm,
+)
 
 
 def forbidden(request):
@@ -236,7 +241,7 @@ class ShipOrderViewSet(
         return qs
 
     serializer_class = ShipOrderSerializer
-    permission_classes = [permissions.DjangoModelPermissions]
+    permission_classes = [HasGooseToolsPerm.of(SHIP_ORDER_ADMIN, exclude_get=True)]
 
     @action(detail=True, methods=["PUT"])
     @transaction.atomic
@@ -343,9 +348,7 @@ def shiporders_view(request):
         "industry/shiporders/view.html",
         context={
             "page_data": {
-                "has_industry_permission": request.user.has_perm(
-                    "industry.change_shiporder"
-                ),
+                "has_industry_permission": request.gooseuser.has_perm(SHIP_ORDER_ADMIN),
                 "request_user_discord_username": request.user.gooseuser.discord_username(),
                 "request_user_pk": request.user.gooseuser.pk,
                 "request_user_character_pks": [
