@@ -1,0 +1,26 @@
+{% extends "core/base.html" %}
+{% load materializecss %}
+{% block body %}
+<div class="section">
+    <h5>New Ship</h5>
+</div>
+<div class="divider"></div>
+<div class="section">
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="row">
+            {{ form.name|materializecss:'s12 m6, icon=label'}}
+            {{ form.free|materializecss:'s12 m6, icon=person'}}
+        </div>
+        <div class="row">
+            {{ form.tech_level|materializecss:'s12 m6, icon=label'}}
+            {{ form.order_limit_group|materializecss:'s12 m6, icon=ship'}}
+        </div>
+
+        <label>
+        <button class="btn waves-effect waves-light" type="submit" value="Submit">Create New Ship
+            <i class="material-icons right">send</i>
+        </button>
+    </form>
+</div>
+{% endblock %}

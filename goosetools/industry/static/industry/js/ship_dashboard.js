@@ -8,7 +8,15 @@ $(function () {
                 {
                     "data": "name", "title": "Name"
                 },
-                { "data": "free", "title": "Is Free", "give_filter": true },
+                {
+                    "data": "tech_level", "title": "Tech Level", "give_filter": true,
+                },
+                { "data": "free", "title": "Free (click to change)", "give_filter": true,
+                    render: function (data, type, row) {
+                        const text = data ? "Free" : "Not Free";
+                        return `<a class="flip-btn" href="#">${text}</a>`
+                    }
+                },
                 { "data": "order_limit_group_name", "title": "Order Limit Group", "defaultContent": "", "give_filter": true },
                 {
                     "data": "isk_price", "title": "Isk Price",
@@ -39,16 +47,16 @@ $(function () {
                     }
                 },
                 {
-                    "data": "id", "title": "Actions",
+                    "data": "name", "title": "Actions",
                     "class": "right-align",
                     "width": "18em",
                     render: function (data, type, row) {
-                        return `<a class="waves-btn btn green" href="#">Edit</a>`;
+                        edit_url = page_data["edit_url"].replace("0", data);
+                        return `<a class="waves-btn btn green" href="${edit_url}">Edit</a>`;
                     }
                 },
             ]
         }
     })
-    $('#datatable').on('click', '.unknown-btn', Goose.putSubjectAction(table, "character", "unknown"));
-    $('#datatable').on('click', '.delete-btn', Goose.putSubjectAction(table, "character", "delete"));
+    $('#datatable').on('click', '.flip-btn', Goose.putSubjectAction(table, "ship", "flip_free", "industry/api"));
 });

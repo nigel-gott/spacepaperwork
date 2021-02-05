@@ -165,17 +165,23 @@ USER_GROUP_ADMIN_PERMISSION = "user_group_admin"
 ALL_CORP_ADMIN = "all_corp_admin"
 SINGLE_CORP_ADMIN = "single_corp_admin"
 SHIP_ORDER_ADMIN = "ship_order_admin"
+SHIP_PRICE_ADMIN = "ship_price_admin"
+SHIP_ORDERER = "ship_orderer"
+FREE_SHIP_ORDERER = "free_ship_orderer"
+BASIC_ACCESS = "basic_access"
+LOOT_TRACKER = "loot_tracker"
+LOOT_TRACKER_ADMIN = "loot_tracker_admin"
 
 
 class GoosePermission(models.Model):
     USER_PERMISSION_CHOICES = [
         (
-            "basic_access",
+            BASIC_ACCESS,
             "Able to Apply to join and view the home page and other basic registered user pages",
         ),
-        ("loot_tracker", "Able to use the loot tracker"),
+        (LOOT_TRACKER, "Able to use the loot tracker"),
         (
-            "loot_tracker_admin",
+            LOOT_TRACKER_ADMIN,
             "Automatically an admin in every fleet and able to do loot buyback",
         ),
         (
@@ -194,11 +200,11 @@ class GoosePermission(models.Model):
             ALL_CORP_ADMIN,
             "Able to approve corp applications for all corps and manage characters in all corps",
         ),
-        ("ship_orderer", "Able to place ship orders"),
-        ("free_ship_orderer", "Able to place free ship orders"),
-        ("ship_order_admin", "Able to claim and work on ship orders"),
+        (SHIP_ORDERER, "Able to place ship orders"),
+        (FREE_SHIP_ORDERER, "Able to place free ship orders"),
+        (SHIP_ORDER_ADMIN, "Able to claim and work on ship orders"),
         (
-            SHIP_ORDER_ADMIN,
+            SHIP_PRICE_ADMIN,
             "Able to add/remove ship types and set if they are free or not",
         ),
     ]

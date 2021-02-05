@@ -4,10 +4,10 @@
 {% load materializecss %}
 {% block body %}
 <div class="row">
-    {% has_perm user "ship_order_admin" as is_ship_order_admin %}
+    {% has_perm user "ship_price_admin" as is_ship_price_admin %}
     <div class="col s12 m12">
         <a class="btn waves-btn green" href="{% url 'industry:shiporders_create' %}">Place An Order</a>
-        {% if is_ship_order_admin %}
+        {% if is_ship_price_admin %}
         <a class="btn waves-btn" href="{% url 'industry:ship_dashboard' %}">Ship Admin Dashboard</a>
         {% endif %}
     </div>

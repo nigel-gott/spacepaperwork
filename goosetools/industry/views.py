@@ -4,6 +4,7 @@ from typing import Any, Dict
 
 from django.conf import settings
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models.aggregates import Max
 from django.db.models.functions import Coalesce
@@ -18,11 +19,12 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from goosetools.industry.forms import ShipOrderForm
-from goosetools.industry.models import Ship, ShipOrder, to_isk
+from goosetools.industry.forms import OrderLimitGroupForm, ShipForm, ShipOrderForm
+from goosetools.industry.models import OrderLimitGroup, Ship, ShipOrder, to_isk
 from goosetools.industry.serializers import ShipOrderSerializer, ShipSerializer
 from goosetools.users.models import (
     SHIP_ORDER_ADMIN,
+    SHIP_PRICE_ADMIN,
     Character,
     GooseUser,
     HasGooseToolsPerm,
@@ -365,10 +367,22 @@ class ShipViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
     queryset = Ship.objects.all()
 
     serializer_class = ShipSerializer
-    permission_classes = [HasGooseToolsPerm.of(SHIP_ORDER_ADMIN)]
+    permission_classes = [HasGooseToolsPerm.of(SHIP_PRICE_ADMIN)]
+
+    @action(detail=True, methods=["PUT"])
+    @transaction.atomic
+    # pylint: disable=unused-argument
+    def flip_free(self, request, pk=None):
+        ship = self.get_object()
+        ship.free = not ship.free
+        if not ship.free:
+            ship.order_limit_group = None
+        ship.save()
+        serializer = self.get_serializer(ship)
+        return Response(serializer.data)
 
 
-@has_perm(perm=SHIP_ORDER_ADMIN)
+@has_perm(perm=SHIP_PRICE_ADMIN)
 def ship_dashboard(request):
     return render(
         request,
@@ -376,10 +390,153 @@ def ship_dashboard(request):
         {
             "page_data": {
                 "gooseuser_id": request.gooseuser.id,
-                "edit_url": reverse("admin_character_edit", args=[0]),
+                "edit_url": reverse("industry:edit_ship", args=[0]),
                 "ajax_url": reverse("industry:ship-list"),
                 "site_prefix": f"/{settings.URL_PREFIX}",
             },
             "gooseuser": request.gooseuser,
         },
+    )
+
+
+@has_perm(perm=SHIP_PRICE_ADMIN)
+def olg_list(request):
+    olgs = [
+        {
+            "id": o.id,
+            "name": o.name,
+            "days_between_orders": o.days_between_orders,
+            "ships": ", ".join(o.ships()),
+        }
+        for o in OrderLimitGroup.objects.all().order_by("name")
+    ]
+    return render(
+        request,
+        "industry/shiporders/olg_list.html",
+        {"olgs": olgs},
+    )
+
+
+@has_perm(perm=SHIP_PRICE_ADMIN)
+def new_olg(request):
+    if request.method == "POST":
+        form = OrderLimitGroupForm(request.POST)
+        if form.is_valid():
+            olg = OrderLimitGroup(
+                name=form.cleaned_data["name"],
+                days_between_orders=form.cleaned_data["days_between_orders"],
+            )
+            olg.save()
+            for ship in form.cleaned_data["ships"]:
+                ship.order_limit_group = olg
+                ship.save()
+            messages.success(request, f"Succesfully Edited {olg.name}")
+
+            return HttpResponseRedirect(reverse("industry:olg_list"))
+    else:
+        form = OrderLimitGroupForm()
+    return render(
+        request,
+        "industry/shiporders/olg_new.html",
+        {"form": form},
+    )
+
+
+@has_perm(perm=SHIP_PRICE_ADMIN)
+def edit_olg(request, pk):
+    olg = get_object_or_404(OrderLimitGroup, pk=pk)
+    if request.method == "POST":
+        form = OrderLimitGroupForm(request.POST)
+        if form.is_valid():
+            delete = request.POST.get("delete", False)
+            if delete:
+                olg.delete()
+                messages.success(request, f"Succesfully deleted {olg.name}")
+            else:
+                olg.name = form.cleaned_data["name"]
+                olg.days_between_orders = form.cleaned_data["days_between_orders"]
+                olg.save()
+                olg.ship_set.update(order_limit_group=None)  # type:ignore
+                for ship in form.cleaned_data["ships"]:
+                    ship.order_limit_group = olg
+                    ship.save()
+                messages.success(request, f"Succesfully Edited {olg.name}")
+
+            return HttpResponseRedirect(reverse("industry:olg_list"))
+    else:
+        form = OrderLimitGroupForm(
+            initial={
+                "name": olg.name,
+                "days_between_orders": olg.days_between_orders,
+                "ships": olg.ship_set.all(),  # type:ignore
+            }
+        )
+    return render(
+        request,
+        "industry/shiporders/olg_edit.html",
+        {"form": form},
+    )
+
+
+@has_perm(perm=SHIP_PRICE_ADMIN)
+def new_ship(request):
+    if request.method == "POST":
+        form = ShipForm(request.POST)
+        if form.is_valid():
+            ship = Ship(
+                name=form.cleaned_data["name"],
+                free=form.cleaned_data["free"],
+                order_limit_group=form.cleaned_data["order_limit_group"],
+                tech_level=form.cleaned_data["tech_level"],
+            )
+            try:
+                ship.save()
+                messages.success(request, f"Succesfully Created {ship.name}")
+                return HttpResponseRedirect(reverse("industry:ship_dashboard"))
+            except ValidationError as e:
+                messages.error(request, f"{e}")
+                return HttpResponseRedirect(reverse("industry:new_ship"))
+    else:
+        form = ShipForm()
+    return render(
+        request,
+        "industry/shiporders/ship_new.html",
+        {"form": form},
+    )
+
+
+@has_perm(perm=SHIP_PRICE_ADMIN)
+def edit_ship(request, pk):
+    ship = get_object_or_404(Ship, pk=pk)
+    if request.method == "POST":
+        form = ShipForm(request.POST)
+        form.fields["name"].required = False
+        form.fields["name"].disabled = True
+        if form.is_valid():
+            ship.free = form.cleaned_data["free"]
+            ship.order_limit_group = form.cleaned_data["order_limit_group"]
+            ship.tech_level = form.cleaned_data["tech_level"]
+            try:
+                ship.save()
+                messages.success(request, f"Succesfully Edited {ship.name}")
+                return HttpResponseRedirect(reverse("industry:ship_dashboard"))
+            except ValidationError as e:
+                messages.error(request, f"{e}")
+                return HttpResponseRedirect(reverse("industry:edit_ship", args=[pk]))
+
+    else:
+        form = ShipForm(
+            initial={
+                "name": ship.name,
+                "free": ship.free,
+                "order_limit_group": ship.order_limit_group,
+                "tech_level": ship.tech_level,
+            }
+        )
+        form.fields["name"].required = False
+        form.fields["name"].disabled = True
+    return render(
+        request,
+        "industry/shiporders/ship_edit.html",
+        {"form": form},
     )

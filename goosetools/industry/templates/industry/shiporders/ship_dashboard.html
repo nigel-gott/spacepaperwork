@@ -4,6 +4,10 @@
 {% block datatable_title %}
     Industry Ship Admin Dashboard
 {% endblock %}
+{% block datatable_top_row %}
+    <a class="waves-btn btn" href="{% url 'industry:olg_list'%}">Order Limit Groups</a>
+    <a class="waves-btn btn green" href="{% url 'industry:new_ship'%}">Create New Ship</a>
+{% endblock %}
 
 {% block datatable_footer %}
     <script src="{% static 'industry/js/ship_dashboard.js' %}" type="text/javascript"></script>

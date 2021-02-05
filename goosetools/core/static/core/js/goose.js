@@ -100,11 +100,11 @@ GooseJs = function () {
             );
         },
         "json_django_request": json_django_request,
-        putSubjectAction: function putSubjectAction(table, subject, action) {
+        putSubjectAction: function putSubjectAction(table, subject, action, api_url="api") {
             return function () {
                 const row = table.row($(this).parents('tr'));
                 const id = row.data()['id'];
-                const url = `${page_data["site_prefix"]}api/${subject}/${id}/${action}/`
+                const url = `${page_data["site_prefix"]}${api_url}/${subject}/${id}/${action}/`
                 const request = json_django_request(url);
                 fetch(request, {
                     method: 'PUT',

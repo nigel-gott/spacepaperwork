@@ -1,7 +1,6 @@
 from django import forms
-from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.forms.models import ModelChoiceField
-from django.forms.widgets import HiddenInput
+from django.forms.widgets import CheckboxSelectMultiple, HiddenInput
 
 from goosetools.industry.models import OrderLimitGroup, Ship, ShipOrder
 from goosetools.users.models import Character
@@ -27,16 +26,23 @@ class ShipOrderForm(forms.Form):
     eggs_price = forms.IntegerField(min_value=1, widget=HiddenInput(), required=False)
 
 
+class ShipForm(forms.Form):
+    name = forms.CharField()
+    tech_level = forms.IntegerField(min_value=0)
+    free = forms.BooleanField(required=False)
+    order_limit_group = forms.ModelChoiceField(
+        queryset=OrderLimitGroup.objects.all(), initial=0, required=False
+    )
+
+
 class OrderLimitGroupForm(forms.ModelForm):
     class Meta:
         model = OrderLimitGroup
         fields = ["name", "days_between_orders"]
 
     ships = forms.ModelMultipleChoiceField(
-        queryset=Ship.objects.filter(free=True).all(),
-        widget=FilteredSelectMultiple(
-            "Ships In This Order Limit Group", is_stacked=False
-        ),
+        queryset=Ship.objects.filter(free=True).order_by("name").all(),
+        widget=CheckboxSelectMultiple(),
     )
 
     def __init__(self, *args, **kwargs):

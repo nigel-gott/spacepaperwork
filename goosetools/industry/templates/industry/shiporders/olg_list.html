@@ -1,0 +1,23 @@
+{% extends "core/base.html" %}
+{% block body %}
+<div class="section">
+    <h4>Order Limit Group Admin</h4>
+</div>
+<div class="section">
+    <a class="waves-btn btn" href="{% url 'industry:new_olg' %}">Create New Order Limit Group</a>
+    <ul class="collection" style="overflow: visible;">
+    {% for o in olgs %}
+        <li class="collection-item ">
+                <a href="{% url 'industry:edit_olg' o.id %}" class="waves-btn btn secondary-content">Edit</a>
+            <span class="title"><b>{{o.name}}</b></span>
+            </span>
+            <p>
+                Days Between Orders: {{o.days_between_orders}}<br/>
+                Ships In Group: {{o.ships}}
+            </p>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

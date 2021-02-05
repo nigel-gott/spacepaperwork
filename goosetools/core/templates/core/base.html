@@ -105,9 +105,6 @@
         </a>
     </li>
     <li>
-        <a href="{% url 'admin:index' %}">Site Admin</a>
-    </li>
-    <li>
         <a href="{% url 'auth_settings' %}">Site Auth Settings</a>
     </li>
 </ul>
@@ -206,7 +203,6 @@
                 <a href="{% url 'groups_view' %}">User Groups Admin</a>
         </li>
         {% endif %}
-        <li><a href="{% url 'admin:index' %}">Admin</a></li>
         <li><a href="{% url 'auth_settings' %}">Site Auth Settings</a></li>
         <li>
             <a href="{% url 'applications' %}">New User Applications</a>
@@ -341,6 +337,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var instances = M.Dropdown.init(elems);
     var elems = document.querySelectorAll('.collapsible');
     var instances = M.Collapsible.init(elems);
+    var elems = document.querySelectorAll('.tooltipped');
+    var instances = M.Tooltip.init(elems);
 
 });
 

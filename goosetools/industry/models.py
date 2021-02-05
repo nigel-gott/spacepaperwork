@@ -19,6 +19,9 @@ class OrderLimitGroup(models.Model):
     name = models.TextField()
     days_between_orders = models.PositiveIntegerField()
 
+    def ships(self):
+        return [ship.name for ship in self.ship_set.all()]  # type:ignore
+
     def __str__(self):
         return f"{self.name} - days_between_orders:{self.days_between_orders}"
 
