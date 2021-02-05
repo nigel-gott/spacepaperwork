@@ -35,6 +35,7 @@ GooseJs = function () {
                     if(column_info["empty_filter_name"]){
                         if (column_info["initial_filter_value"] === column_info["empty_filter_name"]) {
                             select.append('<option value="' + column_info["empty_filter_name"] + '" selected>' + column_info["empty_filter_name"] + '</option>')
+                            filterColumn(column, column_info["empty_filter_name"], column_info["include_partial_matches"], column_info["empty_filter_name"]);
                         } else {
                             select.append('<option value="' + column_info["empty_filter_name"] + '">' + column_info["empty_filter_name"] + '</option>')
                         }
