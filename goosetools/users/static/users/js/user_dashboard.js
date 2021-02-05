@@ -26,7 +26,7 @@ $(function () {
                         }
                     }
                 },
-                { "data": "groups", "title": "Groups", "filter_values": page_data["all_group_names"], "initial_filter_value": page_data["group_filter"] },
+                { "data": "groups", "title": "Groups", "filter_values": page_data["all_group_names"], "initial_filter_value": page_data["group_filter"], "include_partial_matches": true },
                 {
                     "data": "notes", "title": "Notes",
                 },
