@@ -1,7 +1,9 @@
 # mypy: ignore-errors
 from django.contrib import admin
 from django.contrib.admin.options import ModelAdmin
+from django.contrib.auth.admin import UserAdmin
 
+from config.middleware import SiteUser
 from goosetools.users.models import (
     AuthConfig,
     Character,
@@ -81,5 +83,10 @@ class CustomUserAdmin(ModelAdmin):
         return [str(v.display_name()) for v in obj.current_vouches.all()]
 
 
+class CustomSiteUserAdmin(UserAdmin):
+    search_fields = ["username"]
+
+
 admin.site.register(GooseUser, CustomUserAdmin)
 admin.site.register(DiscordGuild)
+admin.site.register(SiteUser, CustomSiteUserAdmin)
