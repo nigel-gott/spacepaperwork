@@ -11,9 +11,9 @@ $(function () {
                 {
                     "data": "tech_level", "title": "Tech Level", "give_filter": true,
                 },
-                { "data": "free", "title": "Free (click to change)", "give_filter": true,
+                { "data": "free", "title": "Free (click to change)", "filter_values": ["Free", "Paid For"],
                     render: function (data, type, row) {
-                        const text = data ? "Free" : "Not Free";
+                        const text = data ? "Free" : "Paid For";
                         return `<a class="flip-btn" href="#">${text}</a>`
                     }
                 },
