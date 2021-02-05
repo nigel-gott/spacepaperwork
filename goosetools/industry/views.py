@@ -2,6 +2,7 @@ import json
 from random import randint
 from typing import Any, Dict
 
+from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
 from django.db.models.aggregates import Max
@@ -19,12 +20,13 @@ from rest_framework.viewsets import GenericViewSet
 
 from goosetools.industry.forms import ShipOrderForm
 from goosetools.industry.models import Ship, ShipOrder, to_isk
-from goosetools.industry.serializers import ShipOrderSerializer
+from goosetools.industry.serializers import ShipOrderSerializer, ShipSerializer
 from goosetools.users.models import (
     SHIP_ORDER_ADMIN,
     Character,
     GooseUser,
     HasGooseToolsPerm,
+    has_perm,
 )
 
 
@@ -355,5 +357,29 @@ def shiporders_view(request):
                     char.pk for char in request.user.gooseuser.characters()
                 ],
             }
+        },
+    )
+
+
+class ShipViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
+    queryset = Ship.objects.all()
+
+    serializer_class = ShipSerializer
+    permission_classes = [HasGooseToolsPerm.of(SHIP_ORDER_ADMIN)]
+
+
+@has_perm(perm=SHIP_ORDER_ADMIN)
+def ship_dashboard(request):
+    return render(
+        request,
+        "industry/shiporders/ship_dashboard.html",
+        {
+            "page_data": {
+                "gooseuser_id": request.gooseuser.id,
+                "edit_url": reverse("admin_character_edit", args=[0]),
+                "ajax_url": reverse("industry:ship-list"),
+                "site_prefix": f"/{settings.URL_PREFIX}",
+            },
+            "gooseuser": request.gooseuser,
         },
     )

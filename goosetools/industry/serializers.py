@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from goosetools.industry.models import ShipOrder
+from goosetools.industry.models import Ship, ShipOrder
 
 
 # pylint: disable=abstract-method
@@ -52,4 +52,29 @@ class ShipOrderSerializer(serializers.ModelSerializer):
             "payment_taken",
             "price",
             "needs_manual_price",
+        ]
+
+
+class ShipSerializer(serializers.ModelSerializer):
+    order_limit_group_name = serializers.CharField(
+        source="order_limit_group.name", read_only=True
+    )
+    last_order = serializers.DateTimeField()
+
+    class Meta:
+        model = Ship
+        fields = [
+            "name",
+            "tech_level",
+            "free",
+            "order_limit_group",
+            "order_limit_group_name",
+            "isk_price",
+            "eggs_price",
+            "prices_last_updated",
+            "total_order_quantity",
+            "total_order_quantity_last_month",
+            "last_order",
+            "total_isk_and_eggs_quantity",
+            "total_isk_and_eggs_quantity_last_month",
         ]

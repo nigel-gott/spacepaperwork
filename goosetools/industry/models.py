@@ -1,5 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Sum
+from django.db.models.aggregates import Max
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMField, transition
@@ -52,6 +54,49 @@ class Ship(models.Model):
                     "A Ship cannot be free and in a Order Limit Group. Either remove the group or make the ship free."
                 )
             )
+
+    def total_order_quantity(self):
+        result = self.shiporder_set.aggregate(total=Sum("quantity"))  # type: ignore
+        if result:
+            return result["total"]
+        else:
+            return 0
+
+    def total_order_quantity_last_month(self):
+        now = timezone.now()
+        now_minus_1_month = now - timezone.timedelta(weeks=4)
+        result = self.shiporder_set.filter(created_at__gt=now_minus_1_month).aggregate(  # type: ignore
+            total=Sum("quantity")
+        )
+        if result:
+            return result["total"]
+        else:
+            return 0
+
+    def last_order(self):
+        result = self.shiporder_set.aggregate(max=Max("created_at"))  # type: ignore
+        if result:
+            return result["max"]
+        else:
+            return "Never Ordered"
+
+    def total_isk_and_eggs_quantity(self):
+        result = self.shiporder_set.aggregate(total=Sum("price"))  # type: ignore
+        if result:
+            return result["total"]
+        else:
+            return 0
+
+    def total_isk_and_eggs_quantity_last_month(self):
+        now = timezone.now()
+        now_minus_1_month = now - timezone.timedelta(weeks=4)
+        result = self.shiporder_set.filter(created_at__gt=now_minus_1_month).aggregate(  # type: ignore
+            total=Sum("price")
+        )
+        if result:
+            return result["total"]
+        else:
+            return 0
 
     # pylint: disable=signature-differs
     def save(self, *args, **kwargs):
