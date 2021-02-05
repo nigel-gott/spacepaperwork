@@ -343,7 +343,7 @@ function json_django_request(url){
 }
 function ship_paid(row, table){
     const id = row.data()['id'];
-    const request = json_django_request("api/" + id + "/paid/");
+    const request = json_django_request("shiporder/" + id + "/paid/");
     fetch(request, {
         method: 'PUT',
         mode: 'same-origin'
@@ -358,7 +358,7 @@ function ship_paid(row, table){
 }
 function manually_price_ship(row, table){
     const id = row.data()['id'];
-    const request = json_django_request("api/" + id + "/manual_price/");
+    const request = json_django_request("shiporder/" + id + "/manual_price/");
     const price = parseInt($('#input_price_' + id).val());
     if(price && price > 0){
         fetch(request, {
@@ -380,7 +380,7 @@ function manually_price_ship(row, table){
 }
 function state_change(row, transition, table){
     const id = row.data()['id'];
-    const request = json_django_request("api/" + id + "/transition/");
+    const request = json_django_request("shiporder/" + id + "/transition/");
     fetch(request, {
         method: 'PUT',
         mode: 'same-origin',
@@ -398,7 +398,7 @@ function state_change(row, transition, table){
 
 function claim(row, table){
     const id = row.data()['id'];
-    const request = django_request("api/" + id + "/claim/");
+    const request = django_request("shiporder/" + id + "/claim/");
     fetch(request, {
         method: 'PUT',
         mode: 'same-origin'
@@ -416,7 +416,7 @@ function claim(row, table){
 
 function unclaim(row, table){
     const id = row.data()['id'];
-    const request = django_request("api/" + id + "/unclaim/");
+    const request = django_request("shiporder/" + id + "/unclaim/");
     fetch(request, {
         method: 'PUT',
         mode: 'same-origin'

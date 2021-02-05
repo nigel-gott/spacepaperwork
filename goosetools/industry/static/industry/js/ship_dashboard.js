@@ -58,5 +58,5 @@ $(function () {
             ]
         }
     })
-    $('#datatable').on('click', '.flip-btn', Goose.putSubjectAction(table, "ship", "flip_free", "industry/api"));
+    $('#datatable').on('click', '.flip-btn', Goose.putSubjectAction(table, "ship", "flip_free", "industry/shiporder"));
 });

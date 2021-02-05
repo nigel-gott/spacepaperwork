@@ -37,5 +37,5 @@ urlpatterns = [
     path("admin/ship/new", new_ship, name="new_ship"),
     path("admin/ship/<str:pk>/edit", edit_ship, name="edit_ship"),
     path("admin/ships", ship_dashboard, name="ship_dashboard"),
-    path("api/", include((router.urls))),
+    path("shiporder/", include((router.urls))),
 ]
