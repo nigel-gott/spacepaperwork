@@ -70,13 +70,13 @@
     </li>
 </ul>
 {% endif %}
-{% if user.is_staff %}
-<ul class="dropdown-content" id="dropdown_admin">
     {% has_perm user "user_admin" as is_user_admin %}
     {% has_perm user "user_group_admin" as is_user_group_admin %}
     {% has_perm user "single_corp_admin" as is_single_corp_admin %}
     {% has_perm user "all_corp_admin" as is_all_corp_admin %}
     {% has_perm user "ship_price_admin" as is_ship_price_admin %}
+{% if is_user_admin or is_user_group_admin or is_single_corp_admin or is_all_corp_admin or is_ship_price_admin %}
+<ul class="dropdown-content" id="dropdown_admin">
     {% if is_user_admin %}
     <li>
             <a href="{% url 'user_dashboard' %}">User Dashboard</a>
@@ -147,7 +147,7 @@
                     <i class="material-icons right">arrow_drop_down</i>
                 </a>
             </li>
-            {% if user.is_staff %}
+            {% if is_user_admin or is_user_group_admin or is_single_corp_admin or is_all_corp_admin or is_ship_price_admin %}
             <li>
                 <a class="dropdown-trigger valign-wrapper" data-target="dropdown_admin" href="#!">
                     <i class="material-icons left">build</i>Admin
@@ -189,7 +189,7 @@
         </li>
     {% endif %}
 
-    {% if user.is_staff %}
+    {% if is_user_admin or is_user_group_admin or is_single_corp_admin or is_all_corp_admin or is_ship_price_admin %}
         <li><a class="subheader">Admin<i class="material-icons right">build</i></a></li>
         {% if is_user_admin %}
         <li>
