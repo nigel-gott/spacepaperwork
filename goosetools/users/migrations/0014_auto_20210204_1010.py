@@ -12,9 +12,10 @@ def revert_migration(apps, schema_editor):
 
 # pylint: disable=unused-argument
 def apply_migration(apps, schema_editor):
+    u, _ = Corp.objects.get_or_create(name="UNKNOWN", full_name="UNKNOWN")
     for c in Character.objects.all():
         if not hasattr(c, "corp") or not c.corp:
-            c.corp = Corp.unknown_corp()
+            c.corp = u
             c.save()
 
 

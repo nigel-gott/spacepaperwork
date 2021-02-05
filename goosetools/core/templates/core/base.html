@@ -76,6 +76,7 @@
     {% has_perm user "user_group_admin" as is_user_group_admin %}
     {% has_perm user "single_corp_admin" as is_single_corp_admin %}
     {% has_perm user "all_corp_admin" as is_all_corp_admin %}
+    {% has_perm user "ship_price_admin" as is_ship_price_admin %}
     {% if is_user_admin %}
     <li>
             <a href="{% url 'user_dashboard' %}">User Dashboard</a>
@@ -92,6 +93,11 @@
     {% if is_user_group_admin %}
     <li>
             <a href="{% url 'groups_view' %}">User Groups Admin</a>
+    </li>
+    {% endif %}
+    {% if is_ship_price_admin %}
+    <li>
+        <a href="{% url 'industry:ship_dashboard' %}">Ship Admin</a>
     </li>
     {% endif %}
     <li>
@@ -201,6 +207,11 @@
         {% if is_user_group_admin %}
         <li>
                 <a href="{% url 'groups_view' %}">User Groups Admin</a>
+        </li>
+        {% endif %}
+        {% if is_ship_price_admin %}
+        <li>
+            <a href="{% url 'industry:ship_dashboard' %}">Ship Admin</a>
         </li>
         {% endif %}
         <li><a href="{% url 'auth_settings' %}">Site Auth Settings</a></li>
