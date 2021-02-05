@@ -1,6 +1,10 @@
 GooseJs = function () {
-    function filterColumn(column, val, include_partial_matches){
+    function filterColumn(column, val, include_partial_matches, empty_filter_name){
         search_regex = include_partial_matches ? val : `^${val}$`;
+
+        if(val && empty_filter_name && empty_filter_name === val){
+            search_regex = `^$`;
+        }
 
         column
             .search(val ? search_regex : '', true, false)
@@ -20,7 +24,7 @@ GooseJs = function () {
                     var val = $.fn.dataTable.util.escapeRegex(
                         $(this).val()
                     );
-                    filterColumn(column, val, column_info["include_partial_matches"]);
+                    filterColumn(column, val, column_info["include_partial_matches"], column_info["empty_filter_name"]);
                 }
                 var select = $('<select class="browser-default"><option value=""></option></select>')
                     .appendTo($(column.header()))
@@ -28,10 +32,17 @@ GooseJs = function () {
                     );
 
                 if (column_info["filter_values"]) {
+                    if(column_info["empty_filter_name"]){
+                        if (column_info["initial_filter_value"] === column_info["empty_filter_name"]) {
+                            select.append('<option value="' + column_info["empty_filter_name"] + '" selected>' + column_info["empty_filter_name"] + '</option>')
+                        } else {
+                            select.append('<option value="' + column_info["empty_filter_name"] + '">' + column_info["empty_filter_name"] + '</option>')
+                        }
+                    }
                     column_info["filter_values"].forEach(function (d) {
                         if (column_info["initial_filter_value"] === d) {
                             select.append('<option value="' + d + '" selected>' + d + '</option>')
-                            filterColumn(column, d, column_info["include_partial_matches"]);
+                            filterColumn(column, d, column_info["include_partial_matches"], column_info["empty_filter_name"]);
                         } else {
                             select.append('<option value="' + d + '">' + d + '</option>')
                         }
@@ -41,7 +52,7 @@ GooseJs = function () {
                     column.data().unique().sort().each(function (d, j) {
                         if (column_info["initial_filter_value"] === d) {
                             select.append('<option value="' + d + '" selected>' + d + '</option>')
-                            filterColumn(column, d, column_info["include_partial_matches"]);
+                            filterColumn(column, d, column_info["include_partial_matches"], column_info["empty_filter_name"]);
                         } else {
                             select.append('<option value="' + d + '">' + d + '</option>')
                         }

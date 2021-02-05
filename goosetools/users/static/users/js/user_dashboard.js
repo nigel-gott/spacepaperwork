@@ -15,7 +15,7 @@ $(function () {
                     "data": "display_name", "title": "Display Name"
                 },
                 { "data": "char_names", "title": "Characters" },
-                { "data": "status", "title": "Status", "give_filter": true },
+                { "data": "status", "title": "Status", "give_filter": true, "initial_filter_value": page_data["status_filter"] },
                 {
                     "data": "sa_profile", "title": "SA Profile",
                     render: function (data, type, row) {
@@ -26,7 +26,7 @@ $(function () {
                         }
                     }
                 },
-                { "data": "groups", "title": "Groups", "filter_values": page_data["all_group_names"], "initial_filter_value": page_data["group_filter"], "include_partial_matches": true },
+                { "data": "groups", "title": "Groups", "filter_values": page_data["all_group_names"], "initial_filter_value": page_data["group_filter"], "include_partial_matches": true, "empty_filter_name": "No Groups" },
                 {
                     "data": "notes", "title": "Notes",
                 },

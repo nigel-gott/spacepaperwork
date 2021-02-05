@@ -381,6 +381,7 @@ def user_dashboard(request):
                     GooseGroup.objects.all().values_list("name", flat=True)
                 ),
                 "group_filter": request.GET.get("group_filter", ""),
+                "status_filter": request.GET.get("status_filter", ""),
             },
             "gooseuser": request.gooseuser,
         },
