@@ -14,6 +14,9 @@ $(function () {
                 {
                     "data": "display_name", "title": "Display Name"
                 },
+                {
+                    "data": "username", "title": "Username"
+                },
                 { "data": "char_names", "title": "Characters" },
                 { "data": "status", "title": "Status", "give_filter": true, "initial_filter_value": page_data["status_filter"] },
                 {
