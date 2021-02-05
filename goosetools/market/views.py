@@ -28,6 +28,7 @@ from goosetools.market.forms import (
     SoldItemForm,
 )
 from goosetools.market.models import MarketOrder, SoldItem, to_isk
+from goosetools.users.models import LOOT_TRACKER_ADMIN
 
 
 def forbidden(request):
@@ -134,7 +135,9 @@ def estimate_price(item, hours):
 @transaction.atomic
 def sell_all_items(request, pk):
     loc = get_object_or_404(CharacterLocation, pk=pk)
-    if not loc.has_admin(request.user.gooseuser) or not request.user.is_staff:
+    if not loc.has_admin(request.user.gooseuser) or not request.gooseuser.has_perm(
+        LOOT_TRACKER_ADMIN
+    ):
         return HttpResponseForbidden()
     items = get_items_in_location(loc)
     BulkSellItemFormSet = formset_factory(BulkSellItemForm, extra=0)  # noqa

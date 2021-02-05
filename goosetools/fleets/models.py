@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.utils import timezone
 
 from goosetools.core.models import System
-from goosetools.users.models import Character, GooseUser
+from goosetools.users.models import LOOT_TRACKER_ADMIN, Character, GooseUser
 
 
 def human_readable_relativedelta(delta):
@@ -65,7 +65,7 @@ class Fleet(models.Model):
         return FleetMember.objects.filter(fleet=self, character__user=user)
 
     def has_admin(self, user):
-        if user.site_user.is_staff:
+        if user.has_perm(LOOT_TRACKER_ADMIN):
             return True
         for member in self.members_for_user(user):
             if member.admin_permissions:
