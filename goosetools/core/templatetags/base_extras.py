@@ -62,7 +62,7 @@ def all_sales(user):
 
 @register.simple_tag
 def has_perm(user, perm):
-    return user.has_gooseuser() and user.gooseuser.has_perm(perm)
+    return hasattr(user, "gooseuser") and user.gooseuser.has_perm(perm)
 
 
 @register.simple_tag

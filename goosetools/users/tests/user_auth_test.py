@@ -7,6 +7,8 @@ from freezegun import freeze_time
 from goosetools.tenants.models import SiteUser
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
 from goosetools.users.models import (
+    BASIC_ACCESS,
+    LOOT_TRACKER,
     USER_ADMIN_PERMISSION,
     DiscordGuild,
     GooseGroup,
@@ -53,6 +55,10 @@ class UserAuthTest(GooseToolsTestCase):
         self.user_admin_group = user_admin_group
 
     def test_approved_user_can_see_non_whitelisted_page(self):
+        basic_access_group, _ = GooseGroup.objects.get_or_create(name="basic")
+        basic_access_group.link_permission(BASIC_ACCESS)
+        basic_access_group.link_permission(LOOT_TRACKER)
+        self.user.give_group(basic_access_group)
         response = self.client.get(reverse("fleet"))
         self.assertIn("Active Fleets", str(response.content, encoding="utf-8"))
         self.assert_messages(response, [])
@@ -170,7 +176,27 @@ class UserAuthTest(GooseToolsTestCase):
     def test_unknown_user_creates_an_app_on_signup_which_can_be_approved(
         self,
     ):
+        DiscordGuild.objects.create(
+            guild_id="guild_id",
+            member_role_id="member_role_id",
+            bot_token="bot_token",
+            active=True,
+        )
+        basic_access_group, _ = GooseGroup.objects.get_or_create(
+            name="basic_access_group_given_on_signup",
+            linked_discord_role="member_role_id",
+        )
+        basic_access_group.link_permission(BASIC_ACCESS)
+        basic_access_group.link_permission(LOOT_TRACKER)
         with requests_mock.Mocker() as m:
+            m.get(
+                "https://discord.com/api/guilds/guild_id/members/3",
+                json={},
+                headers={"content-type": "application/json"},
+            )
+            m.put(
+                "https://discord.com/api/guilds/guild_id/members/3/roles/member_role_id"
+            )
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
             # When an unknown and hence unapproved user applies to the corp
@@ -208,6 +234,14 @@ class UserAuthTest(GooseToolsTestCase):
                 application.application_notes, "Hello please let me into goosefleet"
             )
             self.assertEqual(application.status, "unapproved")
+            m.put(
+                "https://discord.com/api/guilds/guild_id/members/3/roles/member_role_id"
+            )
+            m.get(
+                "https://discord.com/api/guilds/guild_id/members/3",
+                json={"roles": ["member_role_id"]},
+                headers={"content-type": "application/json"},
+            )
 
             self.post(
                 reverse("application_update", args=[application.pk]),
@@ -447,6 +481,11 @@ class UserAuthTest(GooseToolsTestCase):
                 bot_token="bot_token",
                 guild_id="guildid",
                 member_role_id="memberroleid",
+            )
+            m.get(
+                "https://discord.com/api/guilds/guildid/members/2",
+                json={"roles": ["memberroleid"]},
+                headers={"content-type": "application/json"},
             )
             m.put(
                 "https://discord.com/api/guilds/guildid/members/2/roles/memberroleid",

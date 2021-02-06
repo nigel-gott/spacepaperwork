@@ -23,6 +23,7 @@ from goosetools.industry.forms import OrderLimitGroupForm, ShipForm, ShipOrderFo
 from goosetools.industry.models import OrderLimitGroup, Ship, ShipOrder, to_isk
 from goosetools.industry.serializers import ShipOrderSerializer, ShipSerializer
 from goosetools.users.models import (
+    FREE_SHIP_ORDERER,
     SHIP_ORDER_ADMIN,
     SHIP_PRICE_ADMIN,
     Character,
@@ -152,6 +153,8 @@ def validate_order(request, ship, payment_method, quantity, isk_price, eggs_pric
         )
     elif payment_method == "free" and quantity > 1:
         messages.error(request, "You cannot order more than free ship at one time.")
+    elif payment_method == "free" and not request.gooseuser.has_perm(FREE_SHIP_ORDERER):
+        messages.error(request, "You do not have permissions to order free ships.")
     else:
         return True
     return False

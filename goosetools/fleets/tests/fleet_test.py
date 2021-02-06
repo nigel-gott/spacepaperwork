@@ -3,11 +3,18 @@ from freezegun import freeze_time
 
 from goosetools.tenants.models import SiteUser
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
-from goosetools.users.models import Character, GooseUser
+from goosetools.users.models import LOOT_TRACKER, Character, GooseGroup, GooseUser
 
 
 @freeze_time("2012-01-14 12:00:00")
 class FleetTest(GooseToolsTestCase):
+    def setUp(self):
+        super().setUp()
+        loot_tracker_group, _ = GooseGroup.objects.get_or_create(name="loot_tracker")
+        loot_tracker_group.link_permission(LOOT_TRACKER)
+        self.user.give_group(loot_tracker_group)
+        self.other_user.give_group(loot_tracker_group)
+
     def an_open_fleet(self, gives_shares_to_alts=False):
         return self.a_fleet(
             start_date="Jan. 14, 2012",
@@ -524,4 +531,17 @@ class FleetTest(GooseToolsTestCase):
         errors = self.post_expecting_error(reverse("fleet_leave", args=[members[0].id]))
         self.assertEqual(
             errors, ["You do not have permissions to remove that member from the fleet"]
+        )
+
+    def test_user_without_loot_tracker_perm_cannot_view(self):
+        s = SiteUser.create("A Brand New Test Goose User")
+        GooseUser.objects.create(site_user=s)
+
+        self.client.force_login(s)
+        r = self.client.get(reverse("fleet"), follow=True)
+        last_url, _ = r.redirect_chain[-1]
+        self.assertEqual(last_url, "/home/")
+        self.assert_messages(
+            r,
+            [("error", "You are not yet approved and cannot access this page.")],
         )

@@ -2,10 +2,24 @@
 {% load comments %}
 {% block body %}
 <div class="section">
-    <h4>Admin View for {{viewed_user.display_name}}</h4>
+    <h4>Admin View for {{viewed_user.display_name}} ({{viewed_user.username}})</h4>
     <a href="{% url 'user_dashboard' %}">Back to Users Dashboard</a>
 </div>
 <div class="section">
+        Discord UID: {{viewed_user.uid}}<br/>
+    {% if viewed_user.voucher %}
+        Vouched By: <a href="{% url 'user_admin_view' viewed_user.voucher.id %}">{{viewed_user.voucher}}</a><br/>
+    {% endif %}
+    {% if viewed_user.current_vouches.count != 0 %}
+        They Have Vouched The Following Users:
+        {% for vouchee in viewed_user.current_vouches.all %}
+        {% if not forloop.first %}, {% endif %}<a href="{% url 'user_admin_view' vouchee.id %}">{{vouchee}}</a>
+        {% endfor %}
+        <br/>
+    {% endif %}
+    {% if viewed_user.sa_profile %}
+        SA Profile: <a href="{{viewed_user.sa_profile}}">Profile Link</a><br/>
+    {% endif %}
     <h6>Their Characters:</h6>
     <ul class="collection" style="overflow: visible;">
     {% for character in viewed_user.character_set.all %}
@@ -14,8 +28,6 @@
         </li>
     {% endfor %}
     </ul>
-    <h6>User Notes</h6>
-    <p> Use these to add a useful top level message about this user which will be visible from the user dashboard. See the comment section below for a history of this user and other admin's discussion on them.</p>
     <form action="" method="post">
         {% csrf_token %}
         {% for field in form %}
@@ -40,7 +52,7 @@
 <div class="divider">
 </div>
 <div class="section">
-    <h6>Admin Comments On User:</h6>
+    <h5>Admin Comments On User:</h5>
 {% render_comment_list for viewed_user %}
     {% get_comment_form for viewed_user as form %}
     <form action="{% comment_form_target %}" method="POST">

@@ -8,9 +8,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 
 from goosetools.tenants.models import SiteUser
-from goosetools.users.jobs.hourly.update_discord_roles import (
-    _setup_user_groups_from_discord_guild_roles,
-)
+from goosetools.users.discord_helpers import setup_user_groups_from_discord_guild_roles
 from goosetools.users.models import DiscordGuild
 
 
@@ -48,7 +46,7 @@ def _update_user_from_social_account(account, siteuser: SiteUser, request):
     if siteuser.has_gooseuser():
         siteuser.gooseuser.cache_fields_from_social_account()
     try:
-        _setup_user_groups_from_discord_guild_roles(siteuser, account.extra_data)
+        setup_user_groups_from_discord_guild_roles(siteuser, account.extra_data)
     except DiscordGuild.DoesNotExist:
         pass
 

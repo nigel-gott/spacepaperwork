@@ -6,8 +6,15 @@ from freezegun import freeze_time
 
 import goosetools.industry.views
 from goosetools.industry.models import OrderLimitGroup, Ship, ShipOrder
+from goosetools.tenants.models import SiteUser
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
-from goosetools.users.models import SHIP_ORDER_ADMIN, GooseGroup
+from goosetools.users.models import (
+    FREE_SHIP_ORDERER,
+    SHIP_ORDER_ADMIN,
+    SHIP_ORDERER,
+    GooseGroup,
+    GooseUser,
+)
 
 
 @freeze_time("2012-01-14 12:00:00")
@@ -21,7 +28,14 @@ class ShipOrderTest(GooseToolsTestCase):
             name="ship_order_admins"
         )
         ship_order_admin_group.link_permission(SHIP_ORDER_ADMIN)
+        ship_order_admin_group.link_permission(SHIP_ORDERER)
+        ship_order_admin_group.link_permission(FREE_SHIP_ORDERER)
         self.ship_order_admin_group = ship_order_admin_group
+        ship_orderer_group, _ = GooseGroup.objects.get_or_create(name="ship_orderers")
+        ship_orderer_group.link_permission(SHIP_ORDERER)
+        self.ship_order_admin_group = ship_order_admin_group
+        self.user.give_group(self.ship_order_admin_group)
+        self.other_user.give_group(ship_orderer_group)
 
     def get_mock_random_1_string(self, _):
         self.next_contract_code = self.next_contract_code + 1
@@ -66,7 +80,6 @@ class ShipOrderTest(GooseToolsTestCase):
 
     def test_can_get_detail_on_model(self):
         ship_order = self.a_ship_order()
-        self.user.give_group(self.ship_order_admin_group)
 
         response = self.get(
             reverse("industry:shiporder-detail", args=[ship_order.pk]),
@@ -136,7 +149,6 @@ class ShipOrderTest(GooseToolsTestCase):
 
     def test_can_claim_ship_order_if_in_industry_group(self):
         ship_order = self.a_ship_order()
-        self.user.give_group(self.ship_order_admin_group)
 
         response = self.put(
             reverse("industry:shiporder-claim", args=[ship_order.pk]),
@@ -148,15 +160,21 @@ class ShipOrderTest(GooseToolsTestCase):
 
     def test_cant_claim_ship_order_if_not_in_industry_group(self):
         ship_order = self.a_ship_order()
-        response = self.client.put(
-            reverse("industry:shiporder-claim", args=[ship_order.pk]),
+        s = SiteUser.create("A Brand New Test Goose User")
+        GooseUser.objects.create(site_user=s)
+        self.client.force_login(s)
+        r = self.client.put(
+            reverse("industry:shiporder-claim", args=[ship_order.pk]), follow=True
         )
-        self.assertEqual(response.status_code, 403)
+        last_url, _ = r.redirect_chain[-1]
+        self.assertEqual(last_url, "/home/")
+        self.assert_messages(
+            r,
+            [("error", "You are not yet approved and cannot access this page.")],
+        )
 
     def test_cant_claim_already_claimed_ship(self):
         ship_order = self.a_ship_order()
-        self.user.give_group(self.ship_order_admin_group)
-        self.other_user.give_group(self.ship_order_admin_group)
 
         response = self.put(
             reverse("industry:shiporder-claim", args=[ship_order.pk]),
@@ -165,6 +183,7 @@ class ShipOrderTest(GooseToolsTestCase):
             str(response.content, encoding="utf-8"),
             f'{{"status":"claimed","assignee":{self.user.pk},"assignee_name":"Test Goose User","uid":"Test Goose User#1234-mock_random_1"}}',
         )
+        self.other_user.give_group(self.ship_order_admin_group)
         self.client.force_login(self.other_site_user)
         response = self.client.put(
             reverse("industry:shiporder-claim", args=[ship_order.pk]),
@@ -176,8 +195,6 @@ class ShipOrderTest(GooseToolsTestCase):
 
     def test_list_of_ship_orders_shows_assignee_name_after_claiming(self):
         ship_order = self.a_ship_order()
-        self.user.give_group(self.ship_order_admin_group)
-        self.other_user.give_group(self.ship_order_admin_group)
 
         response = self.put(
             reverse("industry:shiporder-claim", args=[ship_order.pk]),
@@ -217,7 +234,6 @@ class ShipOrderTest(GooseToolsTestCase):
 
     def test_can_unassign_yourself_from_a_ship_order(self):
         ship_order = self.a_ship_order()
-        self.user.give_group(self.ship_order_admin_group)
 
         response = self.put(
             reverse("industry:shiporder-claim", args=[ship_order.pk]),
@@ -676,7 +692,6 @@ class ShipOrderTest(GooseToolsTestCase):
 
     @freeze_time("2012-01-14 12:00:00")
     def test_can_claim_a_blocked_ship(self):
-        self.user.give_group(self.ship_order_admin_group)
         order_limit_group = OrderLimitGroup.objects.create(
             days_between_orders=1, name="Free Tech 6 and Below"
         )
@@ -773,7 +788,6 @@ class ShipOrderTest(GooseToolsTestCase):
 
     @freeze_time("2012-01-14 12:00:00")
     def test_ship_with_no_price_can_have_manual_price_entered(self):
-        self.user.give_group(self.ship_order_admin_group)
         unpriced_ship = Ship.objects.create(
             name="ShipWithNoPrice",
             tech_level=6,
@@ -828,7 +842,6 @@ class ShipOrderTest(GooseToolsTestCase):
 
     @freeze_time("2012-01-14 12:00:00")
     def test_can_mark_a_ship_as_paid_for(self):
-        self.user.give_group(self.ship_order_admin_group)
         unpriced_ship = Ship.objects.create(
             name="ShipWithNoPrice",
             tech_level=6,
@@ -882,7 +895,6 @@ class ShipOrderTest(GooseToolsTestCase):
 
     @freeze_time("2012-01-14 12:00:00")
     def test_ship_with_valid_price_doesnt_need_price(self):
-        self.user.give_group(self.ship_order_admin_group)
         unpriced_ship = Ship.objects.create(
             name="ShipWithNoPrice",
             tech_level=6,
@@ -940,7 +952,6 @@ class ShipOrderTest(GooseToolsTestCase):
 
     @freeze_time("2012-01-14 12:00:00")
     def test_ship_submitting_with_old_prices_generates_error(self):
-        self.user.give_group(self.ship_order_admin_group)
         unpriced_ship = Ship.objects.create(
             name="ShipWithNoPrice",
             tech_level=6,
@@ -1008,4 +1019,17 @@ class ShipOrderTest(GooseToolsTestCase):
         "price": null
     }}
 ]""",
+        )
+
+    def test_user_without_ship_order_perm_cannot_view(self):
+        s = SiteUser.create("A Brand New Test Goose User")
+        GooseUser.objects.create(site_user=s)
+
+        self.client.force_login(s)
+        r = self.client.get(reverse("industry:shiporder-list"), follow=True)
+        last_url, _ = r.redirect_chain[-1]
+        self.assertEqual(last_url, "/home/")
+        self.assert_messages(
+            r,
+            [("error", "You are not yet approved and cannot access this page.")],
         )

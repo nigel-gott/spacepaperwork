@@ -112,7 +112,7 @@ GooseJs = function () {
             );
         },
         "json_django_request": json_django_request,
-        putSubjectAction: function putSubjectAction(table, subject, action, api_url="api") {
+        putSubjectAction: function putSubjectAction(table, subject, action, api_url="api", success_callback=false) {
             return function () {
                 const row = table.row($(this).parents('tr'));
                 const id = row.data()['id'];
@@ -125,6 +125,9 @@ GooseJs = function () {
                     .then(response => response.json())
                     .then(response_data => {
                         row.data(response_data);
+                        if(success_callback){
+                            success_callback(response_data);
+                        }
                         table.draw();
                     });
 

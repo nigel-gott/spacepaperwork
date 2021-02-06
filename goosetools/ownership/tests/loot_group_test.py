@@ -3,10 +3,18 @@ from freezegun import freeze_time
 
 from goosetools.ownership.models import LootGroup
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
+from goosetools.users.models import LOOT_TRACKER, GooseGroup
 
 
 @freeze_time("2012-01-14 12:00:00")
 class LootGroupTest(GooseToolsTestCase):
+    def setUp(self):
+        super().setUp()
+        loot_tracker_group, _ = GooseGroup.objects.get_or_create(name="loot_tracker")
+        loot_tracker_group.link_permission(LOOT_TRACKER)
+        self.user.give_group(loot_tracker_group)
+        self.other_user.give_group(loot_tracker_group)
+
     def an_open_fleet(self, gives_shares_to_alts=False):
         return self.a_fleet(
             start_date="Jan. 14, 2012",

@@ -1,45 +1,15 @@
 import time
-from typing import Any, Dict
 
 import requests
 from allauth.socialaccount.models import SocialAccount
 from django_extensions.management.jobs import HourlyJob
 from requests.models import HTTPError
 
-from goosetools.tenants.models import SiteUser
+from goosetools.users.discord_helpers import (
+    merge,
+    setup_user_groups_from_discord_guild_roles,
+)
 from goosetools.users.models import DiscordGuild, GooseGroup, GooseUser
-
-
-def _setup_user_groups_from_discord_guild_roles(
-    siteuser: SiteUser,
-    extra_data: Dict[str, Any],
-):
-    output = ""
-    siteuser.groups.clear()
-    if not siteuser.is_superuser:
-        siteuser.is_staff = False
-    else:
-        output = output + " - Gave Superuser\n"
-
-    if siteuser.has_gooseuser():
-        siteuser.gooseuser.groupmember_set.all().delete()
-        if siteuser.is_superuser:
-            superuser_group = GooseGroup.superuser_group()
-            siteuser.gooseuser.give_group(superuser_group)
-        if "roles" in extra_data:
-            for role_id in extra_data["roles"]:
-                output = output + _setup_new_permissions(role_id, siteuser.gooseuser)
-        siteuser.save()
-    return f"Syncing {siteuser.username}\n" + output
-
-
-def _setup_new_permissions(role_id: str, gooseuser: GooseUser):
-    groups = GooseGroup.objects.filter(linked_discord_role=role_id)
-    output = ""
-    for group in groups.all():
-        output = output + (f" - Gave {group.name} to {gooseuser}\n")
-        gooseuser.give_group(group)
-    return output
 
 
 def refresh_from_discord():
@@ -74,7 +44,7 @@ def refresh_from_discord():
                     existing_socialaccount = SocialAccount.objects.get(uid=uid)
                     output = (
                         output
-                        + _setup_user_groups_from_discord_guild_roles(
+                        + setup_user_groups_from_discord_guild_roles(
                             existing_socialaccount.user,
                             user_json,
                         )
@@ -130,26 +100,6 @@ def refresh_from_discord():
                 )
     output = output + (f"Processed {users_processed} users.\n")
     return output
-
-
-def merge(a, b, path=None):
-    "merges b into a"
-    if path is None:
-        path = []
-    for key in b:
-        if key in a:
-            if isinstance(a[key], dict) and isinstance(b[key], dict):
-                merge(a[key], b[key], path + [str(key)])
-            else:
-                a[key] = b[key]
-        else:
-            a[key] = b[key]
-    return a
-
-
-# adding ships
-# changing the free ship groups
-# add user notes
 
 
 class Job(HourlyJob):

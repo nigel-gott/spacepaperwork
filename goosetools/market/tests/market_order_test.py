@@ -5,10 +5,17 @@ from django.urls.base import reverse
 from goosetools.ownership.models import TransferLog
 from goosetools.tenants.models import SiteUser
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase, isk
-from goosetools.users.models import Character, GooseUser
+from goosetools.users.models import LOOT_TRACKER, Character, GooseGroup, GooseUser
 
 
 class MarketOrderTestCase(GooseToolsTestCase):
+    def setUp(self):
+        super().setUp()
+        loot_tracker_group, _ = GooseGroup.objects.get_or_create(name="loot_tracker")
+        loot_tracker_group.link_permission(LOOT_TRACKER)
+        self.user.give_group(loot_tracker_group)
+        self.other_user.give_group(loot_tracker_group)
+
     def test_anom_loot_when_only_the_seller_has_a_share_and_wants_it_in_isk(self):
         # Given there is a basic fleet with a single item split between two different people:
         fleet = self.a_fleet()

@@ -442,6 +442,8 @@ class UserApplication(models.Model):
         self._create_character()
         self.full_clean()
         DiscordGuild.try_give_guild_member_role(self.user)
+        # pylint: disable=no-member
+        self.user.refresh_discord_data()  # type: ignore
         self.save()
 
     def reject(self, rejecting_user):
@@ -481,7 +483,6 @@ class DiscordGuild(models.Model):
             }
             url = f"https://discord.com/api/guilds/{guild.guild_id}/members/{uid}/roles/{role_id}"
             request = requests.put(url, headers=bot_headers)
-            logger.info(f"Response from {url} is {request}")
             request.raise_for_status()
         except DiscordGuild.DoesNotExist:
             pass

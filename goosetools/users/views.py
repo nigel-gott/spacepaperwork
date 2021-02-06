@@ -465,6 +465,17 @@ class GooseUserQuerySet(
     @action(detail=True, methods=["PUT"])
     @transaction.atomic
     # pylint: disable=unused-argument
+    def refresh(self, request, pk=None):
+        goose_user = self.get_object()
+        output = goose_user.refresh_discord_data()
+        serializer = self.get_serializer(goose_user)
+        json_response = serializer.data
+        json_response["output"] = output
+        return Response(json_response)
+
+    @action(detail=True, methods=["PUT"])
+    @transaction.atomic
+    # pylint: disable=unused-argument
     def ban(self, request, pk=None):
         return self._change_status(request, "rejected")
 
@@ -597,7 +608,7 @@ def admin_character_edit(request, pk):
                 character.corp = form.cleaned_data["corp"]
                 character.user_id = form.cleaned_data["gooseuser"]
                 character.save()
-                messages.success(request, "Succesfully Editted the User")
+                messages.success(request, "Succesfully Edited the User")
                 return HttpResponseRedirect(reverse("character_dashboard"))
 
     else:
@@ -615,7 +626,7 @@ def user_admin_view(request, pk):
             user.notes = form.cleaned_data["notes"]
             user.change_status(request.gooseuser, form.cleaned_data["status"])
             user.save()
-            messages.success(request, "Succesfully Editted the User")
+            messages.success(request, "Succesfully Edited the User")
             return HttpResponseRedirect(reverse("user_admin_view", args=[user.pk]))
     else:
         form = AdminEditUserForm(initial={"notes": user.notes, "status": user.status})

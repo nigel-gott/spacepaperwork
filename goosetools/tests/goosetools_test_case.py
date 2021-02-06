@@ -23,6 +23,7 @@ from goosetools.ownership.models import LootGroup, LootShare
 from goosetools.tenants.models import SiteUser
 from goosetools.tests.django_test_case import DjangoTestCase
 from goosetools.users.models import (
+    BASIC_ACCESS,
     USER_ADMIN_PERMISSION,
     Character,
     Corp,
@@ -49,12 +50,15 @@ class GooseToolsTestCase(DjangoTestCase):
 
         self.corp = Corp.objects.create(name="Test Corp")
         self.site_user = SiteUser.create("Test Goose User#1234")
+        self.basic_access_group = GooseGroup.objects.create(name="basic_access")
+        self.basic_access_group.link_permission(BASIC_ACCESS)
         self.user_admin_group = GooseGroup.objects.create(name="user_admin_group")
         self.user_admin_group.link_permission(USER_ADMIN_PERMISSION)
         self.user = GooseUser.objects.create(
             site_user=self.site_user,
             status="approved",
         )
+        self.user.give_group(self.basic_access_group)
         self.char = Character.objects.create(
             user=self.user, ingame_name="Test Char", corp=self.corp
         )
@@ -73,6 +77,7 @@ class GooseToolsTestCase(DjangoTestCase):
             site_user=self.other_site_user,
             status="approved",
         )
+        self.other_user.give_group(self.basic_access_group)
         self.otheruser_socialaccount = SocialAccount.objects.create(
             uid="2",
             provider="discord",
