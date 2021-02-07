@@ -13,7 +13,7 @@ from moneyed.localization import _FORMATTER
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 APPS_DIR = ROOT_DIR / "goosetools"
-env = environ.Env()
+env = environ.Env(USE_NEW_VENMO_COMMANDS=(bool, False))
 
 env.read_env(str(ROOT_DIR / ".env"))
 
@@ -330,3 +330,4 @@ PROMETHEUS_METRICS_EXPORT_ADDRESS = ""
 
 VENMO_HOST_URL = env("VENMO_HOST_URL")
 VENMO_API_TOKEN = env("VENMO_API_TOKEN")
+USE_NEW_VENMO_COMMANDS = env("USE_NEW_VENMO_COMMANDS")

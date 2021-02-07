@@ -4,6 +4,7 @@ from decimal import Decimal
 from typing import Dict, List
 
 from django import forms
+from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import F, Sum
@@ -522,7 +523,10 @@ def view_transfer_log(request, pk):
 
 
 def make_transfer_command(total_participation, transfering_user: GooseUser):
-    command = "$bulk\n"
+    if settings.USE_NEW_VENMO_COMMANDS:
+        command = "/bulk transfer: "
+    else:
+        command = "$bulk\n"
     length_since_last_bulk = len(command)
     commands_issued = False
     deposit_total = 0
@@ -531,9 +535,15 @@ def make_transfer_command(total_participation, transfering_user: GooseUser):
         if user_id != transfering_user.id:
             user = GooseUser.objects.get(id=user_id)
             commands_issued = True
-            next_user = f"<@{user.discord_uid()}> {floored_isk}\n"
+            if settings.USE_NEW_VENMO_COMMANDS:
+                next_user = f"<@!{user.discord_uid()}> {floored_isk} "
+            else:
+                next_user = f"<@{user.discord_uid()}> {floored_isk}\n"
             if length_since_last_bulk + len(next_user) > 1500:
-                new_bulk = "$bulk\n"
+                if settings.USE_NEW_VENMO_COMMANDS:
+                    new_bulk = "/bulk transfer: "
+                else:
+                    new_bulk = "$bulk\n"
                 command = (
                     command
                     + "\nNEW MESSAGE TO AVOID DISCORD CHARACTER LIMIT:\n"
@@ -554,7 +564,10 @@ def make_deposit_command(others_share, own_share, own_share_in_eggs, left_over):
         deposit = others_share + own_share + left_over
     else:
         deposit = others_share
-    return f"$deposit {int(deposit.amount)}"
+    if settings.USE_NEW_VENMO_COMMANDS:
+        return f"/deposit amount: {int(deposit.amount)}"
+    else:
+        return f"$deposit {int(deposit.amount)}"
 
 
 def transfer_sold_items(to_transfer, own_share_in_eggs, request):

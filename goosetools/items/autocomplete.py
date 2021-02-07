@@ -7,7 +7,7 @@ from goosetools.items.models import Item, ItemSubSubType, ItemSubType, ItemType,
 class SystemAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.gooseuser.is_authed_and_approved():
+        if not self.request.gooseuser.is_authed_and_approved():
             return System.objects.none()
 
         qs = System.objects.all()
