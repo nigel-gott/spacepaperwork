@@ -258,13 +258,13 @@ class ShipOrderViewSet(
     def delete(self, request, pk=None):
         ship_order = self.get_object()
         if (
-            ship_order.recipient_character.user != request.gooseuser
-            or ship_order.state == "sent"
-        ) and not request.user.has_perm(SHIP_ORDER_ADMIN):
-            return Response(status.HTTP_403_FORBIDDEN)
-        else:
+            ship_order.recipient_character.user == request.gooseuser
+            and not ship_order.state == "sent"
+        ) or request.user.has_perm(SHIP_ORDER_ADMIN):
             ship_order.delete()
             return Response({"deleted": True})
+        else:
+            return Response(status.HTTP_403_FORBIDDEN)
 
     @action(detail=True, methods=["PUT"])
     @transaction.atomic
