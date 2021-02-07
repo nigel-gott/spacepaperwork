@@ -181,7 +181,7 @@ $(function() {
         <div class="modal-content">
         <h4>Confirm Payment Has Been Taken:</h4>
         <b>For Order ${row['ship']} x ${row['quantity']} -> ${row['recipient_character_name']}</b>
-        <br/><a class="paid-link waves-btn btn green">Yes I Confirm That ${numberWithCommas(row['price'])} has been paid via ${row['payment_method']}</a>
+        <br/><a class="paid-link waves-btn btn green modal-close">Yes I Confirm That ${numberWithCommas(row['price'])} has been paid via ${row['payment_method']}</a>
         </div>
     </div>`
                             } else {
@@ -275,7 +275,7 @@ $(function() {
         <div class="modal-content">
             <h4>Delete Order:</h4>
             <b>Are you Sure you Want To Delete Order ${row['ship']} x ${row['quantity']} -> ${row['recipient_character_name']}?</b><br/>
-            <a class="delete-link waves-btn btn red">Delete Order</a>
+            <a class="delete-link waves-btn btn red modal-close">Delete Order</a>
         </div>
         </div>`;
 
