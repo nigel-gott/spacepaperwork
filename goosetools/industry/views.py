@@ -260,11 +260,11 @@ class ShipOrderViewSet(
         if (
             ship_order.recipient_character.user == request.gooseuser
             and not ship_order.state == "sent"
-        ) or request.user.has_perm(SHIP_ORDER_ADMIN):
+        ) or request.gooseuser.has_perm(SHIP_ORDER_ADMIN):
             ship_order.delete()
             return Response({"deleted": True})
         else:
-            return Response(status.HTTP_403_FORBIDDEN)
+            return Response(status=status.HTTP_403_FORBIDDEN)
 
     @action(detail=True, methods=["PUT"])
     @transaction.atomic
@@ -272,14 +272,14 @@ class ShipOrderViewSet(
     def transition(self, request, pk=None):
         ship_order = self.get_object()
         if ship_order.assignee != request.user.gooseuser:
-            return Response(status.HTTP_403_FORBIDDEN)
+            return Response(status=status.HTTP_403_FORBIDDEN)
         else:
             body_unicode = request.body.decode("utf-8")
             body = json.loads(body_unicode)
             transition = body["transition"]
             transitions = ship_order.availible_transitions()
             if transition not in transitions.keys():
-                return Response(status.HTTP_403_FORBIDDEN)
+                return Response(status=status.HTTP_403_FORBIDDEN)
             else:
                 ship_order.state = transitions[transition].target
                 ship_order.full_clean()
