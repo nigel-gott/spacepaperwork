@@ -18,6 +18,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import ListView
+from requests.exceptions import HTTPError
 from rest_framework import mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -132,12 +133,15 @@ def user_signup(request):
 
 
 def _give_pronoun_roles(uid, prefered_pronouns):
-    if prefered_pronouns == "they":
-        DiscordGuild.try_give_role(uid, 762405572136927242)
-    elif prefered_pronouns == "she":
-        DiscordGuild.try_give_role(uid, 762405484614910012)
-    elif prefered_pronouns == "he":
-        DiscordGuild.try_give_role(uid, 762404773512740905)
+    try:
+        if prefered_pronouns == "they":
+            DiscordGuild.try_give_role(uid, 762405572136927242)
+        elif prefered_pronouns == "she":
+            DiscordGuild.try_give_role(uid, 762405484614910012)
+        elif prefered_pronouns == "he":
+            DiscordGuild.try_give_role(uid, 762404773512740905)
+    except HTTPError:
+        pass
 
 
 @has_perm(perm=USER_ADMIN_PERMISSION)

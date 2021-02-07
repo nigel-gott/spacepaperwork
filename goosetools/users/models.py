@@ -142,18 +142,17 @@ def has_perm(perm: Union[str, List[str]]):
 
 class HasGooseToolsPerm(BasePermission):
     @staticmethod
-    def of(perm, exclude_get=False):
-        return partial(HasGooseToolsPerm, perm, exclude_get)
+    def of(perm, ignore_methods=False):
+        return partial(HasGooseToolsPerm, perm, ignore_methods)
 
-    def __init__(self, perm: Union[str, List[str]], exclude_get=False) -> None:
+    def __init__(self, perm: Union[str, List[str]], ignore_methods=False) -> None:
         super().__init__()
         self.perm = perm
-        self.exclude_get = exclude_get
+        self.ignore_methods = ignore_methods or []
 
     def has_permission(self, request, view):
         return (
-            request.method == "GET"
-            and self.exclude_get
+            request.method in self.ignore_methods
             or request.gooseuser
             and request.gooseuser.has_perm(self.perm)
         )

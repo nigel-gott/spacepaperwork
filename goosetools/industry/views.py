@@ -248,7 +248,23 @@ class ShipOrderViewSet(
         return qs
 
     serializer_class = ShipOrderSerializer
-    permission_classes = [HasGooseToolsPerm.of(SHIP_ORDER_ADMIN, exclude_get=True)]
+    permission_classes = [
+        HasGooseToolsPerm.of(SHIP_ORDER_ADMIN, ignore_methods=["GET", "DELETE"])
+    ]
+
+    @action(detail=True, methods=["DELETE"])
+    @transaction.atomic
+    # pylint: disable=unused-argument
+    def delete(self, request, pk=None):
+        ship_order = self.get_object()
+        if (
+            ship_order.recipient_character.user != request.gooseuser
+            or ship_order.state == "sent"
+        ) and not request.user.has_perm(SHIP_ORDER_ADMIN):
+            return Response(status.HTTP_403_FORBIDDEN)
+        else:
+            ship_order.delete()
+            return Response({"deleted": True})
 
     @action(detail=True, methods=["PUT"])
     @transaction.atomic

@@ -249,31 +249,44 @@ $(function() {
             { "data": "assignee", "visible": false, "searchable": false},
             { "data": "uid", "title": "Contract Code"}
     ];
-    if(page_data["has_industry_permission"]){
         columns.push({
             "title": "Action",
             "data": null,
             render: function ( data, type, row ) {
-                if(row["assignee"]===page_data["request_user_pk"]){
-                    buttons = "";
-                    reset_found = false;
-                    for(const t of row['availible_transition_names']){
-                        if(t!=="reset"){
-                            buttons += '<a class="collection-item state-link" href="#">' + t + '</a>';
-                        } else if(row['state'] !== "not_started") {
-                            reset_found = true;
+                    buttons = ""
+                    if(page_data["has_industry_permission"]){
+                        if(row["assignee"]===page_data["request_user_pk"]){
+                            reset_found = false;
+                            for(const t of row['availible_transition_names']){
+                                if(t!=="reset"){
+                                    buttons += '<a class="collection-item state-link" href="#">' + t + '</a>';
+                                } else if(row['state'] !== "not_started") {
+                                    reset_found = true;
+                                }
+                            }
+                            if(reset_found){
+                                buttons += '<a class="collection-item state-link red-text" href="#">reset</a>';
+                            }
                         }
                     }
-                    if(reset_found){
-                        buttons += '<a class="collection-item state-link red-text" href="#">reset</a>';
+                    if((row["state"] != "sent" && row["recipient_user_pk"]==page_data["request_user_pk"]) || page_data["has_industry_permission"]){
+                        buttons += `<a class="collection-item modal-trigger red-text" href="#modal_delete_${row.id}">DELETE</a>
+        <div id="modal_delete_${row.id}" class="modal">
+        <div class="modal-content">
+            <h4>Delete Order:</h4>
+            <b>Are you Sure you Want To Delete Order ${row['ship']} x ${row['quantity']} -> ${row['recipient_character_name']}?</b><br/>
+            <a class="delete-link waves-btn btn red">Delete Order</a>
+        </div>
+        </div>`;
+
                     }
-                    return `<div class="collection">${buttons}</div>`;
-                } else {
-                    return '';
-                }
-            }
+                    if(buttons){
+                        return `<div class="collection">${buttons}</div>`;
+                    } else {
+                        return '';
+                    }
+        }
         });
-    }
     table = $('#ship_orders_table').DataTable( {
         pageLength: 50,
         ajax: {
@@ -310,6 +323,12 @@ $(function() {
         const row = table.row( $(this).parents('tr') );
         var data = row.data();
         unclaim(row, table);
+    });
+
+    $('#ship_orders_table').on( 'click', '.delete-link', function () {
+        const row = table.row( $(this).parents('tr') );
+        var data = row.data();
+        delete_order(row, table);
     });
 
     loadCheckboxes();
@@ -429,6 +448,22 @@ function unclaim(row, table){
             row_data['assignee'] = null;
             row_data['uid'] = null;
             row.data(row_data);
+            table.draw();
+        }
+    });
+}
+
+function delete_order(row, table){
+    const id = row.data()['id'];
+    const request = django_request("shiporder/" + id + "/delete/");
+    fetch(request, {
+        method: 'DELETE',
+        mode: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(response_data => {
+        if(response_data["deleted"]){
+            row.remove()
             table.draw();
         }
     });
