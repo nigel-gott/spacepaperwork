@@ -3,11 +3,14 @@ from typing import Any, Dict, Union
 
 from allauth.socialaccount.models import SocialAccount
 from bravado.client import SwaggerClient
+from bravado.exception import HTTPError
 from bravado.requests_client import RequestsClient
 from bravado.swagger_model import load_file
 from django.conf import settings
+from django.contrib import messages
 from django.http.response import (
     HttpResponse,
+    HttpResponseBadRequest,
     HttpResponseForbidden,
     HttpResponseRedirect,
     JsonResponse,
@@ -172,11 +175,21 @@ def withdraw(request):
         if form.is_valid():
             venmo_server_client = venmo_client()
             discord_uid = f"<@!{request.gooseuser.discord_uid()}>"
-            withdraw_request = venmo_server_client.withdrawals.createWithdrawal(
-                discordId=discord_uid, body={"value": form.cleaned_data["quantity"]}
-            )
-            withdraw_request.response()
-            return HttpResponseRedirect(reverse("venmo:dashboard"))
+            try:
+                withdraw_request = venmo_server_client.withdrawals.createWithdrawal(
+                    discordId=discord_uid, body={"value": form.cleaned_data["quantity"]}
+                )
+                withdraw_request.response()
+                return HttpResponseRedirect(reverse("venmo:dashboard"))
+            except HTTPError as e:
+                if (
+                    hasattr(e, "response")
+                    and hasattr(e.response, "json")
+                    and "message" in e.response.json()
+                ):
+                    message = e.response.json()["message"]
+                    messages.error(request, message)
+
     else:
         form = WithdrawForm()
 
@@ -187,16 +200,25 @@ def transfer(request):
     if request.method == "POST":
         form = TransferForm(request.POST)
         if form.is_valid():
-            venmo_server_client = venmo_client()
-            discord_uid = f"<@!{request.gooseuser.discord_uid()}>"
-            to_discord_uid = form.cleaned_data["user"].discord_uid()
-            transfer_request = venmo_server_client.transfers.transferToUser(
-                discordId=discord_uid,
-                toDiscordId=to_discord_uid,
-                body={"value": form.cleaned_data["quantity"]},
-            )
-            transfer_request.response()
-            return HttpResponseRedirect(reverse("venmo:dashboard"))
+            try:
+                venmo_server_client = venmo_client()
+                discord_uid = f"<@!{request.gooseuser.discord_uid()}>"
+                to_discord_uid = form.cleaned_data["user"].discord_uid()
+                transfer_request = venmo_server_client.transfers.transferToUser(
+                    discordId=discord_uid,
+                    toDiscordId=to_discord_uid,
+                    body={"value": form.cleaned_data["quantity"]},
+                )
+                transfer_request.response()
+                return HttpResponseRedirect(reverse("venmo:dashboard"))
+            except HTTPError as e:
+                if (
+                    hasattr(e, "response")
+                    and hasattr(e.response, "json")
+                    and "message" in e.response.json()
+                ):
+                    message = e.response.json()["message"]
+                    messages.error(request, message)
     else:
         form = TransferForm()
 
@@ -207,17 +229,26 @@ def deposit(request):
     if request.method == "POST":
         form = DepositForm(request.POST)
         if form.is_valid():
-            venmo_server_client = venmo_client()
-            discord_uid = f"<@!{request.gooseuser.discord_uid()}>"
-            deposit_request = venmo_server_client.deposits.createDeposit(
-                discordId=discord_uid,
-                body={
-                    "value": form.cleaned_data["quantity"],
-                    "note": form.cleaned_data["note"],
-                },
-            )
-            deposit_request.response()
-            return HttpResponseRedirect(reverse("venmo:dashboard"))
+            try:
+                venmo_server_client = venmo_client()
+                discord_uid = f"<@!{request.gooseuser.discord_uid()}>"
+                deposit_request = venmo_server_client.deposits.createDeposit(
+                    discordId=discord_uid,
+                    body={
+                        "value": form.cleaned_data["quantity"],
+                        "note": form.cleaned_data["note"],
+                    },
+                )
+                deposit_request.response()
+                return HttpResponseRedirect(reverse("venmo:dashboard"))
+            except HTTPError as e:
+                if (
+                    hasattr(e, "response")
+                    and hasattr(e.response, "json")
+                    and "message" in e.response.json()
+                ):
+                    message = e.response.json()["message"]
+                    messages.error(request, message)
     else:
         form = DepositForm()
 
@@ -235,10 +266,20 @@ def deny_transaction(request, pk: int):
 def update_transaction(request, transaction_id: int, new_status: str):
     if not request.user.is_superuser or request.method != "PUT":
         return HttpResponseForbidden()
-    venmo_server_client = venmo_client()
-    update_request = venmo_server_client.transactions.updateTransaction(
-        transactionId=str(transaction_id),
-        body={"transaction_status": new_status},
-    )
-    update_request.response()
-    return HttpResponse()
+    try:
+        venmo_server_client = venmo_client()
+        update_request = venmo_server_client.transactions.updateTransaction(
+            transactionId=str(transaction_id),
+            body={"transaction_status": new_status},
+        )
+        update_request.response()
+        return HttpResponse()
+    except HTTPError as e:
+        message = "Unknown error with venmo."
+        if (
+            hasattr(e, "response")
+            and hasattr(e.response, "json")
+            and "message" in e.response.json()
+        ):
+            message = e.response.json()["message"]
+        return HttpResponseBadRequest(message)

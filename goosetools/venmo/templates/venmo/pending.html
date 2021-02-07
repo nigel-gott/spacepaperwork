@@ -42,6 +42,7 @@ $(function() {
     columns = [
             { "data": "transaction_status", "title": "Status" },
             { "data": "transaction_type", "title": "Type" },
+            { "data": "transaction_id", "title": "Id" },
             { "data": "createdAt", "title":"createdAt" },
             { "data": "updatedAt", "title":"updatedAt"},
             { "data": "source_discord_id", "title": "From -> To",
@@ -133,12 +134,15 @@ function update(row, table, type){
     })
     .then(response => {
         if (!response.ok) {
-            throw Error(response.statusText);
+            response.text().then(function(text){
+                M.toast({ html: "Error: " + text})
+            });
+            return;
         }
         row.remove();
         table.draw();
     }).catch(function(error) {
-        console.log(error);
+        M.toast({ html: "Error: " + error })
     });
 }
 
