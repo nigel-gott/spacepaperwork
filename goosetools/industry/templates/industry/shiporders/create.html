@@ -52,9 +52,9 @@ function numberWithCommas(x) {
 
 function update_select_text_with_ship_data(ship_data){
     $("#id_ship option").each(function(){
-        ship_name = $(this).val();
-        ship_info = ship_data[ship_name];
-        text = `${ship_name} (T${ship_info.tech_level})`;
+        ship_id = $(this).val();
+        ship_info = ship_data[ship_id.toString()];
+        text = `${ship_info['name']} (T${ship_info.tech_level})`;
         if(ship_info.free){
             if(ship_info.blocked_until){
                 text += " - Next Free Ship On: " + ship_info.blocked_until;
@@ -78,11 +78,11 @@ $(document).ready(function() {
 });
 
 function update_after_ship_change(ship_data){
-    const ship_name = $('#id_ship').find('option:selected').val();
+    const ship_id = $('#id_ship').find('option:selected').val();
     const quantity = $('#id_quantity').val();
     current_payment = $('#id_payment_method').find('option:selected').val();
     const selectedCategory = document.querySelector('#id_payment_method');
-    selected_ship_data = ship_data[ship_name];
+    selected_ship_data = ship_data[ship_id.toString()];
     if(selected_ship_data){
         $('#submit_btn').prop('disabled', false);
         paid_method = current_payment === "eggs" || current_payment === "isk";

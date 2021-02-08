@@ -47,7 +47,7 @@ $(function () {
                     }
                 },
                 {
-                    "data": "name", "title": "Actions",
+                    "data": "id", "title": "Actions",
                     "class": "right-align",
                     "width": "18em",
                     render: function (data, type, row) {

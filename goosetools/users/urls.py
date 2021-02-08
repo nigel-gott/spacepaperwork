@@ -74,7 +74,7 @@ urlpatterns = [
     ),
     path("api/", include((router.urls))),
     path("corps/", corps_list, name="corps_list"),
-    path("corps/<str:pk>/edit", edit_corp, name="edit_corp"),
+    path("corps/<int:pk>/edit", edit_corp, name="edit_corp"),
     path("crops/new", new_corp, name="new_corp"),
     path("groups/", groups_view, name="groups_view"),
     path("groups/<int:pk>/edit", edit_group, name="edit_group"),

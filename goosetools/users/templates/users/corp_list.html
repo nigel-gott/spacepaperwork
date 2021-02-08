@@ -8,7 +8,7 @@
     <ul class="collection" style="overflow: visible;">
     {% for corp in corps%}
         <li class="collection-item ">
-                <a href="{% url 'edit_corp' corp.name %}" class="waves-btn btn secondary-content">Edit Corp</a>
+                <a href="{% url 'edit_corp' corp.id %}" class="waves-btn btn secondary-content">Edit Corp</a>
             <span class="title"><b>{{corp.name_with_ticker}}</b> - <a href="{% url 'character_dashboard' %}?corp_filter={{corp.name}}">{{corp.member_count}} Members</a><br/>
             </span>
             <p>

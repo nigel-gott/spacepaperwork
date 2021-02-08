@@ -4,6 +4,7 @@ from goosetools.users.models import Character, GooseUser
 
 
 class CharacterSerializer(serializers.ModelSerializer):
+    corp = serializers.CharField(source="corp.name", read_only=True)
     owner_display_name = serializers.CharField(
         source="user.display_name", read_only=True
     )

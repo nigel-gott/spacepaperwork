@@ -70,7 +70,7 @@ class SignUpQuestionChoice(models.Model):
 
 
 class Corp(models.Model):
-    name = models.TextField(primary_key=True)
+    name = models.TextField(unique=True)
     full_name = models.TextField(unique=True, null=True, blank=True)
     # TODO map to Discord Role
     required_discord_role = models.TextField(null=True, blank=True)
@@ -318,7 +318,7 @@ class GooseUser(models.Model):
         # pylint: disable=no-member
         userapp_query = self.userapplication_set.filter(status="unapproved")
         if userapp_query.count() == 1:
-            return userapp_query.only()
+            return userapp_query.first()
         else:
             return False
 

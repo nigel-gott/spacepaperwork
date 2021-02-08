@@ -160,11 +160,12 @@ def validate_order(request, ship, payment_method, quantity, isk_price, eggs_pric
     return False
 
 
-def populate_ship_data(user) -> Dict[str, Any]:
+def populate_ship_data(user) -> Dict[int, Any]:
     ship_data = {}
     ships = Ship.objects.all()
     for ship in ships:
         current_ship_data: Dict[str, Any] = {
+            "name": ship.name,
             "free": ship.free,
             "tech_level": ship.tech_level,
             "isk_price": ship.isk_price and ship.isk_price.amount,
@@ -181,7 +182,7 @@ def populate_ship_data(user) -> Dict[str, Any]:
                 "name": ship.order_limit_group.name,
                 "days_between_orders": ship.order_limit_group.days_between_orders,
             }
-        ship_data[ship.name] = current_ship_data
+        ship_data[ship.id] = current_ship_data
     return ship_data
 
 
@@ -529,9 +530,8 @@ def edit_ship(request, pk):
     ship = get_object_or_404(Ship, pk=pk)
     if request.method == "POST":
         form = ShipForm(request.POST)
-        form.fields["name"].required = False
-        form.fields["name"].disabled = True
         if form.is_valid():
+            ship.name = form.cleaned_data["name"]
             ship.free = form.cleaned_data["free"]
             ship.order_limit_group = form.cleaned_data["order_limit_group"]
             ship.tech_level = form.cleaned_data["tech_level"]
@@ -552,8 +552,6 @@ def edit_ship(request, pk):
                 "tech_level": ship.tech_level,
             }
         )
-        form.fields["name"].required = False
-        form.fields["name"].disabled = True
     return render(
         request,
         "industry/shiporders/ship_edit.html",

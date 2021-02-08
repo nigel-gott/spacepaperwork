@@ -13,6 +13,7 @@ class AssigneeOnlyContractCodeField(serializers.ReadOnlyField):
 
 
 class ShipOrderSerializer(serializers.ModelSerializer):
+    ship = serializers.CharField(source="ship.name", read_only=True)
     recipient_character_name = serializers.CharField(
         source="recipient_character.ingame_name", read_only=True
     )
@@ -56,7 +57,6 @@ class ShipOrderSerializer(serializers.ModelSerializer):
 
 
 class ShipSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(source="name", read_only=True)
     order_limit_group_name = serializers.CharField(
         source="order_limit_group.name", read_only=True
     )

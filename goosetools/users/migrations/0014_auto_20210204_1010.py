@@ -2,9 +2,6 @@
 from django.db import migrations, models
 import django.db.models.deletion
 
-from goosetools.users.models import Character, Corp
-
-
 # pylint: disable=unused-argument
 def revert_migration(apps, schema_editor):
     pass
@@ -12,6 +9,8 @@ def revert_migration(apps, schema_editor):
 
 # pylint: disable=unused-argument
 def apply_migration(apps, schema_editor):
+    Corp = apps.get_model("users", "Corp")
+    Character = apps.get_model("users", "Character")
     u, _ = Corp.objects.get_or_create(name="UNKNOWN", full_name="UNKNOWN")
     for c in Character.objects.all():
         if not hasattr(c, "corp") or not c.corp:

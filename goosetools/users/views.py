@@ -418,7 +418,7 @@ def build_query_for_all_users_annotated_with_their_characters():
         char_names=StringAgg(
             Concat(
                 Value("["),
-                F("character__corp"),
+                F("character__corp__name"),
                 Value("] "),
                 F("character__ingame_name"),
                 output_field=CharField(),
@@ -645,6 +645,7 @@ def user_admin_view(request, pk):
 def corps_list(request):
     corps = [
         {
+            "id": c.id,
             "name": c.name,
             "full_name": c.full_name,
             "name_with_ticker": c.name_with_corp_tag(),
@@ -687,8 +688,6 @@ def edit_corp(request, pk):
     corp = get_object_or_404(Corp, pk=pk)
     if request.method == "POST":
         form = CorpForm(request.POST)
-        form.fields["ticker"].disabled = True
-        form.fields["ticker"].required = False
         if form.is_valid():
             delete = request.POST.get("delete", False)
             if delete:
@@ -702,6 +701,7 @@ def edit_corp(request, pk):
                     )
             else:
                 corp.full_name = form.cleaned_data["full_name"]
+                corp.name = form.cleaned_data["ticker"]
                 corp.required_discord_role = form.cleaned_data["required_discord_role"]
                 corp.save()
                 messages.success(request, f"Succesfully Edited {corp.name}")
@@ -715,8 +715,6 @@ def edit_corp(request, pk):
                 "required_discord_role": corp.required_discord_role,
             }
         )
-        form.fields["ticker"].disabled = True
-        form.fields["ticker"].required = False
     return render(
         request,
         "users/corp_edit.html",

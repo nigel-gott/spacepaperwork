@@ -27,7 +27,7 @@ class OrderLimitGroup(models.Model):
 
 
 class Ship(models.Model):
-    name = models.TextField(primary_key=True)
+    name = models.TextField(unique=True)
     tech_level = models.PositiveIntegerField()
     free = models.BooleanField(default=False)
     order_limit_group = models.ForeignKey(

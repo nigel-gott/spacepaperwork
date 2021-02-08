@@ -145,9 +145,7 @@ class AdminEditUserForm(forms.Form):
 
 class CorpForm(forms.Form):
     full_name = forms.CharField()
-    ticker = forms.CharField(
-        help_text="The ticker cannot be renamed once the corp has been created."
-    )
+    ticker = forms.CharField()
     required_discord_role = forms.CharField(required=False)
 
 
