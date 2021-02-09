@@ -21,12 +21,12 @@ class AuthConfigForm(forms.Form):
 
 
 class SignupFormWithTimezone(forms.Form):
-    ingame_name = forms.CharField(
-        help_text="The EXACT IN GAME name of your SINGLE MAIN CHARACTER. Once approved you will be able to auth alts under Settings->Characters."
-    )
     existing_character = forms.ModelChoiceField(
         queryset=Character.objects.all(),
         help_text="You already have characters in GooseTools, select which one will be applying to this corp or leave blank and fill in In Game Name for a new character.",
+    )
+    ingame_name = forms.CharField(
+        help_text="The EXACT IN GAME name of your SINGLE MAIN CHARACTER. Once approved you will be able to auth alts under Settings->Characters."
     )
     prefered_pronouns = forms.ChoiceField(
         choices=[
@@ -73,6 +73,11 @@ class SignupFormWithTimezone(forms.Form):
             self._disable_field(
                 "existing_character",
             )
+        else:
+            self.fields["ingame_name"].required = False
+            self.fields[
+                "ingame_name"
+            ].help_text = "Only fill this in if you don't want to apply with one of the existing characters above. This should be the EXACT IN GAME name of the character. Once approved you will be able to auth alts under Settings->Characters."
 
 
 class SettingsForm(forms.Form):
