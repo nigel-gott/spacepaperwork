@@ -3,6 +3,7 @@ from functools import partial, wraps
 from typing import List, Union
 
 import requests
+from django.conf import settings
 from django.contrib.postgres.aggregates.general import StringAgg
 from django.contrib.sites.models import Site
 from django.db import models
@@ -19,12 +20,8 @@ logger = logging.getLogger(__name__)
 
 
 class AuthConfig(models.Model):
-    signup_required = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
-    connected_discord_server_id = models.TextField(null=True, blank=True)
     code_of_conduct = models.TextField(null=True, blank=True)
-    sign_up_introduction = models.TextField(null=True, blank=True)
-    new_user_discord_role = models.TextField(null=True, blank=True)
 
     # pylint: disable=signature-differs
     def save(self, *args, **kwargs):
@@ -47,34 +44,19 @@ class AuthConfig(models.Model):
         if AuthConfig.objects.filter(active=True).count() == 0:
             AuthConfig.objects.create(
                 active=True,
-                signup_required=True,
             )
 
 
 class DiscordGuild(models.Model):
     guild_id = models.TextField()
-    member_role_id = models.TextField(null=True, blank=True)
-    bot_token = models.TextField()
     active = models.BooleanField(default=False)
-
-    @staticmethod
-    def try_give_guild_member_role(user):
-        try:
-            guild = DiscordGuild.objects.get(active=True)
-            if guild.member_role_id:
-                logger.info(
-                    f"Attempting to give member role: {guild.member_role_id} to {user.discord_uid()}"
-                )
-                DiscordGuild.try_give_role(user.discord_uid(), guild.member_role_id)
-        except DiscordGuild.DoesNotExist:
-            pass
 
     @staticmethod
     def try_give_role(uid, role_id):
         try:
             guild = DiscordGuild.objects.get(active=True)
             bot_headers = {
-                "Authorization": "Bot {0}".format(guild.bot_token),
+                "Authorization": "Bot {0}".format(settings.BOT_TOKEN),
             }
             url = f"https://discord.com/api/guilds/{guild.guild_id}/members/{uid}/roles/{role_id}"
             request = requests.put(url, headers=bot_headers)
@@ -87,7 +69,7 @@ class DiscordGuild(models.Model):
         try:
             guild = DiscordGuild.objects.get(active=True)
             bot_headers = {
-                "Authorization": "Bot {0}".format(guild.bot_token),
+                "Authorization": "Bot {0}".format(settings.BOT_TOKEN),
             }
             url = f"https://discord.com/api/guilds/{guild.guild_id}"
             request = requests.get(url, headers=bot_headers)

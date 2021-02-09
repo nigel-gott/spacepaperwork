@@ -2,6 +2,7 @@ import time
 
 import requests
 from allauth.socialaccount.models import SocialAccount
+from django.conf import settings
 from django_extensions.management.jobs import HourlyJob
 from requests.models import HTTPError
 
@@ -16,7 +17,7 @@ def refresh_from_discord():
     guild = DiscordGuild.objects.get(active=True)
     output = ""
     bot_headers = {
-        "Authorization": "Bot {0}".format(guild.bot_token),
+        "Authorization": "Bot {0}".format(settings.BOT_TOKEN),
         "Content-Type": "application/json",
     }
 

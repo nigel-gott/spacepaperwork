@@ -203,11 +203,20 @@ def auth_settings_view(request):
         if form.is_valid():
             messages.success(request, "Updated your settings!")
             auth_config.code_of_conduct = form.data["code_of_conduct"]
+            guild_config = DiscordGuild.objects.get(active=True)
+            guild_config.guild_id = form.data["discord_guild_id"]
+            guild_config.full_clean()
+            guild_config.save()
             auth_config.full_clean()
             auth_config.save()
             return HttpResponseRedirect(reverse("auth_settings"))
     else:
-        form = AuthConfigForm(initial={"code_of_conduct": auth_config.code_of_conduct})
+        form = AuthConfigForm(
+            initial={
+                "code_of_conduct": auth_config.code_of_conduct,
+                "discord_guild_id": DiscordGuild.objects.get(active=True).guild_id,
+            }
+        )
 
     return render(
         request, "users/auth_config.html", {"form": form, "auth_config": auth_config}

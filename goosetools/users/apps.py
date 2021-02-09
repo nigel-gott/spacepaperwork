@@ -1,5 +1,6 @@
 import requests
 from django.apps import AppConfig
+from django.conf import settings
 from django.db.models.signals import post_migrate
 
 
@@ -9,7 +10,7 @@ def _try_lookup_guild_roles(user_id):
     try:
         guild = DiscordGuild.objects.get(active=True)
         bot_headers = {
-            "Authorization": "Bot {0}".format(guild.bot_token),
+            "Authorization": "Bot {0}".format(settings.BOT_TOKEN),
             "Content-Type": "application/json",
         }
         discord_uid = user_id

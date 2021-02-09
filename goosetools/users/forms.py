@@ -15,6 +15,7 @@ from goosetools.users.models import (
 
 
 class AuthConfigForm(forms.Form):
+    discord_guild_id = forms.CharField()
     code_of_conduct = forms.CharField(
         widget=TinyMCE(attrs={"cols": 80, "rows": 30}), required=False
     )

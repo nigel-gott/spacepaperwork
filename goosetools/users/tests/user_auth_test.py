@@ -178,8 +178,6 @@ class UserAuthTest(GooseToolsTestCase):
     ):
         DiscordGuild.objects.create(
             guild_id="guild_id",
-            member_role_id="member_role_id",
-            bot_token="bot_token",
             active=True,
         )
         basic_access_group, _ = GooseGroup.objects.get_or_create(
@@ -376,9 +374,7 @@ class UserAuthTest(GooseToolsTestCase):
         with requests_mock.Mocker() as m:
             DiscordGuild.objects.create(
                 active=True,
-                bot_token="bot_token",
                 guild_id="guildid",
-                member_role_id="memberroleid",
             )
             m.get(
                 "https://discord.com/api/guilds/guildid/members/3",
@@ -462,7 +458,6 @@ class UserAuthTest(GooseToolsTestCase):
         with requests_mock.Mocker() as m:
             DiscordGuild.objects.create(
                 active=True,
-                bot_token="bot_token",
                 guild_id="guildid",
             )
             m.get(

@@ -3,7 +3,7 @@ from django.urls.base import reverse
 from freezegun import freeze_time
 
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
-from goosetools.users.models import AuthConfig
+from goosetools.users.models import AuthConfig, DiscordGuild
 
 
 def mock_discord_returns_with_uid(
@@ -40,9 +40,7 @@ class UserAuthTest(GooseToolsTestCase):
     def test_when_signup_required_and_conduct_set_splash_page_links_to_conduct_first(
         self,
     ):
-        AuthConfig.objects.create(
-            signup_required=True, active=True, code_of_conduct="CUSTOM CODE OF CONDUCT"
-        )
+        AuthConfig.objects.create(active=True, code_of_conduct="CUSTOM CODE OF CONDUCT")
         with requests_mock.Mocker() as m:
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
@@ -60,13 +58,18 @@ class UserAuthTest(GooseToolsTestCase):
     def test_a_user_with_user_admin_perm_can_change_code_of_conduct(
         self,
     ):
-        AuthConfig.objects.create(
-            signup_required=True, active=True, code_of_conduct="CUSTOM CODE OF CONDUCT"
-        )
+        DiscordGuild.objects.create(active=True, guild_id="old")
+        AuthConfig.objects.create(active=True, code_of_conduct="CUSTOM CODE OF CONDUCT")
         self.user.give_group(self.user_admin_group)
         with requests_mock.Mocker() as m:
+            m.get(
+                "https://discord.com/api/guilds/id/members/3",
+                json={},
+                headers={"content-type": "application/json"},
+            )
             self.post(
-                reverse("auth_settings"), {"code_of_conduct": "NEW DIFFERENT CODE"}
+                reverse("auth_settings"),
+                {"code_of_conduct": "NEW DIFFERENT CODE", "discord_guild_id": "id"},
             )
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
@@ -76,13 +79,12 @@ class UserAuthTest(GooseToolsTestCase):
                 "NEW DIFFERENT CODE",
                 str(conduct.content, encoding="utf-8"),
             )
+            self.assertEqual(DiscordGuild.objects.get(active=True).guild_id, "id")
 
     def test_a_user_with_no_perms_cant_change_code_of_conduct(
         self,
     ):
-        AuthConfig.objects.create(
-            signup_required=True, active=True, code_of_conduct="CUSTOM CODE OF CONDUCT"
-        )
+        AuthConfig.objects.create(active=True, code_of_conduct="CUSTOM CODE OF CONDUCT")
         should_be_forbidden = self.client.post(
             reverse("auth_settings"), {"code_of_conduct": "NEW DIFFERENT CODE"}
         )

@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 import requests
 from allauth.socialaccount.models import SocialAccount
+from django.conf import settings
 from requests.exceptions import HTTPError
 
 from goosetools.tenants.models import SiteUser
@@ -12,7 +13,7 @@ def refresh_discord_data(self):
     try:
         guild = DiscordGuild.objects.get(active=True)
         bot_headers = {
-            "Authorization": "Bot {0}".format(guild.bot_token),
+            "Authorization": "Bot {0}".format(settings.BOT_TOKEN),
         }
         uid = self.discord_uid()
         url = f"https://discord.com/api/guilds/{guild.guild_id}/members/{uid}"
