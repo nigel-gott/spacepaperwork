@@ -8,7 +8,7 @@
     <p>You are logged in as {{request.user.gooseuser.display_name}}.
     {% if request.user.gooseuser.is_unapproved %}
         {% if request.user.gooseuser.latest_app %}
-            <br/><b>Your application is currently waiting confirmation by a member of the @AuthTeam</b><br/>
+            <br/><b>Your application is currently waiting approval. </b><br/>
             {% if request.user.gooseuser.latest_app.ingame_name %}
                 <b>Please go and make the following application in-game now: </b><br/>
                 <blockquote>Apply with: {{request.user.gooseuser.latest_app.ingame_name}} to [{{request.user.gooseuser.latest_app.corp}}] {{request.user.gooseuser.latest_app.corp.full_name}}</blockquote>
@@ -23,7 +23,7 @@
         {% endif %}
 
     {% elif request.user.gooseuser.is_rejected %}
-        <br/><b class="red-text">Your application has been rejected, please ask a member of @AuthTeam for more details.</b>
+        <br/><b class="red-text">Your application has been rejected.</b>
     {% endif %}
     </p>
 </div>

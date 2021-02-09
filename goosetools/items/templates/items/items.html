@@ -5,7 +5,7 @@
     <ul class="collapsible" id="top_level_thingy">
         <li id="help_thingy">
             <div class="collapsible-header"><i class="material-icons">add</i>How To Send Loot to a Seller or Sell it
-                yourself in Goosetools (click this to hide help)
+                yourself in {{SITE_NAME}} (click this to hide help)
             </div>
             <div class="collapsible-body">
                 <blockquote>
@@ -17,15 +17,20 @@
                         <li> If they are happy then make contract in game to that person in a system they are happy
                             with.
                         </li>
-                        <li> Then move the items to them in Goosetools by clicking the appropriate contract button on
+                        <li> Then move the items to them in {{SITE_NAME}} by clicking the appropriate contract button on
                             this page (all your items, or just one fleet's worth, or a single item at once).
                         </li>
-                        <li> Finally they will have to accept or reject the contract in-game and in Goosetools. You can
+                        <li> Finally they will have to accept or reject the contract in-game and in {{SITE_NAME}}. You can
                             see your contracts pending approval <a href="{% url 'contracts'%}">here</a>.
                         </li>
                     </ol>
+                    {% if GOOSEFLOCK_FEATURES %}
                     Participation will still be tracked and the person receiving the contract will have the
                     responsibility to deposit and transfer eggs.
+                    {% else %}
+                    Participation will still be tracked and the person receiving the contract will have the
+                    responsibility to sell the loot and notify everyone when the profit is ready to be / has been re-distributed.
+                    {% endif %}
                 </blockquote>
                 <blockquote>
                     <b>If you want to sell loot yourself:</b>
@@ -33,7 +38,7 @@
                         <li> Move all your loot to a good selling hub and make sure you have atleast 5/4/0 accounting
                             skill
                         </li>
-                        <li> Click the stack all button in Goosetools to group your items to make them easier to sell,
+                        <li> Click the stack all button in {{SITE_NAME}} to group your items to make them easier to sell,
                             participation will still be tracked.
                         </li>
                         <li> Go through all your items below, click sell and indicate what price you have listed the
@@ -45,7 +50,7 @@
                             sold.
                         </li>
                         <li> If you need to change the price of an order ingame please also update the market order in
-                            Goosetools by going to your <a href="{% url 'orders'%}">market orders</a> and clicking edit
+                            {{SITE_NAME}} by going to your <a href="{% url 'orders'%}">market orders</a> and clicking edit
                             on the order.
                         </li>
                         <li> For now if you need to cancel a market order PM @thejanitor</li>

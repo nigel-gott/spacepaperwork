@@ -70,7 +70,7 @@ def refresh_from_discord():
                         if groups_they_should_have:
                             output = (
                                 output
-                                + f"WARNING: {user_json['user']['username']} has not registered in goosetools YET they have discord server roles for {','.join(groups_they_should_have)}.\n"
+                                + f"WARNING: {user_json['user']['username']} has not registered in {settings.SITE_NAME} YET they have discord server roles for {','.join(groups_they_should_have)}.\n"
                             )
                 users_processed = users_processed + 1
             time.sleep(10)
@@ -84,7 +84,8 @@ def refresh_from_discord():
         )
 
     output = (
-        output + "======= APPROVED GOOSETOOLS USERS WHO ARE NOT IN DISCORD ========\n"
+        output
+        + f"======= APPROVED {settings.SITE_NAME} USERS WHO ARE NOT IN DISCORD ========\n"
     )
     for uid, user in uid_to_user.items():
         if user.status == "approved":
@@ -92,19 +93,18 @@ def refresh_from_discord():
             if user.groups():
                 output = (
                     output
-                    + f"{user.display_name()}({characters}) and has goosetools groups - {user.groups()}\n"
+                    + f"{user.display_name()}({characters}) and has groups - {user.groups()}\n"
                 )
             else:
                 output = (
-                    output
-                    + f"{user.display_name()}({characters}) and has no goosetools groups\n"
+                    output + f"{user.display_name()}({characters}) and has no groups\n"
                 )
     output = output + (f"Processed {users_processed} users.\n")
     return output
 
 
 class Job(HourlyJob):
-    help = "Checks discord roles and updates goosetools permissions accordingly"
+    help = "Checks discord roles and updates permissions accordingly"
 
     def execute(self):
         DiscordRole.sync_from_discord()

@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{% block title %}GooseTools{% endblock %}</title>
+    <title>{% block title %}{{SITE_NAME}}{% endblock %}</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="{% static 'core/css/materialize.css' %}" rel="stylesheet" type="text/css">
     <link href="{% static 'core/css/core.css' %}" rel="stylesheet" type="text/css">
@@ -16,13 +16,17 @@
 <body>
 {% if user.is_authenticated and user.gooseuser.is_approved %}
 <ul class="dropdown-content" id="dropdown_tools">
+    {% if GOOSEFLOCK_FEATURES %}
     <li>
         <a href="{% url 'mapbot:mapbot_index' %}">MapBot</a>
     </li>
+    {% endif %}
     <li>
         <a href="{% url 'character_search' %}">Char/User Search</a>
     </li>
+    {% if GOOSEFLOCK_FEATURES %}
     <li><a href="https://wiki.goosetools.com">HONK Wiki</a></li>
+    {% endif %}
 </ul>
 <ul class="dropdown-content" id="dropdown_fleets">
     <li><a href="{% url 'fleet' %}">Active Fleets
@@ -98,7 +102,7 @@
             <a href="{% url 'groups_view' %}">User Groups Admin</a>
     </li>
     {% endif %}
-    {% if is_ship_price_admin %}
+    {% if is_ship_price_admin and GOOSEFLOCK_FEATURES %}
     <li>
         <a href="{% url 'industry:ship_dashboard' %}">Ship Admin</a>
     </li>
@@ -135,8 +139,10 @@
                 <i class="material-icons left" style="margin-right:0px;">shopping_cart</i>Sales ({{all_sales_num}})
                 <i class="material-icons right">arrow_drop_down</i>
                 </a></li>
+            {% if GOOSEFLOCK_FEATURES %}
             <li><a  href="{% url 'venmo:dashboard' %}">Eggs<i class="material-icons left">attach_money</i>
             <li><a  href="{% url 'industry:shiporders_view' %}">Orders <i class="material-icons left">directions_boat</i>
+            {% endif %}
             </a></li>
             <li>
                 <a class="dropdown-trigger valign-wrapper" data-target="dropdown_tools" href="#!">
@@ -215,7 +221,7 @@
                 <a href="{% url 'groups_view' %}">User Groups Admin</a>
         </li>
         {% endif %}
-        {% if is_ship_price_admin %}
+        {% if is_ship_price_admin and GOOSEFLOCK_FEATURES %}
         <li>
             <a href="{% url 'industry:ship_dashboard' %}">Ship Admin</a>
         </li>
@@ -231,12 +237,14 @@
     {% endif %}
 
     {% if user.is_authenticated and user.gooseuser.is_approved %}
+        {% if GOOSEFLOCK_FEATURES %}
         <li >
             <a href="{% url 'industry:shiporders_view' %}">Orders<i class="material-icons right">directions_boat</i></a>
         </li>
         <li >
             <a href="{% url 'venmo:dashboard' %}">Eggs<i class="material-icons right">attach_money</i></a>
         </li>
+        {% endif %}
 
         <li><div class="divider"></div></li>
         <li><a class="subheader">Fleets<i class="material-icons right">star</i></a></li>
@@ -284,15 +292,19 @@
         <li><div class="divider"></div></li>
         <li><a class="subheader">Tools<i class="material-icons right">find_replace</i></a></li>
 
+        {% if GOOSEFLOCK_FEATURES %}
         <li >
             <a href="{% url 'mapbot:mapbot_index' %}">MapBot</a>
         </li>
+        {% endif %}
         <li>
             <a href="{% url 'character_search' %}">Char/User Search</a>
         </li>
+        {% if GOOSEFLOCK_FEATURES %}
         <li>
             <a href="https://wiki.goosetools.com">HONK Wiki</a>
         </li>
+        {% endif %}
 
         <li><div class="divider"></div></li>
         <li><a class="subheader">Settings<i class="material-icons right">settings</i></a></li>
@@ -326,12 +338,14 @@
 {% block footer %}
 <footer class="page-footer blue-grey lighten-2">
     <div class="container">
-        <h5 class="white-text">⚙ GooseTools</h5>
+        <h5 class="white-text">⚙ {{SITE_NAME}}</h5>
         <ul>
+            {% if GOOSEFLOCK_FEATURES %}
             <li><a class="grey-text text-lighten-3"
                    href="https://wiki.goosetools.com/index.php?title=Goosetools">How to use GooseTools</a>
             </li>
             <li><a class="grey-text text-lighten-3" href="https://wiki.goosetools.com">HONK Wiki</a></li>
+            {% endif %}
             <li><a class="grey-text text-lighten-3" href="https://discord.com/users/244766405260476417/">PM
                 @thejanitor for help and suggestions</a></li>
         </ul>

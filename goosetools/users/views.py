@@ -71,11 +71,11 @@ def corp_select(request):
     if site_user.is_rejected():
         messages.error(
             request,
-            "You cannot signup to goosetools, please contact @AuthTeam on discord for more information.",
+            "You are not allowed to register.",
         )
         return HttpResponseRedirect(reverse("core:splash"))
     elif site_user.is_approved():
-        messages.error(request, "You have already registered on goosetools")
+        messages.error(request, "You have already registered.")
         return HttpResponseRedirect(reverse("core:home"))
 
     corps = _corps_site_user_can_apply_to(request)
@@ -93,11 +93,11 @@ def user_signup(request, pk):
     if site_user.is_rejected():
         messages.error(
             request,
-            "You cannot signup to goosetools, please contact @AuthTeam on discord for more information.",
+            "You cannot signup",
         )
         return HttpResponseRedirect(reverse("core:splash"))
     elif site_user.is_approved():
-        messages.error(request, "You have already registered on goosetools")
+        messages.error(request, "You have already registered")
         return HttpResponseRedirect(reverse("core:home"))
 
     corp = get_object_or_404(Corp, pk=pk)
@@ -788,7 +788,7 @@ def edit_corp(request, pk):
                 else:
                     messages.error(
                         request,
-                        f"Cannot delete {corp.name} until all characters in goosetools with that corp have been moved to a new corp.",
+                        f"Cannot delete {corp.name} until all characters in with that corp have been moved to a new corp.",
                     )
             else:
                 corp.public_corp = form.cleaned_data["public_corp"]

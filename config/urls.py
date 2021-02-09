@@ -6,6 +6,14 @@ from django.contrib import admin
 from django.urls import path
 from django.urls.conf import re_path
 
+gooseflock_apps = []
+if settings.GOOSEFLOCK_FEATURES:
+    gooseflock_apps = [
+        path("venmo/", include("venmo.urls")),
+        path("mapbot/", include("mapbot.urls")),
+        path("industry/", include("industry.urls")),
+    ]
+
 urlpatterns = [
     re_path(
         r"^" + settings.URL_PREFIX,
@@ -21,9 +29,6 @@ urlpatterns = [
                 path("", include("market.urls")),
                 path("", include("ownership.urls")),
                 path("", include("core.urls")),
-                path("venmo/", include("venmo.urls")),
-                path("mapbot/", include("mapbot.urls")),
-                path("industry/", include("industry.urls")),
                 path("accounts/", include("allauth.urls")),
                 path(
                     "api/", include("rest_framework.urls", namespace="rest_framework")
@@ -34,6 +39,7 @@ urlpatterns = [
                 path("forms/", include("user_forms.urls")),
             ]
             + settings.ENV_SPECIFIC_URLS
+            + gooseflock_apps
         ),
     )
 ]

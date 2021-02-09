@@ -19,6 +19,7 @@ env = environ.Env(
 
 env.read_env(str(ROOT_DIR / ".env"))
 
+GOOSEFLOCK_FEATURES = env("GOOSEFLOCK_FEATURES")
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
@@ -92,6 +93,11 @@ THIRD_PARTY_APPS = [
     "tinymce",
     "django_comments",
 ]
+GOOSEFLOCK_APPS = [
+    "goosetools.mapbot.apps.MapBotConfig",
+    "goosetools.venmo.apps.VenmoConfig",
+    "goosetools.industry.apps.IndustryConfig",
+]
 
 LOCAL_APPS = [
     "goosetools.users.apps.UsersConfig",
@@ -102,11 +108,8 @@ LOCAL_APPS = [
     "goosetools.pricing.apps.PricingConfig",
     "goosetools.contracts.apps.ContractsConfig",
     "goosetools.ownership.apps.OwnershipConfig",
-    "goosetools.industry.apps.IndustryConfig",
-    "goosetools.mapbot.apps.MapBotConfig",
     "goosetools.core.apps.CoreConfig",
     "goosetools.tenants.apps.TenantsConfig",
-    "goosetools.venmo.apps.VenmoConfig",
     "goosetools.goose_comments.apps.GooseCommentsConfig",
     "goosetools.user_forms.apps.UserFormsConfig",
     # Goosetools apps go here
@@ -118,6 +121,8 @@ INSTALLED_APPS = (
     + THIRD_PARTY_APPS
     + LOCAL_APPS
 )
+if GOOSEFLOCK_FEATURES:
+    INSTALLED_APPS = INSTALLED_APPS + GOOSEFLOCK_APPS
 
 COMMENTS_APP = "goosetools.goose_comments"
 
@@ -256,6 +261,7 @@ TEMPLATES = [
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
+                "goosetools.core.context_processors.setting_vars",
             ],
         },
     }
@@ -334,5 +340,5 @@ PROMETHEUS_METRICS_EXPORT_ADDRESS = ""
 VENMO_HOST_URL = env("VENMO_HOST_URL")
 VENMO_API_TOKEN = env("VENMO_API_TOKEN")
 USE_NEW_VENMO_COMMANDS = env("USE_NEW_VENMO_COMMANDS")
-GOOSEFLOCK_FEATURES = env("GOOSEFLOCK_FEATURES")
 BOT_TOKEN = env("BOT_TOKEN")
+SITE_NAME = env("SITE_NAME", default="GooseTools")

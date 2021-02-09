@@ -24,7 +24,7 @@ class AuthConfigForm(forms.Form):
 class SignupFormWithTimezone(forms.Form):
     existing_character = forms.ModelChoiceField(
         queryset=Character.objects.all(),
-        help_text="You already have characters in GooseTools, select which one will be applying to this corp or leave blank and fill in In Game Name for a new character.",
+        help_text=f"You already have characters in {settings.SITE_NAME}, select which one will be applying to this corp or leave blank and fill in In Game Name for a new character.",
     )
     ingame_name = forms.CharField(
         help_text="The EXACT IN GAME name of your SINGLE MAIN CHARACTER. Once approved you will be able to auth alts under Settings->Characters."
@@ -49,7 +49,7 @@ class SignupFormWithTimezone(forms.Form):
         decimal_places=2,
         label="Transaction Tax %",
         initial=15,
-        help_text="Your ingame Transaction Tax - Used to calculate fees when you sell loot in goosetools.",
+        help_text=f"Your ingame Transaction Tax - Used to calculate fees when you sell loot in {settings.SITE_NAME}.",
     )
     broker_fee = forms.DecimalField(
         max_digits=5,

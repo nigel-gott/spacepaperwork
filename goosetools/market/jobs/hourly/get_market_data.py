@@ -2,6 +2,7 @@ import csv
 from decimal import Decimal
 
 import requests
+from django.conf import settings
 from django.utils.dateparse import parse_datetime
 from django_extensions.management.jobs import HourlyJob
 
@@ -41,7 +42,7 @@ class Job(HourlyJob):
                 event.save()
             except Item.DoesNotExist:
                 print(
-                    f"WARNING: Market Data Found for Item not in Goosetools - id:{market_id}"
+                    f"WARNING: Market Data Found for Item not in {settings.SITE_NAME}- id:{market_id}"
                 )
 
 

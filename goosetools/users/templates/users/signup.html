@@ -16,8 +16,10 @@
             <h1>{{corp.sign_up_form.title}}</h1>
         {% endif %}
         {% if not corp.sign_up_form.description %}
+            {% if GOOSEFLOCK_FEATURES %}
             <p>Please fill in the fields below to submit your application to Gooseflock. <br/>
             If you need any help please ask in #pubbie-general on the discord server.</p>
+            {% endif %}
         {% else %}
             <p>
             {{corp.sign_up_form.description|linebreaks}}
