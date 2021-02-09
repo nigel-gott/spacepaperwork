@@ -168,7 +168,7 @@ class EditGroupForm(forms.Form):
     name = forms.CharField()
     description = forms.CharField()
     required_discord_role_id = forms.ModelChoiceField(
-        queryset=DiscordRole.objects.all(), required=False
+        queryset=DiscordRole.objects.all().order_by("name"), required=False
     )
     permissions = forms.ModelMultipleChoiceField(
         GoosePermission.objects.all(), widget=forms.CheckboxSelectMultiple

@@ -11,7 +11,7 @@
 <div class="row">
     <div class="col s12 center">
         {% if not corp.sign_up_form %}
-            <h1>Application Form for {{corp.name_with_ticker}} </h1>
+            <h1>Application Form for {{corp.name_with_with_corp_tag}} </h1>
         {% else %}
             <h1>{{corp.sign_up_form.title}}</h1>
         {% endif %}
@@ -23,6 +23,7 @@
             {{corp.sign_up_form.description|linebreaks}}
             </p>
         {% endif %}
+        <b >You are applying to join <span class="green-text">{{corp.name_with_corp_tag}}</span>. Once you have submitted this application go apply in-game.</b>
         {% if form.non_field_errors or corp_form.non_field_errors %}
             <div class="card-panel red darken-1">
                 <span class="white-text">
