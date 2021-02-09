@@ -5,10 +5,6 @@ from goosetools.user_forms.models import DynamicForm, FormQuestion
 
 
 class FormQuestionForm(ModelForm):
-    is_required = forms.BooleanField(
-        label="Question is Manditory", widget=forms.CheckboxInput(), required=False
-    )
-
     class Meta:
         model = FormQuestion
         fields = "__all__"
