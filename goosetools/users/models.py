@@ -367,6 +367,9 @@ class GooseUser(models.Model):
             comment=f"Changed status from {self.status} to {new_status}",
             submit_date=timezone.now(),
         )
+        if new_status != "approved":
+            for app in CorpApplication.objects.filter(character__user=self).all():
+                app.reject()
         self.status = new_status
         self.save()
 
