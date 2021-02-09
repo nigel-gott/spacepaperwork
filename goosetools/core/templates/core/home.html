@@ -13,8 +13,10 @@
                 <b>Please go and make the following application in-game now: </b><br/>
                 <blockquote>Apply with: {{request.user.gooseuser.latest_app.ingame_name}} to [{{request.user.gooseuser.latest_app.corp}}] {{request.user.gooseuser.latest_app.corp.full_name}}</blockquote>
             {% else %}
-                <i>Please Go into Settings->Characters to apply with your individual characters after you have been accepted.</i>
+                <b>Please go and make the following application in-game now: </b><br/>
+                <blockquote>Apply with: {{request.user.gooseuser.latest_app.existing_character}} to [{{request.user.gooseuser.latest_app.corp}}] {{request.user.gooseuser.latest_app.corp.full_name}}</blockquote>
             {% endif %}
+            <i>Once you have been accepted you can apply with alts by going into Settings->Characters and applying there.</i>
         {% else %}
             <br/><b class="orange-text">You have been removed most likely due to in-activity, please re-apply below:</b>
             <br/><a id="agree_button" class="btn waves-btn green btn-large pulse" href="{% url "corp_select" %}">ReApply</a>
