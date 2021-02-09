@@ -27,7 +27,7 @@ class GeneratedForm(forms.Form):
         for question in questions:
             field_name = f"question_{question.id}"
             self.fields[field_name] = forms.CharField(
-                required=question.is_required,  # type: ignore
+                required=question.is_required,
                 label=question.title,
                 help_text=question.help_text or "",
             )

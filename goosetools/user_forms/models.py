@@ -25,4 +25,4 @@ class FormQuestion(models.Model):
     )
     title = models.TextField()
     help_text = models.TextField(null=True, blank=True)
-    is_required = models.TextField(default=True)
+    is_required = models.BooleanField(default=True)
