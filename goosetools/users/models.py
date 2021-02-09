@@ -13,6 +13,7 @@ from rest_framework.permissions import BasePermission
 from timezone_field import TimeZoneField
 
 from goosetools.tenants.models import SiteUser
+from goosetools.user_forms.models import DynamicForm
 
 logger = logging.getLogger(__name__)
 
@@ -50,30 +51,109 @@ class AuthConfig(models.Model):
             )
 
 
-class SignUpQuestion(models.Model):
-    auth_config = models.ForeignKey(AuthConfig, on_delete=models.CASCADE)
-    question_text = models.TextField()
-    question_type = models.TextField(
-        choices=[
-            ("text", "text"),
-            ("number", "number"),
-            ("textarea", "large text area"),
-            ("multichoice_dropdown", "multiple choice dropdown"),
+class DiscordGuild(models.Model):
+    guild_id = models.TextField()
+    member_role_id = models.TextField(null=True, blank=True)
+    bot_token = models.TextField()
+    active = models.BooleanField(default=False)
+
+    @staticmethod
+    def try_give_guild_member_role(user):
+        try:
+            guild = DiscordGuild.objects.get(active=True)
+            if guild.member_role_id:
+                logger.info(
+                    f"Attempting to give member role: {guild.member_role_id} to {user.discord_uid()}"
+                )
+                DiscordGuild.try_give_role(user.discord_uid(), guild.member_role_id)
+        except DiscordGuild.DoesNotExist:
+            pass
+
+    @staticmethod
+    def try_give_role(uid, role_id):
+        try:
+            guild = DiscordGuild.objects.get(active=True)
+            bot_headers = {
+                "Authorization": "Bot {0}".format(guild.bot_token),
+            }
+            url = f"https://discord.com/api/guilds/{guild.guild_id}/members/{uid}/roles/{role_id}"
+            request = requests.put(url, headers=bot_headers)
+            request.raise_for_status()
+        except DiscordGuild.DoesNotExist:
+            pass
+
+    @staticmethod
+    def get_roles():
+        try:
+            guild = DiscordGuild.objects.get(active=True)
+            bot_headers = {
+                "Authorization": "Bot {0}".format(guild.bot_token),
+            }
+            url = f"https://discord.com/api/guilds/{guild.guild_id}"
+            request = requests.get(url, headers=bot_headers)
+            request.raise_for_status()
+            return [(role["name"], role["id"]) for role in request.json()["roles"]]
+        except DiscordGuild.DoesNotExist:
+            return []
+
+    # pylint: disable=signature-differs
+    def save(self, *args, **kwargs):
+        if self.active:
+            try:
+                other_active = DiscordGuild.objects.get(active=True)
+                if self != other_active:
+                    other_active.active = False
+                    other_active.save()
+            except DiscordGuild.DoesNotExist:
+                pass
+        super().save(*args, **kwargs)
+
+
+class DiscordRole(models.Model):
+    name = models.TextField()
+    role_id = models.TextField(unique=True)
+
+    def __str__(self) -> str:
+        return self.name
+
+    @staticmethod
+    def sync_from_discord():
+        all_ids = set()
+        for role_name, role_id in DiscordGuild.get_roles():
+            all_ids.add(role_id)
+            DiscordRole.objects.update_or_create(
+                role_id=role_id, defaults={"name": role_name}
+            )
+
+        DiscordRole.objects.exclude(role_id__in=all_ids).delete()
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["name"]),
         ]
-    )
-
-
-class SignUpQuestionChoice(models.Model):
-    signup_question = models.ForeignKey(SignUpQuestion, on_delete=models.CASCADE)
-    choice = models.TextField()
-    linked_discord_role = models.TextField(blank=True, null=True)
 
 
 class Corp(models.Model):
     name = models.TextField(unique=True)
     full_name = models.TextField(unique=True, null=True, blank=True)
-    # TODO map to Discord Role
-    required_discord_role = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    public_corp = models.BooleanField(default=False)
+    sign_up_form = models.ForeignKey(
+        DynamicForm,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    discord_role_given_on_approval = models.ForeignKey(
+        DiscordRole,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="corps_giving_on_approval",
+    )
+    discord_roles_allowing_application = models.ManyToManyField(
+        DiscordRole, related_name="corps_allowing_application"
+    )
 
     def name_with_corp_tag(self):
         if self.full_name:
@@ -103,6 +183,9 @@ class GooseGroup(models.Model):
     description = models.TextField()
     editable = models.BooleanField(default=True)
     linked_discord_role = models.TextField(null=True, blank=True)
+    required_discord_role = models.ForeignKey(
+        DiscordRole, on_delete=models.SET_NULL, null=True, blank=True
+    )
 
     def link_permission(self, permission_name: str):
         perm, _ = GoosePermission.objects.get_or_create(name=permission_name)
@@ -372,6 +455,24 @@ class GooseUser(models.Model):
     def discord_avatar_url(self):
         return self.avatar_hash
 
+    def can_apply_to_corp(self, corp):
+        return corp in list(self.corps_user_can_apply_to())
+
+    def corps_user_can_apply_to(self):
+        # pylint: disable=no-member
+        self.refresh_discord_data()  # type: ignore
+        roles = self.extra_data().get("roles", [])
+        return GooseUser.corps_roles_can_apply_to(roles)
+
+    @staticmethod
+    def corps_roles_can_apply_to(roles):
+        corp_names = []
+        for corp in Corp.objects.all():
+            q = corp.discord_roles_allowing_application.filter(role_id__in=roles)
+            if corp.public_corp or q.count() > 0:
+                corp_names.append(corp.name)
+        return Corp.objects.filter(name__in=corp_names)
+
     # default avatars look like this: https://cdn.discordapp.com/embed/avatars/3.png
     # there is a bug with discord's size selecting mechanism for these, doing 3.png?size=16 still returns a full size default avatar.
     @staticmethod
@@ -399,106 +500,6 @@ class GroupMember(models.Model):
         unique_together = (("group", "user"),)
 
 
-class UserApplication(models.Model):
-    user = models.ForeignKey(GooseUser, on_delete=models.CASCADE)
-    status = models.TextField(
-        choices=[
-            ("unapproved", "unapproved"),
-            ("approved", "approved"),
-            ("rejected", "rejected"),
-        ],
-        default="unapproved",
-    )
-    created_at = models.DateTimeField(default=timezone.now)
-    application_notes = models.TextField(blank=True, null=True)
-    ingame_name = models.TextField(blank=True, null=True)
-    corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
-
-    previous_alliances = models.TextField(blank=True, null=True)
-    activity = models.TextField(blank=True, null=True)
-    looking_for = models.TextField(blank=True, null=True)
-
-    @staticmethod
-    def unapproved_applications():
-        return UserApplication.objects.filter(status="unapproved")
-
-    def _create_character(self):
-        if self.ingame_name:
-            main_char = Character(
-                user=self.user, ingame_name=self.ingame_name, corp=Corp.unknown_corp()
-            )
-            main_char.full_clean()
-            main_char.save()
-            CorpApplication.objects.create(
-                status="unapproved",
-                corp=self.corp,
-                character=main_char,
-            )
-
-    def approve(self, approving_user):
-        self.status = "approved"
-        self.user.change_status(approving_user, "approved")
-        self._create_character()
-        self.full_clean()
-        DiscordGuild.try_give_guild_member_role(self.user)
-        # pylint: disable=no-member
-        self.user.refresh_discord_data()  # type: ignore
-        self.save()
-
-    def reject(self, rejecting_user):
-        self.status = "rejected"
-        self.user.change_status(rejecting_user, "rejected")
-        self.full_clean()
-        self.save()
-
-    def __str__(self) -> str:
-        return f"{self.status} User App for {self.user} made on {self.created_at}"
-
-
-class DiscordGuild(models.Model):
-    guild_id = models.TextField()
-    member_role_id = models.TextField(null=True, blank=True)
-    bot_token = models.TextField()
-    active = models.BooleanField(default=False)
-
-    @staticmethod
-    def try_give_guild_member_role(user):
-        try:
-            guild = DiscordGuild.objects.get(active=True)
-            if guild.member_role_id:
-                logger.info(
-                    f"Attempting to give member role: {guild.member_role_id} to {user.discord_uid()}"
-                )
-                DiscordGuild.try_give_role(user.discord_uid(), guild.member_role_id)
-        except DiscordGuild.DoesNotExist:
-            pass
-
-    @staticmethod
-    def try_give_role(uid, role_id):
-        try:
-            guild = DiscordGuild.objects.get(active=True)
-            bot_headers = {
-                "Authorization": "Bot {0}".format(guild.bot_token),
-            }
-            url = f"https://discord.com/api/guilds/{guild.guild_id}/members/{uid}/roles/{role_id}"
-            request = requests.put(url, headers=bot_headers)
-            request.raise_for_status()
-        except DiscordGuild.DoesNotExist:
-            pass
-
-    # pylint: disable=signature-differs
-    def save(self, *args, **kwargs):
-        if self.active:
-            try:
-                other_active = DiscordGuild.objects.get(active=True)
-                if self != other_active:
-                    other_active.active = False
-                    other_active.save()
-            except DiscordGuild.DoesNotExist:
-                pass
-        super().save(*args, **kwargs)
-
-
 class Character(models.Model):
     user = models.ForeignKey(GooseUser, on_delete=models.CASCADE)
     ingame_name = models.TextField(unique=True)
@@ -520,6 +521,72 @@ class Character(models.Model):
             return f"{self.ingame_name}"
 
 
+class UserApplication(models.Model):
+    user = models.ForeignKey(GooseUser, on_delete=models.CASCADE)
+    status = models.TextField(
+        choices=[
+            ("unapproved", "unapproved"),
+            ("approved", "approved"),
+            ("rejected", "rejected"),
+        ],
+        default="unapproved",
+    )
+    created_at = models.DateTimeField(default=timezone.now)
+    application_notes = models.TextField(blank=True, null=True)
+    ingame_name = models.TextField(blank=True, null=True)
+    corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
+
+    previous_alliances = models.TextField(blank=True, null=True)
+    activity = models.TextField(blank=True, null=True)
+    looking_for = models.TextField(blank=True, null=True)
+    answers = models.JSONField(blank=True)  # type: ignore
+    existing_character = models.ForeignKey(
+        Character, on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    @staticmethod
+    def unapproved_applications():
+        return UserApplication.objects.filter(status="unapproved")
+
+    def _create_character_application(self):
+        if self.ingame_name:
+            main_char = Character(
+                user=self.user, ingame_name=self.ingame_name, corp=Corp.unknown_corp()
+            )
+            main_char.full_clean()
+            main_char.save()
+        else:
+            main_char = self.existing_character  # type: ignore
+        CorpApplication.objects.create(
+            status="unapproved",
+            corp=self.corp,
+            character=main_char,
+        )
+
+    def approve(self, approving_user):
+        self.status = "approved"
+        self.user.change_status(approving_user, "approved")
+        self._create_character_application()
+        self.full_clean()
+        if self.corp.discord_role_given_on_approval:
+            DiscordGuild.try_give_role(
+                self.user.discord_uid(),
+                self.corp.discord_role_given_on_approval.role_id,
+            )
+        # pylint: disable=no-member
+        self.user.refresh_discord_data()  # type: ignore
+        self.save()
+
+    def reject(self, rejecting_user):
+        self.status = "rejected"
+        self.user.change_status(rejecting_user, "rejected")
+        self.full_clean()
+        self.save()
+
+    def __str__(self) -> str:
+        return f"{self.status} User App for {self.user} made on {self.created_at}"
+
+
 class CorpApplication(models.Model):
     corp = models.ForeignKey(Corp, on_delete=models.CASCADE)
     character = models.ForeignKey(Character, on_delete=models.CASCADE)
@@ -538,6 +605,11 @@ class CorpApplication(models.Model):
         self.status = "approved"
         self.character.corp = self.corp
         self.character.save()
+        if self.corp.discord_role_given_on_approval:
+            DiscordGuild.try_give_role(
+                self.character.user.discord_uid(),
+                self.corp.discord_role_given_on_approval.role_id,
+            )
         self.full_clean()
         self.save()
 

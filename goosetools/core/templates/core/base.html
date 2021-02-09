@@ -81,6 +81,9 @@
     <li>
             <a href="{% url 'user_dashboard' %}">User Dashboard</a>
     </li>
+    <li>
+            <a href="{% url 'user_forms:form-list' %}">Form Setup</a>
+    </li>
     {% endif %}
     {% if is_single_corp_admin or is_all_corp_admin %}
     <li>
@@ -194,6 +197,9 @@
         {% if is_user_admin %}
         <li>
             <a href="{% url 'user_dashboard' %}">User Dashboard</a>
+        </li>
+        <li>
+                <a href="{% url 'user_forms:form-list' %}">Form Setup</a>
         </li>
         {% endif %}
         {% if is_single_corp_admin or is_all_corp_admin %}
@@ -334,10 +340,13 @@
 
 <script src="{% static 'core/js/materialize.js' %}" type="text/javascript"></script>
 
+{% endblock %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+{% block initfooter %}
     var elems = document.querySelectorAll('select');
     var instances = M.FormSelect.init(elems);
+{% endblock %}
     var elems = document.querySelectorAll('.datepicker');
     var instances = M.Datepicker.init(elems);
     var elems = document.querySelectorAll('.timepicker');
@@ -354,7 +363,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 </script>
-{% endblock %}
 {% block extrafooter %}
 {% endblock %}
 </body>

@@ -10,15 +10,28 @@
 
 <div class="row">
     <div class="col s12 center">
-        <h1>{% trans "Gooseflock Sign Up Form" %}</h1>
-        <p>Please fill in the fields below to submit your application to Gooseflock. <br/>
-        If you need any help please ask in #pubbie-general on the discord server.</p>
-        {% if form.non_field_errors %}
+        {% if not corp.sign_up_form %}
+            <h1>Application Form for {{corp.name_with_ticker}} </h1>
+        {% else %}
+            <h1>{{corp.sign_up_form.title}}</h1>
+        {% endif %}
+        {% if not corp.sign_up_form.description %}
+            <p>Please fill in the fields below to submit your application to Gooseflock. <br/>
+            If you need any help please ask in #pubbie-general on the discord server.</p>
+        {% else %}
+            <p>
+            {{corp.sign_up_form.description|linebreaks}}
+            </p>
+        {% endif %}
+        {% if form.non_field_errors or corp_form.non_field_errors %}
             <div class="card-panel red darken-1">
                 <span class="white-text">
                     <b>Errors with form:</b>
                 <ul class="errors">
                     {% for error in form.non_field_errors%}
+                    <li>{{ error|escape }}</li>
+                    {% endfor %}
+                    {% for error in corp_form.non_field_errors%}
                     <li>{{ error|escape }}</li>
                     {% endfor %}
                 </ul>
@@ -27,32 +40,40 @@
         {% endif %}
     </div>
 </div>
+<div class="row">
+    <div class="col s12">
         <!-- Display Form -->
         <form action="" method="post">
             {% csrf_token %}
             {% if redirect_field_value %}
             <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
             {% endif %}
-            <div class="row">
-                <div class="col s12">
             <ul class="collection">
-            {% for field in form %}
-                <li class="collection-item">
-                    <div class="input-field">
-                        {{ field.errors }}
-                        {% if field.help_text %}
-                        <p class="help">{{ field.help_text|safe }}</p>
-                        {% endif %}
-                        {{ field }}
-                </li>
-            {% endfor %}
+                {% for field in corp_form %}
+                    <li class="collection-item">
+                        <div class="row">
+                            <div class="col s12">
+                                {{field|materializecss}}
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+                {% for field in form %}
+                    <li class="collection-item">
+                        <div class="row">
+                            <div class="col s12">
+                                {{field|materializecss}}
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
                 <li class="collection-item center">
-                    <button class="green btn waves-btn btn-large" id="sign_up_button" type="submit">{% trans "Sign Up" %} &raquo;</button>
+                    <button class="green btn waves-btn btn-large" id="sign_up_button" type="submit">{% trans "Submit Application" %} &raquo;</button>
                 </li>
             </ul>
         </form>
-                </div>
-            </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extrafooter %}

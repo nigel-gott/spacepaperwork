@@ -34,11 +34,8 @@ def test_can_sign_up(http_service, browser):
     wait_and_click(browser, "conduct_button")
     wait_and_click(browser, "agree_button")
 
-    wait_for(browser, "id_previous_alliances")
+    wait_for(browser, "id_ingame_name")
 
-    browser.fill("previous_alliances", "x")
-    browser.fill("activity", "x")
-    browser.fill("looking_for", "x")
     browser.fill("ingame_name", "x")
 
     wait_and_click(browser, "sign_up_button")

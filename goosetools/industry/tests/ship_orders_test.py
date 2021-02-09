@@ -668,14 +668,16 @@ class ShipOrderTest(GooseToolsTestCase):
         self.assertEqual(
             r.context["ship_data"],
             {
-                "Thorax": {
+                self.thorax.pk: {
+                    "name": "Thorax",
                     "free": False,
                     "tech_level": 6,
                     "isk_price": None,
                     "eggs_price": None,
                     "valid_price": False,
                 },
-                "DailyShip": {
+                daily_ship.pk: {
+                    "name": "DailyShip",
                     "free": True,
                     "order_limit_group": {
                         "days_between_orders": 1,

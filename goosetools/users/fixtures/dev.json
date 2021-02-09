@@ -70,7 +70,7 @@
     "fields": {
       "user": 99999999,
       "ingame_name": "TEST USER 1",
-      "corp": "HONK"
+      "corp": 1
     }
   },
   {
@@ -79,7 +79,7 @@
     "fields": {
       "user": 99999999,
       "ingame_name": "TEST USER 2",
-      "corp": "MEAN"
+      "corp": 2
     }
   }
 ]

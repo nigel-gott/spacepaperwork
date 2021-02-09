@@ -9,7 +9,7 @@ from goosetools.users.discord_helpers import (
     merge,
     setup_user_groups_from_discord_guild_roles,
 )
-from goosetools.users.models import DiscordGuild, GooseGroup, GooseUser
+from goosetools.users.models import DiscordGuild, DiscordRole, GooseGroup, GooseUser
 
 
 def refresh_from_discord():
@@ -61,7 +61,7 @@ def refresh_from_discord():
                             try:
                                 groups_they_should_have.append(
                                     GooseGroup.objects.get(
-                                        linked_discord_role=role_id
+                                        required_discord_role__role_id=role_id
                                     ).name
                                 )
                             except GooseGroup.DoesNotExist:
@@ -106,4 +106,5 @@ class Job(HourlyJob):
     help = "Checks discord roles and updates goosetools permissions accordingly"
 
     def execute(self):
+        DiscordRole.sync_from_discord()
         print(refresh_from_discord())

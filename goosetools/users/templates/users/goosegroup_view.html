@@ -17,7 +17,7 @@
                 {% endif %}
                 {{group.description}}<br/>
                 Permissions: {{group.permissions}}<br/>
-                {% if group.linked_discord_role %} Discord Role:  {{group.linked_discord_role}} <br/> {% endif %}
+                {% if group.required_discord_role %} Discord Role:  {{group.required_discord_role}} <br/> {% endif %}
             </p>
         </li>
     {% endfor %}

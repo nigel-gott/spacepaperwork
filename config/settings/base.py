@@ -13,7 +13,9 @@ from moneyed.localization import _FORMATTER
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 APPS_DIR = ROOT_DIR / "goosetools"
-env = environ.Env(USE_NEW_VENMO_COMMANDS=(bool, False))
+env = environ.Env(
+    USE_NEW_VENMO_COMMANDS=(bool, False), GOOSEFLOCK_FEATURES=(bool, False)
+)
 
 env.read_env(str(ROOT_DIR / ".env"))
 
@@ -106,6 +108,7 @@ LOCAL_APPS = [
     "goosetools.tenants.apps.TenantsConfig",
     "goosetools.venmo.apps.VenmoConfig",
     "goosetools.goose_comments.apps.GooseCommentsConfig",
+    "goosetools.user_forms.apps.UserFormsConfig",
     # Goosetools apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -331,3 +334,4 @@ PROMETHEUS_METRICS_EXPORT_ADDRESS = ""
 VENMO_HOST_URL = env("VENMO_HOST_URL")
 VENMO_API_TOKEN = env("VENMO_API_TOKEN")
 USE_NEW_VENMO_COMMANDS = env("USE_NEW_VENMO_COMMANDS")
+GOOSEFLOCK_FEATURES = env("GOOSEFLOCK_FEATURES")

@@ -19,6 +19,7 @@ IGNORE_VIEW_NAMES = getattr(settings, "LOGIN_REQUIRED_IGNORE_VIEW_NAMES", [])
 
 APPROVED_IGNORE = [
     "user_signup",
+    "corp_select",
     "core:splash",
     "core:home",
     "core:conduct",

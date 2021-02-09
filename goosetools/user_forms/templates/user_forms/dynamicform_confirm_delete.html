@@ -2,10 +2,11 @@
 {% load materializecss %}
 {% block body %}
 <div class="section">
-    <h5>Create New User Group</h5>
+    <h5>Delete Form {{dynamicform.title}}</h5>
 </div>
 <div class="divider"></div>
 <div class="section">
+    <form action="" method="post">
         {% if form.non_field_errors %}
         <div class="row">
             <div class="col s12 m5">
@@ -22,24 +23,16 @@
             </div>
         </div>
         {% endif %}
-    <form action="" method="post">
         {% csrf_token %}
-            <div class="row">
-                {{ form.name|materializecss:'s12 m12, icon=directions_boat'}}
-            </div>
-            <div class="row">
-                {{ form.description|materializecss:'s12 m12, icon=directions_boat'}}
-            </div>
-            <div class="row">
-                {{ form.required_discord_role_id|materializecss:'s12 m12, icon=directions_boat'}}
-            </div>
-            <div class="row">
-                {{ form.permissions|materializecss:'s12 m12, icon=directions_boat'}}
-            </div>
-        <button class="btn waves-effect waves-light" type="submit" value="Submit">Create Group
+
+        {% for field in form %}
+        <div class="row">
+            {{ field|materializecss:'s12 m12'}}
+        </div>
+        {% endfor %}
+        <button class="btn waves-effect waves-light red " type="submit" value="Submit">Confirm Deleting Form
             <i class="material-icons right">send</i>
         </button>
-        <br/>
     </form>
 </div>
 {% endblock %}

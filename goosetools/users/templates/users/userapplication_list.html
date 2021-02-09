@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load static %}
 {% block body %}
 <div class="section">
     <h4>Corp Applications</h4>
@@ -18,33 +19,50 @@
             <br/>
                 <b>Discord ID:</b> {{application.user.discord_uid}}<br/>
                 {% if application.ingame_name %}
-                <b>In Game Name:</b> {{application.ingame_name}}<br/>
-                <b>Corp Applying To:</b> {{application.corp}}<br/>
+                    <b>In Game Name:</b> {{application.ingame_name}}<br/>
                 {% else %}
-                <b>Returning Member, they will have to manually make character corp applications once accepted.</b><br/>
-                <b>Their current characters are:</b> <br/>
-                    <ol>
-                    {% for char in application.user.character_set.all %}
-                        <li>{{char}}</li>
-                    {% endfor %}
-                    </ol>
+                    <b>Known Character They Are Re-Applying With:</b> {{application.existing_character}}<br/>
+                {% endif %}
+                <b>Corp Applying To:</b> {{application.corp}}<br/>
+                {% if application.corp.discord_role_given_on_approval %}
+                    <b>Discord Role That Will be Given On Approval:</b> {{application.corp.discord_role_given_on_approval}}<br/>
+                {% endif %}
+                {% if application.user.character_set.count != 0 %}
+                    <b>Their current characters are:</b> <br/>
+                        <ol>
+                        {% for char in application.user.character_set.all %}
+                            <li>{{char}}</li>
+                        {% endfor %}
+                        </ol>
                 {% endif %}
                 ----------------<br/>
-                <b>Their Previous Alliances:</b> <blockquote> {{application.previous_alliances}} </blockquote>
-                <b>How Active They Are</b> <blockquote> {{application.activity}} </blockquote>
-                <b>What They Are Looking For In Corp/HONK:</b> <blockquote> {{application.looking_for}} </blockquote>
-                {% if application.application_notes %}
-                <b>Extra Notes From Them:</b> <blockquote>{{application.application_notes}}</blockquote>
-                {% endif %}
+                {% for question, answer in application.answers.items %}
+                    <b>{{question}}:</b> <blockquote> {{answer}} </blockquote>
+                {% endfor %}
             </p>
 
             <form action="{% url 'application_update' application.pk %}" method="post">
                 {% csrf_token %}
                 <label>Notes:</label>
                         <textarea class="materialize-textarea" id="id_notes" name="notes">{{application.user.notes}}</textarea>
-                <button name="approve" class="btn green waves-effect waves-light" type="submit" value="Submit">Approve
-                    <i class="material-icons right">send</i>
-                </button>
+
+                {% if application.corp.discord_role_given_on_approval %}
+                    <a class="btn green waves-effect waves-light modal-trigger" href="#modal_confirm">Approve <i class="material-icons right">send</i></a>
+                    <div id="modal_confirm" class="modal">
+                        <div class="modal-content">
+                            <b class="red-text">Approving this will give the discord role {{application.corp.discord_role_given_on_approval}} to {{application.user}}.</b>
+                            <br/>
+                            <button name="approve" class="btn green waves-effect waves-light" type="submit" value="Submit">Approve
+                                <i class="material-icons right">send</i>
+                            </button>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <button name="approve" class="btn green waves-effect waves-light" type="submit" value="Submit">Approve
+                        <i class="material-icons right">send</i>
+                    </button>
+                {% endif %}
                 <button name="reject" class="btn red waves-effect waves-light" type="submit" value="Submit">Reject
                     <i class="material-icons right">send</i>
                 </button>
@@ -53,5 +71,17 @@
     {% endfor %}
     </ul>
 </div>
+
+{% endblock %}
+
+
+{% block extrafooter %}
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
+<script>
+$(document).ready(function() {
+    var elems = document.querySelectorAll('.modal');
+    var instances = M.Modal.init(elems);
+});
+</script>
 
 {% endblock %}

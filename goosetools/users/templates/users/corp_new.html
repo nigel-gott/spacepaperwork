@@ -1,29 +1,38 @@
 {% extends "core/base.html" %}
+{% load materializecss %}
 {% block body %}
 <div class="section">
     <h5>Create New Corp</h5>
+    <a class="waves-btn btn" href="{% url 'corps_list' %}">Back To Corp List</a>
 </div>
 <div class="divider"></div>
 <div class="section">
     <form action="" method="post">
-        {% csrf_token %}
-        {% for field in form %}
-        <div class="row">
-            <div class="input-field col s12">
-                {{ field.errors }}
-                {{ field }}
-                {{ field.label_tag }}
-                {% if field.help_text %}
-                <p class="help">{{ field.help_text|safe }}</p>
-                {% endif %}
-            </div>
-        </div>
-
-        {% endfor %}
-        <label>
-        <button class="btn waves-effect waves-light" type="submit" value="Submit">Create New Corp
+        <button class="btn waves-effect waves-light green" type="submit" value="Submit">Submit New Corp
             <i class="material-icons right">send</i>
         </button>
+        {% csrf_token %}
+        <div class="row">
+            {{ form.ticker|materializecss:'s12 m12, icon=directions_boat'}}
+        </div>
+        <div class="row">
+            {{ form.full_name|materializecss:'s12 m12, icon=directions_boat'}}
+        </div>
+        <div class="row">
+            {{ form.description|materializecss:'s12 m12, icon=directions_boat'}}
+        </div>
+        <div class="row">
+            {{ form.sign_up_form|materializecss:'s12 m12, icon=directions_boat'}}
+        </div>
+        <div class="row">
+            {{ form.discord_role_given_on_approval|materializecss:'s12 m12, icon=directions_boat'}}
+        </div>
+        <div class="row">
+            {{ form.public_corp|materializecss:'s12 m12, icon=directions_boat'}}
+        </div>
+        <div class="row">
+            {{ form.discord_roles_allowing_application|materializecss:'s12 m12, icon=directions_boat'}}
+        </div>
     </form>
 </div>
 {% endblock %}

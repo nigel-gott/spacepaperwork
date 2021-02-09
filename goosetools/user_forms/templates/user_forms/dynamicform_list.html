@@ -1,0 +1,23 @@
+{% extends "core/base.html" %}
+{% block body %}
+<div class="section">
+    <h4>Form Admin</h4>
+</div>
+<div class="section">
+    <a class="waves-btn btn" href="{% url 'user_forms:form-create' %}">Create New Form</a>
+    <ul class="collection" style="overflow: visible;">
+    {% for dynamicform in form_list %}
+        <li class="collection-item ">
+                <a href="{% url 'user_forms:form-update' dynamicform.id %}" class="waves-btn btn secondary-content">Edit Form</a>
+                <a href="{% url 'user_forms:form-delete' dynamicform.id %}" class="waves-btn btn red secondary-content">Delete Form</a>
+            <span class="title"><a href="{% url 'user_forms:form-detail' dynamicform.id %}">{{dynamicform.title}}</a>
+            </span>
+            <p>
+               Description: {{dynamicform.description}}
+            </p>
+        </li>
+    {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

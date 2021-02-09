@@ -24,6 +24,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from goosetools.user_forms.forms import GeneratedForm
 from goosetools.users.forms import (
     AddEditCharacterForm,
     AdminEditCharacterForm,
@@ -57,7 +58,15 @@ from goosetools.users.models import (
 from goosetools.users.serializers import CharacterSerializer, GooseUserSerializer
 
 
-def user_signup(request):
+def _corps_site_user_can_apply_to(request):
+    socialaccount = request.user.discord_socialaccount()
+    roles = (
+        socialaccount.extra_data["roles"] if "roles" in socialaccount.extra_data else []
+    )
+    return GooseUser.corps_roles_can_apply_to(roles).all()
+
+
+def corp_select(request):
     site_user = request.user
     if site_user.is_rejected():
         messages.error(
@@ -69,26 +78,63 @@ def user_signup(request):
         messages.error(request, "You have already registered on goosetools")
         return HttpResponseRedirect(reverse("core:home"))
 
-    has_characters_already = (
-        site_user.has_gooseuser() and len(site_user.gooseuser.characters()) > 0
+    corps = _corps_site_user_can_apply_to(request)
+    if len(corps) == 1:
+        return HttpResponseRedirect(reverse("user_signup", args=[corps.first().id]))
+    elif len(corps) == 0:
+        messages.error(request, "Closed For Sign-Up")
+        return HttpResponseRedirect(reverse("core:splash"))
+
+    return render(request, "users/corp_select.html", {"corps": corps})
+
+
+def user_signup(request, pk):
+    site_user = request.user
+    if site_user.is_rejected():
+        messages.error(
+            request,
+            "You cannot signup to goosetools, please contact @AuthTeam on discord for more information.",
+        )
+        return HttpResponseRedirect(reverse("core:splash"))
+    elif site_user.is_approved():
+        messages.error(request, "You have already registered on goosetools")
+        return HttpResponseRedirect(reverse("core:home"))
+
+    corp = get_object_or_404(Corp, pk=pk)
+    if corp not in list(_corps_site_user_can_apply_to(request)):
+        messages.error(request, "You do not have permissions to apply for that corp.")
+        return HttpResponseRedirect(reverse("core:splash"))
+    existing_characters = (
+        site_user.gooseuser.characters()
+        if site_user.has_gooseuser()
+        else Character.objects.none()
     )
 
     if request.method == "POST":
+        corp_form = corp.sign_up_form and GeneratedForm(corp.sign_up_form, request.POST)
         form = SignupFormWithTimezone(
             request.POST,
-            socialaccount=request.user.discord_socialaccount(),
-            has_characters_already=has_characters_already,
+            existing_characters=existing_characters,
         )
-        if form.is_valid():
+        if form.is_valid() and (not corp_form or corp_form.is_valid()):
             data = form.cleaned_data
-            ingame_name = not has_characters_already and data["ingame_name"]
+            ingame_name = not existing_characters and data["ingame_name"]
+            if "existing_character" in data:
+                selected_existing_character = data["existing_character"]
+            else:
+                selected_existing_character = None
             if (
                 ingame_name
                 and Character.objects.filter(ingame_name=ingame_name).count() > 0
             ):
                 error = f"You cannot apply with an in-game name of {ingame_name} as it already exists"
                 messages.error(request, error)
-                print(error)
+            elif ingame_name and selected_existing_character:
+                error = "You must leave the existing character dropdown blank if you fill in ingame_name."
+                messages.error(request, error)
+            elif not ingame_name and not selected_existing_character:
+                error = "You must enter an ingame_name or select an existing character"
+                messages.error(request, error)
             else:
                 gooseuser, _ = GooseUser.objects.update_or_create(
                     site_user=site_user,
@@ -103,14 +149,15 @@ def user_signup(request):
                     user=gooseuser,
                     status="unapproved",
                     created_at=timezone.now(),
-                    application_notes=data["application_notes"],
                     ingame_name=ingame_name or None,
-                    previous_alliances=data["previous_alliances"],
-                    activity=data["activity"],
-                    looking_for=data["looking_for"],
-                    corp=data["corp"],
+                    existing_character=selected_existing_character,
+                    corp=corp,
+                    answers=corp_form.as_dict() if corp_form else {},
                 )
-                _give_pronoun_roles(gooseuser.discord_uid(), data["prefered_pronouns"])
+                if settings.GOOSEFLOCK_FEATURES:
+                    _give_pronoun_roles(
+                        gooseuser.discord_uid(), data["prefered_pronouns"]
+                    )
                 application.full_clean()
                 application.save()
                 return HttpResponseRedirect(reverse("core:home"))
@@ -125,11 +172,15 @@ def user_signup(request):
             }
         form = SignupFormWithTimezone(
             initial=initial,
-            socialaccount=request.user.discord_socialaccount(),
-            has_characters_already=has_characters_already,
+            existing_characters=existing_characters,
         )
+        corp_form = corp.sign_up_form and GeneratedForm(corp.sign_up_form)
 
-    return render(request, "users/signup.html", {"form": form})
+    return render(
+        request,
+        "users/signup.html",
+        {"form": form, "corp_form": corp_form, "corp": corp},
+    )
 
 
 def _give_pronoun_roles(uid, prefered_pronouns):
@@ -205,7 +256,10 @@ def application_update(request, pk):
                 error = f"Cannot approve this application with a in-game name of {application.ingame_name} as it already exists, please talk to the user and fix the application's ingame name using the site admin page."
                 messages.error(request, error)
                 return HttpResponseRedirect(reverse("applications"))
-
+            if application.corp not in list(application.user.corps_user_can_apply_to()):
+                error = "Cannot approve this application with a in-game name as the user no longer has permission to join the corp in question."
+                messages.error(request, error)
+                return HttpResponseRedirect(reverse("applications"))
             application.approve(request.gooseuser)
         elif "reject" in request.POST:
             application.reject(request.gooseuser)
@@ -246,6 +300,7 @@ def character_edit(request, pk):
     initial = {"ingame_name": character.ingame_name, "corp": character.corp}
     if request.method == "POST":
         form = AddEditCharacterForm(request.POST, initial=initial)
+        form.fields["corp"].queryset = request.gooseuser.corps_user_can_apply_to()
         if form.is_valid():
             if not form.has_changed():
                 messages.error(request, "You must make a change to the character!")
@@ -253,7 +308,12 @@ def character_edit(request, pk):
                 character.ingame_name = form.cleaned_data["ingame_name"]
                 character.save()
                 corp = form.cleaned_data["corp"]
-                if character.corp != corp:
+                if not request.gooseuser.can_apply_to_corp(corp):
+                    messages.error(
+                        request,
+                        "You do not have the required discord role to apply for this corp",
+                    )
+                elif character.corp != corp:
                     messages.info(
                         request,
                         f"Corp application for {character} to {corp} registered in goosetools pending approval from @AuthTeam.",
@@ -265,12 +325,14 @@ def character_edit(request, pk):
 
     else:
         form = AddEditCharacterForm(initial=initial)
+        form.fields["corp"].queryset = request.gooseuser.corps_user_can_apply_to()
     return render(request, "users/character_edit.html", {"form": form})
 
 
 def character_new(request):
     if request.method == "POST":
         form = AddEditCharacterForm(request.POST)
+        form.fields["corp"].queryset = request.gooseuser.corps_user_can_apply_to()
         if form.is_valid():
             ingame_name = form.cleaned_data["ingame_name"]
             if Character.objects.filter(ingame_name=ingame_name).count() > 0:
@@ -294,6 +356,7 @@ def character_new(request):
 
     else:
         form = AddEditCharacterForm()
+        form.fields["corp"].queryset = request.gooseuser.corps_user_can_apply_to()
     return render(request, "users/character_new.html", {"form": form})
 
 
@@ -512,7 +575,9 @@ def groups_view(request):
             "id": g.id,
             "member_count": g.groupmember_set.count(),
             "description": g.description,
-            "linked_discord_role": g.linked_discord_role,
+            "required_discord_role": g.required_discord_role.name
+            if g.required_discord_role
+            else None,
             "editable": g.editable,
             "permissions": ", ".join(g.permissions()),
         }
@@ -540,7 +605,9 @@ def edit_group(request, pk):
             else:
                 group.name = form.cleaned_data["name"]
                 group.description = form.cleaned_data["description"]
-                group.linked_discord_role = form.cleaned_data["linked_discord_role_id"]
+                group.required_discord_role = form.cleaned_data[
+                    "required_discord_role_id"
+                ]
                 group.grouppermission_set.all().delete()
                 group.save()
                 for perm in form.cleaned_data["permissions"]:
@@ -558,7 +625,7 @@ def edit_group(request, pk):
             initial={
                 "name": group.name,
                 "description": group.description,
-                "linked_discord_role_id": group.linked_discord_role,
+                "required_discord_role_id": group.required_discord_role,
                 "permissions": permissions,
             }
         )
@@ -573,7 +640,7 @@ def new_group(request):
             group = GooseGroup(
                 name=form.cleaned_data["name"],
                 description=form.cleaned_data["description"],
-                linked_discord_role=form.cleaned_data["linked_discord_role_id"],
+                required_discord_role=form.cleaned_data["required_discord_role_id"],
             )
             group.save()
             for p in form.cleaned_data["permissions"]:
@@ -647,10 +714,18 @@ def corps_list(request):
         {
             "id": c.id,
             "name": c.name,
+            "sign_up_form": c.sign_up_form,
+            "description": c.description,
+            "public_corp": c.public_corp,
             "full_name": c.full_name,
             "name_with_ticker": c.name_with_corp_tag(),
             "member_count": c.character_set.count(),
-            "required_discord_role": c.required_discord_role,
+            "discord_role_given_on_approval": c.discord_role_given_on_approval.name
+            if c.discord_role_given_on_approval
+            else None,
+            "discord_roles_allowing_application": c.discord_roles_allowing_application.all().values_list(
+                "name", flat=True
+            ),
         }
         for c in Corp.objects.all().order_by("name")
     ]
@@ -668,10 +743,17 @@ def new_corp(request):
         if form.is_valid():
             corp = Corp(
                 full_name=form.cleaned_data["full_name"],
+                sign_up_form=form.cleaned_data["sign_up_form"],
+                public_corp=form.cleaned_data["public_corp"],
+                description=form.cleaned_data["description"],
                 name=form.cleaned_data["ticker"],
-                required_discord_role=form.cleaned_data["required_discord_role"],
+                discord_role_given_on_approval=form.cleaned_data[
+                    "discord_role_given_on_approval"
+                ],
             )
             corp.save()
+            for role in form.cleaned_data["discord_roles_allowing_application"]:
+                corp.discord_roles_allowing_application.add(role)
             messages.success(request, f"Succesfully Created {corp.name}")
             return HttpResponseRedirect(reverse("corps_list"))
     else:
@@ -700,9 +782,17 @@ def edit_corp(request, pk):
                         f"Cannot delete {corp.name} until all characters in goosetools with that corp have been moved to a new corp.",
                     )
             else:
+                corp.public_corp = form.cleaned_data["public_corp"]
+                corp.sign_up_form = form.cleaned_data["sign_up_form"]
+                corp.description = form.cleaned_data["description"]
                 corp.full_name = form.cleaned_data["full_name"]
                 corp.name = form.cleaned_data["ticker"]
-                corp.required_discord_role = form.cleaned_data["required_discord_role"]
+                corp.discord_role_given_on_approval = form.cleaned_data[
+                    "discord_role_given_on_approval"
+                ]
+                corp.discord_roles_allowing_application.clear()
+                for role in form.cleaned_data["discord_roles_allowing_application"]:
+                    corp.discord_roles_allowing_application.add(role)
                 corp.save()
                 messages.success(request, f"Succesfully Edited {corp.name}")
 
@@ -712,7 +802,11 @@ def edit_corp(request, pk):
             initial={
                 "ticker": corp.name,
                 "full_name": corp.full_name,
-                "required_discord_role": corp.required_discord_role,
+                "description": corp.description,
+                "sign_up_form": corp.sign_up_form,
+                "public_corp": corp.public_corp,
+                "discord_role_given_on_approval": corp.discord_role_given_on_approval,
+                "discord_roles_allowing_application": corp.discord_roles_allowing_application.all(),
             }
         )
     return render(

@@ -17,7 +17,7 @@
             {% endif %}
         {% else %}
             <br/><b class="orange-text">You have been removed most likely due to in-activity, please re-apply below:</b>
-            <br/><a id="agree_button" class="btn waves-btn green btn-large pulse" href="{% url "user_signup" %}">ReApply</a>
+            <br/><a id="agree_button" class="btn waves-btn green btn-large pulse" href="{% url "corp_select" %}">ReApply</a>
         {% endif %}
 
     {% elif request.user.gooseuser.is_rejected %}

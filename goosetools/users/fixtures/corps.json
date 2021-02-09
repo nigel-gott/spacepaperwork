@@ -1,9 +1,15 @@
 [
-  { "model": "users.Corp", "pk": "HAUS", "fields": {} },
-  { "model": "users.Corp", "pk": "HONK", "fields": {} },
-  { "model": "users.Corp", "pk": "MEAN", "fields": {} },
-  { "model": "users.Corp", "pk": "XBUX", "fields": {} },
-  { "model": "users.Corp", "pk": "UNKNOWN", "fields": {} },
-  { "model": "users.Corp", "pk": "UNKNOWN_BUT_STILL_A_GOOSE", "fields": {} },
-  { "model": "users.Corp", "pk": "UNKNOWN_IS_A_PUBBIE", "fields": {} }
+    {
+        "model": "users.corp",
+        "pk": 1,
+        "fields": {
+            "name": "GOOP",
+            "full_name": "Goose Troop",
+            "description": "",
+            "public_corp": true,
+            "sign_up_form": null,
+            "discord_role_given_on_approval": null,
+            "discord_roles_allowing_application": []
+        }
+    }
 ]

@@ -21,11 +21,12 @@ def _try_lookup_guild_roles(user_id):
 
 # pylint: disable=unused-argument
 def populate_models(sender, **kwargs):
-    from goosetools.users.models import AuthConfig, Corp, GoosePermission
+    from goosetools.users.models import AuthConfig, Corp, DiscordRole, GoosePermission
 
     GoosePermission.ensure_populated()
     Corp.ensure_populated()
     AuthConfig.ensure_exists()
+    DiscordRole.sync_from_discord()
 
 
 class IndustryConfig(AppConfig):

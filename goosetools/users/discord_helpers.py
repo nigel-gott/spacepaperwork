@@ -57,11 +57,11 @@ def setup_user_groups_from_discord_guild_roles(
             for role_id in extra_data["roles"]:
                 output = output + _setup_new_permissions(role_id, siteuser.gooseuser)
         siteuser.save()
-    return f"Syncing {siteuser.username}\n" + output
+    return f"Synced {siteuser.username}\n" + output
 
 
 def _setup_new_permissions(role_id: str, gooseuser: GooseUser):
-    groups = GooseGroup.objects.filter(linked_discord_role=role_id)
+    groups = GooseGroup.objects.filter(required_discord_role__role_id=role_id)
     output = ""
     for group in groups.all():
         output = output + (f" - Gave {group.name} to {gooseuser}\n")

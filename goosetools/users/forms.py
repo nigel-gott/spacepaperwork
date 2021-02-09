@@ -1,10 +1,17 @@
 from dal import autocomplete
 from django import forms
-from django.db.models.query_utils import Q
+from django.conf import settings
 from tinymce.widgets import TinyMCE
 
+from goosetools.user_forms.models import DynamicForm
 from goosetools.users.fields import TimeZoneFormField
-from goosetools.users.models import Character, Corp, GoosePermission, GooseUser
+from goosetools.users.models import (
+    Character,
+    Corp,
+    DiscordRole,
+    GoosePermission,
+    GooseUser,
+)
 
 
 class AuthConfigForm(forms.Form):
@@ -14,6 +21,13 @@ class AuthConfigForm(forms.Form):
 
 
 class SignupFormWithTimezone(forms.Form):
+    ingame_name = forms.CharField(
+        help_text="The EXACT IN GAME name of your SINGLE MAIN CHARACTER. Once approved you will be able to auth alts under Settings->Characters."
+    )
+    existing_character = forms.ModelChoiceField(
+        queryset=Character.objects.all(),
+        help_text="You already have characters in GooseTools, select which one will be applying to this corp or leave blank and fill in In Game Name for a new character.",
+    )
     prefered_pronouns = forms.ChoiceField(
         choices=[
             ("blank", "----"),
@@ -24,30 +38,6 @@ class SignupFormWithTimezone(forms.Form):
         help_text="Your Prefered Pronouns, feel free not to say and leave this blank.",
         required=False,
     )
-    previous_alliances = forms.CharField(
-        help_text="Have you been in any previous alliances? If so, what alliances?"
-    )
-    activity = forms.CharField(
-        help_text="How active would you say you are in-game and on discord?",
-        widget=forms.Textarea(attrs={"class": "materialize-textarea"}),
-    )
-    looking_for = forms.CharField(
-        help_text="What are you looking for in a corp and how does honking make you feel?",
-        widget=forms.Textarea(attrs={"class": "materialize-textarea"}),
-    )
-    application_notes = forms.CharField(
-        required=False,
-        help_text="Please fill in with anything else relevent to your application.",
-        widget=forms.Textarea(attrs={"class": "materialize-textarea"}),
-    )
-    ingame_name = forms.CharField(
-        help_text="The EXACT name of you main account you will be applying to Gooseflock and nothing else. Once approved you will be able to auth alts under Settings->Characters."
-    )
-    corp = forms.ModelChoiceField(
-        queryset=Corp.objects.all(),
-        help_text="The Gooseflock corp you wish to apply to. Please send an application in-game to this corp with the same character you have entered above after submitting this form.",
-    )
-
     timezone = TimeZoneFormField(
         help_text="Your Timezone",
         display_GMT_offset=True,
@@ -68,41 +58,21 @@ class SignupFormWithTimezone(forms.Form):
         help_text="Your ingame Broker Fee.",
     )
 
-    def _disable_field(self, field_name, help_text):
-        field = self.fields[field_name]
-        field.help_text = help_text
-        field.required = False
-        field.widget = forms.HiddenInput()
-        field.label = ""
-
-    @staticmethod
-    def corp_label_from_instance(corp):
-        return corp.name_with_corp_tag()
+    def _disable_field(self, field_name):
+        self.fields.pop(field_name)
 
     def __init__(self, *args, **kwargs):
-        socialaccount = kwargs.pop("socialaccount", None)
-        has_characters_already = kwargs.pop("has_characters_already", False)
+        existing_characters = kwargs.pop("existing_characters")
         super().__init__(*args, **kwargs)
 
-        if has_characters_already:
+        if not settings.GOOSEFLOCK_FEATURES:
+            self._disable_field("prefered_pronouns")
+
+        self.fields["existing_character"].queryset = existing_characters
+        if existing_characters.count() == 0:
             self._disable_field(
-                "ingame_name",
-                "You already have characters in goosetools, to get them back into the corps please go to Settings->Characters after this app has been accepted",
+                "existing_character",
             )
-
-        roles = (
-            socialaccount.extra_data["roles"]
-            if "roles" in socialaccount.extra_data
-            else []
-        )
-        self.fields["corp"].queryset = Corp.objects.filter(
-            Q(required_discord_role__in=roles)
-            | Q(required_discord_role__isnull=True)
-            | Q(required_discord_role__exact="")
-        )
-
-        self.fields["corp"].label_from_instance = self.corp_label_from_instance
-        self.fields["corp"].initial = self.fields["corp"].queryset.first()
 
 
 class SettingsForm(forms.Form):
@@ -145,8 +115,27 @@ class AdminEditUserForm(forms.Form):
 
 class CorpForm(forms.Form):
     full_name = forms.CharField()
+    description = forms.CharField(
+        help_text="This description will be shown to users when they are deciding which corp to apply for.",
+        required=False,
+    )
+    public_corp = forms.BooleanField(
+        help_text="Anyone regardless of discord roles can apply for this corp if ticked.",
+        required=False,
+    )
+    sign_up_form = forms.ModelChoiceField(
+        queryset=DynamicForm.objects.all(), required=False
+    )
     ticker = forms.CharField()
-    required_discord_role = forms.CharField(required=False)
+    discord_role_given_on_approval = forms.ModelChoiceField(
+        queryset=DiscordRole.objects.all().order_by("name"), required=False
+    )
+    discord_roles_allowing_application = forms.ModelMultipleChoiceField(
+        DiscordRole.objects.all().order_by("name"),
+        widget=forms.CheckboxSelectMultiple,
+        required=False,
+        help_text="If any roles are ticked then the user must have one or more of those roles to apply for this corp, UNLESS the corp is public which overrides anything you set here.",
+    )
 
 
 class CharacterUserSearchForm(forms.Form):
@@ -178,7 +167,9 @@ class CharacterForm(forms.Form):
 class EditGroupForm(forms.Form):
     name = forms.CharField()
     description = forms.CharField()
-    linked_discord_role_id = forms.CharField(required=False)
+    required_discord_role_id = forms.ModelChoiceField(
+        queryset=DiscordRole.objects.all(), required=False
+    )
     permissions = forms.ModelMultipleChoiceField(
         GoosePermission.objects.all(), widget=forms.CheckboxSelectMultiple
     )

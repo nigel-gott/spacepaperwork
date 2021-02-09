@@ -156,13 +156,13 @@ $(function() {
                     if(row["needs_manual_price"]){
                         if(current_user_assigned){
                             return `${payment_method}<br/>
-  <a class="btn orange modal-trigger" href="#modal_price_${meta.row}">Price</a>
+  <a class="btn orange modal-trigger" href="#modal_price_${meta.row}">price</a>
   <div id="modal_price_${meta.row}" class="modal">
     <div class="modal-content">
-      <h4>Please Enter A Price:</h4>
-      <b>For Order ${row['ship']} x ${row['quantity']} -> ${row['recipient_character_name']}</b>
-      <input type="number" name="Manual Price" id="input_price_${row['id']}">
-      <button class="price-btn waves-btn btn green">Set Manual Price</button>
+      <h4>please enter a price:</h4>
+      <b>for order ${row['ship']} x ${row['quantity']} -> ${row['recipient_character_name']}</b>
+      <input type="number" name="manual price" id="input_price_${row['id']}">
+      <button class="price-btn waves-btn btn green">set manual price</button>
     </div>
   </div>`
                         } else {
