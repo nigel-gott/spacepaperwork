@@ -124,11 +124,6 @@ def other_user_transactions_list(request, pk: int):
 def transactions_list(gooseuser: GooseUser):
     venmo_server_client = venmo_client(use_models=False)
     discord_uid = f"<@!{gooseuser.discord_uid()}>"
-    sourced_by_user = (
-        venmo_server_client.transactions.listTransactions(source_discord_id=discord_uid)
-        .response()
-        .result
-    )
     targeted_at_user = (
         venmo_server_client.transactions.listTransactions(target_discord_id=discord_uid)
         .response()
@@ -136,7 +131,6 @@ def transactions_list(gooseuser: GooseUser):
     )
     discord_id_to_gooseuser: Dict[str, Union[GooseUser, bool]] = {}
     resulting_transactions: Dict[str, Any] = {}
-    parse_transactions(discord_id_to_gooseuser, sourced_by_user, resulting_transactions)
     parse_transactions(
         discord_id_to_gooseuser, targeted_at_user, resulting_transactions
     )
