@@ -42,20 +42,9 @@ $(function() {
     columns = [
             { "data": "transaction_status", "title": "Status" },
             { "data": "transaction_type", "title": "Type" },
-            { "data": "transaction_id", "title": "Id" },
+            { "data": "source_discord_id", "title": "User" },
             { "data": "createdAt", "title":"createdAt" },
             { "data": "updatedAt", "title":"updatedAt"},
-            { "data": "source_discord_id", "title": "From -> To",
-                render: function ( data, type, row ) {
-                    source = render_link(page_data, 'source', row);
-                    target = render_link(page_data, 'target', row);
-                    if(source===target){
-                        return 'N/A';
-                    } else {
-                        return `From ${source} to ${target}`;
-                    }
-                }
-            } ,
             { "data": "note", "title":"Note"} ,
             { "data": "value", "title":"Quantity",
                 render: function ( data, type, row ) {
