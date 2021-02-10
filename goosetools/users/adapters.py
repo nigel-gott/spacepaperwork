@@ -42,6 +42,9 @@ class AccountAdapter(DefaultAccountAdapter):
 
         return resolve_url(url)
 
+    def get_signup_redirect_url(self, request):
+        return self.get_login_redirect_url(request)
+
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def save_user(self, request, sociallogin, form=None):
