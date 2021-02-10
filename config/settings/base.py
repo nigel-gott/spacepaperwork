@@ -200,7 +200,6 @@ LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [
     "discord_callback",
     "account_logout",
     "tenants:splash",
-    "tenants:client-create",
 ]
 LOGIN_REQUIRED_UNAPPROVED_USER_REDIRECT = "tenants:splash"
 
