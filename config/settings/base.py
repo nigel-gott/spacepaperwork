@@ -60,6 +60,7 @@ DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#root-urlconf
 ROOT_URLCONF = "config.urls"
+PUBLIC_SCHEMA_URLCONF = "config.public_urls"
 # https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
 WSGI_APPLICATION = "config.wsgi.application"
 
@@ -199,6 +200,7 @@ LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [
     "discord_callback",
     "account_logout",
     "tenants:splash",
+    "tenants:client-create",
 ]
 LOGIN_REQUIRED_UNAPPROVED_USER_REDIRECT = "tenants:splash"
 

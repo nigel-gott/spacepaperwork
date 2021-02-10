@@ -60,8 +60,10 @@ def all_sales(user):
     return sum([num_items(user), num_orders(user), num_sold(user)])
 
 
-@register.simple_tag
-def has_perm(user, perm):
+@register.simple_tag(takes_context=True)
+def has_perm(context, user, perm):
+    if context["request"].tenant.name == "public":
+        return False
     return hasattr(user, "gooseuser") and user.gooseuser.has_perm(perm)
 
 

@@ -81,13 +81,9 @@ def _redirect_approved_user_to_home_if_not_permitted(request):
 def _redirect_unauthed_user_to_discord_login_if_not_visiting_whitelist(request):
     resolver = resolve(request.path)
     views = ((name == resolver.view_name) for name in IGNORE_VIEW_NAMES)
-    print("AAAAAAAAAAAAA")
-    print(request.path)
-    print(views)
-    print(resolver.view_name)
 
     if not any(views) and not any(url.match(request.path) for url in IGNORE_PATHS):
-        print("REDIRECT")
+        request.session["next_url"] = request.path
         return HttpResponseRedirect(reverse("discord_login"))
 
 

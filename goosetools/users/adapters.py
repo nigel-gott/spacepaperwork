@@ -5,6 +5,7 @@ from allauth.socialaccount.models import SocialAccount
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.dispatch import receiver
+from django.shortcuts import resolve_url
 from django.urls import reverse
 
 from goosetools.tenants.models import SiteUser
@@ -24,6 +25,22 @@ class AccountAdapter(DefaultAccountAdapter):
         if request.path.rstrip("/") == reverse("account_signup").rstrip("/"):
             return False
         return True
+
+    def get_login_redirect_url(self, request):
+        """
+        Returns the default URL to redirect to after logging in.  Note
+        that URLs passed explicitly (e.g. by passing along a `next`
+        GET parameter) take precedence over the value returned here.
+        """
+        assert request.user.is_authenticated
+        url = request.session.pop("next_url", None)
+        if not url:
+            if request.tenant.name == "public":
+                url = "tenants:splash"
+            else:
+                url = "core:splash"
+
+        return resolve_url(url)
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
