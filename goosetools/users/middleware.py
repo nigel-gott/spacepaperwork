@@ -97,13 +97,27 @@ class LoginAndApprovedUserMiddleware(AuthenticationMiddleware):
             request.gooseuser = (
                 hasattr(request.user, "gooseuser") and request.user.gooseuser
             )
-        if request.user.is_authenticated and not in_public:
-            if _user_is_unapproved(request.user):
-                return _redirect_unapproved_user_to_splash_or_home_if_not_visiting_whitelist(
-                    request
-                )
+        if request.user.is_authenticated:
+            if not in_public:
+                if _user_is_unapproved(request.user):
+                    return _redirect_unapproved_user_to_splash_or_home_if_not_visiting_whitelist(
+                        request
+                    )
+                else:
+                    return _redirect_approved_user_to_home_if_not_permitted(request)
             else:
-                return _redirect_approved_user_to_home_if_not_permitted(request)
+                resolver = resolve(request.path)
+                views = (
+                    (name == resolver.view_name)
+                    for name in IGNORE_VIEW_NAMES + ["tenants:client-create"]
+                )
+
+                if not any(views) and not any(
+                    url.match(request.path) for url in IGNORE_PATHS
+                ):
+                    messages.error(request, "You are forbidden access to that page.")
+                    return HttpResponseRedirect(reverse("tenants:splash"))
+
         else:
             return _redirect_unauthed_user_to_discord_login_if_not_visiting_whitelist(
                 request
