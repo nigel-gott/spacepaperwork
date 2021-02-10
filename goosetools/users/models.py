@@ -235,6 +235,7 @@ FREE_SHIP_ORDERER = "free_ship_orderer"
 BASIC_ACCESS = "basic_access"
 LOOT_TRACKER = "loot_tracker"
 LOOT_TRACKER_ADMIN = "loot_tracker_admin"
+VENMO_ADMIN = "venmo_admin"
 
 
 class GoosePermission(models.Model):
@@ -270,6 +271,10 @@ class GoosePermission(models.Model):
         (
             SHIP_PRICE_ADMIN,
             "Able to add/remove ship types and set if they are free or not",
+        ),
+        (
+            VENMO_ADMIN,
+            "Able to approve/deny pending venmo transactions.",
         ),
     ]
     name = models.TextField(unique=True, choices=USER_PERMISSION_CHOICES)

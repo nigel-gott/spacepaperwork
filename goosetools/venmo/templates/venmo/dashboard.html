@@ -35,7 +35,8 @@
         <a href="{% url 'venmo:withdraw' %}">Withdraw Eggs as Isk</a><br/>
         <a href="{% url 'venmo:transfer' %}">Transfer Eggs to Someone</a><br/>
         <a href="{% url 'venmo:deposit' %}">Deposit Eggs</a><br/>
-        {% if user.is_superuser %}
+        {% has_perm user "venmo_admin" as is_venmo_admin %}
+        {% if is_venmo_admin %}
             <a href="{% url 'venmo:pending' %}">Approve/Deny Pending Transactions</a><br/>
         {% endif %}
     </div>

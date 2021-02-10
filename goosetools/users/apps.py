@@ -25,6 +25,12 @@ class UsersConfig(AppConfig):
 
     def ready(self):
         from allauth.socialaccount.providers.discord.views import DiscordOAuth2Adapter
+        from django_tenants.migration_executors.base import run_migrations
+        from django_tenants.signals import schema_migrated
+
+        from goosetools.users.handlers import handle_schema_migrated
+
+        schema_migrated.connect(handle_schema_migrated, run_migrations)
 
         def complete_login_with_guild_roles(self, request, _app, token, **_kwargs):
             headers = {

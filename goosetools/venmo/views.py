@@ -18,7 +18,7 @@ from django.http.response import (
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
-from goosetools.users.models import GooseUser
+from goosetools.users.models import VENMO_ADMIN, GooseUser, has_perm
 from goosetools.venmo.forms import DepositForm, TransferForm, WithdrawForm
 
 swagger_file = load_file("goosetools/venmo/swagger.yml")
@@ -68,17 +68,15 @@ def own_dashboard(request):
     return dashboard(request, request.gooseuser)
 
 
+@has_perm(VENMO_ADMIN)
 def pending(request):
-    if request.user.is_superuser:
-        return render(
-            request,
-            "venmo/pending.html",
-            {
-                "page-data": {},
-            },
-        )
-    else:
-        return HttpResponseForbidden()
+    return render(
+        request,
+        "venmo/pending.html",
+        {
+            "page-data": {},
+        },
+    )
 
 
 def lookup_gooseuser_and_cache(discord_id_to_gooseuser, discord_id_with_brackets):

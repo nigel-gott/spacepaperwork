@@ -154,7 +154,7 @@ class ShipOrder(models.Model):
             return False
 
     def __str__(self):
-        return f"ShipOrder({self.id}) - {self.ship}*{self.quantity}->{self.recipient_character}:{self.uid}"
+        return f"ShipOrder({self.id}) - {self.ship}*{self.quantity}->{self.recipient_character}:{self.uid}"  # type: ignore
 
     def availible_transitions(self):
         # pylint: disable=no-member
