@@ -1,3 +1,5 @@
+import csv
+import math
 from typing import Any, Dict, List
 
 from django import forms
@@ -6,7 +8,11 @@ from django.db import transaction
 from django.db.models import ExpressionWrapper, F, Sum
 from django.db.models.fields import FloatField
 from django.db.models.functions import Coalesce
-from django.http.response import HttpResponseNotAllowed, HttpResponseRedirect
+from django.http.response import (
+    HttpResponse,
+    HttpResponseNotAllowed,
+    HttpResponseRedirect,
+)
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
@@ -83,6 +89,34 @@ def all_items(request):
     ).filter(cc__gt=0)
     result = render_item_view(request, characters, False, "All Items")
     return result
+
+
+def all_items_csv(request):
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="item_dump.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['"Item Name"', '"Created At"', "Quantity", '"Item Type"'])
+    total = InventoryItem.objects.count()
+    print("Processing " + str(total) + " Items ")
+    i = 0
+    for item in InventoryItem.objects.select_related(
+        "marketorder", "junkeditem", "solditem", "item"
+    ).all():
+        i = i + 1
+        if i % math.floor(total / 100) == 0:
+            print(f"{i}/{total}")
+
+        writer.writerow(
+            [
+                item.item.name,
+                item.created_at,
+                item.total_quantity(),
+                item.item.item_type,
+            ]
+        )
+
+    return response
 
 
 def get_items_in_location(char_loc, item_source=None):
