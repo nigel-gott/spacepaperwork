@@ -68,7 +68,7 @@ def own_dashboard(request):
     return dashboard(request, request.gooseuser)
 
 
-@has_perm(VENMO_ADMIN)
+@has_perm(perm=VENMO_ADMIN)
 def pending(request):
     return render(
         request,

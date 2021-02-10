@@ -252,7 +252,7 @@ def settings_view(request):
     return render(request, "users/settings.html", {"form": form})
 
 
-@has_perm(USER_ADMIN_PERMISSION)
+@has_perm(perm=USER_ADMIN_PERMISSION)
 @transaction.atomic
 def application_update(request, pk):
     application = get_object_or_404(UserApplication, pk=pk)
@@ -284,7 +284,7 @@ def application_update(request, pk):
         return HttpResponseNotAllowed("POST")
 
 
-@has_perm([SINGLE_CORP_ADMIN, ALL_CORP_ADMIN])
+@has_perm(perm=[SINGLE_CORP_ADMIN, ALL_CORP_ADMIN])
 @transaction.atomic
 def corp_application_update(request, pk):
     application = get_object_or_404(CorpApplication, pk=pk)
@@ -376,7 +376,7 @@ class UserApplicationListView(ListView):
         return UserApplication.unapproved_applications()
 
 
-@has_perm([SINGLE_CORP_ADMIN, ALL_CORP_ADMIN])
+@has_perm(perm=[SINGLE_CORP_ADMIN, ALL_CORP_ADMIN])
 def corp_application_list(request):
     grouped_by_corp = {
         key: list(result)
@@ -391,7 +391,7 @@ def corp_application_list(request):
     )
 
 
-@has_perm([USER_ADMIN_PERMISSION])
+@has_perm(perm=[USER_ADMIN_PERMISSION])
 def user_application_list(request):
     return render(
         request,
