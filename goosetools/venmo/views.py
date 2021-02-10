@@ -142,24 +142,20 @@ def transactions_list(gooseuser: GooseUser):
     return JsonResponse({"result": all_users_transactions})
 
 
+@has_perm(perm=VENMO_ADMIN)
 def pending_list(request):
-    if request.user.is_superuser:
-        venmo_server_client = venmo_client(use_models=False)
-        pending_transactions = (
-            venmo_server_client.transactions.listTransactions(
-                transaction_status="pending"
-            )
-            .response()
-            .result
-        )
-        discord_id_to_gooseuser: Dict[str, Union[GooseUser, bool]] = {}
-        resulting_transactions: Dict[str, Any] = {}
-        parse_transactions(
-            discord_id_to_gooseuser, pending_transactions, resulting_transactions
-        )
-        return JsonResponse({"result": list(resulting_transactions.values())})
-    else:
-        return HttpResponseForbidden()
+    venmo_server_client = venmo_client(use_models=False)
+    pending_transactions = (
+        venmo_server_client.transactions.listTransactions(transaction_status="pending")
+        .response()
+        .result
+    )
+    discord_id_to_gooseuser: Dict[str, Union[GooseUser, bool]] = {}
+    resulting_transactions: Dict[str, Any] = {}
+    parse_transactions(
+        discord_id_to_gooseuser, pending_transactions, resulting_transactions
+    )
+    return JsonResponse({"result": list(resulting_transactions.values())})
 
 
 def withdraw(request):
