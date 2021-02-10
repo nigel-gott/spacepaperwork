@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.views.generic.edit import CreateView
 
 from goosetools.tenants.models import Client, Domain
-from goosetools.users.signals import setup_tenant
+from goosetools.users.handlers import setup_tenant
 
 
 class ClientCreate(CreateView):

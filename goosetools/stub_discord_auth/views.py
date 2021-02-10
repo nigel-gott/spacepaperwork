@@ -22,7 +22,10 @@ def authorize_url(request):
 def set_uid(request, uid):
     logout(request)
     caches["default"].set("uid", uid)
-    return HttpResponseRedirect(reverse("core:home"))
+    if request.tenant.name == "public":
+        return HttpResponseRedirect(reverse("tenants:splash"))
+    else:
+        return HttpResponseRedirect(reverse("core:home"))
 
 
 def profile_url(request):

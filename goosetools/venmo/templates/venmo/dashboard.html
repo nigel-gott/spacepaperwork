@@ -41,6 +41,8 @@
         {% endif %}
     </div>
     <div class="col s12 m12">
+        <a id="load" href="#" class="waves-btn btn green">Load Transaction History</a>
+        <p id="loading">Loading data...</p>
         <table id="transactions_table"></table>
     </div>
 </div>
@@ -104,21 +106,31 @@ $(function() {
             } ,
     ];
     table = $('#transactions_table').DataTable( {
+        data: [],
         pageLength: 50,
-        ajax: {
-            url: "{% url 'venmo:transactions-list' gooseuser.pk %}",
-            dataSrc: 'result',
-            error: function (xhr, error, code)
-            {
-                console.log(xhr);
-                console.log(code);
-                alert("An error occured getting the data from venmo.")
-            }
-        },
         columns: columns,
         order: [[ 2, "desc" ]]
     } );
+    $('#transactions_table_wrapper').hide();
+    $('#loading').hide();
 
+    $('#load').on('click', function(){
+        $('#loading').show();
+        $('#transactions_table_wrapper').hide();
+        fetch(new Request("{% url 'venmo:transactions-list' gooseuser.pk %}"), {
+            method: 'GET',
+            mode: 'same-origin',
+        })
+        .then(response => response.json())
+        .then(response_data => {
+            table.clear();
+            table.rows.add(response_data["result"]);
+            table.draw();
+            $('#transactions_table_wrapper').show();
+            $('#loading').hide();
+            $('#load').text("reload transaction history");
+        });
+    });
 
 });
 
