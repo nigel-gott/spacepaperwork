@@ -1,11 +1,11 @@
 from allauth.socialaccount.models import SocialAccount
-from django.test import TestCase
+from django_tenants.test.cases import FastTenantTestCase
 
 from goosetools.tenants.models import SiteUser
 from goosetools.users.models import GooseUser
 
 
-class FleetTest(TestCase):
+class FleetTest(FastTenantTestCase):
     def test_when_avatar_hash_is_null_default_avatar_is_returned(self):
         s = SiteUser.create("Test Goose User#1")
         user = GooseUser.objects.create(

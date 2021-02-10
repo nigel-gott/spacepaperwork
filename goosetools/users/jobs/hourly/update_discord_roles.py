@@ -4,8 +4,10 @@ import requests
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from django_extensions.management.jobs import HourlyJob
+from django_tenants.utils import tenant_context
 from requests.models import HTTPError
 
+from goosetools.tenants.models import Client
 from goosetools.users.discord_helpers import (
     merge,
     setup_user_groups_from_discord_guild_roles,
@@ -14,8 +16,8 @@ from goosetools.users.models import DiscordGuild, DiscordRole, GooseGroup, Goose
 
 
 def refresh_from_discord():
-    guild = DiscordGuild.objects.get(active=True)
     output = ""
+    guild = DiscordGuild.objects.get(active=True)
     bot_headers = {
         "Authorization": "Bot {0}".format(settings.BOT_TOKEN),
         "Content-Type": "application/json",
@@ -103,9 +105,18 @@ def refresh_from_discord():
     return output
 
 
+def refresh_from_discord_all():
+    output = ""
+    for tenant in Client.objects.all():
+        with tenant_context(tenant):
+            output = output + f"====== CLIENT {tenant.name} =========\n"
+            DiscordRole.sync_from_discord()
+            output = output + refresh_from_discord()
+    return output
+
+
 class Job(HourlyJob):
     help = "Checks discord roles and updates permissions accordingly"
 
     def execute(self):
-        DiscordRole.sync_from_discord()
-        print(refresh_from_discord())
+        print(refresh_from_discord_all())

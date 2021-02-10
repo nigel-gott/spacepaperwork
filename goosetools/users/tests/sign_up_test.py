@@ -1,4 +1,6 @@
 import requests_mock
+from allauth.socialaccount.models import SocialApp
+from django.contrib.sites.models import Site
 from django.urls.base import reverse
 from freezegun import freeze_time
 
@@ -35,7 +37,19 @@ def mock_discord_returns_with_uid(
 
 @freeze_time("2012-01-14 12:00:00")
 class UserAuthTest(GooseToolsTestCase):
-    fixtures = ["goosetools/users/fixtures/test/test.json"]
+    def setUp(self):
+        super().setUp()
+        site, _ = Site.objects.get_or_create(
+            id=3, defaults={"domain": "localhost", "name": "localhost"}
+        )
+        app = SocialApp.objects.create(
+            provider="discord",
+            name="discord",
+            client_id="123456",
+            secret="some_rando_key",
+            key="",
+        )
+        app.sites.add(site)
 
     def test_when_signup_required_and_conduct_set_splash_page_links_to_conduct_first(
         self,

@@ -1,7 +1,6 @@
 import requests
 from django.apps import AppConfig
 from django.conf import settings
-from django.db.models.signals import post_migrate
 
 
 def _try_lookup_guild_roles(user_id):
@@ -20,20 +19,6 @@ def _try_lookup_guild_roles(user_id):
         return {}
 
 
-# pylint: disable=unused-argument
-def populate_models(sender, **kwargs):
-    from goosetools.users.models import AuthConfig, Corp, DiscordRole, GoosePermission
-
-    GoosePermission.ensure_populated()
-    Corp.ensure_populated()
-    AuthConfig.ensure_exists()
-    DiscordRole.sync_from_discord()
-
-
-class IndustryConfig(AppConfig):
-    name = "goosetools.industry"
-
-
 class UsersConfig(AppConfig):
     name = "goosetools.users"
     verbose_name = "Users"
@@ -41,15 +26,13 @@ class UsersConfig(AppConfig):
     def ready(self):
         from allauth.socialaccount.providers.discord.views import DiscordOAuth2Adapter
 
-        post_migrate.connect(populate_models, sender=self)
-
         def complete_login_with_guild_roles(self, request, _app, token, **_kwargs):
             headers = {
                 "Authorization": "Bearer {0}".format(token.token),
                 "Content-Type": "application/json",
             }
             extra_data = requests.get(self.profile_url, headers=headers).json()
-            if "id" in extra_data:
+            if "id" in extra_data and request.tenant.name != "public":
                 extra_data = {
                     **extra_data,
                     **_try_lookup_guild_roles(extra_data["id"]),

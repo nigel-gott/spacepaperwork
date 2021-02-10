@@ -81,18 +81,26 @@ def _redirect_approved_user_to_home_if_not_permitted(request):
 def _redirect_unauthed_user_to_discord_login_if_not_visiting_whitelist(request):
     resolver = resolve(request.path)
     views = ((name == resolver.view_name) for name in IGNORE_VIEW_NAMES)
+    print("AAAAAAAAAAAAA")
+    print(request.path)
+    print(views)
+    print(resolver.view_name)
 
     if not any(views) and not any(url.match(request.path) for url in IGNORE_PATHS):
+        print("REDIRECT")
         return HttpResponseRedirect(reverse("discord_login"))
 
 
 class LoginAndApprovedUserMiddleware(AuthenticationMiddleware):
     # pylint: disable=unused-argument,no-self-use
     def process_view(self, request, view_func, view_args, view_kwargs):
-        request.gooseuser = (
-            hasattr(request.user, "gooseuser") and request.user.gooseuser
-        )
-        if request.user.is_authenticated:
+        in_public = request.tenant.name == "public"
+
+        if not in_public:
+            request.gooseuser = (
+                hasattr(request.user, "gooseuser") and request.user.gooseuser
+            )
+        if request.user.is_authenticated and not in_public:
             if _user_is_unapproved(request.user):
                 return _redirect_unapproved_user_to_splash_or_home_if_not_visiting_whitelist(
                     request

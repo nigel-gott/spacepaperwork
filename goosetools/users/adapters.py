@@ -43,12 +43,13 @@ class SocialAccountAdapter(DefaultSocialAccountAdapter):
 
 def _update_user_from_social_account(account, siteuser: SiteUser, request):
     _update_username_to_match_discord(account, siteuser, request)
-    if siteuser.has_gooseuser():
-        siteuser.gooseuser.cache_fields_from_social_account()
-    try:
-        setup_user_groups_from_discord_guild_roles(siteuser, account.extra_data)
-    except DiscordGuild.DoesNotExist:
-        pass
+    if request.tenant.name != "public":
+        if siteuser.has_gooseuser():
+            siteuser.gooseuser.cache_fields_from_social_account()
+        try:
+            setup_user_groups_from_discord_guild_roles(siteuser, account.extra_data)
+        except DiscordGuild.DoesNotExist:
+            pass
 
 
 def _update_username_to_match_discord(account, siteuser: SiteUser, request):

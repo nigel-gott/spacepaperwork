@@ -3,10 +3,25 @@ from typing import Any, Dict, List, Set, Tuple, Union
 
 from django.contrib.messages.api import get_messages
 from django.http.response import HttpResponse
-from django.test import TestCase
+from django_tenants.test.cases import FastTenantTestCase
+from django_tenants.test.client import TenantClient
 
 
-class DjangoTestCase(TestCase):
+class DjangoTestCase(FastTenantTestCase):
+    @classmethod
+    def setup_tenant(cls, tenant):
+        """
+        Add any additional setting to the tenant before it get saved. This is required if you have
+        required fields.
+        """
+        tenant.paid_until = "3030-01-04"
+        tenant.on_trial = False
+        return tenant
+
+    def setUp(self):
+        super().setUp()
+        self.client = TenantClient(self.tenant)
+
     @staticmethod
     def get_errors_from_response(response: HttpResponse) -> List[str]:
         return [

@@ -29,6 +29,7 @@ urlpatterns = [
                 path("", include("market.urls")),
                 path("", include("ownership.urls")),
                 path("", include("core.urls")),
+                path("", include("tenants.urls")),
                 path("accounts/", include("allauth.urls")),
                 path(
                     "api/", include("rest_framework.urls", namespace="rest_framework")

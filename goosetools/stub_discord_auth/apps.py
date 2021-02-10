@@ -1,9 +1,13 @@
 from django.apps import AppConfig
+from django.conf import settings
 from django.urls import reverse
 
 
 def _format_url(url):
-    return "".join(["http://", "localhost", ":8000", reverse(url)])
+    if settings.GOOSEFLOCK_FEATURES:
+        return "".join(["http://", "localhost", ":8000", reverse(url)])
+    else:
+        return "".join(["http://", "localhost", ":8000/tenants/public", reverse(url)])
 
 
 class StubDiscordAuthConfig(AppConfig):

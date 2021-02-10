@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from django_tenants.models import DomainMixin, TenantMixin
 
 
 class SiteUser(AbstractUser):
@@ -61,3 +62,17 @@ class SiteUser(AbstractUser):
         user.site_user_id = site_user.id
         user.save()
         return site_user
+
+
+class Client(TenantMixin):
+    name = models.CharField(max_length=100)
+    paid_until = models.DateField()
+    on_trial = models.BooleanField()
+    created_on = models.DateField(auto_now_add=True)
+
+    # default true, schema will be automatically created and synced when it is saved
+    auto_create_schema = True
+
+
+class Domain(DomainMixin):
+    pass

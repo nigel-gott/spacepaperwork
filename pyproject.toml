@@ -28,6 +28,7 @@ google_auth_oauthlib = "^0.4.2"
 django-tinymce = "^3.2.0"
 bravado = "^11.0.2"
 django-contrib-comments = "^2.0.0"
+django-tenants = "^3.2.1"
 
 
 [tool.poetry.dev-dependencies]

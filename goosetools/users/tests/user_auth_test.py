@@ -1,5 +1,7 @@
 import pytest
 import requests_mock
+from allauth.socialaccount.models import SocialApp
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.test.utils import override_settings
 from django.urls.base import reverse
@@ -49,10 +51,21 @@ def mock_discord_returns_with_uid(
 
 @freeze_time("2012-01-14 12:00:00")
 class UserAuthTest(GooseToolsTestCase):
-    fixtures = ["goosetools/users/fixtures/test/test.json"]
+    # fixtures = ["goosetools/users/fixtures/test/test.json"]
 
     def setUp(self):
         super().setUp()
+        site, _ = Site.objects.get_or_create(
+            id=3, defaults={"domain": "localhost", "name": "localhost"}
+        )
+        app = SocialApp.objects.create(
+            provider="discord",
+            name="discord",
+            client_id="123456",
+            secret="some_rando_key",
+            key="",
+        )
+        app.sites.add(site)
         user_admin_group, _ = GooseGroup.objects.get_or_create(name="user_admin_group")
         user_admin_group.link_permission(USER_ADMIN_PERMISSION)
         self.user_admin_group = user_admin_group

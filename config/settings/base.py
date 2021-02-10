@@ -48,12 +48,13 @@ URL_PREFIX = env("URL_PREFIX", default="")
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 DATABASES = {
     # read os.environ['DATABASE_URL'] and raises ImproperlyConfigured exception if not found
-    "default": env.db(engine="django_prometheus.db.backends.postgresql"),
+    "default": env.db(engine="django_tenants.postgresql_backend"),
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 DBBACKUP_CONNECTOR_MAPPING = {
-    "django_prometheus.db.backends.postgresql": "dbbackup.db.postgresql.PgDumpConnector"
+    "django_tenants.postgresql_backend": "dbbackup.db.postgresql.PgDumpConnector"
 }
+DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
 
 # URLS
 # ------------------------------------------------------------------------------
@@ -64,11 +65,19 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # APPS
 # ------------------------------------------------------------------------------
-THIRD_PARTY_APPS_REQUIRED_TO_LOAD_BEFORE_DJANGO_CORE = ["dal", "dal_select2"]
+GOOSEFLOCK_APPS = [
+    "goosetools.mapbot.apps.MapBotConfig",
+    "goosetools.venmo.apps.VenmoConfig",
+    "goosetools.industry.apps.IndustryConfig",
+]
 
-DJANGO_APPS = [
-    "django.contrib.auth",
+SHARED_APPS = [
+    "django_tenants",  # mandatory
+    "dal",
+    "dal_select2",
+    "goosetools.tenants.apps.TenantsConfig",
     "django.contrib.contenttypes",
+    "django.contrib.auth",
     "django.contrib.sessions",
     "django.contrib.sites",
     "django.contrib.messages",
@@ -76,12 +85,15 @@ DJANGO_APPS = [
     "django.contrib.humanize",
     "django.contrib.admin",
     "django.forms",
-]
-THIRD_PARTY_APPS = [
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.discord",
+]
+
+TENANT_APPS = [
+    # The following Django contrib apps must be in TENANT_APPS
+    "django.contrib.contenttypes",
     "django_extensions",
     "djmoney",
     "timezone_field",
@@ -92,14 +104,7 @@ THIRD_PARTY_APPS = [
     "django_prometheus",
     "tinymce",
     "django_comments",
-]
-GOOSEFLOCK_APPS = [
-    "goosetools.mapbot.apps.MapBotConfig",
-    "goosetools.venmo.apps.VenmoConfig",
-    "goosetools.industry.apps.IndustryConfig",
-]
-
-LOCAL_APPS = [
+    # your tenant-specific apps
     "goosetools.users.apps.UsersConfig",
     "goosetools.items.apps.ItemsConfig",
     "goosetools.fleets.apps.FleetsConfig",
@@ -109,22 +114,25 @@ LOCAL_APPS = [
     "goosetools.contracts.apps.ContractsConfig",
     "goosetools.ownership.apps.OwnershipConfig",
     "goosetools.core.apps.CoreConfig",
-    "goosetools.tenants.apps.TenantsConfig",
     "goosetools.goose_comments.apps.GooseCommentsConfig",
     "goosetools.user_forms.apps.UserFormsConfig",
-    # Goosetools apps go here
 ]
+
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
-INSTALLED_APPS = (
-    THIRD_PARTY_APPS_REQUIRED_TO_LOAD_BEFORE_DJANGO_CORE
-    + DJANGO_APPS
-    + THIRD_PARTY_APPS
-    + LOCAL_APPS
-)
 if GOOSEFLOCK_FEATURES:
-    INSTALLED_APPS = INSTALLED_APPS + GOOSEFLOCK_APPS
+    TENANT_APPS = TENANT_APPS + GOOSEFLOCK_APPS
+else:
+    TENANT_SUBFOLDER_PREFIX = "tenants"
+INSTALLED_APPS = list(SHARED_APPS) + [
+    app for app in TENANT_APPS if app not in SHARED_APPS
+]
 
 COMMENTS_APP = "goosetools.goose_comments"
+
+TENANT_MODEL = "tenants.Client"  # app.Model
+
+TENANT_DOMAIN_MODEL = "tenants.Domain"  # app.Model
+
 
 # AUTHENTICATION
 # ------------------------------------------------------------------------------
@@ -166,9 +174,9 @@ SOCIALACCOUNT_PROVIDERS = {
     }
 }
 
-ACCOUNT_LOGOUT_REDIRECT_URL = "core:splash"
+ACCOUNT_LOGOUT_REDIRECT_URL = "tenants:splash"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
-LOGIN_REDIRECT_URL = "core:splash"
+LOGIN_REDIRECT_URL = "tenants:splash"
 # LOGIN_REDIRECT_URL = 'fleet'
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
 LOGIN_URL = "account_login"
@@ -190,13 +198,18 @@ LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [
     "account_login",
     "discord_callback",
     "account_logout",
+    "tenants:splash",
 ]
-LOGIN_REQUIRED_UNAPPROVED_USER_REDIRECT = "core:splash"
+LOGIN_REQUIRED_UNAPPROVED_USER_REDIRECT = "tenants:splash"
 
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#middleware
-MIDDLEWARE = [
+if GOOSEFLOCK_FEATURES:
+    MIDDLEWARE = ["django_tenants.middleware.main.TenantMainMiddleware"]
+else:
+    MIDDLEWARE = ["django_tenants.middleware.TenantSubfolderMiddleware"]
+MIDDLEWARE = MIDDLEWARE + [
     "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",

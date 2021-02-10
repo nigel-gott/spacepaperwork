@@ -39,6 +39,7 @@ if STUB_DISCORD:
     ENV_SPECIFIC_URLS.append(
         path("stub_discord_auth/", include("stub_discord_auth.urls")),
     )
+    SHARED_APPS.append("goosetools.stub_discord_auth.apps.StubDiscordAuthConfig")
     INSTALLED_APPS.append("goosetools.stub_discord_auth.apps.StubDiscordAuthConfig")
 
 # django-debug-toolbar
