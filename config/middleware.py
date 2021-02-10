@@ -16,7 +16,6 @@ class TimezoneMiddleware:
     def __call__(self, request):
         # TODO Move timezone upto SiteUser. Not done now as it would have to mean creating a SiteUser specific settings page?
         user: SiteUser = auth.get_user(request)
-        print(request.tenant.name)
         if (
             request.tenant.name != "public"
             and hasattr(user, "has_gooseuser")
