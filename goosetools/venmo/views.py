@@ -28,8 +28,6 @@ def venmo_client(use_models=True):
     host = settings.VENMO_HOST_URL
     requests_client = RequestsClient()
     api_token_header_name = swagger_file["securityDefinitions"]["api_key"]["name"]
-    print("TOKEN IS ")
-    print(settings.VENMO_API_TOKEN)
     requests_client.set_api_key(
         host,
         settings.VENMO_API_TOKEN,
@@ -37,6 +35,7 @@ def venmo_client(use_models=True):
         param_in="header",
     )
     swagger_file["host"] = settings.VENMO_HOST_URL
+    swagger_file["basePath"] = settings.VENMO_BASE_PATH
     return SwaggerClient.from_spec(
         swagger_file, http_client=requests_client, config={"use_models": use_models}
     )
