@@ -39,6 +39,7 @@ class AccountAdapter(DefaultAccountAdapter):
                 url = "tenants:splash"
             else:
                 url = "core:splash"
+        print("Redirecting to " + url)
 
         return resolve_url(url)
 
