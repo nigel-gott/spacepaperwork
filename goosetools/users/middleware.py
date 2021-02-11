@@ -7,7 +7,6 @@ from django.contrib.auth.middleware import AuthenticationMiddleware
 from django.http.response import HttpResponseRedirect
 from django.urls import resolve
 from django.urls.base import reverse
-from django_tenants.utils import tenant_context
 
 from goosetools.tenants.models import Client
 from goosetools.users.models import BASIC_ACCESS, LOOT_TRACKER, SHIP_ORDERER

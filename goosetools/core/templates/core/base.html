@@ -313,7 +313,7 @@
         <li ><a href="{% url 'characters' %}">Characters</a></li>
 
     {% else %}
-        <li><a class="waves-effect waves-light btn" href="{% provider_login_url 'discord' %}">Login</a></li>
+        <li><a class="waves-effect waves-light btn" href="{{LOGIN_URL}}">Login</a></li>
     {% endif %}
 </ul>
 
