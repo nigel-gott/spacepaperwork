@@ -62,7 +62,7 @@ $(document).ready(function() {
             $("#role_id").show();
         }
     }
-   $("#id_manually_given").change(hide_roles_if_manually_given).trigger("change");
+   $("#id_manually_given").on("change", hide_roles_if_manually_given).trigger("change");
 
 });
 </script>

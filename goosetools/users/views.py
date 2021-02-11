@@ -659,6 +659,7 @@ def edit_group(request, pk):
                 "description": group.description,
                 "required_discord_role_id": group.required_discord_role,
                 "permissions": permissions,
+                "manually_given": group.manually_given,
             }
         )
     return render(request, "users/edit_group.html", {"form": form})
