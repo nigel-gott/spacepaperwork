@@ -35,6 +35,7 @@ def setup_tenant(tenant, request, signup_form):
             transaction_tax=data["transaction_tax"],
             status="approved",
         )
+        gooseuser.cache_fields_from_social_account()
         superuser_group = GooseGroup.objects.get(name=SUPERUSER_GROUP_NAME)
         gooseuser.give_group(superuser_group)
         default_user_group = GooseGroup.objects.create(
