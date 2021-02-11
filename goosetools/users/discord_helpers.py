@@ -43,14 +43,9 @@ def setup_user_groups_from_discord_guild_roles(
     extra_data: Dict[str, Any],
 ):
     output = ""
-    siteuser.groups.clear()
-    if not siteuser.is_superuser:
-        siteuser.is_staff = False
-    else:
-        output = output + " - Gave Superuser\n"
 
     if siteuser.has_gooseuser():
-        siteuser.gooseuser.groupmember_set.all().delete()
+        siteuser.gooseuser.groupmember_set.exclude(group__manually_given=True).delete()
         if siteuser.is_superuser:
             superuser_group = GooseGroup.superuser_group()
             siteuser.gooseuser.give_group(superuser_group)

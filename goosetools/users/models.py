@@ -52,6 +52,13 @@ class DiscordGuild(models.Model):
     active = models.BooleanField(default=False)
 
     @staticmethod
+    def get_active():
+        try:
+            return DiscordGuild.objects.get(active=True)
+        except DiscordGuild.DoesNotExist:
+            return False
+
+    @staticmethod
     def try_give_role(uid, role_id):
         try:
             guild = DiscordGuild.objects.get(active=True)
@@ -115,6 +122,35 @@ class DiscordRole(models.Model):
         ]
 
 
+class GooseGroup(models.Model):
+    name = models.TextField(unique=True)
+    description = models.TextField()
+    editable = models.BooleanField(default=True)
+    manually_given = models.BooleanField(default=False)
+    linked_discord_role = models.TextField(null=True, blank=True)
+    required_discord_role = models.ForeignKey(
+        DiscordRole, on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    def link_permission(self, permission_name: str):
+        perm, _ = GoosePermission.objects.get_or_create(name=permission_name)
+        GroupPermission.objects.get_or_create(group=self, permission_id=perm.id)
+
+    def permissions(self):
+        return list(
+            GoosePermission.objects.filter(grouppermission__group=self)
+            .all()
+            .values_list("name", flat=True)
+        )
+
+    def __str__(self) -> str:
+        return f"{self.name}"
+
+    @staticmethod
+    def superuser_group():
+        return GooseGroup.objects.get(name=SUPERUSER_GROUP_NAME)
+
+
 class Corp(models.Model):
     name = models.TextField(unique=True)
     full_name = models.TextField(unique=True, null=True, blank=True)
@@ -133,6 +169,12 @@ class Corp(models.Model):
         null=True,
         blank=True,
         related_name="corps_giving_on_approval",
+    )
+    manual_group_given_on_approval = models.ForeignKey(
+        GooseGroup,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
     )
     discord_roles_allowing_application = models.ManyToManyField(
         DiscordRole, related_name="corps_allowing_application"
@@ -159,34 +201,6 @@ class Corp(models.Model):
     def ensure_populated():
         Corp.objects.get_or_create(name="DELETED", full_name="DELETED")
         Corp.objects.get_or_create(name="UNKNOWN", full_name="UNKNOWN")
-
-
-class GooseGroup(models.Model):
-    name = models.TextField(unique=True)
-    description = models.TextField()
-    editable = models.BooleanField(default=True)
-    linked_discord_role = models.TextField(null=True, blank=True)
-    required_discord_role = models.ForeignKey(
-        DiscordRole, on_delete=models.SET_NULL, null=True, blank=True
-    )
-
-    def link_permission(self, permission_name: str):
-        perm, _ = GoosePermission.objects.get_or_create(name=permission_name)
-        GroupPermission.objects.get_or_create(group=self, permission_id=perm.id)
-
-    def permissions(self):
-        return list(
-            GoosePermission.objects.filter(grouppermission__group=self)
-            .all()
-            .values_list("name", flat=True)
-        )
-
-    def __str__(self) -> str:
-        return f"{self.name}"
-
-    @staticmethod
-    def superuser_group():
-        return GooseGroup.objects.get(name=SUPERUSER_GROUP_NAME)
 
 
 def has_perm(perm: Union[str, List[str]]):
@@ -289,6 +303,7 @@ class GoosePermission(models.Model):
             defaults={
                 "description": f"A group which has all {settings.SITE_NAME} permissions.",
                 "editable": True,
+                "manually_given": True,
             },
         )
         for choice, description in GoosePermission.USER_PERMISSION_CHOICES:
@@ -309,6 +324,8 @@ class GroupPermission(models.Model):
         return f"Permission: {self.permission}, Group: {self.group}"
 
 
+# Sorry...
+# pylint: disable=too-many-public-methods
 class GooseUser(models.Model):
     USER_STATUS_CHOICES = [
         ("unapproved", "unapproved"),
@@ -347,19 +364,45 @@ class GooseUser(models.Model):
         related_name="current_vouches",
     )
 
-    def change_status(self, admin_making_change, new_status):
+    def give_manual_group(self, admin_making_change, new_group):
+        if not admin_making_change:
+            user = None
+        else:
+            user = admin_making_change.site_user
+        Comment.objects.create(
+            content_object=self,
+            site=Site.objects.get_current(),
+            user=user,
+            comment=f"Gave Manual Group {new_group}",
+            submit_date=timezone.now(),
+        )
+        self.give_group(new_group)
+
+    def remove_manual_group(self, admin_making_change, new_group):
         Comment.objects.create(
             content_object=self,
             site=Site.objects.get_current(),
             user=admin_making_change.site_user,
-            comment=f"Changed status from {self.status} to {new_status}",
+            comment=f"Removed Manual Group {new_group}",
             submit_date=timezone.now(),
         )
-        if new_status != "approved":
-            for app in CorpApplication.objects.filter(character__user=self).all():
-                app.reject()
-        self.status = new_status
-        self.save()
+        print(new_group)
+        self.groupmember_set.filter(group=new_group).delete()
+
+    def change_status(self, admin_making_change, new_status):
+        if new_status != self.status:
+            Comment.objects.create(
+                content_object=self,
+                site=Site.objects.get_current(),
+                user=admin_making_change.site_user,
+                comment=f"Changed status from {self.status} to {new_status}",
+                submit_date=timezone.now(),
+            )
+            if new_status != "approved":
+                for app in CorpApplication.objects.filter(character__user=self).all():
+                    app.reject()
+            self.status = new_status
+            self.save()
 
     def groups(self):
         return self.groupmember_set.aggregate(
@@ -554,7 +597,7 @@ class UserApplication(models.Model):
             character=main_char,
         )
 
-    def approve(self, approving_user):
+    def approve(self, approving_user=None):
         self.status = "approved"
         self.user.change_status(approving_user, "approved")
         self._create_character_application()
@@ -563,6 +606,10 @@ class UserApplication(models.Model):
             DiscordGuild.try_give_role(
                 self.user.discord_uid(),
                 self.corp.discord_role_given_on_approval.role_id,
+            )
+        if self.corp.manual_group_given_on_approval:
+            self.user.give_manual_group(
+                approving_user, self.corp.manual_group_given_on_approval
             )
         # pylint: disable=no-member
         self.user.refresh_discord_data()  # type: ignore
@@ -598,9 +645,9 @@ class CorpApplication(models.Model):
             character=character, status=status, corp=corp
         )
         if corp.auto_approve:
-            app.approve()
+            app.approve(None)
 
-    def approve(self):
+    def approve(self, approving_user):
         self.status = "approved"
         self.character.corp = self.corp
         self.character.save()
@@ -608,6 +655,10 @@ class CorpApplication(models.Model):
             DiscordGuild.try_give_role(
                 self.character.user.discord_uid(),
                 self.corp.discord_role_given_on_approval.role_id,
+            )
+        if self.corp.manual_group_given_on_approval:
+            self.character.user.give_manual_group(
+                approving_user, self.corp.manual_group_given_on_approval
             )
         self.full_clean()
         self.save()

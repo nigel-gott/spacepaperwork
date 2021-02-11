@@ -27,6 +27,11 @@
                         <div class="col s12 m2 right-align">Role Given To New Users on Approval: </div><div class="col s12 m10"> {{corp.discord_role_given_on_approval}} </div>
                     </div>
                 {% endif %}
+                {% if corp.manual_group_given_on_approval%}
+                    <div class="row valign-wrapper">
+                        <div class="col s12 m2 right-align">Manual {{SITE_NAME}} Group Given To New Users on Approval: </div><div class="col s12 m10"> {{corp.manual_group_given_on_approval}} </div>
+                    </div>
+                {% endif %}
                 <div class="row">
                     {% if not corp.public_corp %}
                         {% if corp.discord_roles_allowing_application.count != 0 %}
@@ -45,7 +50,9 @@
                         <div class="col s12 m2 right-align">Application Status:</div><div class="col s12 m10"><b class="green-text">Anyone Can Apply to Join this Corp.</b></div>
                     {% endif %}
                 </div>
+                {% if corp.public_corp or corp.discord_roles_allowing_application.count != 0 %}
                 <div class="row"><div class="col s12 m2 right-align">Approval Method:</div><div class="col s12 m10">{% if corp.auto_approve %}Applications are Automatically Approved {% else %}Applications need Manual Approval {% endif %}</div></div>
+                {% endif %}
         </li>
     {% endfor %}
     </ul>

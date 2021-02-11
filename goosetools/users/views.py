@@ -296,7 +296,7 @@ def corp_application_update(request, pk):
     application = get_object_or_404(CorpApplication, pk=pk)
     if request.method == "POST":
         if "approve" in request.POST:
-            application.approve()
+            application.approve(request.user)
         elif "reject" in request.POST:
             application.reject()
         else:
@@ -460,6 +460,11 @@ def user_dashboard(request):
                 "all_group_names": list(
                     GooseGroup.objects.all().values_list("name", flat=True)
                 ),
+                "manual_groups": list(
+                    GooseGroup.objects.filter(manually_given=True).values_list(
+                        "name", flat=True
+                    )
+                ),
                 "group_filter": request.GET.get("group_filter", ""),
                 "status_filter": request.GET.get("status_filter", ""),
             },
@@ -588,6 +593,7 @@ def groups_view(request):
             "id": g.id,
             "member_count": g.groupmember_set.count(),
             "description": g.description,
+            "manually_given": g.manually_given,
             "required_discord_role": g.required_discord_role.name
             if g.required_discord_role
             else None,
@@ -615,18 +621,31 @@ def edit_group(request, pk):
             if delete:
                 group.delete()
                 messages.success(request, f"Succesfully deleted group {group.name}")
+                return HttpResponseRedirect(reverse("groups_view"))
             else:
-                group.name = form.cleaned_data["name"]
-                group.description = form.cleaned_data["description"]
-                group.required_discord_role = form.cleaned_data[
-                    "required_discord_role_id"
-                ]
-                group.grouppermission_set.all().delete()
-                group.save()
-                for perm in form.cleaned_data["permissions"]:
-                    group.link_permission(perm.name)
-                messages.success(request, f"Succesfully edited group {group.name}")
-            return HttpResponseRedirect(reverse("groups_view"))
+                manually_given = form.cleaned_data["manually_given"]
+                required_discord_role = form.cleaned_data["required_discord_role_id"]
+                if manually_given and required_discord_role:
+                    messages.error(
+                        request,
+                        "A Group must be either Manually Given OR linked to a discord role. It Cannot be both.",
+                    )
+                elif not manually_given and not required_discord_role:
+                    messages.error(
+                        request,
+                        "A Group must be either Manually Given OR linked to a discord role. It cannot be neither.",
+                    )
+                else:
+                    group.name = form.cleaned_data["name"]
+                    group.description = form.cleaned_data["description"]
+                    group.manually_given = manually_given
+                    group.required_discord_role = required_discord_role
+                    group.grouppermission_set.all().delete()
+                    group.save()
+                    for perm in form.cleaned_data["permissions"]:
+                        group.link_permission(perm.name)
+                    messages.success(request, f"Succesfully edited group {group.name}")
+                    return HttpResponseRedirect(reverse("groups_view"))
     else:
         permissions = list(
             GoosePermission.objects.filter(grouppermission__group=group).values_list(
@@ -650,17 +669,31 @@ def new_group(request):
     if request.method == "POST":
         form = EditGroupForm(request.POST)
         if form.is_valid():
-            group = GooseGroup(
-                name=form.cleaned_data["name"],
-                description=form.cleaned_data["description"],
-                required_discord_role=form.cleaned_data["required_discord_role_id"],
-            )
-            group.save()
-            for p in form.cleaned_data["permissions"]:
-                group.link_permission(p.name)
-            messages.success(request, f"Succesfully created group {group.name}")
+            manually_given = form.cleaned_data["manually_given"]
+            required_discord_role = form.cleaned_data["required_discord_role_id"]
+            if manually_given and required_discord_role:
+                messages.error(
+                    request,
+                    "A Group must be either Manually Given OR linked to a discord role. It Cannot be both.",
+                )
+            elif not manually_given and not required_discord_role:
+                messages.error(
+                    request,
+                    "A Group must be either Manually Given OR linked to a discord role. It cannot be neither.",
+                )
+            else:
+                group = GooseGroup(
+                    name=form.cleaned_data["name"],
+                    description=form.cleaned_data["description"],
+                    manually_given=manually_given,
+                    required_discord_role=required_discord_role,
+                )
+                group.save()
+                for p in form.cleaned_data["permissions"]:
+                    group.link_permission(p.name)
+                messages.success(request, f"Succesfully created group {group.name}")
 
-            return HttpResponseRedirect(reverse("groups_view"))
+                return HttpResponseRedirect(reverse("groups_view"))
     else:
         form = EditGroupForm()
     return render(request, "users/new_group.html", {"form": form})
@@ -704,16 +737,32 @@ def admin_character_edit(request, pk):
 @has_perm(perm=USER_ADMIN_PERMISSION)
 def user_admin_view(request, pk):
     user = get_object_or_404(GooseUser, pk=pk)
+    existing_manual_groups = GooseGroup.objects.filter(
+        groupmember__user=user, manually_given=True
+    )
     if request.method == "POST":
         form = AdminEditUserForm(request.POST)
         if form.is_valid():
             user.notes = form.cleaned_data["notes"]
             user.change_status(request.gooseuser, form.cleaned_data["status"])
+            new_manual_groups = form.cleaned_data["manual_groups"]
+            for group in existing_manual_groups:
+                if group not in new_manual_groups:
+                    user.remove_manual_group(request.gooseuser, group)
+            for group in new_manual_groups:
+                if group not in existing_manual_groups:
+                    user.give_manual_group(request.gooseuser, group)
             user.save()
             messages.success(request, "Succesfully Edited the User")
             return HttpResponseRedirect(reverse("user_admin_view", args=[user.pk]))
     else:
-        form = AdminEditUserForm(initial={"notes": user.notes, "status": user.status})
+        form = AdminEditUserForm(
+            initial={
+                "notes": user.notes,
+                "status": user.status,
+                "manual_groups": existing_manual_groups,
+            }
+        )
     return render(
         request,
         "users/user_admin_view.html",
@@ -734,6 +783,7 @@ def corps_list(request):
             "full_name": c.full_name,
             "name_with_ticker": c.name_with_corp_tag(),
             "member_count": c.character_set.count(),
+            "manual_group_given_on_approval": c.manual_group_given_on_approval,
             "discord_role_given_on_approval": c.discord_role_given_on_approval.name
             if c.discord_role_given_on_approval
             else None,
@@ -764,6 +814,9 @@ def new_corp(request):
                 name=form.cleaned_data["ticker"],
                 discord_role_given_on_approval=form.cleaned_data[
                     "discord_role_given_on_approval"
+                ],
+                manual_group_given_on_approval=form.cleaned_data[
+                    "manual_group_given_on_approval"
                 ],
             )
             corp.save()
@@ -806,6 +859,9 @@ def edit_corp(request, pk):
                 corp.discord_role_given_on_approval = form.cleaned_data[
                     "discord_role_given_on_approval"
                 ]
+                corp.manual_group_given_on_approval = form.cleaned_data[
+                    "manual_group_given_on_approval"
+                ]
                 corp.discord_roles_allowing_application.clear()
                 for role in form.cleaned_data["discord_roles_allowing_application"]:
                     corp.discord_roles_allowing_application.add(role)
@@ -822,6 +878,7 @@ def edit_corp(request, pk):
                 "sign_up_form": corp.sign_up_form,
                 "public_corp": corp.public_corp,
                 "auto_approve": corp.auto_approve,
+                "manual_group_given_on_approval": corp.manual_group_given_on_approval,
                 "discord_role_given_on_approval": corp.discord_role_given_on_approval,
                 "discord_roles_allowing_application": corp.discord_roles_allowing_application.all(),
             }

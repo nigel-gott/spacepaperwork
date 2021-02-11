@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
 {% load materializecss %}
+{% load static %}
 {% block body %}
 <div class="section">
     <h5>Create New User Group</h5>
@@ -31,6 +32,9 @@
                 {{ form.description|materializecss:'s12 m12, icon=directions_boat'}}
             </div>
             <div class="row">
+                {{ form.manually_given|materializecss:'s12 m12, icon=directions_boat'}}
+            </div>
+            <div class="row" id="role_id">
                 {{ form.required_discord_role_id|materializecss:'s12 m12, icon=directions_boat'}}
             </div>
             <div class="row">
@@ -42,4 +46,22 @@
         <br/>
     </form>
 </div>
+{% endblock %}
+
+{% block extrafooter %}
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
+<script>
+$(document).ready(function() {
+    function hide_roles_if_manually_given(){
+        if(this.checked) {
+            $("#role_id").hide();
+        } else {
+            $("#role_id").show();
+        }
+    }
+   $("#id_manually_given").change(hide_roles_if_manually_given).trigger("change");
+
+});
+</script>
+
 {% endblock %}

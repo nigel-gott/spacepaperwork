@@ -27,6 +27,9 @@
                 {% if application.corp.discord_role_given_on_approval %}
                     <b>Discord Role That Will be Given On Approval:</b> {{application.corp.discord_role_given_on_approval}}<br/>
                 {% endif %}
+                {% if application.corp.manual_group_given_on_approval%}
+                    <b>{{SITE_NAME}} Group That Will be Given On Approval:</b> {{application.corp.manual_group_given_on_approval}}<br/>
+                {% endif %}
                 {% if application.user.character_set.count != 0 %}
                     <b>Their current characters are:</b> <br/>
                         <ol>
@@ -50,7 +53,14 @@
                     <a class="btn green waves-effect waves-light modal-trigger" href="#modal_confirm">Approve <i class="material-icons right">send</i></a>
                     <div id="modal_confirm" class="modal">
                         <div class="modal-content">
-                            <b class="red-text">Approving this will give the discord role {{application.corp.discord_role_given_on_approval}} to {{application.user}}.</b>
+                            <b class="red-text">Approving this will give the following to {{application.user}}:</b>
+                            {% if application.corp.discord_role_given_on_approval %}
+                                <b>The Discord Role:</b> {{application.corp.discord_role_given_on_approval}}<br/>
+                            {% endif %}
+                            {% if application.corp.manual_group_given_on_approval%}
+                                <b>The {{SITE_NAME}} Group:</b> {{application.corp.manual_group_given_on_approval}}<br/>
+                            {% endif %}
+                            <br/>
                             <br/>
                             <button name="approve" class="btn green waves-effect waves-light" type="submit" value="Submit">Approve
                                 <i class="material-icons right">send</i>

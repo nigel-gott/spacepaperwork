@@ -17,7 +17,9 @@ from goosetools.users.models import DiscordGuild, DiscordRole, GooseGroup, Goose
 
 def refresh_from_discord():
     output = ""
-    guild = DiscordGuild.objects.get(active=True)
+    guild = DiscordGuild.get_active()
+    if not guild:
+        return "No Discord Guild Linked, please do so first under Admin->Discord Settings.\n"
     bot_headers = {
         "Authorization": "Bot {0}".format(settings.BOT_TOKEN),
         "Content-Type": "application/json",

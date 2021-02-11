@@ -1,9 +1,9 @@
-{% block title %}{{SITE_NAME}}{% endblock %}
 {% extends "core/base.html" %}
+{% block title %}{{SITE_NAME}}{% endblock %}
 {% block body %}
 <div class="section">
     <div class="row">
-        <div class="col s12 m6">
+        <div class="col s12 m12 center">
             <h2>Welcome to {{SITE_NAME}}</h2>
             <p>
             <a class="waves-btn btn green" href="{% url 'tenants:client-create' %}">Sign Up</a>

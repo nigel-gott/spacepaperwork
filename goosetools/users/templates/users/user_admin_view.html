@@ -1,4 +1,5 @@
 {% extends "core/base.html" %}
+{% load materializecss %}
 {% load comments %}
 {% block body %}
 <div class="section">
@@ -20,6 +21,15 @@
     {% if viewed_user.sa_profile %}
         SA Profile: <a href="{{viewed_user.sa_profile}}">Profile Link</a><br/>
     {% endif %}
+    <h6>Their {{SITE_NAME}} Groups:</h6>
+    <ul class="collection" style="overflow: visible;">
+    {% for gm in viewed_user.groupmember_set.all %}
+        <li class="collection-item ">
+            <span class="title"><a href="{% url 'edit_group' gm.group.pk %}">{{gm.group}}</a> </span>
+            <p>{% if gm.group.manually_given %}Given Manually By An Admin.{% else %}Given by {{SITE_NAME}} as they have the discord role: {{gm.group.required_discord_role}}.{%endif%}</p>
+        </li>
+    {% endfor %}
+    </ul>
     <h6>Their Characters:</h6>
     <ul class="collection" style="overflow: visible;">
     {% for character in viewed_user.character_set.all %}
@@ -32,14 +42,7 @@
         {% csrf_token %}
         {% for field in form %}
         <div class="row">
-            <div class="input-field col s12">
-                {{ field.errors }}
-                {{ field }}
-                {{ field.label_tag }}
-                {% if field.help_text %}
-                <p class="help">{{ field.help_text|safe }}</p>
-                {% endif %}
-            </div>
+                {{ field|materializecss}}
         </div>
 
         {% endfor %}

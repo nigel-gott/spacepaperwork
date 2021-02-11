@@ -18,6 +18,7 @@
                 {{group.description}}<br/>
                 Permissions: {{group.permissions}}<br/>
                 {% if group.required_discord_role %} Discord Role:  {{group.required_discord_role}} <br/> {% endif %}
+                {% if group.manually_given %} This group is given out manually by admins using {{SITE_NAME}}. <br/> {% endif %}
             </p>
         </li>
     {% endfor %}

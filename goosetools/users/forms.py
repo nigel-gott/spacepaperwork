@@ -9,6 +9,7 @@ from goosetools.users.models import (
     Character,
     Corp,
     DiscordRole,
+    GooseGroup,
     GoosePermission,
     GooseUser,
 )
@@ -119,9 +120,13 @@ class AdminEditCharacterForm(forms.Form):
 
 
 class AdminEditUserForm(forms.Form):
-    notes = forms.CharField()
+    notes = forms.CharField(required=False)
     status = forms.ChoiceField(
         choices=GooseUser.USER_STATUS_CHOICES,
+    )
+    manual_groups = forms.ModelMultipleChoiceField(
+        GooseGroup.objects.filter(manually_given=True),
+        widget=forms.CheckboxSelectMultiple,
     )
 
 
@@ -145,6 +150,10 @@ class CorpForm(forms.Form):
     ticker = forms.CharField()
     discord_role_given_on_approval = forms.ModelChoiceField(
         queryset=DiscordRole.objects.all().order_by("name"), required=False
+    )
+    manual_group_given_on_approval = forms.ModelChoiceField(
+        queryset=GooseGroup.objects.filter(manually_given=True).order_by("name"),
+        required=False,
     )
     discord_roles_allowing_application = forms.ModelMultipleChoiceField(
         DiscordRole.objects.all().order_by("name"),
@@ -183,8 +192,15 @@ class CharacterForm(forms.Form):
 class EditGroupForm(forms.Form):
     name = forms.CharField()
     description = forms.CharField()
+    manually_given = forms.BooleanField(
+        initial=True,
+        required=False,
+        help_text=f"When ticked this group can only be given manually via the Admin Menus on {settings.SITE_NAME}.",
+    )
     required_discord_role_id = forms.ModelChoiceField(
-        queryset=DiscordRole.objects.all().order_by("name"), required=False
+        queryset=DiscordRole.objects.all().order_by("name"),
+        required=False,
+        help_text="When selected this group is only given to people with the role in discord, this is automatically checked every hour, it cannot be manually given.",
     )
     permissions = forms.ModelMultipleChoiceField(
         GoosePermission.objects.all(), widget=forms.CheckboxSelectMultiple

@@ -2,6 +2,9 @@ from django.conf import settings
 from django_tenants.utils import schema_context, tenant_context
 
 from goosetools.users.models import (
+    BASIC_ACCESS,
+    LOOT_TRACKER,
+    SHIP_ORDERER,
     SUPERUSER_GROUP_NAME,
     AuthConfig,
     Character,
@@ -34,12 +37,22 @@ def setup_tenant(tenant, request, signup_form):
         )
         superuser_group = GooseGroup.objects.get(name=SUPERUSER_GROUP_NAME)
         gooseuser.give_group(superuser_group)
+        default_user_group = GooseGroup.objects.create(
+            name="Default User Group",
+            description=f"Initial Group for Users created on Sign Up by {settings.SITE_NAME}",
+            editable=True,
+            manually_given=True,
+        )
+        default_user_group.link_permission(BASIC_ACCESS)
+        default_user_group.link_permission(LOOT_TRACKER)
+        default_user_group.link_permission(SHIP_ORDERER)
         default_corp = Corp.objects.create(
             name="DEFAULT",
             full_name="Default Corp",
             description=f"Initial Corp created on Sign Up by {settings.SITE_NAME}",
             auto_approve=True,
             public_corp=True,
+            manual_group_given_on_approval=default_user_group,
         )
         Character.objects.create(
             ingame_name=data["ingame_name"], corp=default_corp, user=gooseuser

@@ -9,6 +9,7 @@
             "public_corp": true,
             "sign_up_form": null,
             "discord_role_given_on_approval": null,
+            "manual_group_given_on_approval": null,
             "discord_roles_allowing_application": []
         }
     }
