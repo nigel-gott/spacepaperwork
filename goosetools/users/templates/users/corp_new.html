@@ -1,5 +1,6 @@
 {% extends "core/base.html" %}
 {% load materializecss %}
+{% load static %}
 {% block body %}
 <div class="section">
     <h5>Create New Corp</h5>
@@ -8,9 +9,6 @@
 <div class="divider"></div>
 <div class="section">
     <form action="" method="post">
-        <button class="btn waves-effect waves-light green" type="submit" value="Submit">Submit New Corp
-            <i class="material-icons right">send</i>
-        </button>
         {% csrf_token %}
         <div class="row">
             {{ form.ticker|materializecss:'s12 m12, icon=directions_boat'}}
@@ -31,8 +29,31 @@
             {{ form.public_corp|materializecss:'s12 m12, icon=directions_boat'}}
         </div>
         <div class="row">
+            {{ form.auto_approve|materializecss:'s12 m12, icon=directions_boat'}}
+        </div>
+        <div class="row" id="app_roles">
             {{ form.discord_roles_allowing_application|materializecss:'s12 m12, icon=directions_boat'}}
         </div>
+        <button class="btn waves-effect waves-light green" type="submit" value="Submit">Submit New Corp
+            <i class="material-icons right">send</i>
+        </button>
     </form>
 </div>
+{% endblock %}
+{% block extrafooter %}
+<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
+<script>
+$(document).ready(function() {
+    function hide_roles_if_public(){
+        if(this.checked) {
+            $("#app_roles").hide();
+        } else {
+            $("#app_roles").show();
+        }
+    }
+   $("#id_public_corp").change(hide_roles_if_public).trigger("change");
+
+});
+</script>
+
 {% endblock %}

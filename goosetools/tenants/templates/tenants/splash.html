@@ -1,18 +1,6 @@
-
-{% load materializecss %}
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{% block title %}{{SITE_NAME}}{% endblock %}</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="{% static 'core/css/materialize.css' %}" rel="stylesheet" type="text/css">
-    <link href="{% static 'core/css/core.css' %}" rel="stylesheet" type="text/css">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    {% block extraheader %}
-    {% endblock %}
-</head>
-<body>
+{% block title %}{{SITE_NAME}}{% endblock %}
+{% extends "core/base.html" %}
+{% block body %}
 <div class="section">
     <div class="row">
         <div class="col s12 m6">
@@ -23,4 +11,4 @@
         </div>
     </div>
 </div>
-</body>
+{%endblock%}

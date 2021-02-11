@@ -9,32 +9,43 @@
     <ul class="collection" style="overflow: visible;">
     {% for corp in corps%}
         <li class="collection-item ">
-                <a href="{% url 'edit_corp' corp.id %}" class="waves-btn btn secondary-content">Edit Corp</a>
-            <span class="title"><b>{{corp.name_with_ticker}}</b> - <a href="{% url 'character_dashboard' %}?corp_filter={{corp.name}}">{{corp.member_count}} Members</a><br/>
-            </span>
-            <p>
+                <div class="row">
+                    <div class="col s12 m2 right-align"><b>{{corp.name_with_ticker}}</b></div>
+                    <div class="col s12 m8"><a href="{% url 'character_dashboard' %}?corp_filter={{corp.name}}">{{corp.member_count}} Members</a></div>
+                    <div class="col s12 m2">
+                        <a href="{% url 'edit_corp' corp.id %}" class="waves-btn btn secondary-content">Edit Corp</a>
+                    </div>
+                </div>
                 {% if corp.description %}
-                Corp Description: {{corp.description}}<br/>
+                <div class="row"><div class="col s12 m2 right-align">Corp Description:</div><div class="col s12 m10"> {{corp.description}} </div></div>
                 {% endif %}
                 {% if corp.sign_up_form %}
-                Sign Up Form: <a href="{% url 'user_forms:form-detail' corp.sign_up_form.pk %}">{{corp.sign_up_form.title}}</a><br/>
+                <div class="row"><div class="col s12 m2 right-align">Sign Up Form:</div> <div class="col s12 m10"><a href="{% url 'user_forms:form-detail' corp.sign_up_form.pk %}">{{corp.sign_up_form.title}}</a></div></div>
                 {% endif %}
-                {% if corp.discord_role_given_on_approval %} Discord Role Given When New User Signs Up To Corp:  {{corp.discord_role_given_on_approval}} <br/> {% endif %}
-                {% if not corp.public_corp %}
-                    {% if corp.discord_roles_allowing_application.count != 0 %}
-                    Only users with one or more of the following roles can apply to this corp: <br/>
-                    <ul class="browser-default">
-                    {% for role in corp.discord_roles_allowing_application.all %}
-                        <li>{{role}}</li>
-                    {% endfor %}
-                    </ul>
+                {% if corp.discord_role_given_on_approval %}
+                    <div class="row">
+                        <div class="col s12 m2 right-align">Role Given To New Users on Approval: </div><div class="col s12 m10"> {{corp.discord_role_given_on_approval}} </div>
+                    </div>
+                {% endif %}
+                <div class="row">
+                    {% if not corp.public_corp %}
+                        {% if corp.discord_roles_allowing_application.count != 0 %}
+                        <div class="col s12 m2 right-align">One of these roles are required to apply:</div>
+                            <div class="col s12 m10">
+                                <ul class="browser-default">
+                                {% for role in corp.discord_roles_allowing_application.all %}
+                                    <li>{{role}}</li>
+                                {% endfor %}
+                                </ul>
+                            </div>
+                        {% else %}
+                        <div class="col s12 m2 right-align">Application Status:</div><div class="col s12 m10"><b class="red-text">No one can apply for this corp!</b></div>
+                        {% endif %}
                     {% else %}
-                    <b class="red-text">No one can apply for this corp!</b>
+                        <div class="col s12 m2 right-align">Application Status:</div><div class="col s12 m10"><b class="green-text">Anyone Can Apply to Join this Corp.</b></div>
                     {% endif %}
-                {% else %}
-                    <b class="green-text">Anyone Can Apply to Join this Corp.</b>
-                {% endif %}
-            </p>
+                </div>
+                <div class="row"><div class="col s12 m2 right-align">Approval Method:</div><div class="col s12 m10">{% if corp.auto_approve %}Applications are Automatically Approved {% else %}Applications need Manual Approval {% endif %}</div></div>
         </li>
     {% endfor %}
     </ul>

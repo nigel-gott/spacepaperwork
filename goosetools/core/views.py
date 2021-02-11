@@ -29,11 +29,15 @@ def core_home(request):
 
 
 def core_conduct(request):
-    return render(
-        request,
-        "core/conduct.html",
-        {"code_of_conduct": AuthConfig.get_active().code_of_conduct},
-    )
+    code_of_conduct = AuthConfig.get_active().code_of_conduct
+    if code_of_conduct.strip():
+        return render(
+            request,
+            "core/conduct.html",
+            {"code_of_conduct": code_of_conduct},
+        )
+    else:
+        return HttpResponseRedirect(reverse("corp_select"))
 
 
 def core_handler500(request):

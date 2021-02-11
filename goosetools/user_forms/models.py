@@ -18,8 +18,6 @@ class FormQuestion(models.Model):
     question_type = models.TextField(
         choices=[
             ("text", "text"),
-            ("number", "number"),
-            ("textarea", "large text area"),
         ],
         default="text",
     )

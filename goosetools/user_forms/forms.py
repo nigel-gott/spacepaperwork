@@ -7,7 +7,7 @@ from goosetools.user_forms.models import DynamicForm, FormQuestion
 class FormQuestionForm(ModelForm):
     class Meta:
         model = FormQuestion
-        fields = "__all__"
+        fields = ["form", "title", "help_text", "is_required"]
 
 
 FormQuestionFormSet = inlineformset_factory(

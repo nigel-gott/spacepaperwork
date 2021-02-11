@@ -119,6 +119,7 @@ class Corp(models.Model):
     name = models.TextField(unique=True)
     full_name = models.TextField(unique=True, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    auto_approve = models.BooleanField(default=False)
     public_corp = models.BooleanField(default=False)
     sign_up_form = models.ForeignKey(
         DynamicForm,
@@ -286,8 +287,8 @@ class GoosePermission(models.Model):
         superuser_group, _ = GooseGroup.objects.update_or_create(
             name=SUPERUSER_GROUP_NAME,
             defaults={
-                "description": "An uneditable group which has all goosetool permissions.",
-                "editable": False,
+                "description": f"A group which has all {settings.SITE_NAME} permissions.",
+                "editable": True,
             },
         )
         for choice, description in GoosePermission.USER_PERMISSION_CHOICES:
@@ -547,7 +548,7 @@ class UserApplication(models.Model):
             main_char.save()
         else:
             main_char = self.existing_character  # type: ignore
-        CorpApplication.objects.create(
+        CorpApplication.new(
             status="unapproved",
             corp=self.corp,
             character=main_char,
@@ -590,6 +591,14 @@ class CorpApplication(models.Model):
     )
     notes = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
+
+    @staticmethod
+    def new(character, status, corp):
+        app = CorpApplication.objects.create(
+            character=character, status=status, corp=corp
+        )
+        if corp.auto_approve:
+            app.approve()
 
     def approve(self):
         self.status = "approved"

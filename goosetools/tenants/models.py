@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -65,7 +67,11 @@ class SiteUser(AbstractUser):
 
 
 class Client(TenantMixin):
-    name = models.CharField(max_length=100)
+    name = models.CharField(
+        max_length=100,
+        help_text=f"The name of your organization in {settings.SITE_NAME}",
+        validators=[RegexValidator("^[a-z0-9_]{1,100}$")],
+    )
     paid_until = models.DateField()
     on_trial = models.BooleanField()
     created_on = models.DateField(auto_now_add=True)

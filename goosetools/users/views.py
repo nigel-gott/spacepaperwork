@@ -160,6 +160,8 @@ def user_signup(request, pk):
                     )
                 application.full_clean()
                 application.save()
+                if corp.auto_approve:
+                    application.approve(gooseuser)
                 return HttpResponseRedirect(reverse("core:home"))
     else:
         initial = {}
@@ -203,7 +205,7 @@ def auth_settings_view(request):
         if form.is_valid():
             messages.success(request, "Updated your settings!")
             auth_config.code_of_conduct = form.data["code_of_conduct"]
-            guild_config = DiscordGuild.objects.get(active=True)
+            guild_config, _ = DiscordGuild.objects.get_or_create(active=True)
             guild_config.guild_id = form.data["discord_guild_id"]
             guild_config.full_clean()
             guild_config.save()
@@ -211,10 +213,14 @@ def auth_settings_view(request):
             auth_config.save()
             return HttpResponseRedirect(reverse("auth_settings"))
     else:
+        try:
+            guild_id = DiscordGuild.objects.get(active=True).guild_id
+        except DiscordGuild.DoesNotExist:
+            guild_id = ""
         form = AuthConfigForm(
             initial={
                 "code_of_conduct": auth_config.code_of_conduct,
-                "discord_guild_id": DiscordGuild.objects.get(active=True).guild_id,
+                "discord_guild_id": guild_id,
             }
         )
 
@@ -327,7 +333,7 @@ def character_edit(request, pk):
                         request,
                         f"Corp application for {character} to {corp} registered in goosetools pending approval from @AuthTeam.",
                     )
-                    CorpApplication.objects.create(
+                    CorpApplication.new(
                         character=character, status="unapproved", corp=corp
                     )
                 return HttpResponseRedirect(reverse("characters"))
@@ -358,9 +364,7 @@ def character_new(request):
                 request,
                 f"Corp application for {character} to {corp} registered in goosetools pending approval from @AuthTeam.",
             )
-            CorpApplication.objects.create(
-                character=character, status="unapproved", corp=corp
-            )
+            CorpApplication.new(character=character, status="unapproved", corp=corp)
             return HttpResponseRedirect(reverse("characters"))
 
     else:
@@ -726,6 +730,7 @@ def corps_list(request):
             "sign_up_form": c.sign_up_form,
             "description": c.description,
             "public_corp": c.public_corp,
+            "auto_approve": c.auto_approve,
             "full_name": c.full_name,
             "name_with_ticker": c.name_with_corp_tag(),
             "member_count": c.character_set.count(),
@@ -754,6 +759,7 @@ def new_corp(request):
                 full_name=form.cleaned_data["full_name"],
                 sign_up_form=form.cleaned_data["sign_up_form"],
                 public_corp=form.cleaned_data["public_corp"],
+                auto_approve=form.cleaned_data["auto_approve"],
                 description=form.cleaned_data["description"],
                 name=form.cleaned_data["ticker"],
                 discord_role_given_on_approval=form.cleaned_data[
@@ -792,6 +798,7 @@ def edit_corp(request, pk):
                     )
             else:
                 corp.public_corp = form.cleaned_data["public_corp"]
+                corp.auto_approve = form.cleaned_data["auto_approve"]
                 corp.sign_up_form = form.cleaned_data["sign_up_form"]
                 corp.description = form.cleaned_data["description"]
                 corp.full_name = form.cleaned_data["full_name"]
@@ -814,6 +821,7 @@ def edit_corp(request, pk):
                 "description": corp.description,
                 "sign_up_form": corp.sign_up_form,
                 "public_corp": corp.public_corp,
+                "auto_approve": corp.auto_approve,
                 "discord_role_given_on_approval": corp.discord_role_given_on_approval,
                 "discord_roles_allowing_application": corp.discord_roles_allowing_application.all(),
             }

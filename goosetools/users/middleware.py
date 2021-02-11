@@ -88,6 +88,18 @@ def _redirect_unauthed_user_to_discord_login_if_not_visiting_whitelist(request):
         return HttpResponseRedirect(reverse("discord_login"))
 
 
+def _redirect_authed_user_on_public_site(request):
+    resolver = resolve(request.path)
+    views = (
+        (name == resolver.view_name)
+        for name in IGNORE_VIEW_NAMES + ["tenants:client-create"]
+    )
+
+    if not any(views) and not any(url.match(request.path) for url in IGNORE_PATHS):
+        messages.error(request, "You are forbidden access to that page.")
+        return HttpResponseRedirect(reverse("tenants:splash"))
+
+
 class LoginAndApprovedUserMiddleware(AuthenticationMiddleware):
     # pylint: disable=unused-argument,no-self-use
     def process_view(self, request, view_func, view_args, view_kwargs):
@@ -106,18 +118,7 @@ class LoginAndApprovedUserMiddleware(AuthenticationMiddleware):
                 else:
                     return _redirect_approved_user_to_home_if_not_permitted(request)
             else:
-                resolver = resolve(request.path)
-                views = (
-                    (name == resolver.view_name)
-                    for name in IGNORE_VIEW_NAMES + ["tenants:client-create"]
-                )
-
-                if not any(views) and not any(
-                    url.match(request.path) for url in IGNORE_PATHS
-                ):
-                    messages.error(request, "You are forbidden access to that page.")
-                    return HttpResponseRedirect(reverse("tenants:splash"))
-
+                return _redirect_authed_user_on_public_site(request)
         else:
             return _redirect_unauthed_user_to_discord_login_if_not_visiting_whitelist(
                 request

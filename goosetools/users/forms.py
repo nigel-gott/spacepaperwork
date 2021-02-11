@@ -15,9 +15,13 @@ from goosetools.users.models import (
 
 
 class AuthConfigForm(forms.Form):
-    discord_guild_id = forms.CharField()
+    discord_guild_id = forms.CharField(
+        help_text="The Discord Guild Id to Link Spacepaperwork To"
+    )
     code_of_conduct = forms.CharField(
-        widget=TinyMCE(attrs={"cols": 80, "rows": 30}), required=False
+        widget=TinyMCE(attrs={"cols": 80, "rows": 30}),
+        required=False,
+        help_text="The Code of Conduct new user's must agree to on application. Leave blank to disable.",
     )
 
 
@@ -27,7 +31,7 @@ class SignupFormWithTimezone(forms.Form):
         help_text=f"You already have characters in {settings.SITE_NAME}, select which one will be applying to this corp or leave blank and fill in In Game Name for a new character.",
     )
     ingame_name = forms.CharField(
-        help_text="The EXACT IN GAME name of your SINGLE MAIN CHARACTER. Once approved you will be able to auth alts under Settings->Characters."
+        help_text="The exact in-game name of one of your characters. Later you can add more characters by going to Settings->Characters."
     )
     prefered_pronouns = forms.ChoiceField(
         choices=[
@@ -63,7 +67,9 @@ class SignupFormWithTimezone(forms.Form):
         self.fields.pop(field_name)
 
     def __init__(self, *args, **kwargs):
-        existing_characters = kwargs.pop("existing_characters")
+        existing_characters = kwargs.pop(
+            "existing_characters", Character.objects.none()
+        )
         super().__init__(*args, **kwargs)
 
         if not settings.GOOSEFLOCK_FEATURES:
@@ -122,11 +128,15 @@ class AdminEditUserForm(forms.Form):
 class CorpForm(forms.Form):
     full_name = forms.CharField()
     description = forms.CharField(
-        help_text="This description will be shown to users when they are deciding which corp to apply for.",
+        help_text="This description will be shown to users when they are deciding which corp to apply for:",
         required=False,
     )
     public_corp = forms.BooleanField(
-        help_text="Anyone regardless of discord roles can apply for this corp if ticked.",
+        help_text="Anyone regardless of discord roles can apply for this corp if ticked:",
+        required=False,
+    )
+    auto_approve = forms.BooleanField(
+        help_text="If ticked users will have their applications instantly accepted and be let into this corp, if not ticked a user admin will have to approve any applications:",
         required=False,
     )
     sign_up_form = forms.ModelChoiceField(
@@ -140,7 +150,7 @@ class CorpForm(forms.Form):
         DiscordRole.objects.all().order_by("name"),
         widget=forms.CheckboxSelectMultiple,
         required=False,
-        help_text="If any roles are ticked then the user must have one or more of those roles to apply for this corp, UNLESS the corp is public which overrides anything you set here.",
+        help_text="If any roles below are ticked then the user must have one or more of those roles to apply for this corp, UNLESS the corp is public which overrides anything you set here:",
     )
 
 
