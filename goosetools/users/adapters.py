@@ -26,6 +26,20 @@ class AccountAdapter(DefaultAccountAdapter):
             return False
         return True
 
+    def get_logout_redirect_url(self, request):
+        """
+        Returns the default URL to redirect to after logging in.  Note
+        that URLs passed explicitly (e.g. by passing along a `next`
+        GET parameter) take precedence over the value returned here.
+        """
+        assert request.user.is_authenticated
+        if request.tenant.name == "public":
+            url = "tenants:splash"
+        else:
+            url = "core:splash"
+
+        return resolve_url(url)
+
     def get_login_redirect_url(self, request):
         """
         Returns the default URL to redirect to after logging in.  Note
@@ -39,7 +53,6 @@ class AccountAdapter(DefaultAccountAdapter):
                 url = "tenants:splash"
             else:
                 url = "core:splash"
-        print("Redirecting to " + url)
 
         return resolve_url(url)
 
