@@ -7,7 +7,9 @@ from django.contrib.auth.middleware import AuthenticationMiddleware
 from django.http.response import HttpResponseRedirect
 from django.urls import resolve
 from django.urls.base import reverse
+from django_tenants.utils import tenant_context
 
+from goosetools.tenants.models import Client
 from goosetools.users.models import BASIC_ACCESS, LOOT_TRACKER, SHIP_ORDERER
 
 IGNORE_PATHS = [re.compile(settings.LOGIN_URL)]
@@ -85,7 +87,9 @@ def _redirect_unauthed_user_to_discord_login_if_not_visiting_whitelist(request):
     if not any(views) and not any(url.match(request.path) for url in IGNORE_PATHS):
         print("Set next url to " + request.path)
         request.session["next_url"] = request.path
-        return HttpResponseRedirect(reverse("discord_login"))
+        tenant = Client.objects.get(name="public")
+        with tenant_context(tenant):
+            return HttpResponseRedirect(reverse("discord_login"))
 
 
 def _redirect_authed_user_on_public_site(request):
