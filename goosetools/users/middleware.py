@@ -87,7 +87,7 @@ def _redirect_unauthed_user_to_discord_login_if_not_visiting_whitelist(request):
         print("Set next url to " + request.path)
         request.session["next_url"] = request.path
         tenant = Client.objects.get(name="public")
-        return HttpResponseRedirect(tenant.reverse("discord_login", request))
+        return HttpResponseRedirect(tenant.reverse(request, "discord_login"))
 
 
 def _redirect_authed_user_on_public_site(request):
