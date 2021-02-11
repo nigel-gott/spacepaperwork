@@ -33,7 +33,6 @@ urlpatterns = [
                     "api/", include("rest_framework.urls", namespace="rest_framework")
                 ),
                 path("", include("django_prometheus.urls")),
-                path("accounts/", include("allauth.urls")),
                 path("tinymce/", include("tinymce.urls")),
                 path("comments/", include("django_comments.urls")),
                 path("forms/", include("user_forms.urls")),
