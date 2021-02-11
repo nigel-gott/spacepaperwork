@@ -1,8 +1,9 @@
 """goldengoose URL Configuration
 """
 from django.conf import settings
-from django.conf.urls import include
+from django.conf.urls import handler500, include
 from django.contrib import admin
+from django.shortcuts import render
 from django.urls import path
 from django.urls.conf import re_path
 
@@ -43,3 +44,10 @@ urlpatterns = [
         ),
     )
 ]
+
+
+def core_handler500(request):
+    return render(request, "core/500.html", status=500)
+
+
+handler500 = core_handler500
