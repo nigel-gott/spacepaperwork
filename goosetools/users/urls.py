@@ -8,16 +8,17 @@ from goosetools.users.views import (
     GooseUserQuerySet,
     admin_character_edit,
     application_update,
-    auth_settings_view,
     character_dashboard,
     character_edit,
     character_list,
     character_new,
     character_search,
+    code_of_conduct_edit,
     corp_application_list,
     corp_application_update,
     corp_select,
     corps_list,
+    discord_settings,
     edit_corp,
     edit_group,
     groups_view,
@@ -37,7 +38,8 @@ router.register(r"gooseuser", GooseUserQuerySet)
 router.register(r"character", CharacterQuerySet)
 
 urlpatterns = [
-    path("auth/settings/", auth_settings_view, name="auth_settings"),
+    path("code_of_conduct/edit", code_of_conduct_edit, name="code_of_conduct_edit"),
+    path("settings/discord", discord_settings, name="discord_settings"),
     path("settings/", settings_view, name="settings"),
     path("user/dashboard", user_dashboard, name="user_dashboard"),
     path("character/dashboard", character_dashboard, name="character_dashboard"),

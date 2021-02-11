@@ -1,0 +1,23 @@
+{% extends "core/base.html" %}
+{% load materializecss %}
+
+{% block body %}
+<div class="section">
+    <h5>Discord Settings</h5>
+</div>
+<div class="divider"></div>
+<div class="section">
+    <form action="" method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="row">
+            {{ field|materializecss}}
+        </div>
+
+        {% endfor %}
+        <button class="btn waves-effect waves-light" type="submit" value="Submit">Submit
+            <i class="material-icons right">send</i>
+        </button>
+    </form>
+</div>
+{% endblock %}

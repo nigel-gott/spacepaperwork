@@ -24,7 +24,31 @@
 
     {% elif request.user.gooseuser.is_rejected %}
         <br/><b class="red-text">Your application has been rejected.</b>
+    {% elif not GOOSEFLOCK_FEATURES %}
+        <div class="card-panel white">
+        <p>Shareable Invite Link For This {{SITE_NAME}} Organization:</p>
+        <div class="input-field">
+            <i class="material-icons prefix">share</i>
+            <input id="shareurl" type="text" value="{{share_url}}">
+        </div>
+        <button class="waves-effect waves-light btn" data-clipboard-target="#shareurl" id="share_button">
+            Copy Invite Link
+        </button>
+        </div>
     {% endif %}
     </p>
 </div>
 {% endblock body %}
+{% block extrafooter %}
+
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
+
+
+<script>
+    var clipboard = new ClipboardJS('.btn');
+
+
+</script>
+
+
+{% endblock %}

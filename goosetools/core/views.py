@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
@@ -22,10 +23,13 @@ def core_splash(request):
 
 
 def core_home(request):
-    return render(
-        request,
-        "core/home.html",
-    )
+    context = {}
+    if not settings.GOOSEFLOCK_FEATURES:
+        context[
+            "share_url"
+        ] = f"https://www.spacepaperwork.com/{settings.TENANT_SUBFOLDER_PREFIX}/{request.tenant.name}/"
+
+    return render(request, "core/home.html", context)
 
 
 def core_conduct(request):

@@ -251,6 +251,7 @@ BASIC_ACCESS = "basic_access"
 LOOT_TRACKER = "loot_tracker"
 LOOT_TRACKER_ADMIN = "loot_tracker_admin"
 VENMO_ADMIN = "venmo_admin"
+DISCORD_ADMIN_PERMISSION = "discord_admin"
 
 
 class GoosePermission(models.Model):
@@ -290,6 +291,10 @@ class GoosePermission(models.Model):
         (
             VENMO_ADMIN,
             "Able to approve/deny pending venmo transactions.",
+        ),
+        (
+            DISCORD_ADMIN_PERMISSION,
+            "Able to change which discord server is connected to.",
         ),
     ]
     name = models.TextField(unique=True, choices=USER_PERMISSION_CHOICES)

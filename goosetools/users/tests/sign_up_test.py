@@ -82,7 +82,7 @@ class UserAuthTest(GooseToolsTestCase):
                 headers={"content-type": "application/json"},
             )
             self.post(
-                reverse("auth_settings"),
+                reverse("code_of_conduct_edit"),
                 {"code_of_conduct": "NEW DIFFERENT CODE", "discord_guild_id": "id"},
             )
             mock_discord_returns_with_uid(m, "3")
@@ -100,6 +100,6 @@ class UserAuthTest(GooseToolsTestCase):
     ):
         AuthConfig.objects.create(active=True, code_of_conduct="CUSTOM CODE OF CONDUCT")
         should_be_forbidden = self.client.post(
-            reverse("auth_settings"), {"code_of_conduct": "NEW DIFFERENT CODE"}
+            reverse("code_of_conduct_edit"), {"code_of_conduct": "NEW DIFFERENT CODE"}
         )
         self.assertEqual(should_be_forbidden.status_code, 403)

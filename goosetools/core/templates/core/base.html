@@ -79,14 +79,12 @@
     {% has_perm user "single_corp_admin" as is_single_corp_admin %}
     {% has_perm user "all_corp_admin" as is_all_corp_admin %}
     {% has_perm user "ship_price_admin" as is_ship_price_admin %}
-{% if is_user_admin or is_user_group_admin or is_single_corp_admin or is_all_corp_admin or is_ship_price_admin %}
+    {% has_perm user "discord_admin" as is_discord_admin %}
+{% if is_user_admin or is_user_group_admin or is_single_corp_admin or is_all_corp_admin or is_ship_price_admin or is_discord_admin %}
 <ul class="dropdown-content" id="dropdown_admin">
     {% if is_user_admin %}
     <li>
             <a href="{% url 'user_dashboard' %}">User Dashboard</a>
-    </li>
-    <li>
-            <a href="{% url 'user_forms:form-list' %}">Form Setup</a>
     </li>
     {% endif %}
     {% if is_single_corp_admin or is_all_corp_admin %}
@@ -107,19 +105,30 @@
         <a href="{% url 'industry:ship_dashboard' %}">Ship Admin</a>
     </li>
     {% endif %}
+    {% if is_user_admin %}
     <li>
         <a href="{% url 'applications' %}">New User Applications
         ({% num_pending_user_apps %})
         </a>
     </li>
+    {% endif %}
+    {% if is_single_corp_admin or is_all_corp_admin %}
     <li>
         <a href="{% url 'corp_applications' %}">Corp Applications
         ({% num_pending_corp_apps %})
         </a>
     </li>
+    {% endif %}
+    {% if is_user_admin %}
     <li>
-        <a href="{% url 'auth_settings' %}">Site Auth Settings</a>
+            <a href="{% url 'user_forms:form-list' %}">Sign-Up Form Setup</a>
     </li>
+    {% endif %}
+    {% if is_discord_admin %}
+    <li>
+        <a href="{% url 'discord_settings' %}">Discord Settings</a>
+    </li>
+    {% endif %}
 </ul>
 {% endif %}
 <nav class="nav-extended blue-grey darken-3">
@@ -198,14 +207,11 @@
         </li>
     {% endif %}
 
-    {% if is_user_admin or is_user_group_admin or is_single_corp_admin or is_all_corp_admin or is_ship_price_admin %}
+    {% if is_user_admin or is_user_group_admin or is_single_corp_admin or is_all_corp_admin or is_ship_price_admin or is_discord_admin %}
         <li><a class="subheader">Admin<i class="material-icons right">build</i></a></li>
         {% if is_user_admin %}
         <li>
             <a href="{% url 'user_dashboard' %}">User Dashboard</a>
-        </li>
-        <li>
-                <a href="{% url 'user_forms:form-list' %}">Form Setup</a>
         </li>
         {% endif %}
         {% if is_single_corp_admin or is_all_corp_admin %}
@@ -226,13 +232,26 @@
             <a href="{% url 'industry:ship_dashboard' %}">Ship Admin</a>
         </li>
         {% endif %}
-        <li><a href="{% url 'auth_settings' %}">Site Auth Settings</a></li>
+        {% if is_user_admin %}
         <li>
             <a href="{% url 'applications' %}">New User Applications</a>
         </li>
+        {% endif %}
+        {% if is_single_corp_admin or is_all_corp_admin %}
         <li>
             <a href="{% url 'corp_applications' %}">Corp Applications</a>
         </li>
+        {% endif %}
+        {% if is_user_group_admin %}
+        <li>
+                <a href="{% url 'user_forms:form-list' %}">Sign-Up Form Setup</a>
+        </li>
+        {% endif %}
+        {% if is_discord_admin %}
+        <li>
+            <a href="{% url 'discord_settings' %}">Discord Settings</a>
+        </li>
+        {% endif %}
         <li><div class="divider"></div></li>
     {% endif %}
 

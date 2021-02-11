@@ -15,14 +15,17 @@ from goosetools.users.models import (
 )
 
 
-class AuthConfigForm(forms.Form):
-    discord_guild_id = forms.CharField(
+class DiscordForm(forms.Form):
+    guild_id = forms.CharField(
         help_text="The Discord Guild Id to Link Spacepaperwork To"
     )
+
+
+class CodeOfConductForm(forms.Form):
     code_of_conduct = forms.CharField(
         widget=TinyMCE(attrs={"cols": 80, "rows": 30}),
         required=False,
-        help_text="The Code of Conduct new user's must agree to on application. Leave blank to disable.",
+        help_text="The Code of Conduct new users must agree to when applying. Leave blank to disable.",
     )
 
 

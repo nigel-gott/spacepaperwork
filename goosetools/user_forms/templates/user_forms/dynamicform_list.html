@@ -1,11 +1,12 @@
 {% extends "core/base.html" %}
 {% block body %}
 <div class="section">
-    <h4>Form Admin</h4>
-</div>
-<div class="section">
-    <a class="waves-btn btn" href="{% url 'user_forms:form-create' %}">Create New Form</a>
+    <h4>Sign Up Form Admin</h4>
+    <p>Want to ask new members questions and review their answers before accepting them to join this site? You can do exactly that by creating a new Corp Sign Up form below and linking it to the corp in the <a href="{% url 'corps_list' %}">Corp Admin</a>.</p>
+    <a class="btn waves-btn" href="{% url "code_of_conduct_edit" %}">Edit Code of Conduct</a>
+    <a class="waves-btn btn green" href="{% url 'user_forms:form-create' %}">Create New Corp Sign Up Form</a>
     <ul class="collection" style="overflow: visible;">
+    {% if form_list %}
     {% for dynamicform in form_list %}
         <li class="collection-item ">
                 <a href="{% url 'user_forms:form-update' dynamicform.id %}" class="waves-btn btn secondary-content">Edit Form</a>
@@ -17,6 +18,9 @@
             </p>
         </li>
     {% endfor %}
+    {% else %}
+    <li class="collection-item"> You haven't created any Corp Sign Up Forms. Click the Create button above to start a new one. </li>
+    {% endif %}
     </ul>
 </div>
 

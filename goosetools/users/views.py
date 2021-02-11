@@ -29,9 +29,10 @@ from goosetools.users.forms import (
     AddEditCharacterForm,
     AdminEditCharacterForm,
     AdminEditUserForm,
-    AuthConfigForm,
     CharacterUserSearchForm,
+    CodeOfConductForm,
     CorpForm,
+    DiscordForm,
     EditGroupForm,
     SettingsForm,
     SignupFormWithTimezone,
@@ -40,6 +41,7 @@ from goosetools.users.forms import (
 from goosetools.users.jobs.hourly.update_discord_roles import refresh_from_discord
 from goosetools.users.models import (
     ALL_CORP_ADMIN,
+    DISCORD_ADMIN_PERMISSION,
     SINGLE_CORP_ADMIN,
     USER_ADMIN_PERMISSION,
     USER_GROUP_ADMIN_PERMISSION,
@@ -198,35 +200,48 @@ def _give_pronoun_roles(uid, prefered_pronouns):
 
 
 @has_perm(perm=USER_ADMIN_PERMISSION)
-def auth_settings_view(request):
+def code_of_conduct_edit(request):
     auth_config = AuthConfig.get_active()
     if request.method == "POST":
-        form = AuthConfigForm(request.POST)
+        form = CodeOfConductForm(request.POST)
         if form.is_valid():
-            messages.success(request, "Updated your settings!")
+            messages.success(request, "Updated your Code of Conduct!")
             auth_config.code_of_conduct = form.data["code_of_conduct"]
-            guild_config, _ = DiscordGuild.objects.get_or_create(active=True)
-            guild_config.guild_id = form.data["discord_guild_id"]
-            guild_config.full_clean()
-            guild_config.save()
             auth_config.full_clean()
             auth_config.save()
-            return HttpResponseRedirect(reverse("auth_settings"))
+            return HttpResponseRedirect(reverse("code_of_conduct_edit"))
     else:
-        try:
-            guild_id = DiscordGuild.objects.get(active=True).guild_id
-        except DiscordGuild.DoesNotExist:
-            guild_id = ""
-        form = AuthConfigForm(
+        form = CodeOfConductForm(
             initial={
                 "code_of_conduct": auth_config.code_of_conduct,
-                "discord_guild_id": guild_id,
             }
         )
 
     return render(
-        request, "users/auth_config.html", {"form": form, "auth_config": auth_config}
+        request,
+        "users/code_of_conduct_edit.html",
+        {"form": form, "auth_config": auth_config},
     )
+
+
+@has_perm(perm=DISCORD_ADMIN_PERMISSION)
+def discord_settings(request):
+    discord_config, _ = DiscordGuild.objects.get_or_create(active=True)
+    if request.method == "POST":
+        form = DiscordForm(request.POST)
+        if form.is_valid():
+            messages.success(request, "Updated your Discord Config!")
+            discord_config.guild_id = form.cleaned_data["guild_id"]
+            discord_config.save()
+            return HttpResponseRedirect(reverse("discord_settings"))
+    else:
+        form = DiscordForm(
+            initial={
+                "guild_id": discord_config.guild_id,
+            }
+        )
+
+    return render(request, "users/discord_settings.html", {"form": form})
 
 
 def settings_view(request):
