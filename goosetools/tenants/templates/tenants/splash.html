@@ -8,6 +8,32 @@
             <p>
             <a class="waves-btn btn green" href="{% url 'tenants:client-create' %}">Sign Up</a>
             </p>
+            </div>
+        </div>
+    <div class="row">
+        <div class="col s12 m12">
+            {% if owner_orgs %}
+                <ul class="collection">
+                    <li class="collection-item collection-header">
+                    {{SITE_NAME}} Organizations You Own:
+                    </li>
+                    {% for owner_org in owner_orgs %}
+                    <li class="collection-item">
+                        <a href="/{{tenant_subfolder_prefix}}/{{owner_org.name}}">{{owner_org.name}}</a>
+                    </li>
+                    {%endfor%}
+            {% endif %}
+            {% if member_orgs %}
+                <ul class="collection">
+                    <li class="collection-item collection-header">
+                    {{SITE_NAME}} Organizations You Are a Member Of:
+                    </li>
+                    {% for member_org in member_orgs %}
+                    <li class="collection-item">
+                        <a href="/{{tenant_subfolder_prefix}}/{{member_org.name}}">{{member_org.name}}</a>
+                    </li>
+                    {%endfor%}
+            {% endif %}
         </div>
     </div>
 </div>

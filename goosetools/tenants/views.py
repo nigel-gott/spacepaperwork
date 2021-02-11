@@ -4,11 +4,13 @@ from django.shortcuts import render
 from django.urls.base import reverse
 from django.utils import timezone
 from django.views.generic.edit import CreateView
+from django_tenants.utils import tenant_context
 
 from goosetools.tenants.forms import ClientForm
 from goosetools.tenants.models import Client, Domain
 from goosetools.users.forms import SignupFormWithTimezone
 from goosetools.users.handlers import setup_tenant
+from goosetools.users.models import GooseUser
 
 
 class ClientCreate(CreateView):
@@ -41,6 +43,7 @@ class ClientCreate(CreateView):
             two_weeks_from_now = timezone.now() + timezone.timedelta(days=14)
             form.instance.on_trial = True
             form.instance.paid_until = two_weeks_from_now
+            form.instance.owner = self.request.user
             form.instance.schema_name = form.instance.name
             r = super().form_valid(form)
             if form.is_valid():
@@ -56,7 +59,23 @@ class ClientCreate(CreateView):
 def splash(request):
     if settings.GOOSEFLOCK_FEATURES:
         return HttpResponseRedirect(reverse("core:splash"))
+    member_orgs = []
+    owners_orgs = []
+    for tenant in Client.objects.all():
+        if tenant.name != "public":
+            with tenant_context(tenant):
+                if tenant.owner == request.user:
+                    print("owner")
+                    owners_orgs.append(tenant)
+                elif GooseUser.objects.filter(site_user=request.user).count() > 0:
+                    print("member")
+                    member_orgs.append(tenant)
     return render(
         request,
         "tenants/splash.html",
+        {
+            "owner_orgs": owners_orgs,
+            "member_orgs": member_orgs,
+            "tenant_subfolder_prefix": settings.TENANT_SUBFOLDER_PREFIX,
+        },
     )

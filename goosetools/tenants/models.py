@@ -72,6 +72,9 @@ class Client(TenantMixin):
         help_text=f"The name of your organization in {settings.SITE_NAME}",
         validators=[RegexValidator("^[a-z0-9_]{1,100}$")],
     )
+    owner = models.ForeignKey(
+        SiteUser, on_delete=models.SET_NULL, null=True, blank=True
+    )
     paid_until = models.DateField()
     on_trial = models.BooleanField()
     created_on = models.DateField(auto_now_add=True)
