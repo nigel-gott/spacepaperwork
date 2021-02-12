@@ -9,17 +9,50 @@
     <ul class="collection" style="overflow: visible;">
     {% for group in groups %}
         <li class="collection-item ">
-            <span class="title"><b>{{group.name}}</b> - <a href="{% url 'user_dashboard' %}?group_filter={{group.name}}">{{group.member_count}} Members</a><br/>
-            </span>
-            <p>
+            <div class="row">
+                <div class="col s12 m2 hide-on-small-only right-align">Group Name:</div>
+                <div class="col s12 m2 hide-on-med-and-up grey lighten-5"><h5>Group Name:</h5></div>
+                <div class="col s12 m8">
+                    <b>{{group.name}}</b> - <a href="{% url 'user_dashboard' %}?group_filter={{group.name}}">{{group.member_count}} Members</a>
+                </div>
                 {% if group.editable %}
+                <div class="col s12 m2">
                     <a href="{% url 'edit_group' group.id %}" class="waves-btn btn secondary-content">Edit Group</a>
+                </div>
                 {% endif %}
-                {{group.description}}<br/>
-                Permissions: {{group.permissions}}<br/>
-                {% if group.required_discord_role %} Discord Role:  {{group.required_discord_role}} <br/> {% endif %}
-                {% if group.manually_given %} This group is given out manually by admins using {{SITE_NAME}}. <br/> {% endif %}
-            </p>
+            </div>
+            <div class="row">
+                <div class="col s12 m2 right-align hide-on-small-only">Description:</div>
+                <div class="col s12 m2 hide-on-med-and-up grey lighten-5"><h5>Description:</h5></div>
+
+                <div class="col s12 m10">
+                    {{group.description}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m2 right-align hide-on-small-only">Permissions:</div>
+                <div class="col s12 m2 hide-on-med-and-up grey lighten-5"><h5>Permissions:</h5></div>
+                <div class="col s12 m10">
+                    {{group.permissions}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col s12 m2 right-align hide-on-small-only">Given To Users When:</div>
+                <div class="col s12 m2 hide-on-med-and-up grey lighten-5"><h5>Given To Users When:</h5></div>
+                {% if group.required_discord_role %}
+                <div class="col s12 m10">
+                    They have the Discord Role: {{group.required_discord_role}}
+                </div>
+                {% elif group.manually_given %}
+                <div class="col s12 m10">
+                    Manually By User Admins on {{SITE_NAME}}.
+                </div>
+                {% else %}
+                <div class="col s12 m10">
+                <b class="red-text">This Group is mis-configured and can never be given out.</b>
+                </div>
+                {% endif %}
+            </div>
         </li>
     {% endfor %}
     </ul>

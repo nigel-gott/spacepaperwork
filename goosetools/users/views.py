@@ -50,6 +50,7 @@ from goosetools.users.models import (
     Corp,
     CorpApplication,
     DiscordGuild,
+    DiscordRole,
     GooseGroup,
     GoosePermission,
     GooseUser,
@@ -244,6 +245,8 @@ def discord_settings(request):
             discord_config.guild_id = form.cleaned_data["guild_id"]
             discord_config.save()
             discord_config.check_valid()
+            if not discord_config.guild_id:
+                DiscordRole.objects.all().delete()
             return HttpResponseRedirect(reverse("discord_settings"))
     else:
         form = DiscordForm(
