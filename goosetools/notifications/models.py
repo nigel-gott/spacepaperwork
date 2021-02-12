@@ -44,7 +44,7 @@ class RenderedNotification:
         self.action_url = action_url
 
     def as_html(self) -> str:
-        return f"<a href='{self.action_url}'><i class='material-icons left'>{self.icon}</i>{self.text}</a>"
+        return f"<a href='{self.action_url}' class='red-text'><i class='material-icons left'>{self.icon}</i>{self.text}</a>"
 
     def __str__(self) -> str:
         return self.as_html()
