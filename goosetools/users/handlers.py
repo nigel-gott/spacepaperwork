@@ -9,6 +9,7 @@ from goosetools.users.models import (
     AuthConfig,
     Character,
     Corp,
+    DiscordGuild,
     DiscordRole,
     GooseGroup,
     GoosePermission,
@@ -65,3 +66,5 @@ def setup():
     Corp.ensure_populated()
     AuthConfig.ensure_exists()
     DiscordRole.sync_from_discord()
+    g, _ = DiscordGuild.objects.get_or_create(active=True)
+    g.check_valid()
