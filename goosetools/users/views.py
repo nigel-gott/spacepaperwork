@@ -225,6 +225,16 @@ def code_of_conduct_edit(request):
 
 
 @has_perm(perm=DISCORD_ADMIN_PERMISSION)
+def check_discord_status(request):
+    discord_config, _ = DiscordGuild.objects.get_or_create(active=True)
+    if request.method == "POST":
+        discord_config.check_valid()
+        return HttpResponseRedirect(reverse("discord_settings"))
+    else:
+        return HttpResponseForbidden()
+
+
+@has_perm(perm=DISCORD_ADMIN_PERMISSION)
 def discord_settings(request):
     discord_config, _ = DiscordGuild.objects.get_or_create(active=True)
     if request.method == "POST":
@@ -233,6 +243,7 @@ def discord_settings(request):
             messages.success(request, "Updated your Discord Config!")
             discord_config.guild_id = form.cleaned_data["guild_id"]
             discord_config.save()
+            discord_config.check_valid()
             return HttpResponseRedirect(reverse("discord_settings"))
     else:
         form = DiscordForm(
@@ -241,7 +252,16 @@ def discord_settings(request):
             }
         )
 
-    return render(request, "users/discord_settings.html", {"form": form})
+    return render(
+        request,
+        "users/discord_settings.html",
+        {
+            "form": form,
+            "discord_config": discord_config,
+            "discord_oauth_url": settings.DISCORD_OAUTH_URL,
+            "discord_oauth_url_without_manage_permissions": settings.DISCORD_OAUTH_URL_WITHOUT_MANAGE,
+        },
+    )
 
 
 def settings_view(request):

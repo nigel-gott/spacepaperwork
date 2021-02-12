@@ -13,6 +13,7 @@ from goosetools.users.views import (
     character_list,
     character_new,
     character_search,
+    check_discord_status,
     code_of_conduct_edit,
     corp_application_list,
     corp_application_update,
@@ -39,6 +40,7 @@ router.register(r"character", CharacterQuerySet)
 
 urlpatterns = [
     path("code_of_conduct/edit", code_of_conduct_edit, name="code_of_conduct_edit"),
+    path("settings/discord/check", check_discord_status, name="check_discord_status"),
     path("settings/discord", discord_settings, name="discord_settings"),
     path("settings/", settings_view, name="settings"),
     path("user/dashboard", user_dashboard, name="user_dashboard"),
@@ -79,7 +81,7 @@ urlpatterns = [
     path("api/", include((router.urls))),
     path("corps/", corps_list, name="corps_list"),
     path("corps/<int:pk>/edit", edit_corp, name="edit_corp"),
-    path("crops/new", new_corp, name="new_corp"),
+    path("corps/new", new_corp, name="new_corp"),
     path("groups/", groups_view, name="groups_view"),
     path("groups/<int:pk>/edit", edit_group, name="edit_group"),
     path("groups/new", new_group, name="new_group"),

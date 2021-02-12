@@ -10,6 +10,7 @@ from django.db import models
 from django.http.response import HttpResponseForbidden
 from django.utils import timezone
 from django_comments.models import Comment
+from requests.exceptions import RequestException
 from rest_framework.permissions import BasePermission
 from timezone_field import TimeZoneField
 
@@ -47,9 +48,116 @@ class AuthConfig(models.Model):
             )
 
 
+MANAGE_ROLES_DISCORD_PERMISSION = 0x10000000
+
+
 class DiscordGuild(models.Model):
-    guild_id = models.TextField()
+    guild_id = models.TextField(null=True, blank=True)
+    server_name = models.TextField(null=True, blank=True)
     active = models.BooleanField(default=False)
+    connection_valid = models.BooleanField(default=False)
+    discord_connection_issue = models.BooleanField(default=False)
+    has_manage_roles = models.BooleanField(default=False)
+
+    @staticmethod
+    def bot_headers():
+        return {
+            "Authorization": "Bot {0}".format(settings.BOT_TOKEN),
+        }
+
+    def _check_discord_is_up_and_bot_valid(self):
+        self.discord_connection_issue = False
+        url = "https://discord.com/api/users/@me"
+        try:
+            bot_info_request = requests.get(url, headers=DiscordGuild.bot_headers())
+            bot_info_request.raise_for_status()
+        except RequestException as e:
+            print("Error querying discord for bot info: " + str(e))
+            self.discord_connection_issue = True
+            return False
+        bot_info = bot_info_request.json()
+        if "id" not in bot_info or not bot_info["bot"]:
+            print("Missing Id from bot info request: " + bot_info_request.text)
+            self.discord_connection_issue = True
+            return False
+        return True
+
+    def _check_for_permissions(self):
+        self.has_manage_roles = False
+        url = f"https://discord.com/api/guilds/{self.guild_id}/members/{settings.BOT_USER_ID}"
+        try:
+            bot_member_request = requests.get(url, headers=DiscordGuild.bot_headers())
+            bot_member_request.raise_for_status()
+        except RequestException as e:
+            print("Error querying discord for member info: " + str(e))
+        bot_member_info = bot_member_request.json()
+        if "roles" not in bot_member_info:
+            print("Missing roles discord bot info request: " + bot_member_request.text)
+        else:
+            try:
+                url = f"https://discord.com/api/guilds/{self.guild_id}/roles"
+                try:
+                    roles_request = requests.get(
+                        url, headers=DiscordGuild.bot_headers()
+                    )
+                    roles_request.raise_for_status()
+                except RequestException as e:
+                    print("Error querying discord for roles info: " + str(e))
+
+                roles_by_id = {role["id"]: role for role in roles_request.json()}
+
+                for role in bot_member_info["roles"]:
+                    permissions = int(roles_by_id[role]["permissions"])
+                    print(permissions)
+                    print(permissions & MANAGE_ROLES_DISCORD_PERMISSION)
+                    print(MANAGE_ROLES_DISCORD_PERMISSION)
+                    self.has_manage_roles = (
+                        permissions & MANAGE_ROLES_DISCORD_PERMISSION
+                    ) == MANAGE_ROLES_DISCORD_PERMISSION
+                    if self.has_manage_roles:
+                        return
+            except (ValueError, KeyError):
+                print("Weird permissions from discord guild:" + bot_member_request.text)
+                if roles_request and hasattr(roles_request, "text"):
+                    print(roles_request.text)
+
+    def _check_discord_guild_is_valid(self):
+        self.server_name = None
+        url = f"https://discord.com/api/guilds/{self.guild_id}"
+        try:
+            guild_info_request = requests.get(url, headers=DiscordGuild.bot_headers())
+            guild_info_request.raise_for_status()
+        except RequestException as e:
+            print("Error querying discord for guild info: " + str(e))
+            return False
+        guild_info = guild_info_request.json()
+        if "name" not in guild_info:
+            print(
+                "Missing Name from discord guild info request: "
+                + guild_info_request.text
+            )
+            return False
+        else:
+            self.server_name = guild_info["name"]
+
+        return True
+
+    def _update_status_fields(self):
+        self.connection_valid = False
+        if self.guild_id:
+            if (
+                self._check_discord_is_up_and_bot_valid()
+                and self._check_discord_guild_is_valid()
+            ):
+                self._check_for_permissions()
+                self.connection_valid = True
+
+    def check_valid(self):
+        self._update_status_fields()
+        self.save()
+        if self.connection_valid:
+            DiscordRole.sync_from_discord()
+        return self.connection_valid
 
     @staticmethod
     def get_active():
