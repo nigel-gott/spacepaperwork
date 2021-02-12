@@ -13,88 +13,134 @@
 </div>
 <div class="divider"></div>
 <div class="section">
-    <h5>Discord Server Setup Wizard</h5>
-    {% if discord_config.discord_connection_issue %}
-        <p>
-            <b class="red-text">{{SITE_NAME}} cannot connect to Discord, it might be experiencing an outage.</b>
-            <form action="{% url "check_discord_status" %}" method="post">
-            {% csrf_token %}
-            <button class="btn waves-effect waves-light green" type="submit" value="Submit">Attempt to Reconnect to Discord
-                <i class="material-icons right">send</i>
-            </button>
-            </form>
-            {% include "core/includes/help_contact.html" %}
-        </p>
-    {% else %}
-        {% if not discord_config.connection_valid %}
-        <ol>
-            {% if not discord_config.guild_id %}
-                <li>
-                <p>First you need to invite the {{SITE_NAME}} bot to your server with the "Manage Permissions" role so it can give out permissions if you have configured {{SITE_NAME}} to do so:
-                <a href="{{discord_oauth_url}}" class="waves-btn btn green" target="_blank" rel="noopener noreferrer">Invite {{SITE_NAME}} to Your Discord Server</a><br/>
-                If you are not comfortable giving the "Manage Permissions" role to {{SITE_NAME}}, however you still want to be able to restrict access to corps based on roles or give groups to certain roles you can instead
-                invite the bot without the "Manage Permissions" role by clicking below:<br/>
-                <a href="{{discord_oauth_url_without_manage_permissions}}" class="waves-btn btn orange" target="_blank" rel="noopener noreferrer">Invite Bot Without Manage Roles</a>
-                </p>
-                </li>
-            {% else %}
-                {% if not discord_config.server_name %}
-                    <p class="red-text">The Discord Server ID you have entered is invalid OR you have not invited the {{SITE_NAME}} bot to your server. Please check the Server ID and/or re-invite the bot using the links below:<br/>
-                    <a href="{{discord_oauth_url}}" class="waves-btn btn green" target="_blank" rel="noopener noreferrer">Invite {{SITE_NAME}} to Your Discord Server</a><br/><br/>
-                    <a href="{{discord_oauth_url_without_manage_permissions}}" class="waves-btn btn orange" target="_blank" rel="noopener noreferrer">Invite Bot Without Manage Roles</a>
-                    </p>
-                {% endif %}
-            {% endif %}
-        {% else %}
-            <p>You have successfully connected {{SITE_NAME}} to the discord server "{{discord_config.server_name}}". <br/>
-            </p>
-            {% if not discord_config.has_manage_roles %}
-            <b class="orange-text">You have not given the {{SITE_NAME}} bot the manage roles permission in your server. This means it cannot give roles out on user/corp application approval.</b>
-            If you wish to now give the manage roles permission click this button:<br/>
-                    <a href="{{discord_oauth_url}}" class="waves-btn btn green" target="_blank" rel="noopener noreferrer">Invite {{SITE_NAME}} With Manage Roles </a><br/><br/>
-            {% endif %}
-        {% endif %}
-
-        {% if not discord_config.guild_id %}
-        <li>Then you need to connect your Discord Server to {{SITE_NAME}} by entering your Discord Server ID below:</li>
-        </ol>
-        {% elif discord_config.server_name %}
-
-        <p>You can connect {{SITE_NAME}} to a different Discord Server by entering a new Discord Server ID below:<br/>
-        <b class="orange-text">WARNING: This will unlink all Discord Roles you might have configured in {{SITE_NAME}}.</b>
-        </p>
-        {% endif %}
-        <form action="" method="post">
-            <ul class="collapsible">
-                <li>
-                    <div class="collapsible-header"><i class="material-icons">add</i>Follow these steps to find your Discord Server ID (not the name)</div>
-                    <div class="collapsible-body">
-                        <p>
-                            <ol>
-                                <li>In Discord, open your User Settings by clicking the Settings Cog next to your user name on the bottom.</li>
-                                <li>Go to Appearance and enable Developer Mode under the Advanced section, then close User Settings.</li>
-                                <li>Open your Discord server, right-click on the server name, then select Copy ID.</li>
-                                <li>Paste the Server ID into the Discord Server ID field below.</li>
-                                <li>You can disable Developer Mode now if you wish.</li>
-                            </ol>
-                        </p>
-                    </div>
-                </li>
-            </ul>
-            {% csrf_token %}
-            {% for field in form %}
+    {% if discord_config.connection_valid %}
+        {% if discord_config.has_manage_roles %}
             <div class="row">
-                {{ field|materializecss}}
+                <div class="col s12 m12">
+                    <div class="card green lighten-5">
+                        <div class="card-content">
+                            <span class="card-title green-text">  <i class="material-icons medium">check</i> Discord Server connected</span>
+                            <p>The Discord Server "{{discord_config.server_name}}" is successfully connected to your {{SITE_NAME}} organization.</p>
+                        </div>
+                        <div class="card-action">
+                            <form action="{% url "check_discord_status" %}" method="post">
+                                {% csrf_token %}
+                                <button class="btn waves-effect waves-light green" type="submit" value="Submit">Re-Check Discord Status
+                                    <i class="material-icons right">send</i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
+        {% else %}
+            <div class="row">
+                <div class="col s12 m12">
+                    <div class="card orange lighten-5">
+                        <div class="card-content">
+                            <span class="card-title orange-text">  <i class="material-icons medium">check</i> Discord Server "{{discord_config.server_name}}" connected!</span>
+                            You have not given the {{SITE_NAME}} bot the manage roles permission in your server. This means it cannot give roles out on user/corp application approval, however all other discord related features will still work.</b>
+                            If you wish to now give the manage roles permission click the link below and then click "Re-Check Discord Status":<br/>
+                        </div>
+                        <div class="card-action">
+                            <a class="btn" href="{{discord_oauth_url}}" target="_blank" rel="noopener noreferrer">Give {{SITE_NAME}} Manage Roles </a>
+                            <form action="{% url "check_discord_status" %}" method="post">
+                                {% csrf_token %}
+                                <button class="btn waves-effect waves-light green" type="submit" value="Submit">Re-Check Discord Status
+                                    <i class="material-icons right">send</i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if discord_config.discord_connection_issue %}
+            <div class="row">
+                <div class="col s12 m12">
+                    <div class="card red lighten-5">
+                        <div class="card-content">
+                            <span class="card-title red-text">  <i class="material-icons medium">error</i> Discord Is Down!</span>
+                            {{SITE_NAME}} cannot connect to Discord. Discord itself might be experiencing an outage.
+                        </div>
+                        <div class="card-action">
+                            <form action="{% url "check_discord_status" %}" method="post">
+                                {% csrf_token %}
+                                <button class="btn waves-effect waves-light green" type="submit" value="Submit">Re-Check Discord Status
+                                    <i class="material-icons right">send</i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="row">
+                <div class="col s12 m8">
+                    <div class="card red lighten-5">
+                        <div class="card-content">
+                            {% if not discord_config.guild_id %}
+                                <span class="card-title red-text">  <i class="material-icons medium">error</i> No Discord Server Connected</span>
+                            {% elif not discord_config.server_name %}
+                                <span class="card-title red-text">  <i class="material-icons medium">error</i> Unable to connect to your Discord Server</span>
+                                <b>The Discord Server ID you have entered is invalid OR you have not invited the {{SITE_NAME}} bot to your server.
+                                Please check the Server ID and/or re-invite the bot using the links below:</b><br/><br/>
+                            {% else %}
+                                <span class="card-title red-text">  <i class="material-icons medium">error</i> Unable to connect to your Discord Server</span>
+                                <b>Some Unknown error has occured connecting to your discord server. Please check the Server ID is correct and the bot has been invited to the server.</b><br/><br/>
+                            {% endif %}
+                            Follow these steps to connect your discord server to {{SITE_NAME}}:
+                            <ol>
+                                <li>
+                                    Invite the {{SITE_NAME}} bot to your server by clicking one of the two invite buttons below.
+                                </li>
+                                <li>Enter your Discord Server ID into the field below and click "Update Discord Server".</li>
+                            </ol>
+                        </div>
+                        <div class="card-action">
+                            <a href="{{discord_oauth_url}}" class="waves-btn btn" target="_blank" rel="noopener noreferrer">Invite {{SITE_NAME}} to Your Discord Server</a>
+                            <a href="{{discord_oauth_url_without_manage_permissions}}" class="waves-btn btn orange" target="_blank" rel="noopener noreferrer">Invite Without Manage Roles</a>
+                        </div>
+                    </div>
+                </div>
+                {% include "core/includes/error_contact.html" %}
+            </div>
+        {% endif %}
+    {% endif %}
+    <form action="" method="post">
+        <ul class="collapsible">
+            <li>
+                <div class="collapsible-header"><i class="material-icons">add</i>Follow these steps to find your Discord Server ID (not the name)</div>
+                <div class="collapsible-body">
+                    <p>
+                        <ol>
+                            <li>In Discord, open your User Settings by clicking the Settings Cog next to your user name on the bottom.</li>
+                            <li>Go to Appearance and enable Developer Mode under the Advanced section, then close User Settings.</li>
+                            <li>Open your Discord server, right-click on the server name, then select Copy ID.</li>
+                            <li>Paste the Server ID into the Discord Server ID field below.</li>
+                            <li>You can disable Developer Mode now if you wish.</li>
+                        </ol>
+                    </p>
+                </div>
+            </li>
+        </ul>
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="row">
+            {{ field|materializecss}}
+        </div>
 
-            {% endfor %}
-            <button class="btn waves-effect waves-light" type="submit" value="Submit">Connect Discord Server
+        {% endfor %}
+        {% if not discord_config.guild_id %}
+            <button class="btn waves-effect waves-light green" type="submit" value="Submit">Connect Discord Server
                 <i class="material-icons right">send</i>
             </button>
-        </form>
-    {% endif %}
-
-
-
+        {% else %}
+            <button class="btn waves-effect waves-light green" type="submit" value="Submit">Update Discord Server
+                <i class="material-icons right">send</i>
+            </button>
+        {% endif %}
+    </form>
 </div>
 {% endblock %}

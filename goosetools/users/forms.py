@@ -17,8 +17,9 @@ from goosetools.users.models import (
 
 class DiscordForm(forms.Form):
     guild_id = forms.CharField(
-        help_text="The Discord Server ID to Link Spacepaperwork To:",
+        help_text=f"The Discord Server ID to Link {settings.SITE_NAME} To:",
         label="Discord Server ID",
+        required=False,
     )
 
 
