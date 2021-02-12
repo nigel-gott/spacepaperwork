@@ -1,5 +1,6 @@
 from django.conf import settings
 from django_tenants.utils import schema_context, tenant_context
+from requests.exceptions import HTTPError
 
 from goosetools.users.models import (
     BASIC_ACCESS,
@@ -65,6 +66,9 @@ def setup():
     GoosePermission.ensure_populated()
     Corp.ensure_populated()
     AuthConfig.ensure_exists()
-    DiscordRole.sync_from_discord()
+    try:
+        DiscordRole.sync_from_discord()
+    except HTTPError:
+        pass
     g, _ = DiscordGuild.objects.get_or_create(active=True)
     g.check_valid()
