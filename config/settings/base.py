@@ -117,6 +117,7 @@ TENANT_APPS = [
     "goosetools.core.apps.CoreConfig",
     "goosetools.goose_comments.apps.GooseCommentsConfig",
     "goosetools.user_forms.apps.UserFormsConfig",
+    "goosetools.notifications.apps.NotificationsConfig",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

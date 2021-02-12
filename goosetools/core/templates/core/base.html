@@ -15,6 +15,25 @@
 </head>
 <body>
 {% if user.is_authenticated and user.gooseuser.is_approved %}
+<ul class="dropdown-content" id="dropdown_notifications">
+    {% notifications user as ns %}
+    {% if ns %}
+        <li>
+            <a href="{% url "notifications:notifications-list" %}">View All Notifications</a>
+        </li>
+        <li class="divider" tabindex="-1"></li>
+        {% for n in ns %}
+        <li>
+            {{n.as_html|safe}}
+        </li>
+        {% endfor %}
+    {% else %}
+        <li>
+            <a href="{% url "notifications:notifications-list" %}">No Notifications!</a>
+        </li>
+        <li class="divider" tabindex="-1"></li>
+    {% endif %}
+</ul>
 <ul class="dropdown-content" id="dropdown_tools">
     {% if GOOSEFLOCK_FEATURES %}
     <li>
@@ -137,6 +156,11 @@
         {% if user.is_authenticated and user.gooseuser.is_approved %}
         <ul class="left hide-on-med-and-down valign-wrapper">
 
+            <li>
+                <a class="dropdown-trigger valign-wrapper" data-target="dropdown_notifications" href="#!">
+                    <i class="material-icons left">notifications_active</i>{% if ns %}<span class="new badge red">{{ns|length}}{% endif %}</span>
+                </a>
+            </li>
             <li>
                 <a class="dropdown-trigger valign-wrapper" data-target="dropdown_fleets" href="#!">
                     <i class="material-icons left">star</i>Fleets
@@ -387,7 +411,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var elems = document.querySelectorAll('.sidenav');
     var instances = M.Sidenav.init(elems);
         var elems = document.querySelectorAll('.dropdown-trigger');
-    var instances = M.Dropdown.init(elems);
+    var instances = M.Dropdown.init(elems, {"constrainWidth":false, "coverTrigger":false});
     var elems = document.querySelectorAll('.collapsible');
     var instances = M.Collapsible.init(elems);
     var elems = document.querySelectorAll('.tooltipped');

@@ -1,0 +1,27 @@
+{% extends "core/base.html" %}
+{% block body %}
+<div class="section">
+    <h4>Notifications</h4>
+    <ul class="collection" style="overflow: visible;">
+    {% if notifications %}
+        {% for n in notifications%}
+            <li class="collection-item ">
+                <div class="row">
+                {{n.as_html|safe}}
+                <form action="{% url "notifications:notification-dismiss" n.id %}" method="POST">
+                    {% csrf_token %}
+                    <button class="btn waves-effect waves-light red secondary-content" type="submit" value="Submit">
+                        Dismiss
+                        <i class="material-icons right">send</i>
+                    </button>
+                </form>
+                </div>
+            </li>
+        {% endfor %}
+    {% else %}
+        <li class="collection-item"> You Have No Notifications. </li>
+    {% endif %}
+    </ul>
+</div>
+
+{% endblock %}

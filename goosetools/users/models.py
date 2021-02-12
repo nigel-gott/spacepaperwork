@@ -14,6 +14,7 @@ from requests.exceptions import RequestException
 from rest_framework.permissions import BasePermission
 from timezone_field import TimeZoneField
 
+from goosetools.notifications.notification_types import NOTIFICATION_TYPES
 from goosetools.tenants.models import SiteUser
 from goosetools.user_forms.models import DynamicForm
 
@@ -157,6 +158,9 @@ class DiscordGuild(models.Model):
         self.save()
         if self.connection_valid:
             DiscordRole.sync_from_discord()
+            NOTIFICATION_TYPES["discord_not_setup"].dismiss()
+        else:
+            NOTIFICATION_TYPES["discord_not_setup"].send()
         return self.connection_valid
 
     @staticmethod

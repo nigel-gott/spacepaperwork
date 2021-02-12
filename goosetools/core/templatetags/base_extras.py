@@ -13,9 +13,18 @@ from goosetools.fleets.models import (
 )
 from goosetools.items.models import InventoryItem
 from goosetools.market.models import MarketOrder, SoldItem
+from goosetools.notifications.models import Notification
 from goosetools.users.models import CorpApplication, UserApplication
 
 register = template.Library()
+
+
+@register.simple_tag
+def notifications(user):
+    if hasattr(user, "gooseuser"):
+        return Notification.for_user_rendered(user.gooseuser)
+    else:
+        return []
 
 
 @register.simple_tag

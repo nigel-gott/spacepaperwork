@@ -62,13 +62,11 @@ def splash(request):
     member_orgs = []
     owners_orgs = []
     for tenant in Client.objects.all():
-        if tenant.name != "public":
+        if tenant.name != "public" and request.user.is_authenticated:
             with tenant_context(tenant):
                 if tenant.owner == request.user:
-                    print("owner")
                     owners_orgs.append(tenant)
                 elif GooseUser.objects.filter(site_user=request.user).count() > 0:
-                    print("member")
                     member_orgs.append(tenant)
     return render(
         request,

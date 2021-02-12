@@ -1,7 +1,7 @@
 """goldengoose URL Configuration
 """
 from django.conf import settings
-from django.conf.urls import handler500, include
+from django.conf.urls import include
 from django.contrib import admin
 from django.shortcuts import render
 from django.urls import path
@@ -38,6 +38,7 @@ urlpatterns = [
                 path("tinymce/", include("tinymce.urls")),
                 path("comments/", include("django_comments.urls")),
                 path("forms/", include("user_forms.urls")),
+                path("notifications/", include("notifications.urls")),
             ]
             + settings.ENV_SPECIFIC_URLS
             + gooseflock_apps
