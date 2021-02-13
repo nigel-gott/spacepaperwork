@@ -229,11 +229,6 @@
                 <button class="waves-effect waves-light btn" type="submit">{% trans 'Logout' %}</button>
             </form>
         </li>
-        <li>
-            <a class="center valign-wrapper" href="{% url "notifications:notifications-list" %}">
-                <i class="material-icons left">notifications_active</i>{% if ns %}<span class="new badge red">{{ns|length}}{% endif %}</span>
-            </a>
-        </li>
     {% endif %}
 
     {% if is_user_admin or is_user_group_admin or is_single_corp_admin or is_all_corp_admin or is_ship_price_admin or is_discord_admin %}
@@ -285,6 +280,11 @@
     {% endif %}
 
     {% if user.is_authenticated and user.gooseuser.is_approved %}
+        <li>
+            <a class="center valign-wrapper" href="{% url "notifications:notifications-list" %}">
+                <i class="material-icons left">notifications_active</i>{% if ns %}<span class="new badge red">{{ns|length}}{% endif %}</span>
+            </a>
+        </li>
         {% if GOOSEFLOCK_FEATURES %}
         <li >
             <a href="{% url 'industry:shiporders_view' %}">Orders<i class="material-icons right">directions_boat</i></a>
