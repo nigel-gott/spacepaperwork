@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
@@ -69,7 +68,7 @@ class SiteUser(AbstractUser):
 class Client(TenantMixin):
     name = models.CharField(
         max_length=100,
-        help_text=f"The name of your organization in {settings.SITE_NAME}",
+        help_text="The name of your organization.",
         validators=[RegexValidator("^[a-z0-9_]{1,100}$")],
     )
     owner = models.ForeignKey(

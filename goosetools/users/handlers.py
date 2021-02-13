@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.management import call_command
 from django_tenants.utils import schema_context, tenant_context
 from requests.exceptions import HTTPError
 
@@ -59,6 +60,14 @@ def setup_tenant(tenant, request, signup_form):
         )
         Character.objects.create(
             ingame_name=data["ingame_name"], corp=default_corp, user=gooseuser
+        )
+
+        call_command(
+            "tenant_command",
+            "loaddata",
+            "goosetools/core/fixtures/systems.json",
+            "goosetools/items/fixtures/items.json",
+            schema={tenant.schema_name},
         )
 
 

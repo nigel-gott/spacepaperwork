@@ -9,7 +9,7 @@ class UserDashboardTest(GooseToolsTestCase):
         self.other_user.groupmember_set.all().delete()
         r = self.client.get(reverse("user_dashboard"), follow=True)
         last_url, _ = r.redirect_chain[-1]
-        self.assertEqual(last_url, "/home/")
+        self.assertIn("/home/", last_url)
         self.assert_messages(
             r,
             [("error", "You are not yet approved and cannot access this page.")],

@@ -10,6 +10,7 @@
     <link href="{% static 'core/css/materialize.css' %}" rel="stylesheet" type="text/css">
     <link href="{% static 'core/css/core.css' %}" rel="stylesheet" type="text/css">
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <link rel="shortcut icon" type="image/png" href="{% static 'core/favicon.svg' %}"/>
     {% block extraheader %}
     {% endblock %}
 </head>
@@ -155,7 +156,6 @@
         <a class="sidenav-trigger" data-target="mobile-demo" href="#"><i class="material-icons">menu</i></a>
         {% if user.is_authenticated and user.gooseuser.is_approved %}
         <ul class="left hide-on-med-and-down valign-wrapper">
-
             <li>
                 <a class="dropdown-trigger valign-wrapper" data-target="dropdown_notifications" href="#!">
                     <i class="material-icons left">notifications_active</i>{% if ns %}<span class="new badge red">{{ns|length}}{% endif %}</span>
@@ -228,6 +228,11 @@
                 {% endif %}
                 <button class="waves-effect waves-light btn" type="submit">{% trans 'Logout' %}</button>
             </form>
+        </li>
+        <li>
+            <a class="center valign-wrapper" href="{% url "notifications:notifications-list" %}">
+                <i class="material-icons left">notifications_active</i>{% if ns %}<span class="new badge red">{{ns|length}}{% endif %}</span>
+            </a>
         </li>
     {% endif %}
 
@@ -381,7 +386,7 @@
 {% block footer %}
 <footer class="page-footer blue-grey lighten-2">
     <div class="container">
-        <h5 class="white-text">⚙ {{SITE_NAME}}</h5>
+        <h5 class="white-text">{{SITE_NAME}}</h5>
         <ul>
             {% if GOOSEFLOCK_FEATURES %}
             <li><a class="grey-text text-lighten-3"
@@ -389,8 +394,11 @@
             </li>
             <li><a class="grey-text text-lighten-3" href="https://wiki.goosetools.com">HONK Wiki</a></li>
             {% endif %}
-            <li><a class="grey-text text-lighten-3" href="https://discord.com/users/244766405260476417/">PM
-                @thejanitor for help and suggestions</a></li>
+            <li>
+                    <i class="material-icons left">help</i>
+                {% include "core/includes/error_contact_no_card.html" %}
+
+                </li>
         </ul>
     </div>
 </footer>

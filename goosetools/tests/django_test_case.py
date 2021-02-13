@@ -1,10 +1,98 @@
 import json
 from typing import Any, Dict, List, Set, Tuple, Union
 
+from django.conf import settings
+from django.contrib.auth import authenticate
 from django.contrib.messages.api import get_messages
+from django.http.request import HttpRequest
 from django.http.response import HttpResponse
+from django.test.client import MULTIPART_CONTENT, Client
 from django_tenants.test.cases import FastTenantTestCase
-from django_tenants.test.client import TenantClient
+
+
+class SubFolderTenantClient(Client):
+    def __init__(self, tenant, enforce_csrf_checks=False, **defaults):
+        super().__init__(enforce_csrf_checks, **defaults)
+        self.tenant = tenant
+
+    def _setup(self, path, extra):
+        if not settings.TENANT_SUBFOLDER_PREFIX:
+            if "HTTP_HOST" not in extra:
+                extra["HTTP_HOST"] = self.tenant.get_primary_domain().domain
+        else:
+            domain = self.tenant.get_primary_domain().domain
+            if domain not in path:
+                return f"/{settings.TENANT_SUBFOLDER_PREFIX}/{domain}{path}", extra
+        return path, extra
+
+    def get(self, path, data=None, follow=False, secure=False, **extra):
+        path, extra = self._setup(path, extra)
+        return super().get(path, data, follow, secure, **extra)
+
+    def post(
+        self,
+        path,
+        data=None,
+        content_type=MULTIPART_CONTENT,
+        follow=False,
+        secure=False,
+        **extra,
+    ):
+        path, extra = self._setup(path, extra)
+        return super().post(path, data, content_type, follow, secure, **extra)
+
+    def patch(
+        self,
+        path,
+        data="",
+        content_type="application/octet-stream",
+        follow=False,
+        secure=False,
+        **extra,
+    ):
+        path, extra = self._setup(path, extra)
+        return super().patch(path, data, content_type, follow, secure, **extra)
+
+    def put(
+        self,
+        path,
+        data="",
+        content_type="application/octet-stream",
+        follow=False,
+        secure=False,
+        **extra,
+    ):
+        path, extra = self._setup(path, extra)
+        return super().put(path, data, content_type, follow, secure, **extra)
+
+    def delete(
+        self,
+        path,
+        data="",
+        content_type="application/octet-stream",
+        follow=False,
+        secure=False,
+        **extra,
+    ):
+        path, extra = self._setup(path, extra)
+        return super().delete(path, data, content_type, follow, secure, **extra)
+
+    def login(self, **credentials):
+        # Create a dummy HttpRequest object and add HTTP_HOST
+
+        request = HttpRequest()
+        _, _ = self._setup("", request.META)
+        request.tenant = self.tenant  # type: ignore
+
+        # Authenticate using django contrib's authenticate which passes the request on
+        # to custom backends
+
+        user = authenticate(request, **credentials)
+        if user:
+            super()._login(user)  # type: ignore
+            return True
+        else:
+            return False
 
 
 class DjangoTestCase(FastTenantTestCase):
@@ -16,11 +104,12 @@ class DjangoTestCase(FastTenantTestCase):
         """
         tenant.paid_until = "3030-01-04"
         tenant.on_trial = False
+        tenant.is_primary = True
         return tenant
 
     def setUp(self):
         super().setUp()
-        self.client = TenantClient(self.tenant)
+        self.client = SubFolderTenantClient(self.tenant)
 
     @staticmethod
     def get_errors_from_response(response: HttpResponse) -> List[str]:

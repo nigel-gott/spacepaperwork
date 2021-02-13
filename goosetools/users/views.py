@@ -367,10 +367,17 @@ def character_edit(request, pk):
                         "You do not have the required discord role to apply for this corp",
                     )
                 elif character.corp != corp:
-                    messages.info(
-                        request,
-                        f"Corp application for {character} to {corp} registered in goosetools pending approval from @AuthTeam.",
-                    )
+                    if not corp.auto_approve:
+                        messages.info(
+                            request,
+                            f"Corp application for {character} to {corp} has been made pending approval from an admin.",
+                        )
+                    else:
+                        messages.info(
+                            request,
+                            f"Moved {character} to {corp}!",
+                        )
+
                     CorpApplication.new(
                         character=character, status="unapproved", corp=corp
                     )
@@ -398,10 +405,16 @@ def character_new(request):
                 corp=Corp.unknown_corp(),
                 user=request.user.gooseuser,
             )
-            messages.info(
-                request,
-                f"Corp application for {character} to {corp} registered in goosetools pending approval from @AuthTeam.",
-            )
+            if not corp.auto_approve:
+                messages.info(
+                    request,
+                    f"Corp application for {character} to {corp} made pending approval from an admin.",
+                )
+            else:
+                messages.info(
+                    request,
+                    f"Created {character} in {corp}!",
+                )
             CorpApplication.new(character=character, status="unapproved", corp=corp)
             return HttpResponseRedirect(reverse("characters"))
 

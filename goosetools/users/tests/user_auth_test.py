@@ -85,7 +85,6 @@ class UserAuthTest(GooseToolsTestCase):
 
         response = self.client.get(reverse("fleet"))
         self.assertNotIn("Active Fleets", str(response.content, encoding="utf-8"))
-        self.assertRedirects(response, reverse("core:home"))
         self.assert_messages(
             response,
             [("error", "You are not yet approved and cannot access this page.")],

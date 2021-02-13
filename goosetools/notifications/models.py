@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from django.db import models
 from django.db.models.query_utils import Q
-from django.urls.base import reverse_lazy
+from django.urls.base import reverse, reverse_lazy
 from django.utils import timezone
 
 from goosetools.notifications.notification_types import NOTIFICATION_TYPES
@@ -33,7 +33,9 @@ class Notification(models.Model):
         notifications = Notification.for_user(user)
         rendered_notifications = []
         for n in notifications:
-            rendered_notifications.append(NOTIFICATION_TYPES[n.type].render(n))
+            rendered_n = NOTIFICATION_TYPES[n.type].render(n)
+            rendered_n.id = n.id
+            rendered_notifications.append(rendered_n)
         return rendered_notifications
 
 
@@ -56,7 +58,7 @@ class NotificationType(ABC):
         pass
 
     @abstractmethod
-    def send(self):
+    def send(self, user):
         pass
 
 
@@ -67,7 +69,7 @@ class UnStackablePermissionNotification(NotificationType):
         self.pre_rendered = pre_rendered
         super().__init__()
 
-    def send(self):
+    def send(self, _=None):
         Notification.objects.update_or_create(
             type=self.notification_type,
             permission=GoosePermission.objects.get(name=self.permission),
@@ -79,9 +81,71 @@ class UnStackablePermissionNotification(NotificationType):
             type=self.notification_type, permission__name=self.permission
         ).delete()
 
-    def render(self, notification):
-        self.pre_rendered.id = notification.id
+    def render(self, _):
         return self.pre_rendered
+
+
+class StackableUserNotification(NotificationType):
+    def __init__(self, notification_type) -> None:
+        self.notification_type = notification_type
+        super().__init__()
+
+    def send(self, user):
+        n, new = Notification.objects.get_or_create(
+            type=self.notification_type,
+            user=user,
+        )
+        n.created_at = timezone.now()
+        if new:
+            n.data = {"count": 1}
+        else:
+            n.data = {"count": n.data["count"] + 1}
+        n.save()
+
+    def dismiss_one(self, user):
+        try:
+            n = Notification.objects.get(type=self.notification_type, user=user)
+            if n.data["count"] < 2:
+                n.delete()
+            else:
+                n.data = {"count": n.data["count"] - 1}
+                n.save()
+        except Notification.DoesNotExist:
+            pass
+
+    def dismiss_all(self, user):
+        Notification.objects.filter(type=self.notification_type, user=user).delete()
+
+    def dismiss(self, n):
+        self.dismiss_all(n.user)
+
+
+class ContractMadeNotification(StackableUserNotification):
+    def __init__(self) -> None:
+        super().__init__("contract_made")
+
+    def render(self, notification):
+        count = notification.data["count"]
+        plural = "s" if count > 1 else ""
+        return RenderedNotification(
+            f"You have {count} pending contract{plural}.",
+            "hourglass_empty",
+            reverse("contracts"),
+        )
+
+
+class ContractRequestedNotification(StackableUserNotification):
+    def __init__(self) -> None:
+        super().__init__("contract_requested")
+
+    def render(self, notification):
+        count = notification.data["count"]
+        plural = "s" if count > 1 else ""
+        return RenderedNotification(
+            f"You have {count} requested contract{plural} to make.",
+            "add_box",
+            reverse("contracts"),
+        )
 
 
 NOTIFICATION_TYPES["discord_not_setup"] = UnStackablePermissionNotification(
@@ -93,3 +157,5 @@ NOTIFICATION_TYPES["discord_not_setup"] = UnStackablePermissionNotification(
         reverse_lazy("discord_settings"),
     ),
 )
+NOTIFICATION_TYPES["contract_made"] = ContractMadeNotification()
+NOTIFICATION_TYPES["contract_requested"] = ContractRequestedNotification()

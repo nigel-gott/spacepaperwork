@@ -109,9 +109,6 @@ class DiscordGuild(models.Model):
 
                 for role in bot_member_info["roles"]:
                     permissions = int(roles_by_id[role]["permissions"])
-                    print(permissions)
-                    print(permissions & MANAGE_ROLES_DISCORD_PERMISSION)
-                    print(MANAGE_ROLES_DISCORD_PERMISSION)
                     self.has_manage_roles = (
                         permissions & MANAGE_ROLES_DISCORD_PERMISSION
                     ) == MANAGE_ROLES_DISCORD_PERMISSION

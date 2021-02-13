@@ -34,7 +34,7 @@ def core_home(request):
 
 def core_conduct(request):
     code_of_conduct = AuthConfig.get_active().code_of_conduct
-    if code_of_conduct.strip():
+    if code_of_conduct:
         return render(
             request,
             "core/conduct.html",

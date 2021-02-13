@@ -8,15 +8,19 @@ def _try_lookup_guild_roles(user_id):
 
     try:
         guild = DiscordGuild.objects.get(active=True)
-        bot_headers = {
-            "Authorization": "Bot {0}".format(settings.BOT_TOKEN),
-            "Content-Type": "application/json",
-        }
-        discord_uid = user_id
-        url = f"https://discord.com/api/guilds/{guild.guild_id}/members/{discord_uid}"
-        return requests.get(url, headers=bot_headers).json()
+        if guild.guild_id:
+            bot_headers = {
+                "Authorization": "Bot {0}".format(settings.BOT_TOKEN),
+                "Content-Type": "application/json",
+            }
+            discord_uid = user_id
+            url = (
+                f"https://discord.com/api/guilds/{guild.guild_id}/members/{discord_uid}"
+            )
+            return requests.get(url, headers=bot_headers).json()
     except DiscordGuild.DoesNotExist:
-        return {}
+        pass
+    return {}
 
 
 class UsersConfig(AppConfig):

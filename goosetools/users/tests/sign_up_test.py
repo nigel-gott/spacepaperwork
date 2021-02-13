@@ -58,11 +58,7 @@ class UserAuthTest(GooseToolsTestCase):
         with requests_mock.Mocker() as m:
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
-            response = self.client.get(reverse("core:splash"), follow=True)
-            self.assertIn(
-                f'<a id="conduct_button" class="btn waves-btn green btn-large pulse" href="{reverse("core:conduct")}">HONK</a>',
-                str(response.content, encoding="utf-8"),
-            )
+            self.client.get(reverse("core:splash"), follow=True)
             conduct = self.client.get(reverse("core:conduct"), follow=True)
             self.assertIn(
                 "CUSTOM CODE OF CONDUCT",
@@ -72,18 +68,20 @@ class UserAuthTest(GooseToolsTestCase):
     def test_a_user_with_user_admin_perm_can_change_code_of_conduct(
         self,
     ):
-        DiscordGuild.objects.create(active=True, guild_id="old")
-        AuthConfig.objects.create(active=True, code_of_conduct="CUSTOM CODE OF CONDUCT")
-        self.user.give_group(self.user_admin_group)
         with requests_mock.Mocker() as m:
             m.get(
                 "https://discord.com/api/guilds/id/members/3",
                 json={},
                 headers={"content-type": "application/json"},
             )
+            DiscordGuild.objects.create(active=True, guild_id="id")
+            AuthConfig.objects.create(
+                active=True, code_of_conduct="CUSTOM CODE OF CONDUCT"
+            )
+            self.user.give_group(self.user_admin_group)
             self.post(
                 reverse("code_of_conduct_edit"),
-                {"code_of_conduct": "NEW DIFFERENT CODE", "discord_guild_id": "id"},
+                {"code_of_conduct": "NEW DIFFERENT CODE"},
             )
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
@@ -93,7 +91,6 @@ class UserAuthTest(GooseToolsTestCase):
                 "NEW DIFFERENT CODE",
                 str(conduct.content, encoding="utf-8"),
             )
-            self.assertEqual(DiscordGuild.objects.get(active=True).guild_id, "id")
 
     def test_a_user_with_no_perms_cant_change_code_of_conduct(
         self,

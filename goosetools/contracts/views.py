@@ -8,7 +8,7 @@ from django.forms.forms import Form
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.utils import timezone, translation
+from django.utils import translation
 from djmoney.money import Money
 from moneyed.localization import format_money
 
@@ -28,7 +28,7 @@ def reject_contract(request, pk):
     if request.method == "POST":
         form = Form(request.POST)
         if form.is_valid() and contract.can_accept_or_reject(request.user.gooseuser):
-            contract.status = "rejected"
+            contract.change_status("rejected")
             log = []
             for item in contract.inventoryitem_set.all():
                 log.append(
@@ -73,7 +73,7 @@ class ComplexEncoder(json.JSONEncoder):
 
 
 def change_contract_status(contract, status, change_location):
-    contract.status = status
+    contract.change_status(status)
     char_loc, _ = CharacterLocation.objects.get_or_create(
         character=contract.to_char, system=contract.system
     )
@@ -129,15 +129,12 @@ def create_contract_item(request, pk):
             system = form.cleaned_data["system"]
             character = form.cleaned_data["character"]
 
-            contract = Contract(
+            contract = Contract.create(
                 from_user=request.user.gooseuser,
                 to_char=character,
                 system=system,
-                created=timezone.now(),
                 status="pending",
             )
-            contract.full_clean()
-            contract.save()
             item.contract = contract
             item.full_clean()
             item.save()
@@ -175,15 +172,12 @@ def create_contract_for_loc(request, pk):
                 messages.error(request, "You have no items to contract :'(")
                 return forbidden(request)
 
-            contract = Contract(
+            contract = Contract.create(
                 from_user=request.user.gooseuser,
                 to_char=character,
                 system=system,
-                created=timezone.now(),
                 status="pending",
             )
-            contract.full_clean()
-            contract.save()
             items_in_location.update(contract=contract)
             return HttpResponseRedirect(reverse("contracts"))
     else:
@@ -221,15 +215,12 @@ def create_contract_for_fleet(request, fleet_pk, loc_pk):
                 messages.error(request, "You have no items to contract :'(")
                 return forbidden(request)
 
-            contract = Contract(
+            contract = Contract.create(
                 from_user=request.user.gooseuser,
                 to_char=character,
                 system=system,
-                created=timezone.now(),
                 status="pending",
             )
-            contract.full_clean()
-            contract.save()
             items_in_location.update(contract=contract)
             return HttpResponseRedirect(reverse("contracts"))
     else:
@@ -259,15 +250,12 @@ def item_move_all(request):
                 messages.error(request, "You have no items to contract :'(")
                 return forbidden(request)
 
-            contract = Contract(
+            contract = Contract.create(
                 from_user=request.user.gooseuser,
                 to_char=character,
                 system=system,
-                created=timezone.now(),
                 status="pending",
             )
-            contract.full_clean()
-            contract.save()
             all_your_items.update(contract=contract)
             return HttpResponseRedirect(reverse("contracts"))
     else:
