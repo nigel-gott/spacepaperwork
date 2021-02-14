@@ -19,7 +19,7 @@
                     </div>
                     <div class="card-action">
                         {% if not owner_orgs %}
-                            <a class="waves-btn btn green" href="{% url 'tenants:client-create' %}">Create your {{SITE_NAME}} site for free</a><br/>
+                            <a class="waves-btn btn green" href="{% url 'tenants:client-create' %}">Create your {{SITE_NAME}} site now</a><br/>
                         {% else %}
                             {% if orgs|length == 1 %}
                                 {% for org in orgs %}
