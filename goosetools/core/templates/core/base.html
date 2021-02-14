@@ -154,8 +154,15 @@
 <nav class="nav-extended blue-grey darken-3">
     <div class="nav-wrapper">
         <a class="sidenav-trigger" data-target="mobile-demo" href="#"><i class="material-icons">menu</i></a>
-        {% if user.is_authenticated and user.gooseuser.is_approved %}
         <ul class="left hide-on-med-and-down valign-wrapper">
+            {% if tenant.name == "public" %}
+            <li><a href="{% url 'tenants:splash' %}"><img class="valign-wrapper" style="width:32px;" src="{% static 'core/logo.svg'%}"></a></li>
+            {% else %}
+            <li><a href="{% url 'core:splash' %}"><img class="valign-wrapper" style="width:32px;" src="{% static 'core/logo.svg'%}"></a></li>
+            {% endif %}
+            {% block extranavbar %}
+            {% endblock %}
+            {% if user.is_authenticated and user.gooseuser.is_approved %}
             <li>
                 <a class="dropdown-trigger valign-wrapper" data-target="dropdown_notifications" href="#!">
                     <i class="material-icons left">notifications_active</i>{% if ns %}<span class="new badge red">{{ns|length}}{% endif %}</span>
@@ -198,8 +205,30 @@
                 </a>
             </li>
             {% endif %}
+            {% else %}
+            <li>
+                <a href="{% url 'tenants:splash' %}">
+                    <i class="material-icons left">star</i>Features
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'tenants:pricing' %}">
+                    <i class="material-icons left">attach_money</i>Pricing
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'tenants:about' %}">
+                    <i class="material-icons left">question_answer</i>About
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'tenants:help' %}">
+                    <i class="material-icons left">help</i>Help
+                </a>
+            </li>
+
+            {% endif %}
         </ul>
-        {% endif %}
         <ul class="right hide-on-med-and-down">
             {% if user.is_authenticated %}
             <li>
@@ -361,7 +390,30 @@
         <li ><a href="{% url 'characters' %}">Characters</a></li>
 
     {% else %}
+        {% if not user.is_authenticated %}
         <li><a class="waves-effect waves-light btn" href="{{LOGIN_URL}}">Login</a></li>
+        {% endif %}
+            <li>
+                <a href="{% url 'tenants:splash' %}">
+                    <i class="material-icons left">star</i>Features
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'tenants:pricing' %}">
+                    <i class="material-icons left">attach_money</i>Pricing
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'tenants:about' %}">
+                    <i class="material-icons left">question_answer</i>About
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'tenants:help' %}">
+                    <i class="material-icons left">help</i>Help
+                </a>
+            </li>
+
     {% endif %}
 </ul>
 

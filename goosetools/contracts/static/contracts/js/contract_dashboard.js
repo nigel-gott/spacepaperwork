@@ -87,11 +87,55 @@ $(function () {
                                         }
                                     }
                                 case "rejected":
-                                    return ``;
+                                    if (row['isk'] === 0) {
+                                        if (row["total_items"] > 0) {
+                                            if (page_data["gooseuser_id"] === row["to_char"]) {
+                                                return `REJECTED: Contract from ${['from_user_display_name']} sending you ${row['total_items']} items to "${row['to_char_ingame_name']}"`;
+                                            } else {
+                                                return `REJECTED: Contract sending ${row['total_items']} items to ${row['to_char_ingame_name']}(${row['to_char_display_name']}) in-game`;
+                                            }
+                                        } else {
+                                            return "REJECTED: Invalid Pending Contract for 0 ISK and 0 items."
+                                        }
+                                    } else if (row['isk'] > 0) {
+                                        if (page_data["gooseuser_id"] === row["to_char"]) {
+                                            return `REJECTED: Contract from ${['from_user_display_name']} sending you ${row['isk']} ISK to "${row['to_char_ingame_name']}"`;
+                                        } else {
+                                            return `REJECTED: Contract sending ${row['ISK']} isk to ${row['to_char_ingame_name']}(${row['to_char_display_name']}) in-game`;
+                                        }
+                                    } else {
+                                        if (page_data["gooseuser_id"] === row["to_char"]) {
+                                            return `REJECTED: Contract from ${['from_user_display_name']} requesting ${row['isk']} ISK from your character "${row['to_char_ingame_name']}"`;
+                                        } else {
+                                            return `REJECTED: Contract requesting ${row['ISK']} from ${row['to_char_ingame_name']}(${row['to_char_display_name']}) in-game`;
+                                        }
+                                    }
                                 case "cancelled":
-                                    return ``;
+                                    if (row['isk'] === 0) {
+                                        if (row["total_items"] > 0) {
+                                            if (page_data["gooseuser_id"] === row["to_char"]) {
+                                                return `CANCELLED: Contract from ${['from_user_display_name']} sending you ${row['total_items']} items to "${row['to_char_ingame_name']}"`;
+                                            } else {
+                                                return `CANCELLED: Contract sending ${row['total_items']} items to ${row['to_char_ingame_name']}(${row['to_char_display_name']}) in-game`;
+                                            }
+                                        } else {
+                                            return "CANCELLED: Invalid Pending Contract for 0 ISK and 0 items."
+                                        }
+                                    } else if (row['isk'] > 0) {
+                                        if (page_data["gooseuser_id"] === row["to_char"]) {
+                                            return `CANCELLED: Contract from ${['from_user_display_name']} sending you ${row['isk']} ISK to "${row['to_char_ingame_name']}"`;
+                                        } else {
+                                            return `CANCELLED: Contract sending ${row['ISK']} isk to ${row['to_char_ingame_name']}(${row['to_char_display_name']}) in-game`;
+                                        }
+                                    } else {
+                                        if (page_data["gooseuser_id"] === row["to_char"]) {
+                                            return `CANCELLED: Contract from ${['from_user_display_name']} requesting ${row['isk']} ISK from your character "${row['to_char_ingame_name']}"`;
+                                        } else {
+                                            return `CANCELLED: Contract requesting ${row['ISK']} from ${row['to_char_ingame_name']}(${row['to_char_display_name']}) in-game`;
+                                        }
+                                    }
                                 default:
-                                    return ``;
+                                    return `Unknown contract status.`;
                             }
                         }
                         edit_url = page_data['contract_view_url'].replace("0", row["id"]);
@@ -141,7 +185,11 @@ $(function () {
                         function make_buttons(status) {
                             switch (status) {
                                 case "requested":
-                                    return `<a class="ban-btn green-text" href="#">I've Made This Contract</a> / <a class="inactive-btn grey-text" href="#">Cancel</a>`;
+                                    if (page_data["gooseuser_id"] === row["to_char"]) {
+                                        return `<a class="ban-btn green-text" href="#">I've Made This Contract</a> / <a class="inactive-btn grey-text" href="#">Cancel</a>`;
+                                    } else {
+                                        return '<a class="ban-btn grey-text" href="#">Cancel</a>';
+                                    }
                                 case "pending":
                                     if (page_data["gooseuser_id"] === row["to_char"]) {
                                         return `<a class="pulse ban-btn green-text" href="#">I've Accepted This</a> / <a class="inactive-btn grey-text" href="#">Reject</a>`;

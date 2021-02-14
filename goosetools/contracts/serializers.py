@@ -16,7 +16,7 @@ class ContractSerializer(serializers.ModelSerializer):
     to_char_display_name = serializers.CharField(
         source="to_char.user.display_name", read_only=True
     )
-    isk = serializers.CharField(source="isk.amount", read_only=True)
+    isk = serializers.IntegerField(source="isk.amount", read_only=True)
 
     class Meta:
         model = Contract

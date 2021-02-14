@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib import messages
 from django.http.response import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls.base import reverse
@@ -11,6 +12,23 @@ from goosetools.tenants.models import Client, Domain
 from goosetools.users.forms import SignupFormWithTimezone
 from goosetools.users.handlers import setup_tenant
 from goosetools.users.models import GooseUser
+
+
+def find_tenants_for_user(request, excluding=None):
+    owners_orgs = []
+    member_orgs = []
+    if excluding:
+        qs = Client.objects.exclude(id=excluding.id).all()
+    else:
+        qs = Client.objects.all()
+    for tenant in qs:
+        if tenant.name != "public" and request.user.is_authenticated:
+            with tenant_context(tenant):
+                if tenant.owner == request.user:
+                    owners_orgs.append(tenant)
+                elif GooseUser.objects.filter(site_user=request.user).count() > 0:
+                    member_orgs.append(tenant)
+    return owners_orgs, member_orgs
 
 
 class ClientCreate(CreateView):
@@ -34,6 +52,29 @@ class ClientCreate(CreateView):
             data["signup_form"] = SignupFormWithTimezone()
         return data
 
+    def get(self, request, *args, **kwargs):
+        """Handle GET requests: instantiate a blank version of the form."""
+        owner_orgs, _ = find_tenants_for_user(self.request)
+        if len(owner_orgs) == 0:
+            return super().get(request, args, kwargs)
+        else:
+            messages.error(
+                self.request,
+                f"You already own the {settings.SITE_NAME} organization '{owner_orgs[0].name}' and cannot create another.",
+            )
+            return HttpResponseRedirect(reverse("tenants:splash"))
+
+    def post(self, request, *args, **kwargs):
+        owner_orgs, _ = find_tenants_for_user(self.request)
+        if len(owner_orgs) == 0:
+            return super().post(request, *args, **kwargs)
+        else:
+            messages.error(
+                self.request,
+                f"You already own the {settings.SITE_NAME} organization '{owner_orgs[0].name}' and cannot create another.",
+            )
+            return HttpResponseRedirect(reverse("tenants:splash"))
+
     def form_valid(self, form):
         if settings.GOOSEFLOCK_FEATURES:
             return HttpResponseBadRequest()
@@ -51,29 +92,85 @@ class ClientCreate(CreateView):
                     domain=self.object.name, is_primary=False, tenant=self.object
                 )
                 setup_tenant(self.object, self.request, signup_form)
-            return r
-        else:
-            return super().form_invalid(form)
+                return r
+        return super().form_invalid(form)
 
 
 def splash(request):
     if settings.GOOSEFLOCK_FEATURES:
         return HttpResponseRedirect(reverse("core:splash"))
-    member_orgs = []
-    owners_orgs = []
-    for tenant in Client.objects.all():
-        if tenant.name != "public" and request.user.is_authenticated:
-            with tenant_context(tenant):
-                if tenant.owner == request.user:
-                    owners_orgs.append(tenant)
-                elif GooseUser.objects.filter(site_user=request.user).count() > 0:
-                    member_orgs.append(tenant)
+    owner_orgs, member_orgs = find_tenants_for_user(request)
     return render(
         request,
         "tenants/splash.html",
         {
-            "owner_orgs": owners_orgs,
-            "member_orgs": member_orgs,
             "tenant_subfolder_prefix": settings.TENANT_SUBFOLDER_PREFIX,
+            "owner_orgs": owner_orgs,
+            "member_orgs": member_orgs,
+            "orgs": owner_orgs + member_orgs,
+        },
+    )
+
+
+def about(request):
+    if settings.GOOSEFLOCK_FEATURES:
+        return HttpResponseRedirect(reverse("core:splash"))
+    owner_orgs, member_orgs = find_tenants_for_user(request)
+    return render(
+        request,
+        "tenants/about.html",
+        {
+            "tenant_subfolder_prefix": settings.TENANT_SUBFOLDER_PREFIX,
+            "owner_orgs": owner_orgs,
+            "member_orgs": member_orgs,
+            "orgs": owner_orgs + member_orgs,
+        },
+    )
+
+
+def privacy(request):
+    if settings.GOOSEFLOCK_FEATURES:
+        return HttpResponseRedirect(reverse("core:splash"))
+    owner_orgs, member_orgs = find_tenants_for_user(request)
+    return render(
+        request,
+        "tenants/privacy.html",
+        {
+            "tenant_subfolder_prefix": settings.TENANT_SUBFOLDER_PREFIX,
+            "owner_orgs": owner_orgs,
+            "member_orgs": member_orgs,
+            "orgs": owner_orgs + member_orgs,
+        },
+    )
+
+
+def pricing(request):
+    if settings.GOOSEFLOCK_FEATURES:
+        return HttpResponseRedirect(reverse("core:splash"))
+    owner_orgs, member_orgs = find_tenants_for_user(request)
+    return render(
+        request,
+        "tenants/pricing.html",
+        {
+            "tenant_subfolder_prefix": settings.TENANT_SUBFOLDER_PREFIX,
+            "owner_orgs": owner_orgs,
+            "member_orgs": member_orgs,
+            "orgs": owner_orgs + member_orgs,
+        },
+    )
+
+
+def help_page(request):
+    if settings.GOOSEFLOCK_FEATURES:
+        return HttpResponseRedirect(reverse("core:splash"))
+    owner_orgs, member_orgs = find_tenants_for_user(request)
+    return render(
+        request,
+        "tenants/help.html",
+        {
+            "tenant_subfolder_prefix": settings.TENANT_SUBFOLDER_PREFIX,
+            "owner_orgs": owner_orgs,
+            "member_orgs": member_orgs,
+            "orgs": owner_orgs + member_orgs,
         },
     )
