@@ -1,16 +1,41 @@
-{% extends "core/base.html" %}
+{% extends "tenants/public_base.html" %}
 {% load static %}
 {% block title %}Pricing | {{SITE_NAME}}{% endblock %}
-{% block extranavbar %}
-    <li>
-        <a class="waves-btn btn green" href="{% url 'tenants:client-create' %}">Sign Up</a><br/>
-    </li>
-{% endblock %}
 {% block body %}
 <div class="section">
+<div class="row">
+    <div class="col s12 s12">
+        <h2>Pricing</h2>
+    </div>
+</div>
+<div class="col s12 s12">
+    <div class="col s12">
+            <div class="card-panel">
+                <span class="card-title"><i class="material-icons medium green-text">check</i>Your First Month is Free!</span><br/><br/>
+                For organizations upto 50 members your entire first month is free on {{SITE_NAME}}. After which the below pricing table will kick in for continued access:
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col s12 s12">
-            <h3>Pricing</h3>
+
+            <table>
+                <thead>
+                    <th>
+                    Organization Size
+                    </th>
+                    <th>
+                    Monthly Price
+                    </th>
+                </thead>
+                <tbody>
+                    <tr><td>20 or fewer members</td><td>£1 Per Month</td></tr>
+                    <tr><td>20-50</td><td>£5 Per Month</td></tr>
+                    <tr><td>50-200</td><td>£15 Per Month</td></tr>
+                    <tr><td>200-500</td><td>£30 Per Month</td></tr>
+                    <tr><td>500+</td><td>Contact @thejanitor on Discord and lets work something out!</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

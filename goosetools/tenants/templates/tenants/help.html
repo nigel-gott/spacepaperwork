@@ -1,16 +1,21 @@
-{% extends "core/base.html" %}
+{% extends "tenants/public_base.html" %}
 {% load static %}
 {% block title %}Help | {{SITE_NAME}}{% endblock %}
-{% block extranavbar %}
-    <li>
-        <a class="waves-btn btn green" href="{% url 'tenants:client-create' %}">Sign Up</a><br/>
-    </li>
-{% endblock %}
 {% block body %}
 <div class="section">
     <div class="row">
         <div class="col s12 s12">
-            <h3>Help</h3>
+            <div class="col s12">
+                <div class="card-panel">
+                    <span class="card-title">  <i class="material-icons medium">help</i> Need Help with {{SITE_NAME}}?</span>
+                    Join the Discord Server below and ping @thejanitor for help.</p>
+
+                    <div class="card-action">
+                        <a href="https://discord.gg/tsHP3XStQm" class="btn waves-btn">Join the {{SITE_NAME}} Discord</a>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

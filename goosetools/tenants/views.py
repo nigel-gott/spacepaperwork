@@ -112,38 +112,6 @@ def splash(request):
     )
 
 
-def about(request):
-    if settings.GOOSEFLOCK_FEATURES:
-        return HttpResponseRedirect(reverse("core:splash"))
-    owner_orgs, member_orgs = find_tenants_for_user(request)
-    return render(
-        request,
-        "tenants/about.html",
-        {
-            "tenant_subfolder_prefix": settings.TENANT_SUBFOLDER_PREFIX,
-            "owner_orgs": owner_orgs,
-            "member_orgs": member_orgs,
-            "orgs": owner_orgs + member_orgs,
-        },
-    )
-
-
-def privacy(request):
-    if settings.GOOSEFLOCK_FEATURES:
-        return HttpResponseRedirect(reverse("core:splash"))
-    owner_orgs, member_orgs = find_tenants_for_user(request)
-    return render(
-        request,
-        "tenants/privacy.html",
-        {
-            "tenant_subfolder_prefix": settings.TENANT_SUBFOLDER_PREFIX,
-            "owner_orgs": owner_orgs,
-            "member_orgs": member_orgs,
-            "orgs": owner_orgs + member_orgs,
-        },
-    )
-
-
 def pricing(request):
     if settings.GOOSEFLOCK_FEATURES:
         return HttpResponseRedirect(reverse("core:splash"))

@@ -1,40 +1,10 @@
-{% extends "core/base.html" %}
+{% extends "tenants/public_base.html" %}
 {% load static %}
 {% block title %}{{SITE_NAME}}{% endblock %}
 {% block extraheader %}
 <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
  <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
 <script type="text/javascript" src="//cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
-{% endblock %}
-{% block extranavbar %}
-    <li>
-        {% if not orgs %}
-        <a class="waves-btn btn green" href="{% url 'tenants:client-create' %}">Sign Up</a><br/>
-        {% elif not owner_orgs %}
-        <a class="waves-btn btn green" href="{% url 'tenants:client-create' %}">Create Site</a><br/>
-        {% endif %}
-    </li>
-    {% if orgs %}
-        {% if orgs|length == 1 %}
-        <li>
-            {% for org in orgs %}
-                <a class="waves-btn btn" href="/{{tenant_subfolder_prefix}}/{{org.name}}">Go To {{org.name}}</a>
-            {% endfor %}
-        </li>
-        {% else %}
-            <li>
-                <a class="dropdown-trigger valign-wrapper" data-target="dropdown_orgs" href="#!">
-                    <i class="material-icons left">public</i>Your Orgs</span>
-                </a>
-            </li>
-            <ul class="dropdown-content" id="dropdown_orgs">
-                {% for org in orgs %}
-                    <li><a  href="/{{tenant_subfolder_prefix}}/{{org.name}}">{{org.name}}</a></li>
-                {% endfor %}
-            </ul>
-
-        {%endif %}
-    {% endif %}
 {% endblock %}
 {% block body %}
 <div class="section">
@@ -45,7 +15,7 @@
                         <span class="card-title orange-text">Swamped by spreadsheets in your favourite space MMORPG?</span>
                         Let <b>SpacePaperwork.com</b> do all the tedious work for you and get back to exploding spaceships. <br/>
                         <br/>
-                        SpacePaperwork gives your own secure sandboxed site fully controlled by you and packed full of useful features.
+                        SpacePaperwork gives your own secure sandboxed site fully controlled by you and is packed full of useful features.
                     </div>
                     <div class="card-action">
                         {% if not owner_orgs %}
