@@ -268,7 +268,7 @@ def discord_settings(request):
 
 
 def settings_view(request):
-    goose_user = request.user.gooseuser
+    goose_user = request.gooseuser
     if request.method == "POST":
         form = SettingsForm(request.POST)
         if form.is_valid():
@@ -347,7 +347,7 @@ def corp_application_update(request, pk):
 
 def character_edit(request, pk):
     character = get_object_or_404(Character, pk=pk)
-    if character.user != request.user.gooseuser:
+    if character.user != request.gooseuser:
         messages.error(request, "You cannot edit someone elses character")
         return HttpResponseRedirect(reverse("characters"))
     initial = {"ingame_name": character.ingame_name, "corp": character.corp}
@@ -403,7 +403,7 @@ def character_new(request):
             character = Character.objects.create(
                 ingame_name=form.cleaned_data["ingame_name"],
                 corp=Corp.unknown_corp(),
-                user=request.user.gooseuser,
+                user=request.gooseuser,
             )
             if not corp.auto_approve:
                 messages.info(
@@ -469,9 +469,9 @@ def character_list(request):
         request,
         "users/character_list.html",
         {
-            "characters": request.user.gooseuser.characters(),
+            "characters": request.gooseuser.characters(),
             "corp_apps": CorpApplication.objects.filter(
-                character__user=request.user.gooseuser,
+                character__user=request.gooseuser,
             ).exclude(status="approved"),
         },
     )

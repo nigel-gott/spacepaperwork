@@ -1,7 +1,10 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
 {% load materializecss %}
+<div class="row">
     <div class="col s12 m12">
-        <h5>Outstanding Egg Transfers</h5>
+        <h5>Outstanding Profit Transfers</h5>
+        <a class="waves-btn btn" href="{% url 'completed_profit_transfers' %}">View Completed Profit Transfers</h5></a>
+        {% if transfer_logs %}
         <table>
             <thead>
             <th>Time</th>
@@ -10,38 +13,38 @@
             <th>Total Eggs</th>
             </thead>
             <tbody>
-            {% for transfer_log in transfer_logs %}
-            <tr>
-                <td>
-                    {{transfer_log.time}}
-                </td>
-                <td>
-                    <a class="waves-btn btn green" href="{% url 'view_transfer_log' transfer_log.id %}">Complete Transfer</a>
-                </td>
-                <td>
-                    {{transfer_log.count}}
-                </td>
-                <td>
-                    {{transfer_log.total}}
-                </td>
-            </tr>
-            {% endfor %}
+                {% for transfer_log in transfer_logs %}
+                <tr>
+                    <td>
+                        {{transfer_log.time}}
+                    </td>
+                    <td>
+                        <a class="waves-btn btn green" href="{% url 'view_transfer_log' transfer_log.id %}">Complete Transfer</a>
+                    </td>
+                    <td>
+                        {{transfer_log.count}}
+                    </td>
+                    <td>
+                        {{transfer_log.total}}
+                    </td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
-        <a class="waves-btn btn" href="{% url 'completed_egg_transfers' %}">Your Completed Egg Transfers</h5></a>
+        {% else %}
+            <p>You have no Outstanding profit transfers</p>
+        {% endif %}
     </div>
+</div>
 <div class="row">
     <div class="col s12 m12">
-        <div class="section">
-
-            {% if user.gooseuser.can_deposit %}
-            <a class="waves-effect waves-light btn green lighten-2"
-               href="{% url 'transfer_eggs' %}"><i class="material-icons right">info</i>Transfer Sold Items To Eggs</a>
-            {% endif %}
-        </div>
         <div class="divider"></div>
         <div class="section">
-            <h5>Sold Items</h5>
+            <h5>Your Sold Items With Un-Transfered Profit</h5>
+            {% if user.gooseuser.can_deposit %}
+            <a class="waves-effect waves-light pulse btn green lighten-2"
+               href="{% url 'transfer_profit' %}"><i class="material-icons right">info</i>Transfer Profit From Sold Items</a>
+            {% endif %}
             <table>
                 <thead>
                 <th>Location</th>

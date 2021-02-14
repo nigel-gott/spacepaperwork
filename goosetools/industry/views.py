@@ -41,7 +41,7 @@ def forbidden(request):
 @transaction.atomic
 def shiporders_contract_confirm(request, pk):
     ship_order = get_object_or_404(ShipOrder, pk=pk)
-    if ship_order.recipient_character.user != request.user.gooseuser:
+    if ship_order.recipient_character.user != request.gooseuser:
         return HttpResponseForbidden()
     if request.method == "POST":
         ship_order.contract_made = True
@@ -103,7 +103,7 @@ def create_ship_order(
     notes: str,
     request: HttpRequest,
 ) -> ShipOrder:
-    uid = generate_contract_code(request.user.gooseuser)  # type: ignore
+    uid = generate_contract_code(request.gooseuser)  # type: ignore
 
     price = None
     payment_taken = False
@@ -207,7 +207,7 @@ def shiporders_create(request):
             ):
                 ship_order = create_ship_order(
                     ship,
-                    request.user.gooseuser,
+                    request.gooseuser,
                     data["recipient_character"],
                     quantity,
                     payment_method,
@@ -221,13 +221,11 @@ def shiporders_create(request):
                 )
     else:
         form = ShipOrderForm(
-            initial={"recipient_character": request.user.gooseuser.default_character}
+            initial={"recipient_character": request.gooseuser.default_character}
         )
-        form.fields[
-            "recipient_character"
-        ].queryset = request.user.gooseuser.characters()
+        form.fields["recipient_character"].queryset = request.gooseuser.characters()
 
-    ship_data = populate_ship_data(request.user.gooseuser)
+    ship_data = populate_ship_data(request.gooseuser)
     return render(
         request,
         "industry/shiporders/create.html",
@@ -272,7 +270,7 @@ class ShipOrderViewSet(
     # pylint: disable=unused-argument
     def transition(self, request, pk=None):
         ship_order = self.get_object()
-        if ship_order.assignee != request.user.gooseuser:
+        if ship_order.assignee != request.gooseuser:
             return Response(status=status.HTTP_403_FORBIDDEN)
         else:
             body_unicode = request.body.decode("utf-8")
@@ -298,7 +296,7 @@ class ShipOrderViewSet(
     def claim(self, request, pk=None):
         ship_order = self.get_object()
         if ship_order.assignee is None:
-            ship_order.assignee = request.user.gooseuser
+            ship_order.assignee = request.gooseuser
             ship_order.save()
             claim_status = "claimed"
             uid = ship_order.uid
@@ -335,7 +333,7 @@ class ShipOrderViewSet(
     # pylint: disable=unused-argument
     def paid(self, request, pk=None):
         ship_order = self.get_object()
-        if ship_order.assignee != request.user.gooseuser:
+        if ship_order.assignee != request.gooseuser:
             return Response(status=status.HTTP_403_FORBIDDEN)
         else:
             ship_order.payment_taken = True
@@ -348,7 +346,7 @@ class ShipOrderViewSet(
     # pylint: disable=unused-argument
     def manual_price(self, request, pk=None):
         ship_order = self.get_object()
-        if ship_order.assignee != request.user.gooseuser:
+        if ship_order.assignee != request.gooseuser:
             return Response(status=status.HTTP_403_FORBIDDEN)
         else:
             body_unicode = request.body.decode("utf-8")
@@ -373,10 +371,10 @@ def shiporders_view(request):
         context={
             "page_data": {
                 "has_industry_permission": request.gooseuser.has_perm(SHIP_ORDER_ADMIN),
-                "request_user_discord_username": request.user.gooseuser.discord_username(),
-                "request_user_pk": request.user.gooseuser.pk,
+                "request_user_discord_username": request.gooseuser.discord_username(),
+                "request_user_pk": request.gooseuser.pk,
                 "request_user_character_pks": [
-                    char.pk for char in request.user.gooseuser.characters()
+                    char.pk for char in request.gooseuser.characters()
                 ],
             }
         },

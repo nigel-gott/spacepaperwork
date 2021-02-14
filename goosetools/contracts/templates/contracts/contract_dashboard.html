@@ -1,0 +1,28 @@
+{% extends "core/datatable.html" %}
+{% load static %}
+
+{% block datatable_title %}
+    Contracts Dashboard
+{% endblock %}
+{% block title %}
+    Contracts | {{SITE_NAME}}
+{% endblock %}
+
+{% block datatable_top_row %}
+    <div class="row">
+        <div class="col s12 m12">
+            <a id="requested_button" href="#" class="btn waves-btn"><i class="material-icons right">call_received</i>Your Pending Contracts</a>
+            <a id="own_requested_button" href="#" class="btn waves-btn"><i class="material-icons right">call_made</i>Contracts You've Sent</a>
+            <a id="old_button" href="#" class="btn waves-btn"><i class="material-icons right">archive</i>Old Contracts</a>
+    </div>
+    <div class="row">
+        <div class="col s12 m6">
+        </div>
+        <div class="col s12 m6">
+        </div>
+    </div>
+{% endblock %}
+
+{% block datatable_footer %}
+    <script src="{% static 'contracts/js/contract_dashboard.js' %}" type="text/javascript"></script>
+{% endblock %}

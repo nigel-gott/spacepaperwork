@@ -39,14 +39,30 @@ class Contract(models.Model):
                 NOTIFICATION_TYPES["contract_made"].dismiss_one(self.to_char.user)
         self.status = new_status
 
+    def isk_display(self):
+
+        # pylint: disable=no-member
+        isk_amount = self.isk.amount
+        if isk_amount == 0:
+            return "0"
+        elif isk_amount > 0:
+            return (
+                f"{self.from_user} pays {self.to_char}({self.to_char.user}) {self.isk}"
+            )
+        else:
+            return (
+                f"{self.to_char}({self.to_char.user}) pays {self.from_user} {self.isk}"
+            )
+
     @staticmethod
-    def create(from_user, to_char, system, status):
+    def create(from_user, to_char, system, status, isk=0):
         contract = Contract(
             from_user=from_user,
             to_char=to_char,
             system=system,
             created=timezone.now(),
             status=status,
+            isk=isk,
         )
         if status == "requested":
             NOTIFICATION_TYPES["contract_requested"].send(from_user)

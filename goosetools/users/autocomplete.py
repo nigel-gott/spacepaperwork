@@ -6,7 +6,7 @@ from goosetools.users.models import Character, GooseUser
 class CharacterAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.gooseuser.is_authed_and_approved():
+        if not self.request.gooseuser.is_authed_and_approved():
             return Character.objects.none()
 
         qs = Character.objects.all()
@@ -33,7 +33,7 @@ class CharacterAutocomplete(autocomplete.Select2QuerySetView):
 class UsernameAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
-        if not self.request.user.gooseuser.is_authed_and_approved():
+        if not self.request.gooseuser.is_authed_and_approved():
             return GooseUser.objects.none()
 
         qs = GooseUser.objects.all()

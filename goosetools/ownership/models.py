@@ -221,8 +221,9 @@ class TransferLog(models.Model):
     own_share = MoneyField(
         max_digits=20, decimal_places=2, default_currency="EEI", blank=True, null=True
     )
-    deposit_command = models.TextField(default="")
-    transfer_command = models.TextField(default="")
+    transfer_method = models.TextField()
+    deposit_command = models.TextField(default="", blank=True)
+    transfer_command = models.TextField(default="", blank=True)
     own_share_in_eggs = models.BooleanField(default=True)
     all_done = models.BooleanField(default=True)
     legacy_transfer = models.BooleanField(default=True)

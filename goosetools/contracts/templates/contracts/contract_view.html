@@ -1,14 +1,21 @@
-{% extends "core/base.html" %} {% load base_extras %} {% block body %}
+{% extends "core/base.html" %} {% load base_extras %}
+{% block title %}
+View Contract | {{SITE_NAME}}
+{% endblock %}
+{% block body %}
 {% load materializecss %}
 {% can_accept_reject user contract as can_admin %}
 <div class="row">
     <div class="col s12 m12">
         <h5>Contract {{contract.id}}</h5>
+        <a href="{% url 'contracts' %}">Back to Contracts</a>
         <p>
             <b> From: </b> {{contract.from_user}} <br/>
             <b> To: </b> {{contract.to_char}} <br/>
             <b> Created At: </b> {{contract.created}} <br/>
             <b> In System: </b> {{contract.system}} <br/>
+            <b> Isk: </b> {{contract.isk_display}} <br/>
+            <b> Total Items: </b> {{contract.total_items}} <br/>
             <b> Status: </b> {{contract.status}} <br/>
         </p>
 

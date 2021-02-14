@@ -67,9 +67,20 @@ class LootShareForm(forms.Form):
     )
 
 
-class DepositEggsForm(forms.Form):
+class TransferProfitForm(forms.Form):
+    transfer_method = forms.ChoiceField(
+        choices=[
+            ("contract", "Tell Recipients To Send You Contracts"),
+            ("eggs", "Send Eggs to Recipients"),
+        ],
+        initial="eggs",
+    )
+    character_to_send_contracts_to = forms.ModelChoiceField(
+        required=False,
+        queryset=Character.objects.all(),
+    )
     own_share_in_eggs = forms.BooleanField(
         required=False,
         initial=False,
-        help_text="Tick if you want to deposit your isk as eggs instead of just keeping the isk.",
+        help_text="Tick if you want to also move your share of the profit into eggs rather than keeping it as isk.",
     )

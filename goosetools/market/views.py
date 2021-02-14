@@ -39,7 +39,7 @@ def forbidden(request):
 def stack_change_price(request, pk):
     stack = get_object_or_404(StackedInventoryItem, pk=pk)
 
-    if not stack.has_admin(request.user.gooseuser):
+    if not stack.has_admin(request.gooseuser):
         return forbidden(request)
 
     if request.method == "POST":
@@ -52,7 +52,7 @@ def stack_change_price(request, pk):
                 new_price = form.cleaned_data["new_price"]
                 broker_fee = form.cleaned_data["broker_fee"] / 100
                 inner_success, message = market_order.change_price(
-                    new_price, broker_fee, request.user.gooseuser
+                    new_price, broker_fee, request.gooseuser
                 )
                 success = inner_success and success
                 if not success:
@@ -68,11 +68,11 @@ def stack_change_price(request, pk):
     else:
         form = EditOrderPriceForm()
         form.fields["new_price"].initial = stack.list_price().amount
-        form.fields["broker_fee"].initial = request.user.gooseuser.broker_fee
+        form.fields["broker_fee"].initial = request.gooseuser.broker_fee
     order_json = {
         "old_price": stack.list_price().amount,
         "quantity": stack.order_quantity(),
-        "broker_fee": request.user.gooseuser.broker_fee,
+        "broker_fee": request.gooseuser.broker_fee,
     }
     return render(
         request,
@@ -89,7 +89,7 @@ def stack_change_price(request, pk):
 def edit_order_price(request, pk):
     market_order = get_object_or_404(MarketOrder, pk=pk)
 
-    if not market_order.has_admin(request.user.gooseuser):
+    if not market_order.has_admin(request.gooseuser):
         return forbidden(request)
 
     if request.method == "POST":
@@ -98,7 +98,7 @@ def edit_order_price(request, pk):
             new_price = form.cleaned_data["new_price"]
             broker_fee = form.cleaned_data["broker_fee"] / 100
             success, message = market_order.change_price(
-                new_price, broker_fee, request.user.gooseuser
+                new_price, broker_fee, request.gooseuser
             )
             if success:
                 messages.success(request, message)
@@ -109,11 +109,11 @@ def edit_order_price(request, pk):
     else:
         form = EditOrderPriceForm()
         form.fields["new_price"].initial = market_order.listed_at_price.amount
-        form.fields["broker_fee"].initial = request.user.gooseuser.broker_fee
+        form.fields["broker_fee"].initial = request.gooseuser.broker_fee
     order_json = {
         "old_price": market_order.listed_at_price.amount,
         "quantity": market_order.quantity,
-        "broker_fee": request.user.gooseuser.broker_fee,
+        "broker_fee": request.gooseuser.broker_fee,
     }
     return render(
         request,
@@ -135,7 +135,7 @@ def estimate_price(item, hours):
 @transaction.atomic
 def sell_all_items(request, pk):
     loc = get_object_or_404(CharacterLocation, pk=pk)
-    if not loc.has_admin(request.user.gooseuser) or not request.gooseuser.has_perm(
+    if not loc.has_admin(request.gooseuser) or not request.gooseuser.has_perm(
         LOOT_TRACKER_ADMIN
     ):
         return HttpResponseForbidden()
@@ -241,7 +241,7 @@ def sell_all_items(request, pk):
 
 
 def sold(request):
-    characters = request.user.gooseuser.characters()
+    characters = request.gooseuser.characters()
     all_sold = []
     for char in characters:
         char_locs = CharacterLocation.objects.filter(character=char)
@@ -258,9 +258,7 @@ def sold(request):
         request,
         "market/sold.html",
         {
-            "transfer_logs": request.user.gooseuser.transferlog_set.filter(
-                all_done=False
-            )
+            "transfer_logs": request.gooseuser.transferlog_set.filter(all_done=False)
             .order_by("-time")
             .all(),
             "all_sold": all_sold,
@@ -269,7 +267,7 @@ def sold(request):
 
 
 def orders(request):
-    characters = request.user.gooseuser.characters()
+    characters = request.gooseuser.characters()
     all_orders = []
     for char in characters:
         char_locs = CharacterLocation.objects.filter(character=char)
@@ -331,7 +329,7 @@ def item_sold(order, remaining_quantity_to_sell):
 @transaction.atomic
 def stack_sold(request, pk):
     stack = get_object_or_404(StackedInventoryItem, pk=pk)
-    if not stack.has_admin(request.user.gooseuser):
+    if not stack.has_admin(request.gooseuser):
         return forbidden(request)
 
     if request.method == "POST":
@@ -363,7 +361,7 @@ def stack_sold(request, pk):
 @transaction.atomic
 def order_sold(request, pk):
     order = get_object_or_404(MarketOrder, pk=pk)
-    if not order.has_admin(request.user.gooseuser):
+    if not order.has_admin(request.gooseuser):
         return forbidden(request)
 
     if request.method == "POST":
@@ -473,7 +471,7 @@ def sell_item(item, form, quantity_to_sell, new_stack=None):
 @transaction.atomic
 def stack_sell(request, pk):
     stack = get_object_or_404(StackedInventoryItem, pk=pk)
-    if not stack.has_admin(request.user.gooseuser):
+    if not stack.has_admin(request.gooseuser):
         messages.error(request, f"You do not have permission to sell stack {stack.id}")
         return HttpResponseRedirect(reverse("items"))
 
@@ -508,8 +506,8 @@ def stack_sell(request, pk):
             stack.quantity(),
             initial={
                 "quantity": stack.quantity(),
-                "broker_fee": request.user.gooseuser.broker_fee,
-                "transaction_tax": request.user.gooseuser.transaction_tax,
+                "broker_fee": request.gooseuser.broker_fee,
+                "transaction_tax": request.gooseuser.transaction_tax,
             },
         )
 
@@ -530,7 +528,7 @@ def stack_sell(request, pk):
 @transaction.atomic
 def item_sell(request, pk):
     item = get_object_or_404(InventoryItem, pk=pk)
-    if not item.has_admin(request.user.gooseuser):
+    if not item.has_admin(request.gooseuser):
         return forbidden(request)
 
     if item.quantity == 0:
@@ -548,8 +546,8 @@ def item_sell(request, pk):
             item.quantity,
             initial={
                 "quantity": item.quantity,
-                "broker_fee": request.user.gooseuser.broker_fee,
-                "transaction_tax": request.user.gooseuser.transaction_tax,
+                "broker_fee": request.gooseuser.broker_fee,
+                "transaction_tax": request.gooseuser.transaction_tax,
             },
         )
 

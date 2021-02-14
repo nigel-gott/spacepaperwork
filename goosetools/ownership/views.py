@@ -19,15 +19,17 @@ from djmoney.money import Money
 from moneyed.localization import format_money
 
 from goosetools.bank.models import EggTransaction, IskTransaction
+from goosetools.contracts.models import Contract
+from goosetools.core.models import System
 from goosetools.fleets.models import AnomType, Fleet, FleetAnom
 from goosetools.items.forms import InventoryItemForm
 from goosetools.items.models import CharacterLocation, InventoryItem, ItemLocation
 from goosetools.market.models import SoldItem
 from goosetools.ownership.forms import (
-    DepositEggsForm,
     LootGroupForm,
     LootJoinForm,
     LootShareForm,
+    TransferProfitForm,
 )
 from goosetools.ownership.models import (
     LootBucket,
@@ -37,7 +39,7 @@ from goosetools.ownership.models import (
     to_isk,
 )
 from goosetools.users.forms import CharacterForm
-from goosetools.users.models import GooseUser
+from goosetools.users.models import Character, GooseUser
 
 
 class ComplexEncoder(json.JSONEncoder):
@@ -499,10 +501,10 @@ def transfered_items(request):
     return render(request, "ownership/transfered_items.html", {"all_sold": all_sold})
 
 
-def completed_egg_transfers(request):
+def completed_profit_transfers(request):
     return render(
         request,
-        "ownership/completed_egg_transfers.html",
+        "ownership/completed_profit_transfers.html",
         {
             "transfer_logs": request.user.gooseuser.transferlog_set.filter(
                 all_done=True
@@ -520,6 +522,27 @@ def view_transfer_log(request, pk):
         "ownership/view_transfer_log.html",
         {"log": item, "explaination": json.loads(item.explaination)},
     )
+
+
+def generate_contract_requests(
+    total_participation, transfering_user: GooseUser, character_with_profit: Character
+):
+    deposit_total = 0
+    for user_id, isk in total_participation.items():
+        floored_isk = m.floor(isk.amount)
+        if user_id != transfering_user.id:
+            user = GooseUser.objects.get(id=user_id)
+
+            Contract.create(
+                user,
+                character_with_profit,
+                System.objects.first(),
+                "requested",
+                -floored_isk,
+            )
+
+            deposit_total = deposit_total + floored_isk
+    return deposit_total
 
 
 def make_transfer_command(total_participation, transfering_user: GooseUser):
@@ -570,7 +593,9 @@ def make_deposit_command(others_share, own_share, own_share_in_eggs, left_over):
         return f"$deposit {int(deposit.amount)}"
 
 
-def transfer_sold_items(to_transfer, own_share_in_eggs, request):
+def transfer_sold_items(
+    to_transfer, own_share_in_eggs, request, transfer_method, contract_character
+):
     total = 0
     sellers_isk = to_isk(0)
     others_isk = to_isk(0)
@@ -659,16 +684,28 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
                 counterparty=request.user.gooseuser,
                 notes="Fractional leftovers assigned to the loot seller ",
             )
-    deposit_command = make_deposit_command(
-        others_isk, sellers_isk, own_share_in_eggs, left_over
-    )
-    transfer_command = make_transfer_command(
-        total_participation, request.user.gooseuser
-    )
-    messages.success(
-        request,
-        f"Generated Deposit and Transfer commands for {total} eggs from {count} sold items!.",
-    )
+
+    if transfer_method == "eggs":
+        deposit_command = make_deposit_command(
+            others_isk, sellers_isk, own_share_in_eggs, left_over
+        )
+        transfer_command = make_transfer_command(
+            total_participation, request.user.gooseuser
+        )
+        messages.success(
+            request,
+            f"Generated Deposit and Transfer commands for {total} eggs from {count} sold items!.",
+        )
+    else:
+        transfer_command = ""
+        deposit_command = ""
+        t = generate_contract_requests(
+            total_participation, request.gooseuser, contract_character
+        )
+        messages.success(
+            request,
+            f"Told all recipients to Send {contract_character} contracts in-game for {t} ISK from {count} sold items!.",
+        )
     log = TransferLog(
         user=request.user.gooseuser,
         time=timezone.now(),
@@ -681,6 +718,7 @@ def transfer_sold_items(to_transfer, own_share_in_eggs, request):
         all_done=False,
         legacy_transfer=False,
         own_share_in_eggs=own_share_in_eggs,
+        transfer_method=transfer_method,
     )
     log.full_clean()
     log.save()
@@ -729,29 +767,44 @@ def valid_transfer(to_transfer, request):
 
 
 @transaction.atomic
-def transfer_eggs(request):
+def transfer_profit(request):
     if request.method == "POST":
-        form = DepositEggsForm(request.POST)
+        form = TransferProfitForm(request.POST)
+        form.fields[
+            "character_to_send_contracts_to"
+        ].queryset = request.gooseuser.characters()
+
         if form.is_valid():
             to_transfer = SoldItem.objects.filter(
-                item__location__character_location__character__user=request.user.gooseuser,
+                item__location__character_location__character__user=request.gooseuser,
                 quantity__gt=F("transfered_quantity"),
             ).annotate(isk_balance=Sum("item__isktransaction__isk"))
             if not valid_transfer(to_transfer, request):
                 return HttpResponseRedirect(reverse("sold"))
             log_id = transfer_sold_items(
-                to_transfer, form.cleaned_data["own_share_in_eggs"], request
+                to_transfer,
+                form.cleaned_data["own_share_in_eggs"],
+                request,
+                form.cleaned_data["transfer_method"],
+                form.cleaned_data["character_to_send_contracts_to"],
             )
             if log_id:
                 return HttpResponseRedirect(reverse("view_transfer_log", args=[log_id]))
             else:
                 return HttpResponseRedirect(reverse("sold"))
     else:
-        form = DepositEggsForm()
+        form = TransferProfitForm(
+            initial={
+                "character_to_send_contracts_to": request.user.gooseuser.default_character
+            }
+        )
+        form.fields[
+            "character_to_send_contracts_to"
+        ].queryset = request.gooseuser.characters()
     return render(
         request,
-        "ownership/transfer_eggs_form.html",
-        {"form": form, "title": "Transfer Eggs"},
+        "ownership/transfer_profit.html",
+        {"form": form, "title": "Transfer Profit"},
     )
 
 

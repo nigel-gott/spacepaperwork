@@ -14,7 +14,7 @@
             <th>Link</th>
             </thead>
             <tbody>
-            {% for contract in to_me_contracts %}
+            {% for contract in to_me_contracts_pending %}
             <tr>
                 <td>
                     {{contract.id}}
@@ -30,6 +30,47 @@
                 </td>
                 <td>
                     {{contract.total_items}}
+                </td>
+                <td>
+                    {{contract.created}}
+                </td>
+                <td>
+                    <a class="waves-btn orange btn" href="{% url 'view_contract' contract.id %}">Accept or Reject
+                        Contract {{contract.id}}</a>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="row">
+    <div class="col s12 m12">
+        <h5>Contracts Others Have Requested You Should Make</h5>
+        <table>
+            <thead>
+            <th>Contract ID</th>
+            <th>From</th>
+            <th>To</th>
+            <th>System</th>
+            <th>Isk</th>
+            <th>Created At</th>
+            <th>Link</th>
+            </thead>
+            <tbody>
+            {% for contract in my_contracts_requested %}
+            <tr>
+                <td>
+                    {{contract.id}}
+                </td>
+                <td>
+                    {{contract.from_user}}
+                </td>
+                <td>
+                    {{contract.to_char}}
+                </td>
+                <td>
+                    {{contract.isk}}
                 </td>
                 <td>
                     {{contract.created}}

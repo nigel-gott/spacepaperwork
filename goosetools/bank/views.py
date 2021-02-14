@@ -8,7 +8,7 @@ from goosetools.users.models import GooseUser
 
 def own_user_transactions(request):
     return HttpResponseRedirect(
-        reverse("user_transactions", args=[request.user.gooseuser.pk])
+        reverse("user_transactions", args=[request.gooseuser.pk])
     )
 
 

@@ -142,7 +142,7 @@ class ContractRequestedNotification(StackableUserNotification):
         count = notification.data["count"]
         plural = "s" if count > 1 else ""
         return RenderedNotification(
-            f"You have {count} requested contract{plural} to make.",
+            f"You have {count} requested contract{plural} to send.",
             "add_box",
             reverse("contracts"),
         )

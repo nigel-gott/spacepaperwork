@@ -1,8 +1,12 @@
+from django.conf.urls import include
 from django.urls import path
+from rest_framework import routers
 
 from goosetools.contracts.views import (
+    ContractQuerySet,
     accept_contract,
     cancel_contract,
+    contract_dashboard,
     contracts,
     create_contract_for_fleet,
     create_contract_for_loc,
@@ -12,8 +16,11 @@ from goosetools.contracts.views import (
     view_contract,
 )
 
+router = routers.DefaultRouter()
+router.register(r"contract", ContractQuerySet)
+
 urlpatterns = [
-    path("contracts/", contracts, name="contracts"),
+    path("contract/dashboard", contract_dashboard, name="contracts"),
     path("contract/create/", contracts, name="create_contract"),
     path(
         "contract/create/fleet/<int:fleet_pk>/<int:loc_pk>/",
@@ -31,4 +38,5 @@ urlpatterns = [
     path("contract/<int:pk>/accept", accept_contract, name="accept_contract"),
     path("contract/<int:pk>/cancel", cancel_contract, name="cancel_contract"),
     path("item/move/all", item_move_all, name="item_move_all"),
+    path("api/", include((router.urls))),
 ]

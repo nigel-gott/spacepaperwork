@@ -2,8 +2,10 @@ import json
 import math as m
 from decimal import Decimal
 
+from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
+from django.db.models.query_utils import Q
 from django.forms.forms import Form
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -11,9 +13,12 @@ from django.urls import reverse
 from django.utils import translation
 from djmoney.money import Money
 from moneyed.localization import format_money
+from rest_framework import mixins
+from rest_framework.viewsets import GenericViewSet
 
 from goosetools.contracts.forms import ItemMoveAllForm
 from goosetools.contracts.models import Contract
+from goosetools.contracts.serializers import ContractSerializer
 from goosetools.fleets.models import Fleet
 from goosetools.items.models import CharacterLocation, InventoryItem, ItemLocation
 
@@ -27,7 +32,7 @@ def reject_contract(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if request.method == "POST":
         form = Form(request.POST)
-        if form.is_valid() and contract.can_accept_or_reject(request.user.gooseuser):
+        if form.is_valid() and contract.can_accept_or_reject(request.gooseuser):
             contract.change_status("rejected")
             log = []
             for item in contract.inventoryitem_set.all():
@@ -51,7 +56,7 @@ def reject_contract(request, pk):
 def cancel_contract(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if request.method == "POST":
-        if contract.can_cancel(request.user.gooseuser):
+        if contract.can_cancel(request.gooseuser):
             change_contract_status(contract, "cancelled", False)
         else:
             messages.error(request, "You cannot cancel someone elses contract")
@@ -104,7 +109,7 @@ def accept_contract(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if request.method == "POST":
         form = Form(request.POST)
-        if form.is_valid() and contract.can_accept_or_reject(request.user.gooseuser):
+        if form.is_valid() and contract.can_accept_or_reject(request.gooseuser):
             change_contract_status(contract, "accepted", True)
     return HttpResponseRedirect(reverse("view_contract", args=[pk]))
 
@@ -115,7 +120,7 @@ def create_contract_item(request, pk):
     if request.method == "POST":
         form = ItemMoveAllForm(request.POST)
         if form.is_valid():
-            if not item.has_admin(request.user.gooseuser):
+            if not item.has_admin(request.gooseuser):
                 messages.error(
                     request, f"You do not have permission to move item {item}"
                 )
@@ -130,7 +135,7 @@ def create_contract_item(request, pk):
             character = form.cleaned_data["character"]
 
             contract = Contract.create(
-                from_user=request.user.gooseuser,
+                from_user=request.gooseuser,
                 to_char=character,
                 system=system,
                 status="pending",
@@ -154,7 +159,7 @@ def create_contract_for_loc(request, pk):
     if request.method == "POST":
         form = ItemMoveAllForm(request.POST)
         if form.is_valid():
-            if not loc.has_admin(request.user.gooseuser):
+            if not loc.has_admin(request.gooseuser):
                 messages.error(
                     request, f"You do not have permission to move items from {loc}"
                 )
@@ -173,7 +178,7 @@ def create_contract_for_loc(request, pk):
                 return forbidden(request)
 
             contract = Contract.create(
-                from_user=request.user.gooseuser,
+                from_user=request.gooseuser,
                 to_char=character,
                 system=system,
                 status="pending",
@@ -196,7 +201,7 @@ def create_contract_for_fleet(request, fleet_pk, loc_pk):
     if request.method == "POST":
         form = ItemMoveAllForm(request.POST)
         if form.is_valid():
-            if not loc.has_admin(request.user.gooseuser):
+            if not loc.has_admin(request.gooseuser):
                 messages.error(
                     request, f"You do not have permission to move items from {loc}"
                 )
@@ -216,7 +221,7 @@ def create_contract_for_fleet(request, fleet_pk, loc_pk):
                 return forbidden(request)
 
             contract = Contract.create(
-                from_user=request.user.gooseuser,
+                from_user=request.gooseuser,
                 to_char=character,
                 system=system,
                 status="pending",
@@ -241,7 +246,7 @@ def item_move_all(request):
             character = form.cleaned_data["character"]
             all_your_items = InventoryItem.objects.filter(
                 contract__isnull=True,
-                location__character_location__character__user=request.user.gooseuser,
+                location__character_location__character__user=request.gooseuser,
                 quantity__gt=0,
                 marketorder__isnull=True,
                 solditem__isnull=True,
@@ -251,7 +256,7 @@ def item_move_all(request):
                 return forbidden(request)
 
             contract = Contract.create(
-                from_user=request.user.gooseuser,
+                from_user=request.gooseuser,
                 to_char=character,
                 system=system,
                 status="pending",
@@ -270,7 +275,7 @@ def item_move_all(request):
 
 def view_contract(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
-    if contract.status == "pending":
+    if contract.status == "pending" or contract.status == "requested":
         log = []
         for item in contract.inventoryitem_set.all():
             log.append(
@@ -290,24 +295,64 @@ def view_contract(request, pk):
     )
 
 
+class ContractQuerySet(
+    mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet
+):
+    queryset = Contract.objects.all()
+
+    def get_queryset(self):
+        return Contract.objects.filter(
+            Q(from_user=self.request.gooseuser)
+            | Q(to_char__user=self.request.gooseuser)
+        )
+
+    serializer_class = ContractSerializer
+
+
 def contracts(request):
+    actionable = ["pending", "requested"]
     return render(
         request,
         "contracts/contracts.html",
         {
-            "my_contracts": Contract.objects.filter(
-                from_user=request.user.gooseuser, status="pending"
+            "my_contracts_pending": Contract.objects.filter(
+                from_user=request.gooseuser, status="pending"
             ),
-            "to_me_contracts": list(
+            "my_contracts_requested": Contract.objects.filter(
+                from_user=request.gooseuser, status="requested"
+            ),
+            "to_me_contracts_pending": list(
                 Contract.objects.filter(
-                    to_char__user=request.user.gooseuser, status="pending"
+                    to_char__user=request.gooseuser, status="pending"
+                )
+            ),
+            "to_me_contracts_requested": list(
+                Contract.objects.filter(
+                    to_char__user=request.gooseuser, status="requested"
                 )
             ),
             "old_my_contracts": Contract.objects.filter(
-                from_user=request.user.gooseuser
-            ).exclude(status="pending"),
+                from_user=request.gooseuser
+            ).exclude(status__in=actionable),
             "old_to_me_contracts": Contract.objects.filter(
-                to_char__user=request.user.gooseuser
-            ).exclude(status="pending"),
+                to_char__user=request.gooseuser
+            ).exclude(status__in=actionable),
+        },
+    )
+
+
+def contract_dashboard(request):
+    return render(
+        request,
+        "contracts/contract_dashboard.html",
+        {
+            "page_data": {
+                "gooseuser_id": request.gooseuser.id,
+                "site_prefix": f"/{settings.URL_PREFIX}",
+                "ajax_url": reverse("contract-list"),
+                "contract_view_url": reverse("view_contract", args=[0]),
+                "status_filter": request.GET.get("status_filter", ""),
+            },
+            "gooseuser": request.gooseuser,
         },
     )

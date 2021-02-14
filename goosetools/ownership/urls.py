@@ -1,7 +1,7 @@
 from django.urls import path
 
 from goosetools.ownership.views import (
-    completed_egg_transfers,
+    completed_profit_transfers,
     fleet_shares,
     item_add,
     loot_group_add,
@@ -18,7 +18,7 @@ from goosetools.ownership.views import (
     loot_share_minus,
     loot_share_plus,
     mark_transfer_as_done,
-    transfer_eggs,
+    transfer_profit,
     transfered_items,
     view_transfer_log,
     your_fleet_shares,
@@ -60,12 +60,12 @@ urlpatterns = [
         mark_transfer_as_done,
         name="mark_transfer_as_done",
     ),
-    path("transfer_eggs/", transfer_eggs, name="transfer_eggs"),
+    path("transfer_profit/", transfer_profit, name="transfer_profit"),
     path("transfered/", transfered_items, name="transfered_items"),
     path("transfer_log/<int:pk>/", view_transfer_log, name="view_transfer_log"),
     path(
-        "completed_egg_transfers/",
-        completed_egg_transfers,
-        name="completed_egg_transfers",
+        "completed_profit_transfers/",
+        completed_profit_transfers,
+        name="completed_profit_transfers",
     ),
 ]

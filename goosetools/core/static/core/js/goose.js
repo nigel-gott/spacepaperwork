@@ -84,6 +84,7 @@ GooseJs = function () {
             const goose_data_table_config = {
                 dom: 'Bfrtip',
                 pageLength: 50,
+                responsive: true,
                 ajax: {
                     url: page_data["ajax_url"],
                     dataSrc: '',
@@ -91,7 +92,7 @@ GooseJs = function () {
                         console.log(xhr);
                         console.log(code);
                         console.log(error);
-                        alert("An error occured getting the data from goosetools please contact @thejanitor on discord.");
+                        alert("An error occured getting the data. Please contact @thejanitor on discord.");
                     }
                 },
                 buttons: [
@@ -100,7 +101,23 @@ GooseJs = function () {
                 ],
                 initComplete: dataTableColumnFilterInit
             }
-            const merged_data_table_config = Object.assign({}, user_data_table_config, goose_data_table_config);
+            const merged_data_table_config = [user_data_table_config, goose_data_table_config].reduce((acc, el) => {
+                for (let key in el) {
+                    if(Array.isArray(el[key])){
+                        if(acc[key]){
+                            acc[key] = acc[key].concat(el[key]);
+                        } else {
+                            acc[key] = el[key];
+                        }
+                    } else if (typeof el[key] === 'object' && el[key] !== null){
+                        acc[key] = { ...acc[key], ...el[key]};
+                    } else {
+                        acc[key] = el[key];
+                    }
+                };
+                return acc;
+                }, {})
+
             table = $('#datatable').DataTable(merged_data_table_config);
             return table;
         },
