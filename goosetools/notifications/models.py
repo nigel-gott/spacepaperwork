@@ -157,5 +157,14 @@ NOTIFICATION_TYPES["discord_not_setup"] = UnStackablePermissionNotification(
         reverse_lazy("discord_settings"),
     ),
 )
+NOTIFICATION_TYPES["discord_not_setup"] = UnStackablePermissionNotification(
+    DISCORD_ADMIN_PERMISSION,
+    "discord_not_setup",
+    RenderedNotification(
+        "Discord Integration Is Not Setup",
+        "directions",
+        reverse_lazy("discord_settings"),
+    ),
+)
 NOTIFICATION_TYPES["contract_made"] = ContractMadeNotification()
 NOTIFICATION_TYPES["contract_requested"] = ContractRequestedNotification()

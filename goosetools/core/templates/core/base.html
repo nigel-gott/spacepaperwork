@@ -163,49 +163,49 @@
             {% block extranavbar %}
             {% endblock %}
             {% if user.is_authenticated and user.gooseuser.is_approved %}
-            <li>
-                <a class="dropdown-trigger valign-wrapper" data-target="dropdown_notifications" href="#!">
-                    <i class="material-icons left">notifications_active</i>{% if ns %}<span class="new badge red">{{ns|length}}{% endif %}</span>
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-trigger valign-wrapper" data-target="dropdown_fleets" href="#!">
-                    <i class="material-icons left">star</i>Fleets
+                <li>
+                    <a class="dropdown-trigger valign-wrapper" data-target="dropdown_notifications" href="#!">
+                        <i class="material-icons left">notifications_active</i>{% if ns %}<span class="new badge red">{{ns|length}}{% endif %}</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-trigger valign-wrapper" data-target="dropdown_fleets" href="#!">
+                        <i class="material-icons left">star</i>Fleets
+                        <i class="material-icons right">arrow_drop_down</i>
+                    </a>
+                </li>
+                {% all_sales user as all_sales_num %}
+                <li><a class="dropdown-trigger valign-wrapper" data-target="dropdown_sales" href="#!">
+                    <i class="material-icons left" style="margin-right:0px;">shopping_cart</i>Sales ({{all_sales_num}})
                     <i class="material-icons right">arrow_drop_down</i>
-                </a>
-            </li>
-            {% all_sales user as all_sales_num %}
-            <li><a class="dropdown-trigger valign-wrapper" data-target="dropdown_sales" href="#!">
-                <i class="material-icons left" style="margin-right:0px;">shopping_cart</i>Sales ({{all_sales_num}})
-                <i class="material-icons right">arrow_drop_down</i>
+                    </a></li>
+                {% if GOOSEFLOCK_FEATURES %}
+                <li><a  href="{% url 'venmo:dashboard' %}">Eggs<i class="material-icons left">attach_money</i>
+                <li><a  href="{% url 'industry:shiporders_view' %}">Orders <i class="material-icons left">directions_boat</i>
+                {% endif %}
                 </a></li>
-            {% if GOOSEFLOCK_FEATURES %}
-            <li><a  href="{% url 'venmo:dashboard' %}">Eggs<i class="material-icons left">attach_money</i>
-            <li><a  href="{% url 'industry:shiporders_view' %}">Orders <i class="material-icons left">directions_boat</i>
-            {% endif %}
-            </a></li>
-            <li>
-                <a class="dropdown-trigger valign-wrapper" data-target="dropdown_tools" href="#!">
-                    <i class="material-icons left">find_replace</i>Tools
-                    <i class="material-icons right">arrow_drop_down</i>
-                </a>
-            </li>
-            <li>
-                <a class="dropdown-trigger valign-wrapper" data-target="dropdown_settings" href="#!">
-                    <i class="material-icons left">settings</i>Settings
-                    <i class="material-icons right">arrow_drop_down</i>
-                </a>
-            </li>
-            {% if is_user_admin or is_user_group_admin or is_single_corp_admin or is_all_corp_admin or is_ship_price_admin %}
-            <li>
-                <a class="dropdown-trigger valign-wrapper" data-target="dropdown_admin" href="#!">
-                    <i class="material-icons left">build</i>Admin
-                    ({% num_pending_apps %})
-                    <i class="material-icons right">arrow_drop_down</i>
-                </a>
-            </li>
-            {% endif %}
-            {% else %}
+                <li>
+                    <a class="dropdown-trigger valign-wrapper" data-target="dropdown_tools" href="#!">
+                        <i class="material-icons left">find_replace</i>Tools
+                        <i class="material-icons right">arrow_drop_down</i>
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-trigger valign-wrapper" data-target="dropdown_settings" href="#!">
+                        <i class="material-icons left">settings</i>Settings
+                        <i class="material-icons right">arrow_drop_down</i>
+                    </a>
+                </li>
+                {% if is_user_admin or is_user_group_admin or is_single_corp_admin or is_all_corp_admin or is_ship_price_admin %}
+                    <li>
+                        <a class="dropdown-trigger valign-wrapper" data-target="dropdown_admin" href="#!">
+                            <i class="material-icons left">build</i>Admin
+                            ({% num_pending_apps %})
+                            <i class="material-icons right">arrow_drop_down</i>
+                        </a>
+                    </li>
+                {% endif %}
+            {% elif tenant.name == "public" %}
             <li>
                 <a href="{% url 'tenants:splash' %}">
                     <i class="material-icons left">star</i>Features
@@ -221,7 +221,6 @@
                     <i class="material-icons left">help</i>Help
                 </a>
             </li>
-
             {% endif %}
         </ul>
         <ul class="right hide-on-med-and-down">
@@ -388,21 +387,24 @@
         {% if not user.is_authenticated %}
         <li><a class="waves-effect waves-light btn" href="{{LOGIN_URL}}">Login</a></li>
         {% endif %}
-            <li>
-                <a href="{% url 'tenants:splash' %}">
-                    <i class="material-icons left">star</i>Features
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'tenants:pricing' %}">
-                    <i class="material-icons left">attach_money</i>Pricing
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'tenants:help' %}">
-                    <i class="material-icons left">help</i>Help
-                </a>
-            </li>
+
+            {% if tenant.name == "public" %}
+                <li>
+                    <a href="{% url 'tenants:splash' %}">
+                        <i class="material-icons left">star</i>Features
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'tenants:pricing' %}">
+                        <i class="material-icons left">attach_money</i>Pricing
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'tenants:help' %}">
+                        <i class="material-icons left">help</i>Help
+                    </a>
+                </li>
+            {% endif %}
 
     {% endif %}
 </ul>
