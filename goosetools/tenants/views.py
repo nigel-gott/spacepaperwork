@@ -147,6 +147,6 @@ def help_page(request):
 def login_cancelled(request):
     messages.error(
         request,
-        f"Sorry you cannot Login without Discord. {settings.SITE_NAME} authenticates who you are using Discord. We only request the minimum amount of data from Discord which is your username avatar. This way is more secure for everybody as we do not need to store personal data about you such as having you enter a password and email address.",
+        f"Sorry you cannot Login without Discord. {settings.SITE_NAME} authenticates who you are using Discord. We only request the minimum amount of data from Discord which is your username and avatar. This way is more secure for everybody as we do not need to store personal data about you such as having you enter a password and email address.",
     )
     return HttpResponseRedirect(reverse("tenants:splash"))

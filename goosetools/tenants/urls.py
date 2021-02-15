@@ -16,5 +16,5 @@ urlpatterns = [
     path("help", help_page, name="help"),
     path("pricing", pricing, name="pricing"),
     path("signup", ClientCreate.as_view(), name="client-create"),
-    path("accounts/social/login/cancelled", login_cancelled),
+    path("accounts/social/login/cancelled", login_cancelled, "login_cancelled"),
 ]
