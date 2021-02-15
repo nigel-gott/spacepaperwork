@@ -62,6 +62,9 @@ class RenderedNotification:
 
 
 class NotificationType(ABC):
+    def __init__(self) -> None:
+        self.send_on_new_org = False
+
     @abstractmethod
     def render(self, notification) -> RenderedNotification:
         pass
@@ -95,11 +98,11 @@ class UnStackablePermissionNotification(NotificationType):
     def __init__(
         self, permission, notification_type, pre_rendered, send_on_new_org=False
     ) -> None:
+        super().__init__()
         self.permission = permission
         self.notification_type = notification_type
         self.pre_rendered = pre_rendered
         self.send_on_new_org = send_on_new_org
-        super().__init__()
 
     def send(self, _=None):
         Notification.objects.update_or_create(
@@ -119,8 +122,8 @@ class UnStackablePermissionNotification(NotificationType):
 
 class StackableUserNotification(NotificationType):
     def __init__(self, notification_type) -> None:
-        self.notification_type = notification_type
         super().__init__()
+        self.notification_type = notification_type
 
     def send(self, user):
         n, new = Notification.objects.get_or_create(
