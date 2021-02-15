@@ -94,7 +94,11 @@ class SignupFormWithTimezone(forms.Form):
 
 
 class SettingsForm(forms.Form):
-    timezone = TimeZoneFormField(display_GMT_offset=True)
+    timezone = TimeZoneFormField(
+        help_text="Your Timezone",
+        display_GMT_offset=True,
+        widget=forms.Select(attrs={"class": "browser-default"}),
+    )
     transaction_tax = forms.DecimalField(
         max_digits=5, decimal_places=2, label="Transaction Tax %", initial=15
     )
