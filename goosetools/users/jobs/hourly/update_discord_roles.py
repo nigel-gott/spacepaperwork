@@ -113,9 +113,10 @@ def refresh_from_discord():
 def refresh_from_discord_all():
     output = ""
     for tenant in Client.objects.all():
-        with tenant_context(tenant):
-            output = output + f"====== CLIENT {tenant.name} =========\n"
-            output = output + refresh_from_discord()
+        if tenant.name != "public":
+            with tenant_context(tenant):
+                output = output + f"====== CLIENT {tenant.name} =========\n"
+                output = output + refresh_from_discord()
     return output
 
 
