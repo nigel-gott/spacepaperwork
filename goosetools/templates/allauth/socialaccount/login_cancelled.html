@@ -1,0 +1,20 @@
+
+{% extends "tenants/public_base.html" %}
+{% block title %}{{SITE_NAME}}{% endblock %}
+{% block body %}
+<div class="section">
+<div class="col s12">
+    <div class="card-panel">
+        <span class="card-title orange-text">  <i class="material-icons medium">help</i>You Cancelled Your Discord Login Attempt</span>
+        <p>{{SITE_NAME}} uses Discord to log you in for conviencience, your privacy and safety. The only data we recieve is your <b>Discord Username and Avatar</b>. <br/>
+        This removes the need for you to have to sign-up using a username and password, which would have to be stored on {{SITE_NAME}}, so by using Discord we respect your privacy as much as possible. <br/>
+        If you have any further concerns please contact @thejanitor on the discord server linked below!</p>
+        <div class="card-action">
+            <a href="https://discord.gg/tsHP3XStQm" class="btn waves-btn">Join the {{SITE_NAME}} Discord For Help</a>
+            <a class="waves-btn btn green" href="{% url 'tenants:client-create' %}">Login Again With Discord</a><br/>
+        </div>
+    </div>
+</div>
+
+</div>
+{% block %}
