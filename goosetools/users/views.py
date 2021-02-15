@@ -24,6 +24,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
+from goosetools.notifications.notification_types import NOTIFICATION_TYPES
 from goosetools.user_forms.forms import GeneratedForm
 from goosetools.users.forms import (
     AddEditCharacterForm,
@@ -852,6 +853,15 @@ def corps_list(request):
     )
 
 
+def check_open_site_notification():
+    for corp in Corp.objects.all():
+        if corp.public_corp and corp.auto_approve:
+            NOTIFICATION_TYPES["fully_open_site"].send()
+            return
+
+    NOTIFICATION_TYPES["fully_open_site"].dismiss()
+
+
 @has_perm(perm=[ALL_CORP_ADMIN, SINGLE_CORP_ADMIN])
 def new_corp(request):
     if request.method == "POST":
@@ -874,6 +884,7 @@ def new_corp(request):
             corp.save()
             for role in form.cleaned_data["discord_roles_allowing_application"]:
                 corp.discord_roles_allowing_application.add(role)
+            check_open_site_notification()
             messages.success(request, f"Succesfully Created {corp.name}")
             return HttpResponseRedirect(reverse("corps_list"))
     else:
@@ -918,6 +929,7 @@ def edit_corp(request, pk):
                 for role in form.cleaned_data["discord_roles_allowing_application"]:
                     corp.discord_roles_allowing_application.add(role)
                 corp.save()
+                check_open_site_notification()
                 messages.success(request, f"Succesfully Edited {corp.name}")
 
             return HttpResponseRedirect(reverse("corps_list"))

@@ -3,6 +3,7 @@ from django.db import connection
 from django_tenants.utils import schema_context, tenant_context
 from requests.exceptions import HTTPError
 
+from goosetools.notifications.notification_types import NOTIFICATION_TYPES
 from goosetools.users.models import (
     BASIC_ACCESS,
     LOOT_TRACKER,
@@ -58,9 +59,12 @@ def setup_tenant(tenant, request, signup_form):
             public_corp=True,
             manual_group_given_on_approval=default_user_group,
         )
-        Character.objects.create(
+        c = Character.objects.create(
             ingame_name=data["ingame_name"], corp=default_corp, user=gooseuser
         )
+        gooseuser.default_character = c
+        gooseuser.save()
+        NOTIFICATION_TYPES["fully_open_site"].send()
         with connection.cursor() as cursor:
             tables = [
                 ("core", "region"),

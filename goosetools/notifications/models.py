@@ -6,7 +6,12 @@ from django.urls.base import reverse, reverse_lazy
 from django.utils import timezone
 
 from goosetools.notifications.notification_types import NOTIFICATION_TYPES
-from goosetools.users.models import DISCORD_ADMIN_PERMISSION, GoosePermission, GooseUser
+from goosetools.users.models import (
+    ALL_CORP_ADMIN,
+    DISCORD_ADMIN_PERMISSION,
+    GoosePermission,
+    GooseUser,
+)
 
 
 class Notification(models.Model):
@@ -60,6 +65,26 @@ class NotificationType(ABC):
     @abstractmethod
     def send(self, user):
         pass
+
+
+class UnStackableUserNotification(NotificationType):
+    def __init__(self, notification_type, pre_rendered) -> None:
+        self.notification_type = notification_type
+        self.pre_rendered = pre_rendered
+        super().__init__()
+
+    def send(self, user):
+        Notification.objects.update_or_create(
+            type=self.notification_type,
+            user=user,
+            defaults={"created_at": timezone.now()},
+        )
+
+    def dismiss(self, n):
+        Notification.objects.filter(type=self.notification_type, user=n.user).delete()
+
+    def render(self, _):
+        return self.pre_rendered
 
 
 class UnStackablePermissionNotification(NotificationType):
@@ -148,6 +173,15 @@ class ContractRequestedNotification(StackableUserNotification):
         )
 
 
+NOTIFICATION_TYPES["fully_open_site"] = UnStackablePermissionNotification(
+    ALL_CORP_ADMIN,
+    "fully_open_site",
+    RenderedNotification(
+        "Anyone can join your site without approval",
+        "error",
+        reverse_lazy("corps_list"),
+    ),
+)
 NOTIFICATION_TYPES["discord_not_setup"] = UnStackablePermissionNotification(
     DISCORD_ADMIN_PERMISSION,
     "discord_not_setup",

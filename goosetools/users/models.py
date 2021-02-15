@@ -703,6 +703,9 @@ class UserApplication(models.Model):
             )
             main_char.full_clean()
             main_char.save()
+            if not self.user.default_character:
+                self.user.default_character = main_char
+                self.user.save()
         else:
             main_char = self.existing_character  # type: ignore
         CorpApplication.new(
