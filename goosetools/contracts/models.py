@@ -107,7 +107,7 @@ class Contract(models.Model):
                 }
             )
         self.log = json.dumps(log, cls=JSONEncoderWithMoneyAndDecimalSupport)
-        self.logged_quantity = len(log)
+        self.logged_quantity = self.inventoryitem_set.count()
         self.full_clean()
         self.save()
         if clear_items:
