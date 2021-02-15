@@ -525,7 +525,10 @@ def view_transfer_log(request, pk):
 
 
 def generate_contract_requests(
-    total_participation, transfering_user: GooseUser, character_with_profit: Character
+    total_participation,
+    transfering_user: GooseUser,
+    character_with_profit: Character,
+    transfer,
 ):
     deposit_total = 0
     for user_id, isk in total_participation.items():
@@ -539,6 +542,7 @@ def generate_contract_requests(
                 System.objects.first(),
                 "requested",
                 -floored_isk,
+                transfer,
             )
 
             deposit_total = deposit_total + floored_isk
@@ -685,6 +689,8 @@ def transfer_sold_items(
                 notes="Fractional leftovers assigned to the loot seller ",
             )
 
+    transfer_command = ""
+    deposit_command = ""
     if transfer_method == "eggs":
         deposit_command = make_deposit_command(
             others_isk, sellers_isk, own_share_in_eggs, left_over
@@ -695,16 +701,6 @@ def transfer_sold_items(
         messages.success(
             request,
             f"Generated Deposit and Transfer commands for {total} eggs from {count} sold items!.",
-        )
-    else:
-        transfer_command = ""
-        deposit_command = ""
-        t = generate_contract_requests(
-            total_participation, request.gooseuser, contract_character
-        )
-        messages.success(
-            request,
-            f"Told all recipients to Send {contract_character} contracts in-game for {t} ISK from {count} sold items!.",
         )
     log = TransferLog(
         user=request.user.gooseuser,
@@ -722,6 +718,16 @@ def transfer_sold_items(
     )
     log.full_clean()
     log.save()
+    if transfer_method == "contract":
+        t, text = generate_contract_requests(
+            total_participation, request.gooseuser, contract_character, log
+        )
+        log.transfer_command = text
+        log.save()
+        messages.success(
+            request,
+            f"Told all recipients to Send {contract_character} contracts in-game for {t} ISK from {count} sold items!.",
+        )
     to_transfer.update(transfer_log=log.id)
     return log.id
 

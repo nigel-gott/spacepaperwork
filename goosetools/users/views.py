@@ -505,7 +505,7 @@ def user_dashboard(request):
         {
             "page_data": {
                 "gooseuser_id": request.gooseuser.id,
-                "site_prefix": f"/{settings.URL_PREFIX}",
+                "site_prefix": f"/{request.site_prefix}",
                 "ajax_url": reverse("gooseuser-list"),
                 "user_admin_view_url": reverse("user_admin_view", args=[0]),
                 "all_group_names": list(
@@ -534,7 +534,7 @@ def character_dashboard(request):
                 "gooseuser_id": request.gooseuser.id,
                 "edit_url": reverse("admin_character_edit", args=[0]),
                 "ajax_url": reverse("character-list"),
-                "site_prefix": f"/{settings.URL_PREFIX}",
+                "site_prefix": f"/{request.site_prefix}",
                 "all_corp_names": list(
                     Corp.objects.all().values_list("name", flat=True)
                 ),

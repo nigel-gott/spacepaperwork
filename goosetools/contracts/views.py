@@ -1,8 +1,5 @@
 import json
-import math as m
-from decimal import Decimal
 
-from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
 from django.db.models.query_utils import Q
@@ -10,10 +7,9 @@ from django.forms.forms import Form
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.utils import translation
-from djmoney.money import Money
-from moneyed.localization import format_money
 from rest_framework import mixins
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from goosetools.contracts.forms import ItemMoveAllForm
@@ -28,27 +24,25 @@ def forbidden(request):
     return render(request, "contracts/403.html")
 
 
+def pending_contract(request, pk):
+    contract = get_object_or_404(Contract, pk=pk)
+    if request.method == "POST":
+        form = Form(request.POST)
+        if form.is_valid() and contract.can_change_status_to(
+            request.gooseuser, "pending"
+        ):
+            change_contract_status(contract, "pending")
+    return HttpResponseRedirect(reverse("view_contract", args=[pk]))
+
+
 def reject_contract(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if request.method == "POST":
         form = Form(request.POST)
-        if form.is_valid() and contract.can_accept_or_reject(request.gooseuser):
-            contract.change_status("rejected")
-            log = []
-            for item in contract.inventoryitem_set.all():
-                log.append(
-                    {
-                        "id": item.id,
-                        "item": str(item),
-                        "quantity": item.quantity,
-                        "status": item.status(),
-                        "loot_group_id": item.loot_group and item.loot_group.id,
-                    }
-                )
-            contract.log = json.dumps(log, cls=ComplexEncoder)
-            contract.full_clean()
-            contract.save()
-            contract.inventoryitem_set.update(contract=None)
+        if form.is_valid() and contract.can_change_status_to(
+            request.gooseuser, "rejected"
+        ):
+            change_contract_status(contract, "rejected")
     return HttpResponseRedirect(reverse("view_contract", args=[pk]))
 
 
@@ -56,8 +50,8 @@ def reject_contract(request, pk):
 def cancel_contract(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if request.method == "POST":
-        if contract.can_cancel(request.gooseuser):
-            change_contract_status(contract, "cancelled", False)
+        if contract.can_change_status_to(request.gooseuser, "cancelled"):
+            change_contract_status(contract, "cancelled")
         else:
             messages.error(request, "You cannot cancel someone elses contract")
         return HttpResponseRedirect(reverse("view_contract", args=[pk]))
@@ -67,17 +61,7 @@ def cancel_contract(request, pk):
         )
 
 
-class ComplexEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, Money):
-            return format_money(o, locale=translation.get_language())
-        if isinstance(o, Decimal):
-            return str(m.floor(o))
-        # Let the base class default method raise the TypeError
-        return json.JSONEncoder.default(self, o)
-
-
-def change_contract_status(contract, status, change_location):
+def change_contract_status(contract, status):
     contract.change_status(status)
     char_loc, _ = CharacterLocation.objects.get_or_create(
         character=contract.to_char, system=contract.system
@@ -85,23 +69,11 @@ def change_contract_status(contract, status, change_location):
     loc, _ = ItemLocation.objects.get_or_create(
         character_location=char_loc, corp_hanger=None
     )
-    log = []
-    for item in contract.inventoryitem_set.all():
-        log.append(
-            {
-                "id": item.id,
-                "item": str(item),
-                "quantity": item.quantity,
-                "status": item.status(),
-                "loot_group_id": item.loot_group and item.loot_group.id,
-            }
-        )
-    contract.log = json.dumps(log, cls=ComplexEncoder)
-    contract.full_clean()
-    contract.save()
-    if change_location:
-        contract.inventoryitem_set.update(location=loc)
-    contract.inventoryitem_set.update(contract=None)
+    if status not in ("requested", "pending"):
+        contract.save_items_to_log(clear_items=False)
+        if status == "accepted":
+            contract.inventoryitem_set.update(location=loc)
+        contract.inventoryitem_set.update(contract=None)
 
 
 @transaction.atomic
@@ -109,8 +81,10 @@ def accept_contract(request, pk):
     contract = get_object_or_404(Contract, pk=pk)
     if request.method == "POST":
         form = Form(request.POST)
-        if form.is_valid() and contract.can_accept_or_reject(request.gooseuser):
-            change_contract_status(contract, "accepted", True)
+        if form.is_valid() and contract.can_change_status_to(
+            request.gooseuser, "accepted"
+        ):
+            change_contract_status(contract, "accepted")
     return HttpResponseRedirect(reverse("view_contract", args=[pk]))
 
 
@@ -308,6 +282,41 @@ class ContractQuerySet(
 
     serializer_class = ContractSerializer
 
+    @action(detail=True, methods=["PUT"])
+    @transaction.atomic
+    # pylint: disable=unused-argument
+    def cancelled(self, request, pk=None):
+        return self._change_status(request, "cancelled")
+
+    @action(detail=True, methods=["PUT"])
+    @transaction.atomic
+    # pylint: disable=unused-argument
+    def pending(self, request, pk=None):
+        return self._change_status(request, "pending")
+
+    @action(detail=True, methods=["PUT"])
+    @transaction.atomic
+    # pylint: disable=unused-argument
+    def accepted(self, request, pk=None):
+        return self._change_status(request, "accepted")
+
+    @action(detail=True, methods=["PUT"])
+    @transaction.atomic
+    # pylint: disable=unused-argument
+    def rejected(self, request, pk=None):
+        return self._change_status(request, "rejected")
+
+    def _change_status(self, request, status):
+        contract = self.get_object()
+        if contract.can_change_status_to(request.gooseuser, status):
+            change_contract_status(contract, status)
+            serializer = self.get_serializer(contract)
+            return Response(serializer.data)
+        else:
+            return Response(
+                {"error": "You are not able to change the status of that contract."}
+            )
+
 
 def contracts(request):
     actionable = ["pending", "requested"]
@@ -342,13 +351,28 @@ def contracts(request):
 
 
 def contract_dashboard(request):
+    actionable_count = Contract.objects.filter(
+        Q(from_user=request.gooseuser) & Q(status="requested")
+        | Q(to_char__user=request.gooseuser) & Q(status="pending")
+    ).count()
+    mine_count = Contract.objects.filter(
+        Q(to_char__user=request.gooseuser) & Q(status="requested")
+        | Q(from_user=request.gooseuser) & Q(status="pending")
+    ).count()
+    old_count = Contract.objects.filter(
+        (Q(from_user=request.gooseuser) | Q(to_char__user=request.gooseuser))
+        & (Q(status="accepted") | Q(status="rejected") | Q(status="cancelled"))
+    ).count()
     return render(
         request,
         "contracts/contract_dashboard.html",
         {
+            "actionable_count": actionable_count,
+            "mine_count": mine_count,
+            "old_count": old_count,
             "page_data": {
                 "gooseuser_id": request.gooseuser.id,
-                "site_prefix": f"/{settings.URL_PREFIX}",
+                "site_prefix": f"/{request.site_prefix}",
                 "ajax_url": reverse("contract-list"),
                 "contract_view_url": reverse("view_contract", args=[0]),
                 "status_filter": request.GET.get("status_filter", ""),

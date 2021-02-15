@@ -12,6 +12,7 @@ from goosetools.contracts.views import (
     create_contract_for_loc,
     create_contract_item,
     item_move_all,
+    pending_contract,
     reject_contract,
     view_contract,
 )
@@ -37,6 +38,7 @@ urlpatterns = [
     path("contract/<int:pk>/reject", reject_contract, name="reject_contract"),
     path("contract/<int:pk>/accept", accept_contract, name="accept_contract"),
     path("contract/<int:pk>/cancel", cancel_contract, name="cancel_contract"),
+    path("contract/<int:pk>/pending", pending_contract, name="pending_contract"),
     path("item/move/all", item_move_all, name="item_move_all"),
     path("api/", include((router.urls))),
 ]

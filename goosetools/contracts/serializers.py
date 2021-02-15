@@ -16,6 +16,7 @@ class ContractSerializer(serializers.ModelSerializer):
     to_char_display_name = serializers.CharField(
         source="to_char.user.display_name", read_only=True
     )
+    to_char_user_id = serializers.IntegerField(source="to_char.user.id", read_only=True)
     isk = serializers.IntegerField(source="isk.amount", read_only=True)
 
     class Meta:
@@ -26,6 +27,7 @@ class ContractSerializer(serializers.ModelSerializer):
             "from_user_display_name",
             "from_user_discord_avatar_url",
             "to_char",
+            "to_char_user_id",
             "to_char_ingame_name",
             "to_char_display_name",
             "system",

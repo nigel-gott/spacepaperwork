@@ -51,7 +51,7 @@ def dashboard(request, gooseuser):
     context = {
         "page_data": {
             "gooseuser_id": gooseuser.id,
-            "site_prefix": f"/{settings.URL_PREFIX}",
+            "site_prefix": f"/{request.site_prefix}",
         },
         "gooseuser": gooseuser,
         "venmo_user_balance": venmo_user_balance,

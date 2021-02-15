@@ -1,8 +1,11 @@
 {% extends "core/datatable.html" %}
 {% load static %}
 
-{% block datatable_title %}
-    Contracts Dashboard
+{% block datatable_above %}
+    <div class="row">
+    <div class="col s12 m12" id="top_row">
+    </div>
+    </div>
 {% endblock %}
 {% block title %}
     Contracts | {{SITE_NAME}}
@@ -11,14 +14,9 @@
 {% block datatable_top_row %}
     <div class="row">
         <div class="col s12 m12">
-            <a id="requested_button" href="#" class="btn waves-btn"><i class="material-icons right">call_received</i>Your Pending Contracts</a>
-            <a id="own_requested_button" href="#" class="btn waves-btn"><i class="material-icons right">call_made</i>Contracts You've Sent</a>
-            <a id="old_button" href="#" class="btn waves-btn"><i class="material-icons right">archive</i>Old Contracts</a>
-    </div>
-    <div class="row">
-        <div class="col s12 m6">
-        </div>
-        <div class="col s12 m6">
+            <a id="actionable_filter" href="#" class="btn waves-btn filter"><i class="material-icons left">call_received</i>Your Pending Contracts ({{actionable_count}}) </a>
+            <a id="mine_filter" href="#" class="btn waves-btn filter"><i class="material-icons left">call_made</i>Contracts You've Requested or Sent ({{mine_count}}) </a>
+            <a id="old_filter" href="#" class="btn waves-btn filter"><i class="material-icons left">archive</i>Old Contracts ({{old_count}}) </a>
         </div>
     </div>
 {% endblock %}

@@ -52,15 +52,15 @@ def num_sold(user):
 
 
 @register.simple_tag
-def can_accept_reject(user, contract):
-    return contract.can_accept_or_reject(user.gooseuser)
+def can_change_contract_status_to(user, contract, status):
+    return contract.can_change_status_to(user.gooseuser, status)
 
 
 @register.simple_tag
 def num_contracts(user):
     return (
         Contract.objects.filter(to_char__user=user.gooseuser, status="pending").count()
-        + Contract.objects.filter(from_user=user.gooseuser, status="pending").count()
+        + Contract.objects.filter(from_user=user.gooseuser, status="requested").count()
     )
 
 

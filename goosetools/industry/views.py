@@ -2,7 +2,6 @@ import json
 from random import randint
 from typing import Any, Dict
 
-from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -410,7 +409,7 @@ def ship_dashboard(request):
                 "gooseuser_id": request.gooseuser.id,
                 "edit_url": reverse("industry:edit_ship", args=[0]),
                 "ajax_url": reverse("industry:ship-list"),
-                "site_prefix": f"/{settings.URL_PREFIX}",
+                "site_prefix": f"/{request.site_prefix}",
             },
             "gooseuser": request.gooseuser,
         },

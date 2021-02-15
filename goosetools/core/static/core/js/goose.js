@@ -141,11 +141,15 @@ GooseJs = function () {
                 })
                     .then(response => response.json())
                     .then(response_data => {
-                        row.data(response_data);
-                        if(success_callback){
-                            success_callback(response_data);
+                        if(!response_data["error"]){
+                            row.data(response_data);
+                            if(success_callback){
+                                success_callback(response_data);
+                            }
+                            table.draw();
+                        } else {
+                            M.toast({ html: "Error: " + response_data["error"]})
                         }
-                        table.draw();
                     });
 
             }

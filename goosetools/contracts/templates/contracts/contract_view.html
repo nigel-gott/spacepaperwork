@@ -4,33 +4,61 @@ View Contract | {{SITE_NAME}}
 {% endblock %}
 {% block body %}
 {% load materializecss %}
-{% can_accept_reject user contract as can_admin %}
 <div class="row">
     <div class="col s12 m12">
         <h5>Contract {{contract.id}}</h5>
         <a href="{% url 'contracts' %}">Back to Contracts</a>
         <p>
-            <b> From: </b> {{contract.from_user}} <br/>
-            <b> To: </b> {{contract.to_char}} <br/>
-            <b> Created At: </b> {{contract.created}} <br/>
-            <b> In System: </b> {{contract.system}} <br/>
-            <b> Isk: </b> {{contract.isk_display}} <br/>
-            <b> Total Items: </b> {{contract.total_items}} <br/>
-            <b> Status: </b> {{contract.status}} <br/>
-        </p>
+        <table>
 
-        {% if can_admin %}
-        <form action="{% url 'reject_contract' contract.id %}" method="post">
-            {% csrf_token %}
-            <button class="btn waves-effect waves-light red" type="submit" value="Submit">
-                Reject
-                <i class="material-icons right">send</i>
-            </button>
-        </form>
+            <tr><td> From:</td><td> {{contract.from_user}} </td></tr>
+            <tr><td> To:</td><td> {{contract.to_char}} </td></tr>
+            <tr><td> Created At:</td><td> {{contract.created}} </td></tr>
+            <tr><td> In System:</td><td> {{contract.system}} </td></tr>
+            <tr><td> Isk:</td><td> {{contract.isk_display}} </td></tr>
+            <tr><td> Total Items:</td><td> {{contract.total_items}} </td></tr>
+            <tr><td> Status:</td><td> {{contract.status}} </td></tr>
+            {% if contract.transfer %}
+            <tr><td> From Profit Transfer:</td><td> <a href="{% url 'view_transfer_log' contract.transfer.id %}">Transfer Log {{contract.transfer.id}}</a> </td></tr>
+            {% endif %}
+        </table>
+
+        {% can_change_contract_status_to user contract "cancelled" as can_cancel %}
+        {% can_change_contract_status_to user contract "accepted" as can_accept %}
+        {% can_change_contract_status_to user contract "rejected" as can_reject %}
+        {% can_change_contract_status_to user contract "pending" as can_pending %}
+        {% if can_pending %}
+            <form action="{% url 'pending_contract' contract.id %}" method="post">
+                {% csrf_token %}
+                <button class="btn waves-effect waves-light green" type="submit" value="Submit">
+                    I've Made This Contract In-Game
+                    <i class="material-icons right">send</i>
+                </button>
+            </form>
+        {% endif %}
+        {% if can_reject %}
+                <form action="{% url 'reject_contract' contract.id %}" method="post">
+                    {% csrf_token %}
+                    <button class="btn waves-effect waves-light red" type="submit" value="Submit">
+                        Reject
+                        <i class="material-icons right">send</i>
+                    </button>
+                </form>
+        {% endif %}
+        {% if can_accept %}
         <form action="{% url 'accept_contract' contract.id %}" method="post">
             {% csrf_token %}
             <button class="btn waves-effect waves-light green" type="submit" value="Submit">
-                Accept
+                I've accepted this contract
+                <i class="material-icons right">send</i>
+            </button>
+        </form>
+        {% endif %}
+        {% if can_cancel %}
+        <form action="{% url 'cancel_contract' contract.id %}" method="post">
+            {% csrf_token %}
+            <button class="btn waves-effect waves-light grey" type="submit" value="Submit">
+                Cancel
                 <i class="material-icons right">send</i>
             </button>
         </form>

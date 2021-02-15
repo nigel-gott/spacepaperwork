@@ -108,6 +108,21 @@ class LoginAndApprovedUserMiddleware(AuthenticationMiddleware):
             request.gooseuser = (
                 hasattr(request.user, "gooseuser") and request.user.gooseuser
             )
+
+        if settings.GOOSEFLOCK_FEATURES:
+            request.site_prefix = settings.URL_PREFIX
+        else:
+            if in_public:
+                request.site_prefix = settings.URL_PREFIX
+            else:
+                request.site_prefix = (
+                    settings.URL_PREFIX
+                    + settings.TENANT_SUBFOLDER_PREFIX
+                    + "/"
+                    + request.tenant.name
+                    + "/"
+                )
+
         if request.user.is_authenticated:
             if not in_public:
                 if _user_is_unapproved(request.user):
