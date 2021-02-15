@@ -166,6 +166,8 @@ def user_signup(request, pk):
                 application.save()
                 if corp.auto_approve:
                     application.approve(gooseuser)
+                else:
+                    NOTIFICATION_TYPES["user_apps"].send()
                 return HttpResponseRedirect(reverse("core:home"))
     else:
         initial = {}

@@ -64,7 +64,10 @@ def setup_tenant(tenant, request, signup_form):
         )
         gooseuser.default_character = c
         gooseuser.save()
-        NOTIFICATION_TYPES["fully_open_site"].send()
+        for n_type in NOTIFICATION_TYPES.values():
+            if n_type.send_on_new_org:
+                n_type.send()
+
         with connection.cursor() as cursor:
             tables = [
                 ("core", "region"),

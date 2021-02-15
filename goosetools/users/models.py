@@ -482,7 +482,16 @@ class GooseUser(models.Model):
         if not admin_making_change:
             user = None
         else:
-            user = admin_making_change.site_user
+            if hasattr(admin_making_change, "site_user"):
+                user = admin_making_change.site_user
+            elif hasattr(admin_making_change, "gooseuser"):
+                user = admin_making_change
+            else:
+                raise Exception(
+                    "Unknown admin object passed to give manual group "
+                    + str(admin_making_change)
+                )
+
         Comment.objects.create(
             content_object=self,
             site=Site.objects.get_current(),
@@ -731,12 +740,16 @@ class UserApplication(models.Model):
         # pylint: disable=no-member
         self.user.refresh_discord_data()  # type: ignore
         self.save()
+        if self.unapproved_applications().count() == 0:
+            NOTIFICATION_TYPES["user_apps"].dismiss()
 
     def reject(self, rejecting_user):
         self.status = "rejected"
         self.user.change_status(rejecting_user, "rejected")
         self.full_clean()
         self.save()
+        if self.unapproved_applications().count() == 0:
+            NOTIFICATION_TYPES["user_apps"].dismiss()
 
     def __str__(self) -> str:
         return f"{self.status} User App for {self.user} made on {self.created_at}"
@@ -758,6 +771,7 @@ class CorpApplication(models.Model):
 
     @staticmethod
     def new(character, status, corp):
+        NOTIFICATION_TYPES["corp_apps"].send()
         app = CorpApplication.objects.create(
             character=character, status=status, corp=corp
         )
@@ -779,11 +793,15 @@ class CorpApplication(models.Model):
             )
         self.full_clean()
         self.save()
+        if self.unapproved_applications().count() == 0:
+            NOTIFICATION_TYPES["corp_apps"].dismiss()
 
     def reject(self):
         self.status = "rejected"
         self.full_clean()
         self.save()
+        if self.unapproved_applications().count() == 0:
+            NOTIFICATION_TYPES["corp_apps"].dismiss()
 
     @staticmethod
     def unapproved_applications():

@@ -3,6 +3,7 @@ from django.views.generic import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
+from goosetools.notifications.notification_types import NOTIFICATION_TYPES
 from goosetools.user_forms.forms import FormQuestionFormSet, GeneratedForm
 from goosetools.user_forms.models import DynamicForm
 
@@ -31,6 +32,7 @@ class FormCreate(CreateView):
             response = super().form_valid(form)
             questions.instance = self.object  # type: ignore
             questions.save()
+            NOTIFICATION_TYPES["no_signup_form"].dismiss()
             return response
         else:
             return super().form_invalid(form)

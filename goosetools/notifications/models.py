@@ -9,6 +9,7 @@ from goosetools.notifications.notification_types import NOTIFICATION_TYPES
 from goosetools.users.models import (
     ALL_CORP_ADMIN,
     DISCORD_ADMIN_PERMISSION,
+    USER_ADMIN_PERMISSION,
     GoosePermission,
     GooseUser,
 )
@@ -45,13 +46,16 @@ class Notification(models.Model):
 
 
 class RenderedNotification:
-    def __init__(self, text: str, icon: str, action_url: str) -> None:
+    def __init__(
+        self, text: str, icon: str, action_url: str, colour="red-text"
+    ) -> None:
         self.text = text
         self.icon = icon
         self.action_url = action_url
+        self.colour = colour
 
     def as_html(self) -> str:
-        return f"<a href='{self.action_url}' class='red-text'><i class='material-icons left'>{self.icon}</i>{self.text}</a>"
+        return f"<a href='{self.action_url}' class='{self.colour}'><i class='material-icons left'>{self.icon}</i>{self.text}</a>"
 
     def __str__(self) -> str:
         return self.as_html()
@@ -88,10 +92,13 @@ class UnStackableUserNotification(NotificationType):
 
 
 class UnStackablePermissionNotification(NotificationType):
-    def __init__(self, permission, notification_type, pre_rendered) -> None:
+    def __init__(
+        self, permission, notification_type, pre_rendered, send_on_new_org=False
+    ) -> None:
         self.permission = permission
         self.notification_type = notification_type
         self.pre_rendered = pre_rendered
+        self.send_on_new_org = send_on_new_org
         super().__init__()
 
     def send(self, _=None):
@@ -181,6 +188,7 @@ NOTIFICATION_TYPES["fully_open_site"] = UnStackablePermissionNotification(
         "error",
         reverse_lazy("corps_list"),
     ),
+    send_on_new_org=True,
 )
 NOTIFICATION_TYPES["discord_not_setup"] = UnStackablePermissionNotification(
     DISCORD_ADMIN_PERMISSION,
@@ -191,14 +199,35 @@ NOTIFICATION_TYPES["discord_not_setup"] = UnStackablePermissionNotification(
         reverse_lazy("discord_settings"),
     ),
 )
-NOTIFICATION_TYPES["discord_not_setup"] = UnStackablePermissionNotification(
-    DISCORD_ADMIN_PERMISSION,
-    "discord_not_setup",
+NOTIFICATION_TYPES["user_apps"] = UnStackablePermissionNotification(
+    USER_ADMIN_PERMISSION,
+    "user_apps",
     RenderedNotification(
-        "Discord Integration Is Not Setup",
-        "directions",
-        reverse_lazy("discord_settings"),
+        "There are pending user applications that require attention",
+        "person",
+        reverse_lazy("applications"),
+    ),
+)
+NOTIFICATION_TYPES["corp_apps"] = UnStackablePermissionNotification(
+    ALL_CORP_ADMIN,
+    "corp_apps",
+    RenderedNotification(
+        "There are pending corp applications that require attention",
+        "person",
+        reverse_lazy("corp_applications"),
     ),
 )
 NOTIFICATION_TYPES["contract_made"] = ContractMadeNotification()
 NOTIFICATION_TYPES["contract_requested"] = ContractRequestedNotification()
+
+NOTIFICATION_TYPES["no_signup_form"] = UnStackablePermissionNotification(
+    ALL_CORP_ADMIN,
+    "no_signup_form",
+    RenderedNotification(
+        "You can setup custom corp sign-up forms!",
+        "format_list_numbered",
+        reverse_lazy("user_forms:form-list"),
+        "green-text",
+    ),
+    send_on_new_org=True,
+)
