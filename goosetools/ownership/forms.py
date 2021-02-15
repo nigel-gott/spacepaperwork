@@ -1,5 +1,6 @@
 from dal import autocomplete
 from django import forms
+from django.conf import settings
 
 from goosetools.fleets.models import AnomType
 from goosetools.items.models import System
@@ -67,13 +68,23 @@ class LootShareForm(forms.Form):
     )
 
 
+if settings.GOOSEFLOCK_FEATURES:
+    TRANSFER_CHOICES = [
+        ("contract", "Tell Recipients To Send You Contracts"),
+        ("eggs", "Send Eggs to Recipients"),
+    ]
+    INITIAL_CHOICE = "eggs"
+else:
+    TRANSFER_CHOICES = [
+        ("contract", "Tell Recipients To Send You Contracts"),
+    ]
+    INITIAL_CHOICE = "contract"
+
+
 class TransferProfitForm(forms.Form):
     transfer_method = forms.ChoiceField(
-        choices=[
-            ("contract", "Tell Recipients To Send You Contracts"),
-            ("eggs", "Send Eggs to Recipients"),
-        ],
-        initial="eggs",
+        choices=TRANSFER_CHOICES,
+        initial=INITIAL_CHOICE,
     )
     character_to_send_contracts_to = forms.ModelChoiceField(
         required=False,

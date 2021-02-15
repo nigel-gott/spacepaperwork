@@ -16,18 +16,21 @@
         {% if not log.all_done %}
             <form action="{% url 'mark_transfer_as_done' log.id %}" method="POST">
                 {% csrf_token %}
-                <button class="waves-effect waves-light btn" type="submit">Mark Deposit and Transfer As All Done</button>
+                <button class="waves-effect waves-light btn" type="submit">Mark Transfer As All Done</button>
             </form>
             <br/>
+        {% if GOOSEFLOCK_FEATURES %}
             <b class="green-text"> Please send the command below to the <a
                 href="https://discord.com/channels/747575380436713583/754139786679156807/764900253358227506">#general-bot-spam</a>
             channel on GooseFleet discord. </b>
             <br/>
+        {% endif %}
         {% else %}
             <b class="red-text"> Commands Already Sent </b>
             <br/>
         {% endif %}
 
+        {% if GOOSEFLOCK_FEATURES %}
         {% if log.own_share_in_eggs %}
             First Deposit {{log.egg_deposit_amount}} which includes {{log.safe_own_share}} of your own share and {{log.other_peoples_share}} of other peoples share:
             <blockquote>
@@ -43,7 +46,18 @@
         <blockquote>
             {{log.transfer_command|linebreaks}}
         </blockquote>
-        Finally click the "Mark Deposit and Transfer As All Done" button above
+        Finally click the "Mark Transfer As All Done" button above
+        {% else %}
+        {% if log.transfer_method == "contract" %}
+        Send the following command to your Discord Server to let people know how much to contract you for:
+        <blockquote>
+            {{log.transfer_command|linebreaks}}
+        </blockquote>
+        {{SITE_NAME}} has also made these requested contracts visible for each user on their <a href="{% url 'contracts' %}">contracts page</a>.
+        {% else %}
+        <p>Currently Unsupported</p>
+        {% endif %}
+        {% endif %}
     {% endif %}
 
 </div>

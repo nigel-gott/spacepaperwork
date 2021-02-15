@@ -530,11 +530,13 @@ def generate_contract_requests(
     character_with_profit: Character,
     transfer,
 ):
+    command = f"Your loot has been sold!\n Please send a contract in-game to '{character_with_profit.ingame_name}' for the amount of ISK you are owed shown below:\n\n"
     deposit_total = 0
     for user_id, isk in total_participation.items():
         floored_isk = m.floor(isk.amount)
         if user_id != transfering_user.id:
             user = GooseUser.objects.get(id=user_id)
+            command = command + f"<@!{user.discord_uid()}> {floored_isk} \n"
 
             Contract.create(
                 user,
@@ -546,7 +548,7 @@ def generate_contract_requests(
             )
 
             deposit_total = deposit_total + floored_isk
-    return deposit_total
+    return deposit_total, command
 
 
 def make_transfer_command(total_participation, transfering_user: GooseUser):
@@ -732,9 +734,17 @@ def transfer_sold_items(
     return log.id
 
 
-def valid_transfer(to_transfer, request):
+def valid_transfer(to_transfer, request, form):
     if to_transfer.count() == 0:
         messages.error(request, "You cannot transfer 0 items")
+        return False
+
+    if (
+        form.cleaned_data["transfer_method"] == "contract"
+        and not form.cleaned_data["character_to_send_contracts_to"]
+    ):
+        error_message = "You must specify a character which people will be sending the contracts to get their profit"
+        messages.error(request, mark_safe(error_message))
         return False
 
     loot_groups = to_transfer.values("item__loot_group").distinct()
@@ -785,7 +795,7 @@ def transfer_profit(request):
                 item__location__character_location__character__user=request.gooseuser,
                 quantity__gt=F("transfered_quantity"),
             ).annotate(isk_balance=Sum("item__isktransaction__isk"))
-            if not valid_transfer(to_transfer, request):
+            if not valid_transfer(to_transfer, request, form):
                 return HttpResponseRedirect(reverse("sold"))
             log_id = transfer_sold_items(
                 to_transfer,
