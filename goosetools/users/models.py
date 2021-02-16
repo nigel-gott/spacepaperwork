@@ -266,6 +266,7 @@ class Corp(models.Model):
     description = models.TextField(null=True, blank=True)
     auto_approve = models.BooleanField(default=False)
     public_corp = models.BooleanField(default=False)
+    editable = models.BooleanField(default=True)
     sign_up_form = models.ForeignKey(
         DynamicForm,
         on_delete=models.SET_NULL,
@@ -308,8 +309,22 @@ class Corp(models.Model):
 
     @staticmethod
     def ensure_populated():
-        Corp.objects.get_or_create(name="DELETED", full_name="DELETED")
-        Corp.objects.get_or_create(name="UNKNOWN", full_name="UNKNOWN")
+        Corp.objects.update_or_create(
+            name="DELETED",
+            defaults={
+                "description": "An internal un-editable SpacePaperwork corp used to store deleted characters.",
+                "full_name": "DELETED",
+                "editable": False,
+            },
+        )
+        Corp.objects.update_or_create(
+            name="UNKNOWN",
+            defaults={
+                "description": "An internal un-editable SpacePaperwork corp used to store characters before their corp application is accepted.",
+                "full_name": "UNKNOWN",
+                "editable": False,
+            },
+        )
 
 
 def has_perm(perm: Union[str, List[str]]):

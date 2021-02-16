@@ -835,6 +835,7 @@ def corps_list(request):
             "description": c.description,
             "public_corp": c.public_corp,
             "auto_approve": c.auto_approve,
+            "editable": c.editable,
             "full_name": c.full_name,
             "name_with_ticker": c.name_with_corp_tag(),
             "member_count": c.character_set.count(),
@@ -901,6 +902,12 @@ def new_corp(request):
 @has_perm(perm=[ALL_CORP_ADMIN, SINGLE_CORP_ADMIN])
 def edit_corp(request, pk):
     corp = get_object_or_404(Corp, pk=pk)
+    if not corp.editable:
+        messages.error(
+            request,
+            f"Sorry you cannot edit this Corp as it is used internally by {settings.SITE_NAME}",
+        )
+        return HttpResponseRedirect(reverse("corps_list"))
     if request.method == "POST":
         form = CorpForm(request.POST)
         if form.is_valid():

@@ -12,9 +12,11 @@
                 <div class="row">
                     <div class="col s12 m2 right-align"><b>{{corp.name_with_ticker}}</b></div>
                     <div class="col s12 m8"><a href="{% url 'character_dashboard' %}?corp_filter={{corp.name}}">{{corp.member_count}} Members</a></div>
+                    {% if corp.editable %}
                     <div class="col s12 m2">
                         <a href="{% url 'edit_corp' corp.id %}" class="waves-btn btn secondary-content">Edit Corp</a>
                     </div>
+                    {% endif %}
                 </div>
                 {% if corp.description %}
                 <div class="row"><div class="col s12 m2 right-align">Corp Description:</div><div class="col s12 m10"> {{corp.description}} </div></div>
