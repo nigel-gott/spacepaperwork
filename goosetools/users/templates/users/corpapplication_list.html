@@ -50,10 +50,10 @@
                 <form action="{% url 'corp_application_update' application.pk %}" method="post">
                     {% csrf_token %}
                     {% if application.corp.discord_role_given_on_approval or application.corp.manual_group_given_on_approval %}
-                        <a class="btn green waves-effect waves-light modal-trigger" href="#modal_confirm">Approve <i class="material-icons right">send</i></a>
-                        <div id="modal_confirm" class="modal">
+                        <a class="btn green waves-effect waves-light modal-trigger" href="#modal_confirm_{{application.id}}">Approve <i class="material-icons right">send</i></a>
+                        <div id="modal_confirm_{{application.id}}" class="modal">
                             <div class="modal-content">
-                                <b class="red-text">Approving this will give the following to {{application.character.user}}:</b>
+                                <b class="red-text">Approving this will give the following to {{application.character.user}}:</b><br/>
                                 {% if application.corp.discord_role_given_on_approval %}
                                     <b>The Discord Role:</b> {{application.corp.discord_role_given_on_approval}}<br/>
                                 {% endif %}
