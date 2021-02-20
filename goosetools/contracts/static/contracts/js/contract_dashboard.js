@@ -248,14 +248,14 @@ $(function () {
 
     $('#actionable_filter').on('click',  function(){
         $("#top_row").data("filter", "actionable");
-        $("#top_row").html("<h3>Your Pending Contracts</h3><p class='red-text'>You have been requested to make or accept the contracts shown below in-game. Please do so and click the action buttons to let the other user know it has happened.");
+        $("#top_row").html("<h3>Pending Contracts</h3><p class='red-text'>You have been requested to make or accept the contracts shown below in-game. Please do so and click the action buttons to let the other user know it has happened.");
         table.draw();
         $(".filter").attr("disabled", false);
         $(this).attr("disabled", true);
     }).trigger("click");
     $('#mine_filter').on('click', function(){
         $("#top_row").data("filter", "mine");
-        $("#top_row").html("<h3>Contracts You've Requested or Sent</h3>");
+        $("#top_row").html("<h3>Sent Contracts</h3>");
         table.draw();
         $(".filter").attr("disabled", false);
         $(this).attr("disabled", true);

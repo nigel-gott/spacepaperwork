@@ -39,6 +39,7 @@ urlpatterns = [
                 path("comments/", include("django_comments.urls")),
                 path("forms/", include("user_forms.urls")),
                 path("notifications/", include("notifications.urls")),
+                path("hordak/", include("hordak.urls", namespace="hordak")),
             ]
             + settings.ENV_SPECIFIC_URLS
             + gooseflock_apps

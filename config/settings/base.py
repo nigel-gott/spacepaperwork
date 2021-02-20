@@ -105,6 +105,8 @@ TENANT_APPS = [
     "django_prometheus",
     "tinymce",
     "django_comments",
+    "mptt",
+    "hordak",
     # your tenant-specific apps
     "goosetools.users.apps.UsersConfig",
     "goosetools.items.apps.ItemsConfig",
@@ -368,3 +370,6 @@ LOGIN_URL = env("LOGIN_URL", default="/accounts/discord/login/")
 DISCORD_OAUTH_URL = env("DISCORD_OAUTH_URL")
 DISCORD_OAUTH_URL_WITHOUT_MANAGE = env("DISCORD_OAUTH_URL_WITHOUT_MANAGE")
 BOT_USER_ID = env("BOT_USER_ID")
+
+HORDAK_DECIMAL_PLACES = 0
+HORDAK_MAX_DIGITS = 16
