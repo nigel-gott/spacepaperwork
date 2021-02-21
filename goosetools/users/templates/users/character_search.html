@@ -50,7 +50,9 @@
                             src="{{ user.discord_avatar_url }}?size=32"/>
                 {% endif %}
                 <a href="{% url 'user_view' user.pk %}">{{user.discord_username}} {% if user.nick %} / {{user.nick}} {% endif %}</a><br/>
-                <a href="{% url 'venmo:other_dashboard' user.id %}">Their Venmo Transactions</a>
+                {% if GOOSEFLOCK_FEATURES %}
+                    <a href="{% url 'venmo:other_dashboard' user.id %}">Their Venmo Transactions</a>
+                {% endif %}
             </li>
         {% endfor %}
         </ul>

@@ -5,6 +5,9 @@
 </div>
 <div class="section">
     <h6>Their Characters:</h6>
+    {% if GOOSEFLOCK_FEATURES %}
+    <a href="{% url 'venmo:other_dashboard' viewed_user.id %}">Their Venmo Transactions</a>
+    {% endif %}
     <ul class="collection" style="overflow: visible;">
     {% for character in viewed_user.character_set.all %}
         <li class="collection-item ">
