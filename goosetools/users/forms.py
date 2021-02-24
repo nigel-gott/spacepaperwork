@@ -136,6 +136,7 @@ class AdminEditUserForm(forms.Form):
     manual_groups = forms.ModelMultipleChoiceField(
         GooseGroup.objects.filter(manually_given=True),
         widget=forms.CheckboxSelectMultiple,
+        required=False,
     )
 
 

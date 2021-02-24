@@ -211,6 +211,15 @@ NOTIFICATION_TYPES["user_apps"] = UnStackablePermissionNotification(
         reverse_lazy("applications"),
     ),
 )
+NOTIFICATION_TYPES["user_apps"] = UnStackablePermissionNotification(
+    USER_ADMIN_PERMISSION,
+    "user_apps",
+    RenderedNotification(
+        "There are pending user applications that require attention",
+        "person",
+        reverse_lazy("applications"),
+    ),
+)
 NOTIFICATION_TYPES["corp_apps"] = UnStackablePermissionNotification(
     ALL_CORP_ADMIN,
     "corp_apps",
