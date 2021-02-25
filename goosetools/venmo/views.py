@@ -244,16 +244,18 @@ def deposit(request):
     return render(request, "venmo/deposit.html", {"form": form})
 
 
+@has_perm(perm=VENMO_ADMIN)
 def approve_transaction(request, pk: int):
     return update_transaction(request, pk, "complete")
 
 
+@has_perm(perm=VENMO_ADMIN)
 def deny_transaction(request, pk: int):
     return update_transaction(request, pk, "rejected")
 
 
 def update_transaction(request, transaction_id: int, new_status: str):
-    if not request.user.is_superuser or request.method != "PUT":
+    if request.method != "PUT":
         return HttpResponseForbidden()
     try:
         venmo_server_client = venmo_client()
