@@ -3,7 +3,8 @@ from decimal import Decimal
 from django import forms
 from django.db import models
 from django.db.models.aggregates import Sum
-from django.db.models.expressions import F
+from django.db.models.expressions import Case, F, When
+from django.db.models.fields import IntegerField
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from djmoney.models.fields import MoneyField
@@ -160,6 +161,24 @@ class LootGroup(models.Model):
 
     def isk_balance(self):
         return to_isk(model_sum(self.inventoryitem_set, "isktransaction__isk"))
+
+    def non_debt_egg_balance(self):
+        result = self.inventoryitem_set.aggregate(
+            eggs=Sum(
+                Case(
+                    When(
+                        lootbucket__lootgroup__inventoryitem__eggtransaction__debt=False,
+                        then=F("eggtransaction__eggs"),
+                    ),
+                    output_field=IntegerField(),
+                    default=0,
+                )
+            )
+        )["eggs"]
+        if result is None:
+            return to_isk(0)
+        else:
+            return to_isk(result)
 
     def estimated_profit(self):
         return to_isk(
