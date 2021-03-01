@@ -19,7 +19,7 @@ class FleetForm(forms.Form):
     location = forms.CharField(required=False)
     start_date = forms.DateField(
         widget=forms.DateInput(attrs={"class": "datepicker"}, format="%b %d, %Y"),
-        input_formats=["%b. %d, %Y", "%b %d, %Y"],
+        input_formats=["%b. %d, %Y", "%b %d, %Y", "%B %d, %Y", "%B. %d, %Y"],
     )
     start_time = forms.TimeField(
         widget=forms.TimeInput(attrs={"class": "timepicker"}, format="%I:%M %p"),
