@@ -398,6 +398,9 @@ class InventoryItem(models.Model):
     def __str__(self):
         return f"{self.item} x {self.total_quantity()} @ {self.location}"
 
+    class Meta:
+        indexes = [models.Index(fields=["stack", "location", "loot_group", "contract"])]
+
 
 class JunkedItem(models.Model):
     item = models.OneToOneField(InventoryItem, on_delete=models.CASCADE)
