@@ -167,7 +167,7 @@ class LootGroup(models.Model):
             eggs=Sum(
                 Case(
                     When(
-                        lootbucket__lootgroup__inventoryitem__eggtransaction__debt=False,
+                        eggtransaction__debt=False,
                         then=F("eggtransaction__eggs"),
                     ),
                     output_field=IntegerField(),
