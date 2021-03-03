@@ -95,6 +95,8 @@
 </ul>
 {% endif %}
     {% has_perm user "user_admin" as is_user_admin %}
+    {% has_perm user "loot_tracker" as is_loot_tracker %}
+    {% has_perm user "ship_orderer" as is_ship_orderer %}
     {% has_perm user "user_group_admin" as is_user_group_admin %}
     {% has_perm user "single_corp_admin" as is_single_corp_admin %}
     {% has_perm user "all_corp_admin" as is_all_corp_admin %}
@@ -168,6 +170,7 @@
                         <i class="material-icons left">notifications_active</i>{% if ns %}<span class="new badge red">{{ns|length}}{% endif %}</span>
                     </a>
                 </li>
+                {% if is_loot_tracker %}
                 <li>
                     <a class="dropdown-trigger valign-wrapper" data-target="dropdown_fleets" href="#!">
                         <i class="material-icons left">star</i>Fleets
@@ -179,9 +182,12 @@
                     <i class="material-icons left" style="margin-right:0px;">shopping_cart</i>Sales ({{all_sales_num}})
                     <i class="material-icons right">arrow_drop_down</i>
                     </a></li>
+                {% endif %}
                 {% if GOOSEFLOCK_FEATURES %}
                 <li><a  href="{% url 'venmo:dashboard' %}">Eggs<i class="material-icons left">attach_money</i>
-                <li><a  href="{% url 'industry:shiporders_view' %}">Orders <i class="material-icons left">directions_boat</i>
+                    {% if is_ship_orderer %}
+                    <li><a  href="{% url 'industry:shiporders_view' %}">Orders <i class="material-icons left">directions_boat</i>
+                    {% endif %}
                 {% endif %}
                 </a></li>
                 <li>
@@ -309,14 +315,17 @@
             </a>
         </li>
         {% if GOOSEFLOCK_FEATURES %}
+        {% if is_ship_orderer %}
         <li >
             <a href="{% url 'industry:shiporders_view' %}">Orders<i class="material-icons right">directions_boat</i></a>
         </li>
+        {% endif %}
         <li >
             <a href="{% url 'venmo:dashboard' %}">Eggs<i class="material-icons right">attach_money</i></a>
         </li>
         {% endif %}
 
+        {% if is_loot_tracker %}
         <li><div class="divider"></div></li>
         <li><a class="subheader">Fleets<i class="material-icons right">star</i></a></li>
 
@@ -362,6 +371,7 @@
 
         <li><div class="divider"></div></li>
         <li><a class="subheader">Tools<i class="material-icons right">find_replace</i></a></li>
+        {% endif %}
 
         {% if GOOSEFLOCK_FEATURES %}
         <li >
