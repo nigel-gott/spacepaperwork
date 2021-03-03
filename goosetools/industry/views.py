@@ -24,6 +24,7 @@ from goosetools.industry.serializers import ShipOrderSerializer, ShipSerializer
 from goosetools.users.models import (
     FREE_SHIP_ORDERER,
     SHIP_ORDER_ADMIN,
+    SHIP_ORDERER,
     SHIP_PRICE_ADMIN,
     Character,
     GooseUser,
@@ -38,6 +39,7 @@ def forbidden(request):
 
 
 @transaction.atomic
+@has_perm(perm=SHIP_ORDERER)
 def shiporders_contract_confirm(request, pk):
     ship_order = get_object_or_404(ShipOrder, pk=pk)
     if ship_order.recipient_character.user != request.gooseuser:
@@ -186,6 +188,7 @@ def populate_ship_data(user) -> Dict[int, Any]:
 
 
 @transaction.atomic
+@has_perm(perm=SHIP_ORDERER)
 def shiporders_create(request):
     if request.method == "POST":
         form = ShipOrderForm(request.POST)
@@ -247,7 +250,8 @@ class ShipOrderViewSet(
 
     serializer_class = ShipOrderSerializer
     permission_classes = [
-        HasGooseToolsPerm.of(SHIP_ORDER_ADMIN, ignore_methods=["GET", "DELETE"])
+        HasGooseToolsPerm.of(SHIP_ORDER_ADMIN, ignore_methods=["GET", "DELETE"]),
+        HasGooseToolsPerm.of(SHIP_ORDERER),
     ]
 
     @action(detail=True, methods=["DELETE"])
@@ -363,6 +367,7 @@ class ShipOrderViewSet(
             )
 
 
+@has_perm(perm=SHIP_ORDERER)
 def shiporders_view(request):
     return render(
         request,
