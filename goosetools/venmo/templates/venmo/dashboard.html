@@ -21,8 +21,8 @@
     <div class="col s12 m8">
         <b>{{gooseuser.display_name}}</b><br/>
         Current Balance:  Ƶ {{venmo_user_balance.balance|nicemoney}} / ({{venmo_user_balance.balance|commanumber}})<br/>
-        Available Balance: Ƶ {{venmo_user_balance.balance|nicemoney}} / ({{venmo_user_balance.availableBalance|commanumber}})<br/>
-        Pending Balance : Ƶ {{venmo_user_balance.netPendingChange|nicemoney}} / ({{venmo_user_balance.netPendingChange|commanumber}})<br/>
+        Available Balance: Ƶ {{venmo_user_balance.balance|nicemoney}} / ({{venmo_user_balance.available_balance|commanumber}})<br/>
+        Pending Balance : Ƶ {{venmo_user_balance.net_pending_change|nicemoney}} / ({{venmo_user_balance.net_pending_change|commanumber}})<br/>
         {% if gooseuser != user.gooseuser %}
             Their Characters:
             {% for character in gooseuser.characters %}

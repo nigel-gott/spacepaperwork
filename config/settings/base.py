@@ -68,7 +68,6 @@ WSGI_APPLICATION = "config.wsgi.application"
 # ------------------------------------------------------------------------------
 GOOSEFLOCK_APPS = [
     "goosetools.mapbot.apps.MapBotConfig",
-    "goosetools.venmo.apps.VenmoConfig",
     "goosetools.industry.apps.IndustryConfig",
 ]
 
@@ -120,6 +119,7 @@ TENANT_APPS = [
     "goosetools.goose_comments.apps.GooseCommentsConfig",
     "goosetools.user_forms.apps.UserFormsConfig",
     "goosetools.notifications.apps.NotificationsConfig",
+    "goosetools.venmo.apps.VenmoConfig",
 ]
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

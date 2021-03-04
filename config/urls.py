@@ -10,7 +10,6 @@ from django.urls.conf import re_path
 gooseflock_apps = []
 if settings.GOOSEFLOCK_FEATURES:
     gooseflock_apps = [
-        path("venmo/", include("venmo.urls")),
         path("mapbot/", include("mapbot.urls")),
         path("industry/", include("industry.urls")),
     ]
@@ -40,6 +39,7 @@ urlpatterns = [
                 path("forms/", include("user_forms.urls")),
                 path("notifications/", include("notifications.urls")),
                 path("hordak/", include("hordak.urls", namespace="hordak")),
+                path("venmo/", include("venmo.urls")),
             ]
             + settings.ENV_SPECIFIC_URLS
             + gooseflock_apps

@@ -183,8 +183,8 @@
                     <i class="material-icons right">arrow_drop_down</i>
                     </a></li>
                 {% endif %}
-                {% if GOOSEFLOCK_FEATURES %}
                 <li><a  href="{% url 'venmo:dashboard' %}">Eggs<i class="material-icons left">attach_money</i>
+                {% if GOOSEFLOCK_FEATURES %}
                     {% if is_ship_orderer %}
                     <li><a  href="{% url 'industry:shiporders_view' %}">Orders <i class="material-icons left">directions_boat</i>
                     {% endif %}
@@ -320,10 +320,10 @@
             <a href="{% url 'industry:shiporders_view' %}">Orders<i class="material-icons right">directions_boat</i></a>
         </li>
         {% endif %}
+        {% endif %}
         <li >
             <a href="{% url 'venmo:dashboard' %}">Eggs<i class="material-icons right">attach_money</i></a>
         </li>
-        {% endif %}
 
         {% if is_loot_tracker %}
         <li><div class="divider"></div></li>

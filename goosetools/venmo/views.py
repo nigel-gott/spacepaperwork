@@ -1,4 +1,5 @@
 import re
+from abc import ABC, abstractmethod
 from typing import Any, Dict, Union
 
 from allauth.socialaccount.models import SocialAccount
@@ -24,6 +25,55 @@ from goosetools.venmo.forms import DepositForm, TransferForm, WithdrawForm
 swagger_file = load_file("goosetools/venmo/swagger.yml")
 
 
+class VenmoUserBalance:
+    def __init__(
+        self, balance: int, available_balance: int, net_pending_change: int
+    ) -> None:
+        self.balance = balance
+        self.available_balance = available_balance
+        self.net_pending_change = net_pending_change
+
+
+class VenmoInterface(ABC):
+    @abstractmethod
+    def user_balance(self, discord_uid: str) -> VenmoUserBalance:
+        pass
+
+
+class FogVenmo(VenmoInterface):
+    def __init__(self) -> None:
+        super().__init__()
+        self._client = FogVenmo._make_swagger_client()
+
+    @staticmethod
+    def _make_swagger_client(use_models=True):
+        host = settings.VENMO_HOST_URL
+        requests_client = RequestsClient()
+        api_token_header_name = swagger_file["securityDefinitions"]["api_key"]["name"]
+        requests_client.set_api_key(
+            host,
+            settings.VENMO_API_TOKEN,
+            param_name=api_token_header_name,
+            param_in="header",
+        )
+        swagger_file["host"] = settings.VENMO_HOST_URL
+        swagger_file["basePath"] = settings.VENMO_BASE_PATH
+        return SwaggerClient.from_spec(
+            swagger_file, http_client=requests_client, config={"use_models": use_models}
+        )
+
+    def user_balance(self, discord_uid: str) -> VenmoUserBalance:
+        venmo_user_balance_future = self._client.users.getUserBalance(
+            discordId=discord_uid,
+        )
+        balance_result = venmo_user_balance_future.response().result
+        return VenmoUserBalance(
+            balance=balance_result.balance,
+            available_balance=balance_result.availableBalance,
+            net_pending_change=balance_result.netPendingChange,
+        )
+
+
 def venmo_client(use_models=True):
     host = settings.VENMO_HOST_URL
     requests_client = RequestsClient()
@@ -42,12 +92,8 @@ def venmo_client(use_models=True):
 
 
 def dashboard(request, gooseuser):
-    venmo_server_client = venmo_client()
     discord_uid = gooseuser.discord_uid()
-    venmo_user_balance_future = venmo_server_client.users.getUserBalance(
-        discordId=discord_uid,
-    )
-    venmo_user_balance = venmo_user_balance_future.response().result
+    venmo_user_balance = FogVenmo().user_balance(discord_uid)
     context = {
         "page_data": {
             "gooseuser_id": gooseuser.id,
