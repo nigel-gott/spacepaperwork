@@ -73,14 +73,14 @@ $(function() {
     columns = [
             { "data": "transaction_status", "title": "Status" },
             { "data": "transaction_type", "title": "Type" },
-            { "data": "updatedAt", "title":"Time",
+            { "data": "updated_at", "title":"Time",
                 render: function ( data, type, row ) {
-                    createdAt = row['createdAt'];
-                    updatedAt = row['updatedAt'];
-                    if(createdAt < updatedAt){
-                        return updatedAt;
+                    created_at = row['created_at'];
+                    updated_at = row['updated_at'];
+                    if(created_at < updated_at){
+                        return updated_at;
                     } else {
-                        return createdAt;
+                        return created_at;
                     }
                 }
             },
@@ -129,7 +129,14 @@ $(function() {
             $('#transactions_table_wrapper').show();
             $('#loading').hide();
             $('#load').text("reload transaction history");
-        });
+        }).catch(e => {
+            M.toast({ html: "Failed to Load Transactions because of error: " + e})
+            console.log(e);
+            $('#transactions_table_wrapper').hide();
+            $('#loading').hide();
+            $('#load').text("load transaction history");
+        })
+
     });
 
 });
