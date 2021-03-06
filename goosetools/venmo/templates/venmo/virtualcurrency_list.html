@@ -1,0 +1,39 @@
+{% extends "core/base.html" %}
+{% block body %}
+<div class="section">
+    <h4>Virtual Currency Admin</h4>
+    <p>Create and Administrate Virtual Currencies using Corp Wallets.</p>
+    <a class="waves-btn btn green" href="{% url 'venmo:currency-create' %}">Create New Virtual Currency</a>
+    <ul class="collection" style="overflow: visible;">
+    {% if currency_list %}
+    {% for currency in currency_list %}
+        <li class="collection-item ">
+                <a href="{% url 'venmo:currency-update' currency.id %}" class="waves-btn btn secondary-content">Edit</a>
+            <span class="title"><a href="{% url 'venmo:currency-detail' currency.id %}">{{currency.name}}</a>
+            </span>
+            <p>
+               Description: {{currency.description}}<br>
+
+            {% if virtualcurrency.corps.count %}
+               Connected Corp Wallets:
+                {% for corp in virtualcurrency.corps.all %}
+                    {{corp}}
+                    {% if forloop.last %}
+                    .
+                    {% else %}
+                    ,
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                Not connected to any Corp Wallets.
+            {% endif %}
+            </p>
+                </li>
+            {% endfor %}
+    {% else %}
+    <li class="collection-item"> You haven't created any Virtual Currencies. Click the Create button above to create one. </li>
+    {% endif %}
+    </ul>
+</div>
+
+{% endblock %}

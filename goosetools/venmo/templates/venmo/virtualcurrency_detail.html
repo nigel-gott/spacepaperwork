@@ -1,0 +1,29 @@
+{% extends "core/base.html" %}
+{% load materializecss %}
+{% block body %}
+<div class="section">
+    <h4>Virtual Currency: {{virtualcurrency.name}}</h4>
+        <a href="{% url 'venmo:currency-list' %}">Back to All Currencies</a>
+</div>
+<div class="section">
+        <a href="{% url 'venmo:currency-update' virtualcurrency.id %}" class="waves-btn btn">Edit Currency</a>
+        <a href="{% url 'venmo:currency-delete' virtualcurrency.id %}" class="waves-btn btn red">Delete Currency</a>
+    </span>
+    <p>
+    Description: {{virtualcurrency.description}}<br/>
+    </p>
+    {% if virtualcurrency.corps.all %}
+        <ul class="collection with-header">
+        <li class="collection-header">
+            <h6>Connected Corp Wallets</h6>
+        </li>
+        {% for corp in virtualcurrency.corps.all %}
+            <li class="collection-item">{{corp}}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        Not connected to any Corp Wallets.
+    {% endif %}
+</div>
+
+{% endblock %}

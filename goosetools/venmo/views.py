@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.messages.views import SuccessMessageMixin
 from django.http.response import (
     HttpResponse,
     HttpResponseBadRequest,
@@ -9,12 +10,17 @@ from django.http.response import (
 )
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.urls.base import reverse_lazy
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.list import ListView
 
 from goosetools.users.models import VENMO_ADMIN, GooseUser, has_perm
 from goosetools.venmo.api.fog_venmo import FogVenmo
 from goosetools.venmo.api.space_venmo import SpaceVenmo
 from goosetools.venmo.api.venmo import VenmoError, VenmoUserBalance
 from goosetools.venmo.forms import DepositForm, TransferForm, WithdrawForm
+from goosetools.venmo.models import VirtualCurrency
 
 
 def dashboard(request, gooseuser):
@@ -152,3 +158,29 @@ def update_transaction(request, transaction_id: int, new_status: str):
     except VenmoError as e:
         messages.error(request, e.message)
         return HttpResponseBadRequest()
+
+
+class VirtualCurrencyListView(ListView):
+    queryset = VirtualCurrency.objects.order_by("name")
+    context_object_name = "currency_list"
+
+
+class VirtualCurrencyCreateView(SuccessMessageMixin, CreateView):
+    model = VirtualCurrency
+    fields = ["name", "description", "corps"]
+    success_message = "%(name)s was created successfully"
+
+
+class VirtualCurrencyUpdateView(SuccessMessageMixin, UpdateView):
+    model = VirtualCurrency
+    fields = ["name", "description", "corps"]
+    success_message = "%(name)s was edited successfully"
+
+
+class VirtualCurrencyDeleteView(DeleteView):
+    model = VirtualCurrency
+    success_url = reverse_lazy("venmo:currency-list")
+
+
+class VirtualCurrencyDetailView(DetailView):
+    model = VirtualCurrency
