@@ -5,6 +5,7 @@
 <div class="section">
     {% if virtualcurrency %}
         <h5>Editing Virtual Currency: {{virtualcurrency.name}}</h5>
+        <a href="{% url 'venmo:currency-delete' virtualcurrency.id %}" class="waves-btn btn red">Delete Currency</a>
     {% else %}
         <h5>Create New Virtual Currency</h5>
     {% endif %}
@@ -42,4 +43,11 @@
         </button>
     </form>
 </div>
+{% endblock %}
+
+{% block extrafooter %}
+<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+
+{{ form.media }}
+</script>
 {% endblock %}

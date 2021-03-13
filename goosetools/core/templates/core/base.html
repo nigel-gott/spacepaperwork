@@ -96,7 +96,7 @@
     {% has_perm user "venmo_admin" as is_venmo_admin %}
     {% if is_venmo_admin %}
     <ul class="dropdown-content" id="dropdown_venmo">
-        <li><a href="{% url 'venmo:dashboard' %}">Eggs<i class="material-icons left">attach_money</i></a></li>
+        <li><a href="{% url 'venmo:dashboard' 'default' %}">Eggs<i class="material-icons left">attach_money</i></a></li>
         <li >
             <a href="{% url 'venmo:currency-list' %}">Currency Admin<i class="material-icons left">settings</i></a>
         </li>
@@ -198,7 +198,7 @@
                     <i class="material-icons right">arrow_drop_down</i>
                     </a></li>
                 {% else %}
-                <li><a  href="{% url 'venmo:dashboard' %}">Eggs<i class="material-icons left">attach_money</i>
+                <li><a  href="{% url 'venmo:dashboard' 'default' %}">Eggs<i class="material-icons left">attach_money</i>
                 {% endif %}
                 {% if GOOSEFLOCK_FEATURES %}
                     {% if is_ship_orderer %}
@@ -338,7 +338,7 @@
         {% endif %}
         {% endif %}
         <li >
-            <a href="{% url 'venmo:dashboard' %}">Eggs<i class="material-icons right">attach_money</i></a>
+            <a href="{% url 'venmo:dashboard' 'default' %}">Eggs<i class="material-icons right">attach_money</i></a>
         </li>
         {% if is_venmo_admin %}
         <li >

@@ -5,11 +5,22 @@
 {% block body %}
 <div class="row">
     <div class="col s12 m12">
+        {% if all_ccy|length > 1 %}
+            <h6>Switch To Other Currency</h6>
+            {% for ccy in all_ccy %}
+                {% if gooseuser == user.gooseuser %}
+                    <a class="btn waves-btn" href="{% url 'venmo:dashboard' ccy.name %}">{{ccy.name}}</a>
+                {% else %}
+                    <a class="btn waves-btn" href="{% url 'venmo:dashboard' ccy.name gooseuser.id %}">{{ccy.name}}</a>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        <div class="divider"></div>
         {% if gooseuser == user.gooseuser %}
-            <h5>Your Venmo Dashboard</h5>
+            <h5>Your Venmo Dashboard For {{ccy.name}}</h5>
         {% else %}
-            <h5>{{gooseuser.display_name}}'s Venmo Transactions</h5>
-            <a href="{% url 'venmo:dashboard' %}">Back To Your Venmo Dashboard</a>
+            <h5>{{gooseuser.display_name}}'s Venmo Transactions For {{ccy.name}}</h5>
+            <a href="{% url 'venmo:dashboard' ccy.name %}">Back To Your Venmo Dashboard</a>
         {% endif %}
         <div class="divider"></div>
     </div>
@@ -32,12 +43,12 @@
     </div>
     <div class="col s12 m3">
         <b>Available Actions</b><br/>
-        <a href="{% url 'venmo:withdraw' %}">Withdraw Eggs as Isk</a><br/>
-        <a href="{% url 'venmo:transfer' %}">Transfer Eggs to Someone</a><br/>
-        <a href="{% url 'venmo:deposit' %}">Deposit Eggs</a><br/>
+        <a href="{% url 'venmo:withdraw' ccy.name %}">Withdraw Eggs as Isk</a><br/>
+        <a href="{% url 'venmo:transfer' ccy.name %}">Transfer Eggs to Someone</a><br/>
+        <a href="{% url 'venmo:deposit' ccy.name %}">Deposit Eggs</a><br/>
         {% has_perm user "venmo_admin" as is_venmo_admin %}
         {% if is_venmo_admin %}
-            <a href="{% url 'venmo:pending' %}">Approve/Deny Pending Transactions</a><br/>
+            <a href="{% url 'venmo:pending' ccy.name %}">Approve/Deny Pending Transactions</a><br/>
         {% endif %}
     </div>
     <div class="col s12 m12">
@@ -62,8 +73,9 @@ function numberWithCommas(x) {
 function render_link_if_other_user(page_data, prefix, row){
     discord_id = row[prefix+'_discord_id'];
     gooseuser_id = row[prefix+'_gooseuser_id'];
+    ccy_name = page_data['ccy']['name']
     if(gooseuser_id && gooseuser_id != page_data['gooseuser_id']){
-        return `<a href="${page_data['site_prefix']}venmo/user/${gooseuser_id}/dashboard">${discord_id}</a>`;
+        return `<a href="${page_data['site_prefix']}venmo/user/${ccy_name}/${gooseuser_id}/dashboard">${discord_id}</a>`;
     } else{
         return discord_id;
     }
@@ -117,7 +129,7 @@ $(function() {
     $('#load').on('click', function(){
         $('#loading').show();
         $('#transactions_table_wrapper').hide();
-        fetch(new Request("{% url 'venmo:transactions-list' gooseuser.pk %}"), {
+        fetch(new Request("{% url 'venmo:transactions-list' ccy.name gooseuser.pk %}"), {
             method: 'GET',
             mode: 'same-origin',
         })

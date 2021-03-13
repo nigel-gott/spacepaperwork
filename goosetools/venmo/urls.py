@@ -21,20 +21,24 @@ from goosetools.venmo.views import (
 app_name = "venmo"
 
 urlpatterns = [
-    path("dashboard/", own_dashboard, name="dashboard"),
-    path("user/<int:pk>/dashboard/", other_dashboard, name="other_dashboard"),
+    path("<str:ccy>/dashboard/", own_dashboard, name="dashboard"),
+    path("<str:ccy>/user/<int:pk>/dashboard/", other_dashboard, name="other_dashboard"),
     path(
-        "user/<int:pk>/transactions",
+        "<str:ccy>/user/<int:pk>/transactions",
         other_user_transactions_list,
         name="transactions-list",
     ),
-    path("transactions/pending", pending_list, name="pending-list"),
-    path("withdraw/", withdraw, name="withdraw"),
-    path("deposit/", deposit, name="deposit"),
-    path("transfer/", transfer, name="transfer"),
-    path("pending/", pending, name="pending"),
-    path("pending/<int:pk>/approve", approve_transaction, name="approve_transaction"),
-    path("pending/<int:pk>/deny", deny_transaction, name="deny_transaction"),
+    path("<str:ccy>/transactions/pending", pending_list, name="pending-list"),
+    path("<str:ccy>/withdraw/", withdraw, name="withdraw"),
+    path("<str:ccy>/deposit/", deposit, name="deposit"),
+    path("<str:ccy>/transfer/", transfer, name="transfer"),
+    path("<str:ccy>/pending/", pending, name="pending"),
+    path(
+        "<str:ccy>/pending/<int:pk>/approve",
+        approve_transaction,
+        name="approve_transaction",
+    ),
+    path("<str:ccy>/pending/<int:pk>/deny", deny_transaction, name="deny_transaction"),
     path("currency/", VirtualCurrencyListView.as_view(), name="currency-list"),
     path(
         "currency/<int:pk>/",

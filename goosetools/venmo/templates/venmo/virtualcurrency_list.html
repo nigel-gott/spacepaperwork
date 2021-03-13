@@ -9,14 +9,14 @@
     {% for currency in currency_list %}
         <li class="collection-item ">
                 <a href="{% url 'venmo:currency-update' currency.id %}" class="waves-btn btn secondary-content">Edit</a>
-            <span class="title"><a href="{% url 'venmo:currency-detail' currency.id %}">{{currency.name}}</a>
+            <span class="title"><a href="{% url 'venmo:currency-detail' currency.id %}">{{currency.name}} </a>{% if currency.default %}(Default){%endif%}
             </span>
             <p>
                Description: {{currency.description}}<br>
 
-            {% if virtualcurrency.corps.count %}
+            {% if currency.corps.count %}
                Connected Corp Wallets:
-                {% for corp in virtualcurrency.corps.all %}
+                {% for corp in currency.corps.all %}
                     {{corp}}
                     {% if forloop.last %}
                     .
@@ -26,6 +26,20 @@
                 {% endfor %}
             {% else %}
                 Not connected to any Corp Wallets.
+            {% endif %}
+            <br/>
+            {% if currency.withdrawal_characters.all %}
+                    Withdrawal Characters:
+                {% for character in currency.withdrawal_characters.all %}
+                    {{character }}
+                    {% if forloop.last %}
+                    .
+                    {% else %}
+                    ,
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                No Withdrawal Characters.
             {% endif %}
             </p>
                 </li>

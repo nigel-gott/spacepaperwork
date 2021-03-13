@@ -60,7 +60,7 @@
             <tr> <td>
             Venmo:
                 </td><td>
-    <a href="{% url 'venmo:other_dashboard' viewed_user.id %}">Their Venmo Transactions</a>
+    <a href="{% url 'venmo:other_dashboard' 'default' viewed_user.id %}">Their Venmo Transactions</a>
             </td></tr>
     {% endif %}
         {% for field in form %}

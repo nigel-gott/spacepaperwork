@@ -161,13 +161,6 @@ class DiscordGuild(models.Model):
         return self.connection_valid
 
     @staticmethod
-    def get_active():
-        try:
-            return DiscordGuild.objects.get(active=True)
-        except DiscordGuild.DoesNotExist:
-            return False
-
-    @staticmethod
     def try_give_role(uid, role_id):
         try:
             guild = DiscordGuild.objects.get(active=True)
@@ -193,6 +186,13 @@ class DiscordGuild(models.Model):
             return [(role["name"], role["id"]) for role in request.json()["roles"]]
         except DiscordGuild.DoesNotExist:
             return []
+
+    @staticmethod
+    def get_active():
+        try:
+            return DiscordGuild.objects.get(active=True)
+        except DiscordGuild.DoesNotExist:
+            return False
 
     # pylint: disable=signature-differs
     def save(self, *args, **kwargs):
