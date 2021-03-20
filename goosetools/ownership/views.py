@@ -504,7 +504,7 @@ def transfered_items(request):
 def completed_profit_transfers(request):
     return render(
         request,
-        "ownership/completed_profit_transfers.html",
+        "ownership/completed_egg_transfers.html",
         {
             "transfer_logs": request.user.gooseuser.transferlog_set.filter(
                 all_done=True
