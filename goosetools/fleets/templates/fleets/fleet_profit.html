@@ -26,21 +26,17 @@
 
 <div class="row">
     <div class="col s12 m12">
-        <h5>Total Profit per Fleet Member</h5>
+        <h5>Loot share per Fleet Member</h5>
         <table>
             <thead>
             <th>Discord User</th>
-            <th>Total share percentage</th>
-            <th>Percentage shares Per Bucket</th>
+            <th>Percentage Ownership Per Bucket</th>
             </thead>
             <tbody>
             {% for member in stats %}
             <tr>
                 <td>
                     {{ member.username }}
-                </td>
-                <td>
-                    {{ member.total_percent }} %
                 </td>
                 <td>
                     <ul class="browser-default">

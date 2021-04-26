@@ -914,9 +914,6 @@ def item_add(request, lg_pk):
 
 def generate_fleet_profit(fleet):
 
-    all_fleet_items = InventoryItem.objects.filter(
-        loot_group__bucket__fleet=fleet,
-    )
     # not_started_items = InventoryItem .objects.filter(
     #     loot_group__bucket__fleet=fleet,
     #     quantity__gt=0
@@ -938,19 +935,28 @@ def generate_fleet_profit(fleet):
     by_user_by_bucket = {}
     total_item_shares_per_bucket = {}
     total_shares = 0
+    total_items_per_bucket = {}
 
-    for item in all_fleet_items:
-        bucket = item.loot_group.bucket
-        participation = bucket.calculate_participation(0, item.loot_group)
-        for user_id, result in participation["participation"].items():
-            by_user.setdefault(user_id, 0)
-            by_user_by_bucket.setdefault(user_id, {})
-            total_item_shares_per_bucket.setdefault(bucket.id, 0)
-            by_user_by_bucket[user_id].setdefault(bucket.id, 0)
-            total_item_shares_per_bucket[bucket.id] += result["shares"]
-            by_user_by_bucket[user_id][bucket.id] += result["shares"]
-            by_user[user_id] += result["shares"]
-            total_shares += result["shares"]
+    all_fleet_buckets = LootBucket.objects.filter(
+        fleet=fleet,
+    )
+    for bucket in all_fleet_buckets:
+        all_bucket_items = InventoryItem.objects.filter(loot_group__bucket=bucket)
+        total_items_in_bucket = all_bucket_items.count()
+        total_items_per_bucket[bucket.id] = total_items_in_bucket
+
+        for item in all_bucket_items:
+            bucket = item.loot_group.bucket
+            participation = bucket.calculate_participation(0, item.loot_group)
+            for user_id, result in participation["participation"].items():
+                by_user.setdefault(user_id, 0)
+                by_user_by_bucket.setdefault(user_id, {})
+                total_item_shares_per_bucket.setdefault(bucket.id, 0)
+                by_user_by_bucket[user_id].setdefault(bucket.id, 0)
+                total_item_shares_per_bucket[bucket.id] += result["shares"]
+                by_user_by_bucket[user_id][bucket.id] += result["shares"]
+                by_user[user_id] += result["shares"]
+                total_shares += result["shares"]
 
     stats = []
     for user_id, user_total_shares in by_user.items():
@@ -958,8 +964,13 @@ def generate_fleet_profit(fleet):
         total_percent = round((Decimal(user_total_shares) / total_shares) * 100, 2)
         percent_per_bucket = []
         for bucket_id, users_share_in_bucket in by_user_by_bucket[user_id].items():
-            bucket_percent = f"Bucket {bucket_id}: " + percent(
-                users_share_in_bucket, total_item_shares_per_bucket[bucket_id]
+            total_items = total_items_per_bucket[bucket_id]
+            bucket_percent = (
+                f"Bucket {bucket_id}: "
+                + percent(
+                    users_share_in_bucket, total_item_shares_per_bucket[bucket_id]
+                )
+                + f" of {total_items} items."
             )
             percent_per_bucket.append(bucket_percent)
         stats.append(
