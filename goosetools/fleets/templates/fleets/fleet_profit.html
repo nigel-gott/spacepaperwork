@@ -31,6 +31,7 @@
             <thead>
             <th>Discord User</th>
             <th>Bucket Id</th>
+            <th>Num Loot Groups</th>
             <th>Total Item Stacks in Bucket</th>
             <th>% Of Bucket Items Owned</th>
             </thead>
@@ -45,6 +46,9 @@
                 {% endif %}
                 <td>
                     {{ b.id }}
+                </td>
+                <td>
+                    {{ b.groups_with_shares }} with shares / {{b.groups_with_items}} with items
                 </td>
                 <td>
                     {{ b.total_items }}

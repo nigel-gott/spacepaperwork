@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import F, Sum
+from django.db.models.aggregates import Count
 from django.db.models.functions import Coalesce
 from django.forms.formsets import formset_factory
 from django.http.response import HttpResponseNotAllowed, HttpResponseRedirect
@@ -936,6 +937,7 @@ def generate_fleet_profit(fleet):
     total_item_shares_per_bucket = {}
     total_shares = 0
     total_items_per_bucket = {}
+    bucket_info = {}
 
     all_fleet_buckets = LootBucket.objects.filter(
         fleet=fleet,
@@ -946,6 +948,19 @@ def generate_fleet_profit(fleet):
 
         total_item_shares_per_bucket[bucket.id] = bucket.total_shares()
         shares = LootShare.objects.filter(loot_group__bucket=bucket)
+        groups_with_shares = (
+            LootGroup.objects.annotate(shares=Sum("lootshare__share_quantity"))
+            .filter(bucket=bucket, shares__gt=0)
+            .count()
+        )
+        groups_with_items = (
+            LootGroup.objects.annotate(items=Count("inventoryitem"))
+            .filter(bucket=bucket, items__gt=0)
+            .count()
+        )
+        bucket_info.setdefault(bucket.id, {})
+        bucket_info[bucket.id]["groups_with_shares"] = groups_with_shares
+        bucket_info[bucket.id]["groups_with_items"] = groups_with_items
 
         for share in shares:
             user = share.character.user
@@ -976,6 +991,7 @@ def generate_fleet_profit(fleet):
                     "percent_owned": bucket_percent,
                     "their_shares": users_share_in_bucket,
                     "total_shares": total_shares,
+                    **bucket_info[bucket_id],
                 }
             )
         stats.append(
