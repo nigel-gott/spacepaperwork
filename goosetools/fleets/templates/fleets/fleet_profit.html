@@ -30,24 +30,30 @@
         <table>
             <thead>
             <th>Discord User</th>
-            <th>Percentage Ownership Per Bucket</th>
+            <th>Bucket Id</th>
+            <th>Percentage Ownership Of Bucket</th>
+            <th>Total Items in Bucket</th>
             </thead>
             <tbody>
             {% for member in stats %}
+                {% for b in member.buckets %}
             <tr>
-                <td>
+                {% if forloop.first %}
+                <td rowspan="{{member.buckets|length}}">
                     {{ member.username }}
                 </td>
+                {% endif %}
                 <td>
-                    <ul class="browser-default">
-                    {% for b in member.percent_per_bucket %}
-                    <li>
-                        {{ b }}
-                    </li>
-                    {% endfor %}
-                    </ul>
+                    {{ b.id }}
+                </td>
+                <td>
+                    {{ b.percent_owned}}
+                </td>
+                <td>
+                    {{ b.total_items }}
                 </td>
             </tr>
+            {% endfor %}
             {% endfor %}
             </tbody>
         </table>

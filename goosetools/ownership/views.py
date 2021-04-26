@@ -962,26 +962,28 @@ def generate_fleet_profit(fleet):
     for user_id, user_total_shares in by_user.items():
         user = GooseUser.objects.get(pk=user_id)
         total_percent = round((Decimal(user_total_shares) / total_shares) * 100, 2)
-        percent_per_bucket = []
+        buckets = []
         for bucket_id, users_share_in_bucket in by_user_by_bucket[user_id].items():
             total_items = total_items_per_bucket[bucket_id]
-            bucket_percent = (
-                f"Bucket {bucket_id}: "
-                + percent(
-                    users_share_in_bucket, total_item_shares_per_bucket[bucket_id]
-                )
-                + f" of {total_items} items."
+            bucket_percent = percent(
+                users_share_in_bucket, total_item_shares_per_bucket[bucket_id]
             )
-            percent_per_bucket.append(bucket_percent)
+            buckets.append(
+                {
+                    "id": bucket_id,
+                    "total_items": total_items,
+                    "percent_owned": bucket_percent,
+                }
+            )
         stats.append(
             {
                 "username": user.username,
                 "total_percent": total_percent,
-                "percent_per_bucket": percent_per_bucket,
+                "buckets": buckets,
             }
         )
     return stats
 
 
 def percent(n, y):
-    return str(round((Decimal(n) / y) * 100, 2)) + "%"
+    return str(round((Decimal(n) / y) * 100, 2))
