@@ -985,7 +985,7 @@ def generate_fleet_profit(fleet):
                 "buckets": buckets,
             }
         )
-    return stats
+    return sorted(stats, key=lambda x: x["total_percent"])
 
 
 def percent(n, y):
