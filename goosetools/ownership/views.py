@@ -942,21 +942,21 @@ def generate_fleet_profit(fleet):
     )
     for bucket in all_fleet_buckets:
         all_bucket_items = InventoryItem.objects.filter(loot_group__bucket=bucket)
-        total_items_in_bucket = 0
+        total_items_in_bucket = all_bucket_items.count()
 
-        for item in all_bucket_items:
-            total_items_in_bucket += item.total_quantity()
-            bucket = item.loot_group.bucket
-            participation = bucket.calculate_participation(0, item.loot_group)
-            for user_id, result in participation["participation"].items():
-                by_user.setdefault(user_id, 0)
-                by_user_by_bucket.setdefault(user_id, {})
-                total_item_shares_per_bucket.setdefault(bucket.id, 0)
-                by_user_by_bucket[user_id].setdefault(bucket.id, 0)
-                total_item_shares_per_bucket[bucket.id] += result["shares"]
-                by_user_by_bucket[user_id][bucket.id] += result["shares"]
-                by_user[user_id] += result["shares"]
-                total_shares += result["shares"]
+        total_item_shares_per_bucket[bucket.id] = bucket.total_shares()
+        shares = LootShare.objects.filter(loot_group__bucket=bucket)
+
+        for share in shares:
+            user = share.character.user
+            shares = share.share_quantity
+            by_user.setdefault(user.id, 0)
+            by_user_by_bucket.setdefault(user.id, {})
+            total_item_shares_per_bucket.setdefault(bucket.id, 0)
+            by_user_by_bucket[user.id].setdefault(bucket.id, 0)
+            by_user_by_bucket[user.id][bucket.id] += shares
+            by_user[user.id] += shares
+            total_shares += shares
 
         total_items_per_bucket[bucket.id] = total_items_in_bucket
 
