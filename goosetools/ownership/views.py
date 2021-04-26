@@ -947,10 +947,10 @@ def generate_fleet_profit(fleet):
             by_user_by_bucket.setdefault(user_id, {})
             total_item_shares_per_bucket.setdefault(bucket.id, 0)
             by_user_by_bucket[user_id].setdefault(bucket.id, 0)
-            total_item_shares_per_bucket[bucket.id] += result["num_shares"]
-            by_user_by_bucket[user_id][bucket.id] += result["num_shares"]
-            by_user[user_id] += result["num_shares"]
-            total_shares += result["num_shares"]
+            total_item_shares_per_bucket[bucket.id] += result["shares"]
+            by_user_by_bucket[user_id][bucket.id] += result["shares"]
+            by_user[user_id] += result["shares"]
+            total_shares += result["shares"]
 
     stats = {}
     for user_id, user_total_shares in by_user.items():
