@@ -31,8 +31,8 @@
             <thead>
             <th>Discord User</th>
             <th>Bucket Id</th>
-            <th>Percentage Ownership Of Bucket</th>
             <th>Total Items in Bucket</th>
+            <th>% Of Bucket Items Owned</th>
             </thead>
             <tbody>
             {% for member in stats %}
@@ -47,10 +47,10 @@
                     {{ b.id }}
                 </td>
                 <td>
-                    {{ b.percent_owned}}
+                    {{ b.total_items }}
                 </td>
                 <td>
-                    {{ b.total_items }}
+                    {{ b.percent_owned}} ({{b.their_shares}}/{{b.total_shares}} shares)
                 </td>
             </tr>
             {% endfor %}
