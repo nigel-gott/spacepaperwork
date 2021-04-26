@@ -910,3 +910,65 @@ def item_add(request, lg_pk):
             "title": "Add New Items to Loot Bucket",
         },
     )
+
+
+def generate_fleet_profit(fleet):
+
+    all_fleet_items = InventoryItem.objects.filter(
+        loot_group__bucket__fleet=fleet,
+    )
+    # not_started_items = InventoryItem .objects.filter(
+    #     loot_group__bucket__fleet=fleet,
+    #     quantity__gt=0
+    # )
+    # in_market_items = MarketOrder.objects.filter(
+    #     item__loot_group__bucket__fleet=fleet,
+    #     quantity__gt=0
+    # )
+    # to_transfer = SoldItem.objects.filter(
+    #     item__loot_group__bucket__fleet=fleet,
+    #     quantity__gt=F("transfered_quantity"),
+    # ).annotate(isk_balance=Sum("item__isktransaction__isk"))
+    # already_transfered = SoldItem.objects.filter(
+    #     item__loot_group__bucket__fleet=fleet,
+    #     quantity=F("transfered_quantity"),
+    # ).annotate(isk_balance=Sum("item__eggtransaction__eggs"))
+
+    by_user = {}
+    by_user_by_bucket = {}
+    total_item_shares_per_bucket = {}
+    total_shares = 0
+
+    for item in all_fleet_items:
+        bucket = item.loot_group.bucket
+        participation = bucket.calculate_participation(0, item.loot_group)
+        for user_id, result in participation["participation"].items():
+            by_user.setdefault(user_id, 0)
+            by_user_by_bucket.setdefault(user_id, {})
+            total_item_shares_per_bucket.setdefault(bucket.id, 0)
+            by_user_by_bucket[user_id].setdefault(bucket.id, 0)
+            total_item_shares_per_bucket[bucket.id] += result["num_shares"]
+            by_user_by_bucket[user_id][bucket.id] += result["num_shares"]
+            by_user[user_id] += result["num_shares"]
+            total_shares += result["num_shares"]
+
+    stats = {}
+    for user_id, user_total_shares in by_user.items():
+        user = GooseUser.objects.get(pk=user_id)
+        total_percent = round((Decimal(user_total_shares) / total_shares) * 100, 2)
+        percent_per_bucket = []
+        for bucket_id, users_share_in_bucket in by_user_by_bucket.items():
+            bucket_percent = f"Bucket {bucket_id}: " + percent(
+                users_share_in_bucket, total_item_shares_per_bucket[bucket_id]
+            )
+            percent_per_bucket.append(bucket_percent)
+        stats[user_id] = {
+            "username": user.username,
+            "total_percent": total_percent,
+            "percent_per_bucket": percent_per_bucket,
+        }
+    return stats
+
+
+def percent(n, y):
+    return str(round((Decimal(n) / y) * 100, 2)) + "%"

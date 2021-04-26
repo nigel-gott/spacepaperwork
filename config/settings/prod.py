@@ -28,3 +28,6 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MAPBOT_HOST = "https://www.goosetools.com/mapbot"
+
+PROMETHEUS_METRICS_EXPORT_PORT_RANGE = range(8001, 8050)
+PROMETHEUS_METRICS_EXPORT_ADDRESS = ""

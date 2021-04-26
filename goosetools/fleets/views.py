@@ -19,6 +19,7 @@ from goosetools.fleets.models import (
     past_fleets_query,
 )
 from goosetools.ownership.models import LootGroup
+from goosetools.ownership.views import generate_fleet_profit
 from goosetools.users.models import Character
 
 from .forms import FleetAddMemberForm, FleetForm, JoinFleetForm
@@ -352,4 +353,14 @@ def fleet_edit(request, pk):
 
     return render(
         request, "fleets/fleet_form.html", {"form": form, "title": "Edit Fleet"}
+    )
+
+
+def fleet_profit(request, pk):
+    existing_fleet = Fleet.objects.get(pk=pk)
+    stats = generate_fleet_profit(existing_fleet)
+    return render(
+        request,
+        "fleets/fleet_profit.html",
+        {"fleet": existing_fleet, "title": "Fleet", "stats": stats},
     )
