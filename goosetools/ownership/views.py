@@ -914,7 +914,6 @@ def item_add(request, lg_pk):
 
 
 def generate_fleet_profit(fleet):
-
     # not_started_items = InventoryItem .objects.filter(
     #     loot_group__bucket__fleet=fleet,
     #     quantity__gt=0
@@ -936,7 +935,6 @@ def generate_fleet_profit(fleet):
     by_user_by_bucket = {}
     total_item_shares_per_bucket = {}
     total_shares = 0
-    total_items_per_bucket = {}
     bucket_info = {}
 
     all_fleet_buckets = LootBucket.objects.filter(
@@ -961,6 +959,13 @@ def generate_fleet_profit(fleet):
         bucket_info.setdefault(bucket.id, {})
         bucket_info[bucket.id]["groups_with_shares"] = groups_with_shares
         bucket_info[bucket.id]["groups_with_items"] = groups_with_items
+        bucket_info[bucket.id]["total_items"] = total_items_in_bucket
+        bucket_info[bucket.id]["real_profit"] = to_isk(0)
+        bucket_info[bucket.id]["est_profit"] = to_isk(0)
+
+        for loot_group in bucket.lootgroup_set.all():
+            bucket_info[bucket.id]["est_profit"] += loot_group.estimated_profit()
+            bucket_info[bucket.id]["real_profit"] += loot_group.non_debt_egg_balance()
 
         for share in shares:
             user = share.character.user
@@ -973,35 +978,32 @@ def generate_fleet_profit(fleet):
             by_user[user.id] += shares
             total_shares += shares
 
-        total_items_per_bucket[bucket.id] = total_items_in_bucket
-
-    stats = []
+    stats = {"buckets": bucket_info}
+    members = []
     for user_id, user_total_shares in by_user.items():
         user = GooseUser.objects.get(pk=user_id)
         total_percent = round((Decimal(user_total_shares) / total_shares) * 100, 2)
         buckets = []
         for bucket_id, users_share_in_bucket in by_user_by_bucket[user_id].items():
             total_shares = total_item_shares_per_bucket[bucket_id]
-            total_items = total_items_per_bucket[bucket_id]
             bucket_percent = percent(users_share_in_bucket, total_shares)
             buckets.append(
                 {
                     "id": bucket_id,
-                    "total_items": total_items,
                     "percent_owned": bucket_percent,
                     "their_shares": users_share_in_bucket,
                     "total_shares": total_shares,
-                    **bucket_info[bucket_id],
                 }
             )
-        stats.append(
+        members.append(
             {
                 "username": user.username,
                 "total_percent": total_percent,
                 "buckets": buckets,
             }
         )
-    return sorted(stats, key=lambda x: x["total_percent"], reverse=True)
+    stats["members"] = sorted(members, key=lambda x: x["total_percent"], reverse=True)
+    return stats
 
 
 def percent(n, y):
