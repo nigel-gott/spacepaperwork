@@ -23,6 +23,7 @@ def model_sum(queryset, key):
         return result
 
 
+# noinspection DuplicatedCode
 class ItemType(models.Model):
     name = models.TextField()
 

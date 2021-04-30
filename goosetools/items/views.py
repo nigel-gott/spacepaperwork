@@ -498,3 +498,18 @@ def item_delete(request, pk):
         "items/item_delete.html",
         {"form": form, "title": "Delete Item", "item": item},
     )
+
+
+def item_db(request):
+    return render(
+        request,
+        "items/item_db.html",
+        {
+            "page_data": {
+                "gooseuser_id": request.gooseuser.id,
+                "site_prefix": f"/{request.site_prefix}",
+                "ajax_url": reverse("item-list"),
+            },
+            "gooseuser": request.gooseuser,
+        },
+    )

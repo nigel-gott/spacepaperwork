@@ -1,4 +1,6 @@
-from django.urls import path
+from django.urls import include, path
+from items.querysets import ItemDbQuerySet
+from rest_framework import routers
 
 from goosetools.items.autocomplete import (
     ItemAutocomplete,
@@ -9,6 +11,7 @@ from goosetools.items.autocomplete import (
 )
 from goosetools.items.views import (
     all_items,
+    item_db,
     item_delete,
     item_edit,
     item_minus,
@@ -25,6 +28,9 @@ from goosetools.items.views import (
     stack_view,
     unjunk_item,
 )
+
+router = routers.DefaultRouter()
+router.register(r"item_db", ItemDbQuerySet)
 
 urlpatterns = [
     path("stack/<int:pk>/junk", junk_stack, name="junk_stack"),
@@ -43,6 +49,8 @@ urlpatterns = [
     path("item/all/", all_items, name="all_items"),
     path("item/grouped/", items_grouped, name="grouped_items"),
     path("junk/", junk, name="junk"),
+    path("itemdb/", item_db, name="item_db"),
+    path("api/", include(router.urls)),
     path(
         r"system-autocomplete/",
         SystemAutocomplete.as_view(),

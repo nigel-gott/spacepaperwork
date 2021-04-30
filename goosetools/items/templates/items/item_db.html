@@ -1,0 +1,15 @@
+{% extends "core/datatable.html" %}
+{% load static %}
+
+{% block datatable_title %}
+    Item Database
+{% endblock %}
+{% block datatable_top_row %}
+    <p>
+    View, suggest fixes for and edit items in {{ SITE_NAME }}'s item database here.
+    </p>
+{% endblock %}
+
+{% block datatable_footer %}
+    <script src="{% static 'items/js/item_db.js' %}" type="text/javascript"></script>
+{% endblock %}

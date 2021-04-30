@@ -549,18 +549,22 @@ def character_dashboard(request):
 
 
 def build_query_for_all_users_annotated_with_their_characters():
-    q = GooseUser.objects.annotate(
-        char_names=StringAgg(
-            Concat(
-                Value("["),
-                F("character__corp__name"),
-                Value("] "),
-                F("character__ingame_name"),
-                output_field=CharField(),
+    q = (
+        GooseUser.objects.prefetch_related("voucher")
+        .annotate(
+            char_names=StringAgg(
+                Concat(
+                    Value("["),
+                    F("character__corp__name"),
+                    Value("] "),
+                    F("character__ingame_name"),
+                    output_field=CharField(),
+                ),
+                delimiter=", ",
             ),
-            delimiter=", ",
-        ),
-    ).all()
+        )
+        .all()
+    )
     return q
 
 
@@ -568,7 +572,7 @@ class CharacterQuerySet(
     mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet
 ):
     permission_classes = [HasGooseToolsPerm.of([ALL_CORP_ADMIN, SINGLE_CORP_ADMIN])]
-    queryset = Character.objects.all()
+    queryset = Character.objects.prefetch_related("user", "corp").all()
 
     serializer_class = CharacterSerializer
 

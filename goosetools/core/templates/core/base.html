@@ -5,9 +5,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{% block title %}{{SITE_NAME}}{% endblock %}</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="{% static 'core/css/materialize.css' %}" rel="stylesheet" type="text/css">
+    <title>{% block title %}{{ SITE_NAME }}{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+          rel="stylesheet">
+    <link href="{% static 'core/css/materialize.css' %}" rel="stylesheet"
+          type="text/css">
     <link href="{% static 'core/css/core.css' %}" rel="stylesheet" type="text/css">
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
     <link rel="shortcut icon" type="image/png" href="{% static 'core/favicon.svg' %}"/>
@@ -16,195 +18,218 @@
 </head>
 <body>
 {% if user.is_authenticated and user.gooseuser.is_approved %}
-<ul class="dropdown-content" id="dropdown_notifications">
-    {% notifications user as ns %}
-    {% if ns %}
+    <ul class="dropdown-content" id="dropdown_notifications">
+        {% notifications user as ns %}
+        {% if ns %}
+            <li>
+                <a href="{% url "notifications:notifications-list" %}">View All
+                    Notifications</a>
+            </li>
+            <li class="divider" tabindex="-1"></li>
+            {% for n in ns %}
+                <li>
+                    {{ n.as_html|safe }}
+                </li>
+            {% endfor %}
+        {% else %}
+            <li>
+                <a href="{% url "notifications:notifications-list" %}">No
+                    Notifications!</a>
+            </li>
+            <li class="divider" tabindex="-1"></li>
+        {% endif %}
+    </ul>
+    <ul class="dropdown-content" id="dropdown_tools">
+        {% if GOOSEFLOCK_FEATURES %}
+            <li>
+                <a href="{% url 'mapbot:mapbot_index' %}">MapBot</a>
+            </li>
+        {% endif %}
         <li>
-            <a href="{% url "notifications:notifications-list" %}">View All Notifications</a>
+            <a href="{% url 'character_search' %}">Char/User Search</a>
         </li>
-        <li class="divider" tabindex="-1"></li>
-        {% for n in ns %}
         <li>
-            {{n.as_html|safe}}
+            <a href="{% url 'item_db' %}">Item Database</a>
         </li>
-        {% endfor %}
-    {% else %}
-        <li>
-            <a href="{% url "notifications:notifications-list" %}">No Notifications!</a>
+        {% if GOOSEFLOCK_FEATURES %}
+            <li><a href="https://wiki.goosetools.com">HONK Wiki</a></li>
+        {% endif %}
+    </ul>
+    <ul class="dropdown-content" id="dropdown_fleets">
+        <li><a href="{% url 'fleet' %}">Active Fleets
+            ({% num_active_fleets %})
+        </a>
         </li>
-        <li class="divider" tabindex="-1"></li>
-    {% endif %}
-</ul>
-<ul class="dropdown-content" id="dropdown_tools">
-    {% if GOOSEFLOCK_FEATURES %}
-    <li>
-        <a href="{% url 'mapbot:mapbot_index' %}">MapBot</a>
-    </li>
-    {% endif %}
-    <li>
-        <a href="{% url 'character_search' %}">Char/User Search</a>
-    </li>
-    {% if GOOSEFLOCK_FEATURES %}
-    <li><a href="https://wiki.goosetools.com">HONK Wiki</a></li>
-    {% endif %}
-</ul>
-<ul class="dropdown-content" id="dropdown_fleets">
-    <li><a href="{% url 'fleet' %}">Active Fleets
-        ({% num_active_fleets %})
-    </a>
-    </li>
-    <li><a href="{% url 'fleet_past' %}">Past Fleets
-        ({% num_past_fleets %})
-    </a>
-    </li>
-    <li><a href="{% url 'fleet_future' %}">Future Fleets
-        ({% num_future_fleets %})
-    </a>
-    </li>
-    <li><a href="{% url 'your_fleet_shares' %}">Your Fleet Shares/Loot
-    </a>
-</ul>
-<ul class="dropdown-content" id="dropdown_settings">
-    <li><a href="{% url 'settings' %}">Settings</a></li>
-    <li><a href="{% url 'characters' %}">Characters</a></li>
-</ul>
-<ul class="dropdown-content" id="dropdown_sales">
-    {% num_items user as num_to_sell %}
-    {% num_contracts user as contracts %}
-    <li><a href="{% url 'contracts' %}">Contracts ({{contracts}})</a></li>
-    <li><a href="{% url 'items' %}">Your Loot To Sell
-        ({{ num_to_sell }})
-    </a>
-    </li>
-    {% num_orders user as num_active_orders %}
-    <li><a href="{% url 'orders' %}">Market Orders
-        ({{ num_active_orders }})
-    </a>
-    </li>
-    {% num_sold user as num_already_sold %}
-    <li><a href="{% url 'sold' %}">Sold Items
-        ({{ num_already_sold }})
-    </a>
-    </li>
-    <li><a href="{% url 'transfered_items' %}">Transfered Items
-    </a>
-    <li><a href="{% url 'junk' %}">Junked Items
-    </a>
-    <li><a href="{% url 'own_user_transactions' %}">Transactions</a></li>
-    </li>
-</ul>
+        <li><a href="{% url 'fleet_past' %}">Past Fleets
+            ({% num_past_fleets %})
+        </a>
+        </li>
+        <li><a href="{% url 'fleet_future' %}">Future Fleets
+            ({% num_future_fleets %})
+        </a>
+        </li>
+        <li><a href="{% url 'your_fleet_shares' %}">Your Fleet Shares/Loot
+        </a>
+    </ul>
+    <ul class="dropdown-content" id="dropdown_settings">
+        <li><a href="{% url 'settings' %}">Settings</a></li>
+        <li><a href="{% url 'characters' %}">Characters</a></li>
+    </ul>
+    <ul class="dropdown-content" id="dropdown_sales">
+        {% num_items user as num_to_sell %}
+        {% num_contracts user as contracts %}
+        <li><a href="{% url 'contracts' %}">Contracts ({{ contracts }})</a></li>
+        <li><a href="{% url 'items' %}">Your Loot To Sell
+            ({{ num_to_sell }})
+        </a>
+        </li>
+        {% num_orders user as num_active_orders %}
+        <li><a href="{% url 'orders' %}">Market Orders
+            ({{ num_active_orders }})
+        </a>
+        </li>
+        {% num_sold user as num_already_sold %}
+        <li><a href="{% url 'sold' %}">Sold Items
+            ({{ num_already_sold }})
+        </a>
+        </li>
+        <li><a href="{% url 'transfered_items' %}">Transfered Items
+        </a>
+        <li><a href="{% url 'junk' %}">Junked Items
+        </a>
+        <li><a href="{% url 'own_user_transactions' %}">Transactions</a></li>
+        </li>
+    </ul>
 {% endif %}
-    {% has_perm user "user_admin" as is_user_admin %}
-    {% has_perm user "loot_tracker" as is_loot_tracker %}
-    {% has_perm user "ship_orderer" as is_ship_orderer %}
-    {% has_perm user "user_group_admin" as is_user_group_admin %}
-    {% has_perm user "single_corp_admin" as is_single_corp_admin %}
-    {% has_perm user "all_corp_admin" as is_all_corp_admin %}
-    {% has_perm user "ship_price_admin" as is_ship_price_admin %}
-    {% has_perm user "discord_admin" as is_discord_admin %}
+{% has_perm user "user_admin" as is_user_admin %}
+{% has_perm user "loot_tracker" as is_loot_tracker %}
+{% has_perm user "ship_orderer" as is_ship_orderer %}
+{% has_perm user "user_group_admin" as is_user_group_admin %}
+{% has_perm user "single_corp_admin" as is_single_corp_admin %}
+{% has_perm user "all_corp_admin" as is_all_corp_admin %}
+{% has_perm user "ship_price_admin" as is_ship_price_admin %}
+{% has_perm user "discord_admin" as is_discord_admin %}
 {% if is_user_admin or is_user_group_admin or is_single_corp_admin or is_all_corp_admin or is_ship_price_admin or is_discord_admin %}
-<ul class="dropdown-content" id="dropdown_admin">
-    {% if is_user_admin %}
-    <li>
-            <a href="{% url 'user_dashboard' %}">User Dashboard</a>
-    </li>
-    {% endif %}
-    {% if is_single_corp_admin or is_all_corp_admin %}
-    <li>
-            <a href="{% url 'character_dashboard' %}">Character Dashboard</a>
-    </li>
-    <li>
-            <a href="{% url 'corps_list' %}">Corp Admin</a>
-    </li>
-    {% endif %}
-    {% if is_user_group_admin %}
-    <li>
-            <a href="{% url 'groups_view' %}">User Groups Admin</a>
-    </li>
-    {% endif %}
-    {% if is_ship_price_admin and GOOSEFLOCK_FEATURES %}
-    <li>
-        <a href="{% url 'industry:ship_dashboard' %}">Ship Admin</a>
-    </li>
-    {% endif %}
-    {% if is_user_admin %}
-    <li>
-        <a href="{% url 'applications' %}">New User Applications
-        ({% num_pending_user_apps %})
-        </a>
-    </li>
-    {% endif %}
-    {% if is_single_corp_admin or is_all_corp_admin %}
-    <li>
-        <a href="{% url 'corp_applications' %}">Corp Applications
-        ({% num_pending_corp_apps %})
-        </a>
-    </li>
-    {% endif %}
-    {% if is_user_admin %}
-    <li>
-            <a href="{% url 'user_forms:form-list' %}">Sign-Up Form Setup</a>
-    </li>
-    {% endif %}
-    {% if is_discord_admin %}
-    <li>
-        <a href="{% url 'discord_settings' %}">Discord Settings</a>
-    </li>
-    {% endif %}
-</ul>
+    <ul class="dropdown-content" id="dropdown_admin">
+        {% if is_user_admin %}
+            <li>
+                <a href="{% url 'user_dashboard' %}">User Dashboard</a>
+            </li>
+        {% endif %}
+        {% if is_single_corp_admin or is_all_corp_admin %}
+            <li>
+                <a href="{% url 'character_dashboard' %}">Character Dashboard</a>
+            </li>
+            <li>
+                <a href="{% url 'corps_list' %}">Corp Admin</a>
+            </li>
+        {% endif %}
+        {% if is_user_group_admin %}
+            <li>
+                <a href="{% url 'groups_view' %}">User Groups Admin</a>
+            </li>
+        {% endif %}
+        {% if is_ship_price_admin and GOOSEFLOCK_FEATURES %}
+            <li>
+                <a href="{% url 'industry:ship_dashboard' %}">Ship Admin</a>
+            </li>
+        {% endif %}
+        {% if is_user_admin %}
+            <li>
+                <a href="{% url 'applications' %}">New User Applications
+                    ({% num_pending_user_apps %})
+                </a>
+            </li>
+        {% endif %}
+        {% if is_single_corp_admin or is_all_corp_admin %}
+            <li>
+                <a href="{% url 'corp_applications' %}">Corp Applications
+                    ({% num_pending_corp_apps %})
+                </a>
+            </li>
+        {% endif %}
+        {% if is_user_admin %}
+            <li>
+                <a href="{% url 'user_forms:form-list' %}">Sign-Up Form Setup</a>
+            </li>
+        {% endif %}
+        {% if is_discord_admin %}
+            <li>
+                <a href="{% url 'discord_settings' %}">Discord Settings</a>
+            </li>
+        {% endif %}
+    </ul>
 {% endif %}
 <nav class="nav-extended blue-grey darken-3">
     <div class="nav-wrapper">
-        <a class="sidenav-trigger" data-target="mobile-demo" href="#"><i class="material-icons">menu</i></a>
+        <a class="sidenav-trigger" data-target="mobile-demo" href="#"><i
+                class="material-icons">menu</i></a>
         <ul class="left hide-on-med-and-down valign-wrapper">
             {% if tenant.name == "public" %}
-            <li><a href="{% url 'tenants:splash' %}"><img class="valign-wrapper" style="width:32px;" src="{% static 'core/logo.svg'%}"></a></li>
+                <li><a href="{% url 'tenants:splash' %}"><img class="valign-wrapper"
+                                                              style="width:32px;"
+                                                              src="{% static 'core/logo.svg' %}"></a>
+                </li>
             {% else %}
-            <li><a href="{% url 'core:splash' %}"><img class="valign-wrapper" style="width:32px;" src="{% static 'core/logo.svg'%}"></a></li>
+                <li><a href="{% url 'core:splash' %}"><img class="valign-wrapper"
+                                                           style="width:32px;"
+                                                           src="{% static 'core/logo.svg' %}"></a>
+                </li>
             {% endif %}
             {% block extranavbar %}
             {% endblock %}
             {% if user.is_authenticated and user.gooseuser.is_approved %}
                 <li>
-                    <a class="dropdown-trigger valign-wrapper" data-target="dropdown_notifications" href="#!">
-                        <i class="material-icons left">notifications_active</i>{% if ns %}<span class="new badge red">{{ns|length}}{% endif %}</span>
+                    <a class="dropdown-trigger valign-wrapper"
+                       data-target="dropdown_notifications" href="#!">
+                        <i class="material-icons left">notifications_active</i>
+                        {% if ns %}<span class="new badge red">
+                            {{ ns|length }}{% endif %}</span>
                     </a>
                 </li>
                 {% if is_loot_tracker %}
-                <li>
-                    <a class="dropdown-trigger valign-wrapper" data-target="dropdown_fleets" href="#!">
-                        <i class="material-icons left">star</i>Fleets
+                    <li>
+                        <a class="dropdown-trigger valign-wrapper"
+                           data-target="dropdown_fleets" href="#!">
+                            <i class="material-icons left">star</i>Fleets
+                            <i class="material-icons right">arrow_drop_down</i>
+                        </a>
+                    </li>
+                    {% all_sales user as all_sales_num %}
+                    <li><a class="dropdown-trigger valign-wrapper"
+                           data-target="dropdown_sales" href="#!">
+                        <i class="material-icons left" style="margin-right:0px;">shopping_cart</i>Sales
+                        ({{ all_sales_num }})
                         <i class="material-icons right">arrow_drop_down</i>
-                    </a>
-                </li>
-                {% all_sales user as all_sales_num %}
-                <li><a class="dropdown-trigger valign-wrapper" data-target="dropdown_sales" href="#!">
-                    <i class="material-icons left" style="margin-right:0px;">shopping_cart</i>Sales ({{all_sales_num}})
-                    <i class="material-icons right">arrow_drop_down</i>
                     </a></li>
                 {% endif %}
                 {% if GOOSEFLOCK_FEATURES %}
-                <li><a  href="{% url 'venmo:dashboard' %}">Eggs<i class="material-icons left">attach_money</i>
-                    {% if is_ship_orderer %}
-                    <li><a  href="{% url 'industry:shiporders_view' %}">Orders <i class="material-icons left">directions_boat</i>
-                    {% endif %}
+                    <li><a href="{% url 'venmo:dashboard' %}">Eggs<i
+                            class="material-icons left">attach_money</i>
+                        {% if is_ship_orderer %}
+                            <li><a href="{% url 'industry:shiporders_view' %}">Orders
+                            <i class="material-icons left">directions_boat</i>
+                        {% endif %}
                 {% endif %}
-                </a></li>
+            </a></li>
                 <li>
-                    <a class="dropdown-trigger valign-wrapper" data-target="dropdown_tools" href="#!">
+                    <a class="dropdown-trigger valign-wrapper"
+                       data-target="dropdown_tools" href="#!">
                         <i class="material-icons left">find_replace</i>Tools
                         <i class="material-icons right">arrow_drop_down</i>
                     </a>
                 </li>
                 <li>
-                    <a class="dropdown-trigger valign-wrapper" data-target="dropdown_settings" href="#!">
+                    <a class="dropdown-trigger valign-wrapper"
+                       data-target="dropdown_settings" href="#!">
                         <i class="material-icons left">settings</i>Settings
                         <i class="material-icons right">arrow_drop_down</i>
                     </a>
                 </li>
                 {% if is_user_admin or is_user_group_admin or is_single_corp_admin or is_all_corp_admin or is_ship_price_admin %}
                     <li>
-                        <a class="dropdown-trigger valign-wrapper" data-target="dropdown_admin" href="#!">
+                        <a class="dropdown-trigger valign-wrapper"
+                           data-target="dropdown_admin" href="#!">
                             <i class="material-icons left">build</i>Admin
                             ({% num_pending_apps %})
                             <i class="material-icons right">arrow_drop_down</i>
@@ -212,193 +237,6 @@
                     </li>
                 {% endif %}
             {% elif tenant.name == "public" %}
-            <li>
-                <a href="{% url 'tenants:splash' %}">
-                    <i class="material-icons left">star</i>Features
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'tenants:pricing' %}">
-                    <i class="material-icons left">attach_money</i>Pricing
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'tenants:help' %}">
-                    <i class="material-icons left">help</i>Help
-                </a>
-            </li>
-            {% endif %}
-        </ul>
-        <ul class="right hide-on-med-and-down">
-            {% if user.is_authenticated %}
-            <li>
-                <form action="{% url 'account_logout' %}" method="post">
-                    {% csrf_token %}
-                    {% if redirect_field_value %}
-                    <input name="{{ redirect_field_name }}" type="hidden" value="{{ redirect_field_value }}"/>
-                    {% endif %}
-                    <button class="waves-effect waves-light btn" type="submit">{% trans 'Logout' %}</button>
-                </form>
-            </li>
-
-            {% else %}
-            <li><a class="waves-effect waves-light btn" href="{% provider_login_url 'discord' %}">Login</a></li>
-            {% endif %}
-        </ul>
-    </div>
-</nav>
-<ul class="sidenav" id="mobile-demo">
-    {% if user.is_authenticated %}
-        <li class="center">
-            <form action="{% url 'account_logout' %}" method="post">
-                {% csrf_token %}
-                {% if redirect_field_value %}
-                <input name="{{ redirect_field_name }}" type="hidden" value="{{ redirect_field_value }}"/>
-                {% endif %}
-                <button class="waves-effect waves-light btn" type="submit">{% trans 'Logout' %}</button>
-            </form>
-        </li>
-    {% endif %}
-
-    {% if is_user_admin or is_user_group_admin or is_single_corp_admin or is_all_corp_admin or is_ship_price_admin or is_discord_admin %}
-        <li><a class="subheader">Admin<i class="material-icons right">build</i></a></li>
-        {% if is_user_admin %}
-        <li>
-            <a href="{% url 'user_dashboard' %}">User Dashboard</a>
-        </li>
-        {% endif %}
-        {% if is_single_corp_admin or is_all_corp_admin %}
-        <li>
-                <a href="{% url 'character_dashboard' %}">Character Dashboard</a>
-        </li>
-        <li>
-                <a href="{% url 'corps_list' %}">Corp Admin</a>
-        </li>
-        {% endif %}
-        {% if is_user_group_admin %}
-        <li>
-                <a href="{% url 'groups_view' %}">User Groups Admin</a>
-        </li>
-        {% endif %}
-        {% if is_ship_price_admin and GOOSEFLOCK_FEATURES %}
-        <li>
-            <a href="{% url 'industry:ship_dashboard' %}">Ship Admin</a>
-        </li>
-        {% endif %}
-        {% if is_user_admin %}
-        <li>
-            <a href="{% url 'applications' %}">New User Applications</a>
-        </li>
-        {% endif %}
-        {% if is_single_corp_admin or is_all_corp_admin %}
-        <li>
-            <a href="{% url 'corp_applications' %}">Corp Applications</a>
-        </li>
-        {% endif %}
-        {% if is_user_group_admin %}
-        <li>
-                <a href="{% url 'user_forms:form-list' %}">Sign-Up Form Setup</a>
-        </li>
-        {% endif %}
-        {% if is_discord_admin %}
-        <li>
-            <a href="{% url 'discord_settings' %}">Discord Settings</a>
-        </li>
-        {% endif %}
-        <li><div class="divider"></div></li>
-    {% endif %}
-
-    {% if user.is_authenticated and user.gooseuser.is_approved %}
-        <li>
-            <a class="center valign-wrapper" href="{% url "notifications:notifications-list" %}">
-                <i class="material-icons left">notifications_active</i>{% if ns %}<span class="new badge red">{{ns|length}}{% endif %}</span>
-            </a>
-        </li>
-        {% if GOOSEFLOCK_FEATURES %}
-        {% if is_ship_orderer %}
-        <li >
-            <a href="{% url 'industry:shiporders_view' %}">Orders<i class="material-icons right">directions_boat</i></a>
-        </li>
-        {% endif %}
-        <li >
-            <a href="{% url 'venmo:dashboard' %}">Eggs<i class="material-icons right">attach_money</i></a>
-        </li>
-        {% endif %}
-
-        {% if is_loot_tracker %}
-        <li><div class="divider"></div></li>
-        <li><a class="subheader">Fleets<i class="material-icons right">star</i></a></li>
-
-            <li ><a href="{% url 'fleet' %}">Active Fleets
-                ({% num_active_fleets %})
-            </a>
-            </li>
-            <li ><a href="{% url 'fleet_past' %}">Past Fleets
-                ({% num_past_fleets %})
-            </a>
-            </li>
-            <li ><a href="{% url 'fleet_future' %}">Future Fleets
-                ({% num_future_fleets %})
-            </a>
-            </li>
-
-            <li><a href="{% url 'your_fleet_shares' %}">Your Fleet Shares/Loot</li>
-            </a>
-
-        <li><div class="divider"></div></li>
-        <li><a class="subheader">Sales<i class="material-icons right">shopping_cart</i></a></li>
-
-        {% num_items user as num_to_sell %}
-        <li ><a href="{% url 'items' %}">Your Loot To Sell
-            ({{ num_to_sell }})
-        </a>
-
-        </li>
-        {% num_orders user as num_active_orders %}
-        <li ><a href="{% url 'orders' %}">Market Orders
-            ({{ num_active_orders }})
-        </a>
-        </li>
-        {% num_sold user as num_already_sold %}
-        <li ><a href="{% url 'sold' %}">Sold Items
-            ({{ num_already_sold }})
-        </a>
-        </li>
-        <li ><a href="{% url 'transfered_items' %}">Transfered Items
-        </a>
-        </li>
-        <li ><a href="{% url 'contracts' %}">Your Contracts ({{contracts}})</a></li>
-
-        <li><div class="divider"></div></li>
-        <li><a class="subheader">Tools<i class="material-icons right">find_replace</i></a></li>
-        {% endif %}
-
-        {% if GOOSEFLOCK_FEATURES %}
-        <li >
-            <a href="{% url 'mapbot:mapbot_index' %}">MapBot</a>
-        </li>
-        {% endif %}
-        <li>
-            <a href="{% url 'character_search' %}">Char/User Search</a>
-        </li>
-        {% if GOOSEFLOCK_FEATURES %}
-        <li>
-            <a href="https://wiki.goosetools.com">HONK Wiki</a>
-        </li>
-        {% endif %}
-
-        <li><div class="divider"></div></li>
-        <li><a class="subheader">Settings<i class="material-icons right">settings</i></a></li>
-
-        <li ><a href="{% url 'settings' %}">Settings</a></li>
-        <li ><a href="{% url 'characters' %}">Characters</a></li>
-
-    {% else %}
-        {% if not user.is_authenticated %}
-        <li><a class="waves-effect waves-light btn" href="{{LOGIN_URL}}">Login</a></li>
-        {% endif %}
-
-            {% if tenant.name == "public" %}
                 <li>
                     <a href="{% url 'tenants:splash' %}">
                         <i class="material-icons left">star</i>Features
@@ -415,6 +253,218 @@
                     </a>
                 </li>
             {% endif %}
+        </ul>
+        <ul class="right hide-on-med-and-down">
+            {% if user.is_authenticated %}
+                <li>
+                    <form action="{% url 'account_logout' %}" method="post">
+                        {% csrf_token %}
+                        {% if redirect_field_value %}
+                            <input name="{{ redirect_field_name }}" type="hidden"
+                                   value="{{ redirect_field_value }}"/>
+                        {% endif %}
+                        <button class="waves-effect waves-light btn"
+                                type="submit">{% trans 'Logout' %}</button>
+                    </form>
+                </li>
+
+            {% else %}
+                <li><a class="waves-effect waves-light btn"
+                       href="{% provider_login_url 'discord' %}">Login</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+<ul class="sidenav" id="mobile-demo">
+    {% if user.is_authenticated %}
+        <li class="center">
+            <form action="{% url 'account_logout' %}" method="post">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                    <input name="{{ redirect_field_name }}" type="hidden"
+                           value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <button class="waves-effect waves-light btn"
+                        type="submit">{% trans 'Logout' %}</button>
+            </form>
+        </li>
+    {% endif %}
+
+    {% if is_user_admin or is_user_group_admin or is_single_corp_admin or is_all_corp_admin or is_ship_price_admin or is_discord_admin %}
+        <li><a class="subheader">Admin<i class="material-icons right">build</i></a></li>
+        {% if is_user_admin %}
+            <li>
+                <a href="{% url 'user_dashboard' %}">User Dashboard</a>
+            </li>
+        {% endif %}
+        {% if is_single_corp_admin or is_all_corp_admin %}
+            <li>
+                <a href="{% url 'character_dashboard' %}">Character Dashboard</a>
+            </li>
+            <li>
+                <a href="{% url 'corps_list' %}">Corp Admin</a>
+            </li>
+        {% endif %}
+        {% if is_user_group_admin %}
+            <li>
+                <a href="{% url 'groups_view' %}">User Groups Admin</a>
+            </li>
+        {% endif %}
+        {% if is_ship_price_admin and GOOSEFLOCK_FEATURES %}
+            <li>
+                <a href="{% url 'industry:ship_dashboard' %}">Ship Admin</a>
+            </li>
+        {% endif %}
+        {% if is_user_admin %}
+            <li>
+                <a href="{% url 'applications' %}">New User Applications</a>
+            </li>
+        {% endif %}
+        {% if is_single_corp_admin or is_all_corp_admin %}
+            <li>
+                <a href="{% url 'corp_applications' %}">Corp Applications</a>
+            </li>
+        {% endif %}
+        {% if is_user_group_admin %}
+            <li>
+                <a href="{% url 'user_forms:form-list' %}">Sign-Up Form Setup</a>
+            </li>
+        {% endif %}
+        {% if is_discord_admin %}
+            <li>
+                <a href="{% url 'discord_settings' %}">Discord Settings</a>
+            </li>
+        {% endif %}
+        <li>
+            <div class="divider"></div>
+        </li>
+    {% endif %}
+
+    {% if user.is_authenticated and user.gooseuser.is_approved %}
+        <li>
+            <a class="center valign-wrapper"
+               href="{% url "notifications:notifications-list" %}">
+                <i class="material-icons left">notifications_active</i>{% if ns %}
+                <span class="new badge red">{{ ns|length }}{% endif %}</span>
+            </a>
+        </li>
+        {% if GOOSEFLOCK_FEATURES %}
+            {% if is_ship_orderer %}
+                <li>
+                    <a href="{% url 'industry:shiporders_view' %}">Orders<i
+                            class="material-icons right">directions_boat</i></a>
+                </li>
+            {% endif %}
+            <li>
+                <a href="{% url 'venmo:dashboard' %}">Eggs<i
+                        class="material-icons right">attach_money</i></a>
+            </li>
+        {% endif %}
+
+        {% if is_loot_tracker %}
+            <li>
+                <div class="divider"></div>
+            </li>
+            <li><a class="subheader">Fleets<i class="material-icons right">star</i></a>
+            </li>
+
+            <li><a href="{% url 'fleet' %}">Active Fleets
+                ({% num_active_fleets %})
+            </a>
+            </li>
+            <li><a href="{% url 'fleet_past' %}">Past Fleets
+                ({% num_past_fleets %})
+            </a>
+            </li>
+            <li><a href="{% url 'fleet_future' %}">Future Fleets
+                ({% num_future_fleets %})
+            </a>
+            </li>
+
+            <li><a href="{% url 'your_fleet_shares' %}">Your Fleet Shares/Loot</li>
+            </a>
+
+            <li>
+                <div class="divider"></div>
+            </li>
+            <li><a class="subheader">Sales<i
+                    class="material-icons right">shopping_cart</i></a></li>
+
+            {% num_items user as num_to_sell %}
+            <li><a href="{% url 'items' %}">Your Loot To Sell
+                ({{ num_to_sell }})
+            </a>
+
+            </li>
+            {% num_orders user as num_active_orders %}
+            <li><a href="{% url 'orders' %}">Market Orders
+                ({{ num_active_orders }})
+            </a>
+            </li>
+            {% num_sold user as num_already_sold %}
+            <li><a href="{% url 'sold' %}">Sold Items
+                ({{ num_already_sold }})
+            </a>
+            </li>
+            <li><a href="{% url 'transfered_items' %}">Transfered Items
+            </a>
+            </li>
+            <li><a href="{% url 'contracts' %}">Your Contracts ({{ contracts }})</a>
+            </li>
+
+            <li>
+                <div class="divider"></div>
+            </li>
+            <li><a class="subheader">Tools<i
+                    class="material-icons right">find_replace</i></a></li>
+        {% endif %}
+
+        {% if GOOSEFLOCK_FEATURES %}
+            <li>
+                <a href="{% url 'mapbot:mapbot_index' %}">MapBot</a>
+            </li>
+        {% endif %}
+        <li>
+            <a href="{% url 'character_search' %}">Char/User Search</a>
+        </li>
+        {% if GOOSEFLOCK_FEATURES %}
+            <li>
+                <a href="https://wiki.goosetools.com">HONK Wiki</a>
+            </li>
+        {% endif %}
+
+        <li>
+            <div class="divider"></div>
+        </li>
+        <li><a class="subheader">Settings<i
+                class="material-icons right">settings</i></a></li>
+
+        <li><a href="{% url 'settings' %}">Settings</a></li>
+        <li><a href="{% url 'characters' %}">Characters</a></li>
+
+    {% else %}
+        {% if not user.is_authenticated %}
+            <li><a class="waves-effect waves-light btn" href="{{ LOGIN_URL }}">Login</a>
+            </li>
+        {% endif %}
+
+        {% if tenant.name == "public" %}
+            <li>
+                <a href="{% url 'tenants:splash' %}">
+                    <i class="material-icons left">star</i>Features
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'tenants:pricing' %}">
+                    <i class="material-icons left">attach_money</i>Pricing
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'tenants:help' %}">
+                    <i class="material-icons left">help</i>Help
+                </a>
+            </li>
+        {% endif %}
 
     {% endif %}
 </ul>
@@ -438,48 +488,53 @@
     {% endblock %}
 </main>
 {% block footer %}
-<footer class="page-footer blue-grey lighten-2">
-    <div class="container">
-        <h5 class="white-text">{{SITE_NAME}}</h5>
-        <ul>
-            {% if GOOSEFLOCK_FEATURES %}
-            <li><a class="grey-text text-lighten-3"
-                   href="https://wiki.goosetools.com/index.php?title=Goosetools">How to use GooseTools</a>
-            </li>
-            <li><a class="grey-text text-lighten-3" href="https://wiki.goosetools.com">HONK Wiki</a></li>
-            {% endif %}
-            <li>
+    <footer class="page-footer blue-grey lighten-2">
+        <div class="container">
+            <h5 class="white-text">{{ SITE_NAME }}</h5>
+            <ul>
+                {% if GOOSEFLOCK_FEATURES %}
+                    <li><a class="grey-text text-lighten-3"
+                           href="https://wiki.goosetools.com/index.php?title=Goosetools">How
+                        to use GooseTools</a>
+                    </li>
+                    <li><a class="grey-text text-lighten-3"
+                           href="https://wiki.goosetools.com">HONK Wiki</a></li>
+                {% endif %}
+                <li>
                     <i class="material-icons left">help</i>
-                {% include "core/includes/error_contact_no_card.html" %}
+                    {% include "core/includes/error_contact_no_card.html" %}
 
                 </li>
-        </ul>
-    </div>
-</footer>
+            </ul>
+        </div>
+    </footer>
 
-<script src="{% static 'core/js/materialize.js' %}" type="text/javascript"></script>
+    <script src="{% static 'core/js/materialize.js' %}" type="text/javascript"></script>
 
 {% endblock %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-{% block initfooter %}
-    var elems = document.querySelectorAll('select');
-    var instances = M.FormSelect.init(elems);
-{% endblock %}
-    var elems = document.querySelectorAll('.datepicker');
-    var instances = M.Datepicker.init(elems);
-    var elems = document.querySelectorAll('.timepicker');
-    var instances = M.Timepicker.init(elems);
-    var elems = document.querySelectorAll('.sidenav');
-    var instances = M.Sidenav.init(elems);
-        var elems = document.querySelectorAll('.dropdown-trigger');
-    var instances = M.Dropdown.init(elems, {"constrainWidth":false, "coverTrigger":false});
-    var elems = document.querySelectorAll('.collapsible');
-    var instances = M.Collapsible.init(elems);
-    var elems = document.querySelectorAll('.tooltipped');
-    var instances = M.Tooltip.init(elems);
+document.addEventListener('DOMContentLoaded', function () {
+    {% block initfooter %}
+        var elems = document.querySelectorAll('select')
+        var instances = M.FormSelect.init(elems)
+    {% endblock %}
+    var elems = document.querySelectorAll('.datepicker')
+    var instances = M.Datepicker.init(elems)
+    var elems = document.querySelectorAll('.timepicker')
+    var instances = M.Timepicker.init(elems)
+    var elems = document.querySelectorAll('.sidenav')
+    var instances = M.Sidenav.init(elems)
+    var elems = document.querySelectorAll('.dropdown-trigger')
+    var instances = M.Dropdown.init(elems, {
+        "constrainWidth": false,
+        "coverTrigger": false
+    })
+    var elems = document.querySelectorAll('.collapsible')
+    var instances = M.Collapsible.init(elems)
+    var elems = document.querySelectorAll('.tooltipped')
+    var instances = M.Tooltip.init(elems)
 
-});
+})
 
 </script>
 {% block extrafooter %}

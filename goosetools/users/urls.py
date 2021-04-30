@@ -78,7 +78,7 @@ urlpatterns = [
         UsernameAutocomplete.as_view(),
         name="username-autocomplete",
     ),
-    path("api/", include((router.urls))),
+    path("api/", include(router.urls)),
     path("corps/", corps_list, name="corps_list"),
     path("corps/<int:pk>/edit", edit_corp, name="edit_corp"),
     path("corps/new", new_corp, name="new_corp"),
