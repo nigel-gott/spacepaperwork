@@ -18,6 +18,7 @@ from goosetools.ownership.views import (
     loot_share_minus,
     loot_share_plus,
     mark_transfer_as_done,
+    personal_items_add,
     transfer_profit,
     transfered_items,
     view_transfer_log,
@@ -53,6 +54,9 @@ urlpatterns = [
     path("loot_share/<int:pk>/plus/", loot_share_plus, name="loot_share_plus"),
     path("loot_share/<int:pk>/minus/", loot_share_minus, name="loot_share_minus"),
     path("loot_group/<int:lg_pk>/item/create", item_add, name="item_add"),
+    path(
+        "loot_group/personal/item/create", personal_items_add, name="personal_items_add"
+    ),
     path("fleet_shares/", your_fleet_shares, name="your_fleet_shares"),
     path("fleet_shares/<int:pk>/", fleet_shares, name="fleet_shares"),
     path(

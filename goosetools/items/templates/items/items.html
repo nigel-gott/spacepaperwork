@@ -100,6 +100,10 @@
     {% if show_contract_all %}
         <div class="row">
             <div class="col s12 m12">
+                <a class="waves-btn btn green" href="{% url 'personal_items_add' %}">
+                    <i class="material-icons left">add</i>
+                    Add New Items
+                </a>
                 <a class="waves-btn btn" href="{% url 'item_move_all' %}">
                     <i class="material-icons left">send</i>
                     Contract All Your Items
@@ -107,170 +111,174 @@
             </div>
         </div>
     {% endif %}
-    <div class="divider"></div>
     {% for loc_items in all_items %}
-        <div class="row section">
-            <div class="col s12 m12">
-                {% has_admin loc_items.loc user as has_item_admin %}
-                <h3>
-                    <span class="grey-text"> Items In </span>
-                    <strong class="grey-text"> > </strong>
-                    <span class="grey-text text-darken-2">
+        <div class="section items_container">
+            <div class="row ">
+                <div class="col s12 m12">
+                    {% has_admin loc_items.loc user as has_item_admin %}
+                    <h3>
+                        <span class="grey-text"> Items In </span>
+                        <strong class="grey-text"> > </strong>
+                        <span class="grey-text text-darken-2">
                     {% if not loc_items.loc.system %}
                         Unknown System
                     {% else %}
                         {{ loc_items.loc.system }}
                     {% endif %}
                     </span>
-                    <strong class="grey-text text-darken-2"> > </strong>
-                    <span class="grey-text">On Char</span>
-                    <strong class="grey-text"> > </strong>
-                    {{ loc_items.loc.character }}
-                </h3>
-                {% if has_item_admin %}
-                    <p>
-                        <span class="grey-text"> Bulk item actions:</span>
-                        <br/>
-                        <a class="waves-btn btn"
-                           href="{% url 'stack_items' loc_items.loc.id %}">
-                            <i class="material-icons left">burst_mode</i>
-                            Stack
-                        </a>
-                        <a class="waves-btn btn"
-                           href="{% url 'contract_items_in_loc' loc_items.loc.id %}">
-                            <i class="material-icons left">send</i>
-                            Contract
-                        </a>
-                        <a class="waves-btn btn"
-                           href="{% url 'sell_all' loc_items.loc.id %}">
-                            <i class="material-icons left">attach_money</i>
-                            Sell @
-                            Estimate
-                        </a>
-                        <a class="waves-btn btn"
-                           href="{% url 'junk_items' loc_items.loc.id %}">
-                            <i class="material-icons left">delete</i>
-                            Junk Cheap Items
-                        </a>
-                    </p>
-                {% endif %}
+                        <strong class="grey-text text-darken-2"> > </strong>
+                        <span class="grey-text">On Char</span>
+                        <strong class="grey-text"> > </strong>
+                        {{ loc_items.loc.character }}
+                    </h3>
+                    {% if has_item_admin %}
+                        <p>
+                            <span class="grey-text"> Bulk item actions:</span>
+                            <br/>
+                            <a class="waves-btn btn"
+                               href="{% url 'stack_items' loc_items.loc.id %}">
+                                <i class="material-icons left">burst_mode</i>
+                                Stack
+                            </a>
+                            <a class="waves-btn btn"
+                               href="{% url 'contract_items_in_loc' loc_items.loc.id %}">
+                                <i class="material-icons left">send</i>
+                                Contract
+                            </a>
+                            <a class="waves-btn btn"
+                               href="{% url 'sell_all' loc_items.loc.id %}">
+                                <i class="material-icons left">attach_money</i>
+                                Sell @
+                                Estimate
+                            </a>
+                            <a class="waves-btn btn"
+                               href="{% url 'junk_items' loc_items.loc.id %}">
+                                <i class="material-icons left">delete</i>
+                                Junk Cheap Items
+                            </a>
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="divider"></div>
+            <div class="row">
+                <div class="col s12 m12">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Estimated Profit</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for stack_id, stack in loc_items.stacks.items %}
+                            <tr>
+                                <td>
+                                    <i title="This is a stack of items"
+                                       class="material-icons left">burst_mode</i>
+                                    <a href="{% url 'stack_view' stack.stack_id %}">{{ stack.item }}</a>
+                                    {% if has_item_admin %}
+                                        <div class="actions">
+                                            <a class="action_link btn-flat waves-btn waves-light blue-text"
+                                               href="{% url 'stack_sell' stack.stack_id %}">
+                                                <i class="material-icons left">attach_money</i>
+                                                Sell
+                                            </a>
+                                            <a class="action_link btn-flat waves-btn waves-light blue-text"
+                                               href="{% url 'item_contract_stack' stack.stack_id %}">
+                                                <i class="material-icons left">send</i>
+                                                Contract</a>
+                                            <a class="action_link btn-flat waves-btn waves-light blue-text"
+                                               href="{% url 'stack_delete' stack.stack_id %}">
+                                                <i class="material-icons left">insert_photo</i>
+                                                Unstack
+                                            </a>
+                                            {% if stack.stack.can_edit %}
+                                                <a href="{% url 'junk_stack' stack.stack_id %}"
+                                                   class="action_link btn-flat waves-btn waves-light blue-text"
+                                                >Junk
+                                                    <i class="material-icons left">delete</i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>{{ stack.quantity }}</td>
+                                <td>
+                                    {% if stack.stack.estimated_profit %}
+                                        {{ stack.stack.estimated_profit }}
+                                    {% else %}
+                                        Missing Market Data
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {% for item in loc_items.unstacked %}
+                            <tr>
+                                <td>
+                                    <i title="This item is not stacked"
+                                       class="material-icons left">insert_photo</i>
+                                    <a href="{% url 'item_view' item.id %}">
+                                        {{ item.item }}
+                                    </a>
+                                    {% if has_item_admin %}
+                                        <div class="actions">
+                                            {% if item.can_sell %}
+                                                <a class="action_link btn-flat waves-btn waves-light blue-text"
+                                                   href="{% url 'item_sell' item.id %}">
+
+                                                    <i class="material-icons left">attach_money</i>
+                                                    Sell
+                                                </a>
+                                            {% endif %}
+                                            {% if item.can_edit %}
+                                                <a class="action_link btn-flat waves-btn waves-light blue-text"
+                                                   href="{% url 'item_contract' item.id %}">
+                                                    <i class="material-icons left">send</i>
+                                                    Contract
+                                                </a>
+                                                <a class="action_link btn-flat waves-btn waves-light blue-text"
+                                                   href="{% url 'item_edit' item.id %}">
+                                                    <i class="material-icons left">create</i>
+                                                    Edit
+                                                </a>
+                                                <a class="action_link btn-flat waves-btn waves-light blue-text"
+                                                   href="{% url 'item_delete' item.id %}">
+                                                    <i class="material-icons left">delete_forever</i>
+                                                    Delete
+                                                </a>
+                                                <a
+                                                        class="action_link btn-flat waves-btn waves-light blue-text"
+                                                        href="{% url 'junk_item' item.id %}"
+                                                >
+                                                    <i class="material-icons left">delete</i>
+                                                    Junk
+                                                </a>
+                                                </div>
+                                            {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ item.quantity }}
+                                </td>
+                                <td>
+                                    {% if item.estimated_profit_sum != 0 %}
+                                        {{ item.estimated_profit_sum|nicemoney }}
+                                    {% else %}
+                                        None
+                                    {% endif %}
+                                </td>
+                                <td>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-        <div class="row">
-        <div class="col s12 m12">
-        <table>
-        <thead>
-        <tr>
-            <th>Item</th>
-            <th>Quantity</th>
-            <th>Estimated Profit</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for stack_id, stack in loc_items.stacks.items %}
-            <tr>
-                <td>
-                    <i title="This is a stack of items" class="material-icons left">burst_mode</i>
-                    <a href="{% url 'stack_view' stack.stack_id %}">{{ stack.item }}</a>
-                    {% if has_item_admin %}
-                        <div class="actions">
-                            <a class="action_link btn-flat waves-btn waves-light blue-text"
-                               href="{% url 'stack_sell' stack.stack_id %}">
-                                <i class="material-icons left">attach_money</i>
-                                Sell
-                            </a>
-                            <a class="action_link btn-flat waves-btn waves-light blue-text"
-                               href="{% url 'item_contract_stack' stack.stack_id %}">
-                                <i class="material-icons left">send</i>
-                                Contract</a>
-                            <a class="action_link btn-flat waves-btn waves-light blue-text"
-                               href="{% url 'stack_delete' stack.stack_id %}">
-                                <i class="material-icons left">insert_photo</i>
-                                Unstack
-                            </a>
-                            {% if stack.stack.can_edit %}
-                                <a href="{% url 'junk_stack' stack.stack_id %}"
-                                   class="action_link btn-flat waves-btn waves-light blue-text"
-                                >Junk
-                                    <i class="material-icons left">delete</i>
-                                </a>
-                            {% endif %}
-                        </div>
-                    {% endif %}
-                </td>
-                <td>{{ stack.quantity }}</td>
-                <td>
-                    {% if stack.stack.estimated_profit %}
-                        {{ stack.stack.estimated_profit }}
-                    {% else %}
-                        Missing Market Data
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-        {% for item in loc_items.unstacked %}
-            <tr>
-                <td>
-                    <i title="This item is not stacked" class="material-icons left">insert_photo</i>
-                    <a href="{% url 'item_view' item.id %}">
-                        {{ item.item }}
-                    </a>
-                    {% if has_item_admin %}
-                        <div class="actions">
-                            {% if item.can_sell %}
-                                <a class="action_link btn-flat waves-btn waves-light blue-text"
-                                   href="{% url 'item_sell' item.id %}">
-
-                                    <i class="material-icons left">attach_money</i>
-                                    Sell
-                                </a>
-                            {% endif %}
-                            {% if item.can_edit %}
-                                <a class="action_link btn-flat waves-btn waves-light blue-text"
-                                   href="{% url 'item_contract' item.id %}">
-                                    <i class="material-icons left">send</i>
-                                    Contract
-                                </a>
-                                <a class="action_link btn-flat waves-btn waves-light blue-text"
-                                   href="{% url 'item_edit' item.id %}">
-                                    <i class="material-icons left">create</i>
-                                    Edit
-                                    </a>
-                                <a class="action_link btn-flat waves-btn waves-light blue-text"
-                                   href="{% url 'item_delete' item.id %}">
-                                    <i class="material-icons left">delete_forever</i>
-                                    Delete
-                                    </a>
-                                <a
-                                        class="action_link btn-flat waves-btn waves-light blue-text"
-                                        href="{% url 'junk_item' item.id %}"
-                                >
-                                    <i class="material-icons left">delete</i>
-                                    Junk
-                                </a>
-                                </div>
-                            {% endif %}
-                    {% endif %}
-                </td>
-                <td>
-                    {{ item.quantity }}
-                </td>
-                <td>
-                    {% if item.estimated_profit_sum != 0 %}
-                        {{ item.estimated_profit_sum|nicemoney }}
-                    {% else %}
-                        None
-                    {% endif %}
-                </td>
-                <td>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-        </table>
     {% endfor %}
-</div>
-</div>
 
 {% endblock %}
 

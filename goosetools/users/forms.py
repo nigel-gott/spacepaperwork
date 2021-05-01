@@ -196,7 +196,7 @@ class CharacterForm(forms.Form):
     character = forms.ModelChoiceField(
         queryset=Character.objects.all(),
         initial=0,
-        widget=autocomplete.ModelSelect2(url="character-autocomplete"),
+        widget=autocomplete.ModelSelect2(url="user-character-autocomplete"),
     )
 
 

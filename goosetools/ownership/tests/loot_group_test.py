@@ -81,7 +81,7 @@ class LootGroupTest(GooseToolsTestCase):
             [
                 (
                     "success",
-                    "Closed loot group: Serpentis Scout Level 6 @ 2012-01-14 12:00:00+00:00 in Test System (Test Region)",
+                    "Closed loot group: MyLootGroupName",
                 )
             ],
         )

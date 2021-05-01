@@ -16,7 +16,7 @@ class SubFolderTenantClient(Client):
         self.tenant = tenant
 
     def _setup(self, path, extra):
-        if not settings.TENANT_SUBFOLDER_PREFIX:
+        if not hasattr(settings, "TENANT_SUBFOLDER_PREFIX"):
             if "HTTP_HOST" not in extra:
                 extra["HTTP_HOST"] = self.tenant.get_primary_domain().domain
         else:
