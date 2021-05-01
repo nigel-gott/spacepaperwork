@@ -11,6 +11,7 @@ from goosetools.items.autocomplete import (
 )
 from goosetools.items.views import (
     all_items,
+    item_data,
     item_db,
     item_delete,
     item_edit,
@@ -37,6 +38,7 @@ urlpatterns = [
     path("stack/<int:pk>/view", stack_view, name="stack_view"),
     path("stack/<int:pk>/delete", stack_delete, name="stack_delete"),
     path("junk/<int:pk>/unjunk", unjunk_item, name="unjunk_item"),
+    path("item_type/<str:pk>/data", item_data, name="item_data"),
     path("item/<int:pk>/junk", junk_item, name="junk_item"),
     path("item/<int:pk>/edit", item_edit, name="item_edit"),
     path("item/<int:pk>/delete", item_delete, name="item_delete"),

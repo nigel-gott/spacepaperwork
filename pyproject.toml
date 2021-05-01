@@ -30,6 +30,10 @@ bravado = "^11.0.2"
 django-contrib-comments = "^2.0.0"
 django-tenants = "^3.2.1"
 django-hordak = "^1.10.0"
+numpy = "^1.20.2"
+pandas = "^1.2.4"
+django-pandas = "^0.6.4"
+bokeh = "^2.3.1"
 
 
 [tool.poetry.dev-dependencies]

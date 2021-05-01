@@ -28,9 +28,8 @@ $(function () {
                     "class": "right-align",
                     "width": "18em",
                     render: function (data, type, row) {
-                        return '???'
-                        // edit_url = page_data["edit_url"].replace("0", data);
-                        // return `<a class="unknown-btn grey-text" href="#">Move to Unknown</a> / <a class="delete-btn red-text" href="#">Delete</a> / <a class="edit-btn orange-text" href="${edit_url}">Edit</a>`;
+                        const data_url = page_data["data_url"].replace("0", data);
+                        return `<a class="edit-btn orange-text" href="${data_url}">Market Data</a>`;
                     }
                 },
             ]

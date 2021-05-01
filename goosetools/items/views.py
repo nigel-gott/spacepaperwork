@@ -2,6 +2,9 @@ import csv
 import math
 from typing import Any, Dict, List
 
+from bokeh.embed import components
+from bokeh.models import NumeralTickFormatter
+from bokeh.plotting import figure
 from django import forms
 from django.contrib import messages
 from django.db import transaction
@@ -12,6 +15,7 @@ from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
+from django_pandas.io import read_frame
 
 from goosetools.items.forms import DeleteItemForm, InventoryItemForm, JunkItemsForm
 from goosetools.items.models import (
@@ -517,7 +521,154 @@ def item_db(request):
                 "gooseuser_id": request.gooseuser.id,
                 "site_prefix": f"/{request.site_prefix}",
                 "ajax_url": reverse("item-list"),
+                "data_url": reverse("item_data", args=[0]),
             },
             "gooseuser": request.gooseuser,
         },
     )
+
+
+class DataForm(forms.Form):
+    days = forms.IntegerField(initial=7)
+    style = forms.ChoiceField(
+        choices=[("lines", "Lines"), ("bar", "Bar Chart"), ("scatter", "Scatter")],
+        initial="lines",
+    )
+    show_buy_sell = forms.BooleanField(
+        initial=False,
+        required=False,
+    )
+
+
+def item_data(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    days = 14
+    style = "lines"
+    show_buy_sell = False
+    if request.GET:
+        form = DataForm(request.GET)
+        if form.is_valid():
+            days = form.cleaned_data["days"]
+            style = form.cleaned_data["style"]
+            show_buy_sell = form.cleaned_data["show_buy_sell"]
+    else:
+        form = DataForm()
+
+    df = get_df(days, item)
+    div, script = render_graph(days, df, item, show_buy_sell, style)
+
+    result = render(
+        request,
+        "items/item_data.html",
+        {
+            "item": item,
+            "script": script,
+            "div": div,
+            "form": form,
+        },
+    )
+    return result
+
+
+def get_df(days, item):
+    time_threshold = timezone.now() - timezone.timedelta(hours=int(days) * 24)
+    events_last_week = item.itemmarketdataevent_set.filter(
+        time__gte=time_threshold
+    ).all()
+    df = read_frame(
+        events_last_week,
+        fieldnames=["time", "sell", "buy", "highest_buy", "lowest_sell"],
+    )
+    return df
+
+
+def render_graph(days, df, item, show_buy_sell, style):
+    tools = "pan, wheel_zoom, box_zoom, reset, save"
+    title = f"Last {days} of market data for {item}"
+    p = figure(
+        x_axis_type="datetime",
+        tools=tools,
+        plot_width=700,
+        plot_height=500,
+        title=title,
+    )
+    p.xaxis.major_label_orientation = math.pi / 4
+    p.grid.grid_line_alpha = 0.3
+    if style == "bar":
+        p.vbar(
+            df.time,
+            60 * 60 * 2 * 1000,
+            df.highest_buy,
+            df.lowest_sell,
+            fill_color="#D5E1DD",
+            line_color="black",
+        )
+        if show_buy_sell:
+            p.segment(df.time, df.sell, df.time, df.buy, color="black")
+    elif style == "lines":
+        p.line(
+            df.time,
+            df.highest_buy,
+            legend_label="Highest Buy",
+            line_width=2,
+            color="green",
+        )
+        p.line(
+            df.time,
+            df.lowest_sell,
+            legend_label="Lowest Sell",
+            line_width=2,
+            color="blue",
+        )
+        if show_buy_sell:
+            p.line(
+                df.time,
+                df.buy,
+                legend_label="Buy",
+                line_width=2,
+                color="purple",
+            )
+            p.line(
+                df.time,
+                df.sell,
+                legend_label="Sell",
+                line_width=2,
+                color="brown",
+            )
+    else:
+        if show_buy_sell:
+            p.circle(
+                df.time,
+                df.sell,
+                size=5,
+                color="purple",
+                alpha=0.5,
+                legend_label="Sell",
+            )
+            p.square(
+                df.time,
+                df.buy,
+                size=5,
+                color="brown",
+                alpha=0.5,
+                legend_label="Buy",
+            )
+        p.circle(
+            df.time,
+            df.lowest_sell,
+            size=5,
+            color="navy",
+            alpha=0.5,
+            legend_label="Lowest Sell",
+        )
+        p.square(
+            df.time,
+            df.highest_buy,
+            size=5,
+            color="green",
+            alpha=0.5,
+            legend_label="Highest Buy",
+        )
+    p.yaxis[0].formatter = NumeralTickFormatter(format="0,0 $")
+    script, div = components(p)
+    return div, script
