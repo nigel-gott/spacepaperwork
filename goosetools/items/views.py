@@ -630,9 +630,17 @@ def render_graph(days, df, item, show_buy_sell, style):
             "lowest_sell",
             fill_color="#D5E1DD",
             line_color="black",
+            source=source,
         )
         if show_buy_sell:
-            p.segment(df.time, df.sell, df.time, df.buy, color="black")
+            p.segment(
+                df.time,
+                df.sell,
+                df.time,
+                df.buy,
+                color="black",
+                source=source,
+            )
     elif style == "lines":
         p.line(
             "time",
@@ -676,6 +684,7 @@ def render_graph(days, df, item, show_buy_sell, style):
                 color="purple",
                 alpha=0.5,
                 legend_label="Sell",
+                source=source,
             )
             p.square(
                 "time",
@@ -684,6 +693,7 @@ def render_graph(days, df, item, show_buy_sell, style):
                 color="brown",
                 alpha=0.5,
                 legend_label="Buy",
+                source=source,
             )
         p.circle(
             "time",
@@ -692,6 +702,7 @@ def render_graph(days, df, item, show_buy_sell, style):
             color="navy",
             alpha=0.5,
             legend_label="Lowest Sell",
+            source=source,
         )
         p.square(
             "time",
@@ -700,6 +711,7 @@ def render_graph(days, df, item, show_buy_sell, style):
             color="green",
             alpha=0.5,
             legend_label="Highest Buy",
+            source=source,
         )
     p.yaxis[0].formatter = NumeralTickFormatter(format="0,0 $")
     script, div = components(p)
