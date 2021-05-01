@@ -101,6 +101,7 @@ def fleet_view(request, pk):
         by_user[member.character.user.id].append(member)
     loot_buckets = (
         LootBucket.objects.filter(lootgroup__fleet_anom__fleet=f)
+        .distinct()
         .prefetch_related("lootgroup_set")
         .all()
     )
