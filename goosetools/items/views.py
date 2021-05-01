@@ -572,9 +572,12 @@ def item_data(request, pk):
 
 def get_df(days, item):
     time_threshold = timezone.now() - timezone.timedelta(hours=int(days) * 24)
-    events_last_week = item.itemmarketdataevent_set.filter(
-        time__gte=time_threshold
-    ).all()
+    events_last_week = (
+        item.itemmarketdataevent_set.filter(time__gte=time_threshold)
+        .values("time", "sell", "buy", "highest_buy", "lowest_sell")
+        .distinct()
+        .all()
+    )
     df = read_frame(
         events_last_week,
         fieldnames=["time", "sell", "buy", "highest_buy", "lowest_sell"],
@@ -584,7 +587,7 @@ def get_df(days, item):
 
 def render_graph(days, df, item, show_buy_sell, style):
     tools = "pan, wheel_zoom, box_zoom, reset, save"
-    title = f"Last {days} of market data for {item}"
+    title = f"Last {days} days of market data for {item}"
     source = ColumnDataSource(df)
     p = figure(
         x_axis_type="datetime",
