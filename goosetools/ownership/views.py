@@ -267,6 +267,23 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
                         "ownership/loot_group_form.html",
                         {"form": form, "title": "Start New Loot Group"},
                     )
+                if not loot_bucket_pk:
+                    loot_bucket = LootBucket()
+                    loot_bucket.save()
+                else:
+                    loot_bucket = get_object_or_404(LootBucket, pk=loot_bucket_pk)
+                    num_groups_for_this_fleet = loot_bucket.lootgroup_set.filter(
+                        fleet_anom__fleet=f
+                    ).count()
+                    if num_groups_for_this_fleet != loot_bucket.lootgroup_set.count():
+                        messages.error(
+                            request,
+                            "You cannot add a fleet anom to this "
+                            "bucket as this bucket is not for "
+                            "this fleet.",
+                        )
+                        return HttpResponseRedirect(reverse("fleet_view", args=[f.id]))
+
                 fleet_anom = FleetAnom(
                     fleet=f,
                     anom_type=anom_type,
@@ -275,12 +292,6 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
                 )
                 fleet_anom.full_clean()
                 fleet_anom.save()
-
-                if not loot_bucket_pk:
-                    loot_bucket = LootBucket()
-                    loot_bucket.save()
-                else:
-                    loot_bucket = get_object_or_404(LootBucket, pk=loot_bucket_pk)
 
                 new_group = LootGroup(
                     name=form.cleaned_data["name"],
