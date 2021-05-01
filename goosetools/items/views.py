@@ -3,7 +3,7 @@ import math
 from typing import Any, Dict, List
 
 from bokeh.embed import components
-from bokeh.models import NumeralTickFormatter
+from bokeh.models import ColumnDataSource, HoverTool, NumeralTickFormatter
 from bokeh.plotting import figure
 from django import forms
 from django.contrib import messages
@@ -585,6 +585,7 @@ def get_df(days, item):
 def render_graph(days, df, item, show_buy_sell, style):
     tools = "pan, wheel_zoom, box_zoom, reset, save"
     title = f"Last {days} of market data for {item}"
+    source = ColumnDataSource(df)
     p = figure(
         x_axis_type="datetime",
         tools=tools,
@@ -592,14 +593,41 @@ def render_graph(days, df, item, show_buy_sell, style):
         plot_height=500,
         title=title,
     )
+    tooltips = [
+        ("time", "$x{%F %R}"),
+        (
+            "highest_buy",
+            "@highest_buy{0,0 $}",
+        ),  # use @{ } for field names with spaces
+        (
+            "lowest_sell",
+            "@lowest_sell{0,0 $}",
+        ),  # use @{ } for field names with spaces
+    ]
+    if show_buy_sell:
+        tooltips.append(("sell", "@sell{0,0 $}"))
+        tooltips.append(("buy", "@buy{0,0 $}"))
+    h = HoverTool(
+        tooltips=tooltips,
+        formatters={
+            "$x": "datetime",  # use 'datetime' formatter for '@date' field
+            "@lowest_sell": "numeral",  # use 'printf' formatter for '@{adj close}' field
+            "@highest_buy": "numeral",  # use 'printf' formatter for '@{adj close}' field
+            "@sell": "numeral",  # use 'printf' formatter for '@{adj close}' field
+            "@buy": "numeral",  # use 'printf' formatter for '@{adj close}' field
+            # use default 'numeral' formatter for other fields
+        },
+        mode="vline",
+    )
+    p.add_tools(h)
     p.xaxis.major_label_orientation = math.pi / 4
     p.grid.grid_line_alpha = 0.3
     if style == "bar":
         p.vbar(
-            df.time,
+            "time",
             60 * 60 * 2 * 1000,
-            df.highest_buy,
-            df.lowest_sell,
+            "highest_buy",
+            "lowest_sell",
             fill_color="#D5E1DD",
             line_color="black",
         )
@@ -607,64 +635,68 @@ def render_graph(days, df, item, show_buy_sell, style):
             p.segment(df.time, df.sell, df.time, df.buy, color="black")
     elif style == "lines":
         p.line(
-            df.time,
-            df.highest_buy,
+            "time",
+            "highest_buy",
             legend_label="Highest Buy",
             line_width=2,
             color="green",
+            source=source,
         )
         p.line(
-            df.time,
-            df.lowest_sell,
+            "time",
+            "lowest_sell",
             legend_label="Lowest Sell",
             line_width=2,
             color="blue",
+            source=source,
         )
         if show_buy_sell:
             p.line(
-                df.time,
-                df.buy,
+                "time",
+                "buy",
                 legend_label="Buy",
                 line_width=2,
                 color="purple",
+                source=source,
             )
             p.line(
-                df.time,
-                df.sell,
+                "time",
+                "sell",
                 legend_label="Sell",
                 line_width=2,
                 color="brown",
+                source=source,
             )
     else:
         if show_buy_sell:
             p.circle(
-                df.time,
-                df.sell,
+                "time",
+                "sell",
                 size=5,
                 color="purple",
                 alpha=0.5,
                 legend_label="Sell",
             )
             p.square(
-                df.time,
-                df.buy,
+                "time",
+                "buy",
                 size=5,
                 color="brown",
                 alpha=0.5,
                 legend_label="Buy",
             )
         p.circle(
-            df.time,
-            df.lowest_sell,
-            size=5,
+            "time",
+            "lowest_sell",
+            size=3,
             color="navy",
             alpha=0.5,
             legend_label="Lowest Sell",
         )
         p.square(
-            df.time,
-            df.highest_buy,
-            size=5,
+            "time",
+            "highest_buy",
+            size=3,
             color="green",
             alpha=0.5,
             legend_label="Highest Buy",
