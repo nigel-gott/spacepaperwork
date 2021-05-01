@@ -1,0 +1,9 @@
+.actions {
+    padding: 2px 2px !important;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.shrink_cell {
+    width: 18ch;
+}

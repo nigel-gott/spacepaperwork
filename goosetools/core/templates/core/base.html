@@ -78,11 +78,12 @@
     <ul class="dropdown-content" id="dropdown_sales">
         {% num_items user as num_to_sell %}
         {% num_contracts user as contracts %}
-        <li><a href="{% url 'contracts' %}">Contracts ({{ contracts }})</a></li>
-        <li><a href="{% url 'items' %}">Your Loot To Sell
+        <li><a href="{% url 'items' %}">Your Items
             ({{ num_to_sell }})
         </a>
         </li>
+        <li><a href="{% url 'contracts' %}">Contracts ({{ contracts }})</a></li>
+        <li class="divider" tabindex="-1"></li>
         {% num_orders user as num_active_orders %}
         <li><a href="{% url 'orders' %}">Market Orders
             ({{ num_active_orders }})
@@ -198,7 +199,7 @@
                     {% all_sales user as all_sales_num %}
                     <li><a class="dropdown-trigger valign-wrapper"
                            data-target="dropdown_sales" href="#!">
-                        <i class="material-icons left" style="margin-right:0px;">shopping_cart</i>Sales
+                        <i class="material-icons left" style="margin-right:0px;">shopping_cart</i>Items
                         ({{ all_sales_num }})
                         <i class="material-icons right">arrow_drop_down</i>
                     </a></li>
@@ -387,11 +388,11 @@
             <li>
                 <div class="divider"></div>
             </li>
-            <li><a class="subheader">Sales<i
+            <li><a class="subheader">Items<i
                     class="material-icons right">shopping_cart</i></a></li>
 
             {% num_items user as num_to_sell %}
-            <li><a href="{% url 'items' %}">Your Loot To Sell
+            <li><a href="{% url 'items' %}">Your Items
                 ({{ num_to_sell }})
             </a>
 

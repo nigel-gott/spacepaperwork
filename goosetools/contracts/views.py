@@ -16,7 +16,12 @@ from goosetools.contracts.forms import ItemMoveAllForm
 from goosetools.contracts.models import Contract
 from goosetools.contracts.serializers import ContractSerializer
 from goosetools.fleets.models import Fleet
-from goosetools.items.models import CharacterLocation, InventoryItem, ItemLocation
+from goosetools.items.models import (
+    CharacterLocation,
+    InventoryItem,
+    ItemLocation,
+    StackedInventoryItem,
+)
 
 
 def forbidden(request):
@@ -86,6 +91,54 @@ def accept_contract(request, pk):
         ):
             change_contract_status(contract, "accepted")
     return HttpResponseRedirect(reverse("view_contract", args=[pk]))
+
+
+@transaction.atomic
+def create_contract_item_stack(request, pk):
+    stack = get_object_or_404(StackedInventoryItem, pk=pk)
+    if request.method == "POST":
+        form = ItemMoveAllForm(request.POST)
+        if form.is_valid():
+            if not stack.has_admin(request.gooseuser):
+                messages.error(
+                    request, f"You do not have permission to move stack {stack}"
+                )
+                return forbidden(request)
+            if stack.quantity() == 0:
+                messages.error(
+                    request,
+                    "You cannot contract an stack which is being or has been sold",
+                )
+                return forbidden(request)
+            system = form.cleaned_data["system"]
+            character = form.cleaned_data["character"]
+
+            contract = Contract.create(
+                from_user=request.gooseuser,
+                to_char=character,
+                system=system,
+                status="pending",
+            )
+            for item in stack.items():
+                if item.contract:
+                    messages.error(
+                        request,
+                        f"An item ({item}) in the stack is already in a contract, "
+                        f"all items in the stack must not be in a contract before you "
+                        f"can contract the entire stack. ",
+                    )
+                    return forbidden(request)
+                item.contract = contract
+                item.full_clean()
+                item.save()
+            return HttpResponseRedirect(reverse("contracts"))
+    else:
+        form = ItemMoveAllForm()
+    return render(
+        request,
+        "contracts/item_move_all.html",
+        {"form": form, "title": f"Contract Individual Stack: {stack}"},
+    )
 
 
 @transaction.atomic
