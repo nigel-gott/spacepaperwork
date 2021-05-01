@@ -1,5 +1,6 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
-{% has_admin loot_group.fleet user as admin %}
+{% has_group_admin loot_group user as admin %}
+{% if loot_group.fleet_anom %}
 <div>
     <a class="waves-effect waves-light btn"
        href="{% url 'fleet_view' loot_group.fleet_anom.fleet.id %}"><i class="material-icons left">arrow_back</i>Back
@@ -57,8 +58,9 @@
     </li>
 </ul>
 
+{% endif  %}
 
-<h5>Loot</h5>
+    <h5>Loot</h5>
 <table class="responsive-table striped">
     <thead>
     <th>Item</th>
@@ -139,7 +141,7 @@
     <th>Discord User</th>
     <th>InGame Character</th>
     <th>Number of Shares</th>
-    <th>% Cut Of This Anom</th>
+    <th>% Cut Of This Group</th>
     <th>Actions</th>
     </thead>
     <tbody>

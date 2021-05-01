@@ -137,7 +137,9 @@ def fleet_end(request, pk):
             f.end = timezone.now()
             f.full_clean()
             f.save()
-            LootGroup.objects.filter(bucket__fleet=f).update(closed=True)
+            LootGroup.objects.filter(bucket__lootgroup__fleet_anom__fleet=f).update(
+                closed=True
+            )
         else:
             messages.error(
                 request, "You cannot end a future fleet or one that is already closed."

@@ -10,7 +10,7 @@ from django.utils import timezone
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 
-from goosetools.fleets.models import Fleet, FleetAnom, KillMail
+from goosetools.fleets.models import FleetAnom, KillMail
 from goosetools.users.models import Character, GooseUser
 
 
@@ -27,8 +27,6 @@ def model_sum(queryset, key):
 
 
 class LootBucket(models.Model):
-    fleet = models.ForeignKey(Fleet, on_delete=models.CASCADE)
-
     def ordered_lootgroup_set(self):
         return self.lootgroup_set.order_by("-created_at").all()
 
@@ -145,7 +143,7 @@ class LootGroup(models.Model):
         )
 
     def still_open(self):
-        return not self.fleet().in_the_past() and not self.closed
+        return not self.fleet() or (not self.fleet().in_the_past() and not self.closed)
 
     def still_can_join_alts(self, user):
         num_chars = len(user.characters())
@@ -193,7 +191,7 @@ class LootGroup(models.Model):
         )
 
     def __str__(self):
-        return str(self.fleet_anom)
+        return self.display_name()
 
 
 class LootShare(models.Model):

@@ -157,7 +157,7 @@ def loot_share_add(request, pk):
 
 def loot_share_delete(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
-    if not loot_share.loot_group.fleet().has_admin(request.user.gooseuser):
+    if not loot_share.has_admin(request.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         group_pk = loot_share.loot_group.pk
@@ -169,7 +169,7 @@ def loot_share_delete(request, pk):
 
 def loot_share_edit(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
-    if not loot_share.loot_group.fleet().has_admin(request.user.gooseuser):
+    if not loot_share.has_admin(request.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         form = LootShareForm(request.POST)
@@ -200,7 +200,6 @@ def loot_share_edit(request, pk):
 def loot_share_add_fleet_members(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
     if request.method == "POST":
-        # TODO Break coupling of fleet and loot shares
         for fleet_member in loot_group.fleet_anom.fleet.fleetmember_set.all():  # type: ignore
             LootShare.objects.get_or_create(
                 character=fleet_member.character,
@@ -216,7 +215,7 @@ def loot_share_add_fleet_members(request, pk):
 
 def loot_group_close(request, pk):
     lg = get_object_or_404(LootGroup, pk=pk)
-    if not lg.fleet().has_admin(request.user.gooseuser):
+    if not lg.has_admin(request.user.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         lg.closed = True
@@ -230,7 +229,7 @@ def loot_group_close(request, pk):
 
 def loot_group_open(request, pk):
     lg = get_object_or_404(LootGroup, pk=pk)
-    if not lg.fleet().has_admin(request.user.gooseuser):
+    if not lg.has_admin(request.user.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         lg.closed = False
@@ -278,7 +277,7 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
                 fleet_anom.save()
 
                 if not loot_bucket_pk:
-                    loot_bucket = LootBucket(fleet=f)
+                    loot_bucket = LootBucket()
                     loot_bucket.save()
                 else:
                     loot_bucket = get_object_or_404(LootBucket, pk=loot_bucket_pk)
@@ -397,8 +396,6 @@ def fleet_shares(request, pk):
         loot_group = loot_share.loot_group
         if loot_group.id in seen_groups:
             continue
-        if not loot_group.fleet_anom:
-            raise Exception(f"Missing fleet_anom from {loot_group}")
         seen_groups[loot_group.id] = True
 
         my_items = InventoryItem.objects.filter(
@@ -424,7 +421,9 @@ def fleet_shares(request, pk):
         items.append(
             {
                 "username": user.discord_username(),
-                "fleet_id": loot_group.fleet_anom.fleet.id,
+                "fleet_id": loot_group.fleet_anom.fleet.id
+                if loot_group.fleet_anom
+                else False,
                 "loot_bucket": loot_group.bucket.id,
                 "loot_group_id": loot_group.id,
                 "your_shares": estimated_participation["participation"][user.id][
@@ -845,10 +844,7 @@ def item_add(request, lg_pk):
     extra = 10
     InventoryItemFormset = formset_factory(InventoryItemForm, extra=0)  # noqa
     loot_group = get_object_or_404(LootGroup, pk=lg_pk)
-    if not loot_group.fleet_anom:
-        raise Exception(f"Missing fleet_anom from {loot_group}")
-
-    if not loot_group.fleet().has_admin(request.user.gooseuser):
+    if not loot_group.has_admin(request.gooseuser):
         return forbidden(request)
     initial = [{"quantity": 1} for x in range(0, extra)]
     if request.method == "POST":
@@ -914,23 +910,6 @@ def item_add(request, lg_pk):
 
 
 def generate_fleet_profit(fleet):
-    # not_started_items = InventoryItem .objects.filter(
-    #     loot_group__bucket__fleet=fleet,
-    #     quantity__gt=0
-    # )
-    # in_market_items = MarketOrder.objects.filter(
-    #     item__loot_group__bucket__fleet=fleet,
-    #     quantity__gt=0
-    # )
-    # to_transfer = SoldItem.objects.filter(
-    #     item__loot_group__bucket__fleet=fleet,
-    #     quantity__gt=F("transfered_quantity"),
-    # ).annotate(isk_balance=Sum("item__isktransaction__isk"))
-    # already_transfered = SoldItem.objects.filter(
-    #     item__loot_group__bucket__fleet=fleet,
-    #     quantity=F("transfered_quantity"),
-    # ).annotate(isk_balance=Sum("item__eggtransaction__eggs"))
-
     by_user = {}
     by_user_by_bucket = {}
     total_item_shares_per_bucket = {}
