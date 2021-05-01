@@ -620,7 +620,7 @@ def render_graph(days, df, item, show_buy_sell, style):
             "@buy": "numeral",  # use 'printf' formatter for '@{adj close}' field
             # use default 'numeral' formatter for other fields
         },
-        mode="vline",
+        mode="mouse",
     )
     p.add_tools(h)
     p.xaxis.major_label_orientation = math.pi / 4
@@ -637,10 +637,10 @@ def render_graph(days, df, item, show_buy_sell, style):
         )
         if show_buy_sell:
             p.segment(
-                df.time,
-                df.sell,
-                df.time,
-                df.buy,
+                "time",
+                "sell",
+                "time",
+                "buy",
                 color="black",
                 source=source,
             )
