@@ -8,11 +8,7 @@ from django.db import transaction
 from django.db.models import ExpressionWrapper, F, Sum
 from django.db.models.fields import FloatField
 from django.db.models.functions import Coalesce
-from django.http.response import (
-    HttpResponse,
-    HttpResponseNotAllowed,
-    HttpResponseRedirect,
-)
+from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
@@ -268,7 +264,11 @@ def unjunk_item(request, pk):
             junked_item.unjunk()
         return HttpResponseRedirect(reverse("junk"))
     else:
-        return HttpResponseNotAllowed("POST")
+        return render(
+            request,
+            "items/junk_single.html",
+            {"title": f"Unjunk Item {junked_item}"},
+        )
 
 
 @transaction.atomic
@@ -286,7 +286,11 @@ def junk_stack(request, pk):
             )
         return HttpResponseRedirect(reverse("items"))
     else:
-        return HttpResponseNotAllowed("POST")
+        return render(
+            request,
+            "items/junk_single.html",
+            {"title": f"Junk Stack {stack}"},
+        )
 
 
 @transaction.atomic
@@ -304,7 +308,11 @@ def junk_item(request, pk):
             )
         return HttpResponseRedirect(reverse("items"))
     else:
-        return HttpResponseNotAllowed("POST")
+        return render(
+            request,
+            "items/junk_single.html",
+            {"title": f"Junk Item {item}"},
+        )
 
 
 @transaction.atomic
