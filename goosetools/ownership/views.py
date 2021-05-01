@@ -991,8 +991,8 @@ def generate_fleet_profit(fleet):
     total_shares = 0
     bucket_info = {}
 
-    all_fleet_buckets = LootBucket.objects.filter(
-        fleet=fleet,
+    all_fleet_buckets = (
+        LootBucket.objects.filter(lootgroup__fleet_anom__fleet=fleet).distinct().all()
     )
     for bucket in all_fleet_buckets:
         all_bucket_items = InventoryItem.objects.filter(loot_group__bucket=bucket)
