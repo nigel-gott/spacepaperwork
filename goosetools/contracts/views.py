@@ -131,7 +131,7 @@ def create_contract_item_stack(request, pk):
                 item.contract = contract
                 item.full_clean()
                 item.save()
-            return HttpResponseRedirect(reverse("contracts"))
+            return HttpResponseRedirect(reverse("contracts") + "?status_filter=sent")
     else:
         form = ItemMoveAllForm()
     return render(
@@ -170,7 +170,7 @@ def create_contract_item(request, pk):
             item.contract = contract
             item.full_clean()
             item.save()
-            return HttpResponseRedirect(reverse("contracts"))
+            return HttpResponseRedirect(reverse("contracts") + "?status_filter=sent")
     else:
         form = ItemMoveAllForm()
     return render(
@@ -211,7 +211,7 @@ def create_contract_for_loc(request, pk):
                 status="pending",
             )
             items_in_location.update(contract=contract)
-            return HttpResponseRedirect(reverse("contracts"))
+            return HttpResponseRedirect(reverse("contracts") + "?status_filter=sent")
     else:
         form = ItemMoveAllForm()
     return render(
@@ -254,7 +254,7 @@ def create_contract_for_fleet(request, fleet_pk, loc_pk):
                 status="pending",
             )
             items_in_location.update(contract=contract)
-            return HttpResponseRedirect(reverse("contracts"))
+            return HttpResponseRedirect(reverse("contracts") + "?status_filter=sent")
     else:
         form = ItemMoveAllForm()
     return render(
@@ -289,7 +289,7 @@ def item_move_all(request):
                 status="pending",
             )
             all_your_items.update(contract=contract)
-            return HttpResponseRedirect(reverse("contracts"))
+            return HttpResponseRedirect(reverse("contracts") + "?status_filter=sent")
     else:
         form = ItemMoveAllForm()
 

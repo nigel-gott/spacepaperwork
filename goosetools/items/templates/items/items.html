@@ -164,7 +164,6 @@
             <th>Item</th>
             <th>Quantity</th>
             <th>Estimated Profit</th>
-            <th>Individual Item Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -173,6 +172,31 @@
                 <td>
                     <i title="This is a stack of items" class="material-icons left">burst_mode</i>
                     <a href="{% url 'stack_view' stack.stack_id %}">{{ stack.item }}</a>
+                    {% if has_item_admin %}
+                        <div class="actions">
+                            <a class="action_link btn-flat waves-btn waves-light blue-text"
+                               href="{% url 'stack_sell' stack.stack_id %}">
+                                <i class="material-icons left">attach_money</i>
+                                Sell
+                            </a>
+                            <a class="action_link btn-flat waves-btn waves-light blue-text"
+                               href="{% url 'item_contract_stack' stack.stack_id %}">
+                                <i class="material-icons left">send</i>
+                                Contract</a>
+                            <a class="action_link btn-flat waves-btn waves-light blue-text"
+                               href="{% url 'stack_delete' stack.stack_id %}">
+                                <i class="material-icons left">insert_photo</i>
+                                Unstack
+                            </a>
+                            {% if stack.stack.can_edit %}
+                                <a href="{% url 'junk_stack' stack.stack_id %}"
+                                   class="action_link btn-flat waves-btn waves-light blue-text"
+                                >Junk
+                                    <i class="material-icons left">delete</i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                 </td>
                 <td>{{ stack.quantity }}</td>
                 <td>
@@ -180,45 +204,6 @@
                         {{ stack.stack.estimated_profit }}
                     {% else %}
                         Missing Market Data
-                    {% endif %}
-                </td>
-                <td class="actions shrink_cell">
-                    {% if has_item_admin %}
-                        <ul class="collection">
-                            <li class="collection-item actions">
-                                <a class="btn-flat waves-btn waves-light blue-text"
-                                   href="{% url 'stack_sell' stack.stack_id %}">
-                                    <i class="material-icons left">attach_money</i>
-                                    Sell
-                                </a>
-                            </li>
-                            <li class="collection-item actions">
-                                <a class="btn-flat waves-btn waves-light blue-text"
-                                   href="{% url 'item_contract_stack' stack.stack_id %}">
-                                    <i class="material-icons left">send</i>
-                                    Contract</a>
-                            </li>
-                            <li class="collection-item actions">
-                                <a class="btn-flat waves-btn waves-light blue-text"
-                                   href="{% url 'stack_delete' stack.stack_id %}">
-                                    <i class="material-icons left">insert_photo</i>
-                                    Unstack
-                                </a>
-                            </li>
-                            {% if stack.stack.can_edit %}
-                                <li class="collection-item actions">
-                                    <form action="{% url 'junk_stack' stack.stack_id %}"
-                                          method="POST">
-                                        {% csrf_token %}
-
-                                        <button class="btn-flat waves-btn waves-light blue-text"
-                                                type="submit" value="Submit">Junk
-                                            <i class="material-icons left">delete</i>
-                                        </button>
-                                    </form>
-                                </li>
-                            {% endif %}
-                        </ul>
                     {% endif %}
                 </td>
             </tr>
@@ -230,6 +215,42 @@
                     <a href="{% url 'item_view' item.id %}">
                         {{ item.item }}
                     </a>
+                    {% if has_item_admin %}
+                        <div class="actions">
+                            {% if item.can_sell %}
+                                <a class="action_link btn-flat waves-btn waves-light blue-text"
+                                   href="{% url 'item_sell' item.id %}">
+
+                                    <i class="material-icons left">attach_money</i>
+                                    Sell
+                                </a>
+                            {% endif %}
+                            {% if item.can_edit %}
+                                <a class="action_link btn-flat waves-btn waves-light blue-text"
+                                   href="{% url 'item_contract' item.id %}">
+                                    <i class="material-icons left">send</i>
+                                    Contract
+                                </a>
+                                <a class="action_link btn-flat waves-btn waves-light blue-text"
+                                   href="{% url 'item_edit' item.id %}">
+                                    <i class="material-icons left">create</i>
+                                    Edit
+                                    </a>
+                                <a class="action_link btn-flat waves-btn waves-light blue-text"
+                                   href="{% url 'item_delete' item.id %}">
+                                    <i class="material-icons left">delete_forever</i>
+                                    Delete
+                                    </a>
+                                <a
+                                        class="action_link btn-flat waves-btn waves-light blue-text"
+                                        href="{% url 'junk_item' item.id %}"
+                                >
+                                    <i class="material-icons left">delete</i>
+                                    Junk
+                                </a>
+                                </div>
+                            {% endif %}
+                    {% endif %}
                 </td>
                 <td>
                     {{ item.quantity }}
@@ -242,44 +263,12 @@
                     {% endif %}
                 </td>
                 <td>
-                    {% if has_item_admin %}
-                        {% if item.can_edit %}
-                            <a class="waves-btn btn orange"
-                               href="{% url 'item_edit' item.id %}">Edit
-                                Item</a>
-                        {% endif %}
-                        <br/>
-                        {% if item.can_sell %}
-                            <a class="waves-btn btn green"
-                               href="{% url 'item_sell' item.id %}">Sell
-                                Item</a>
-                        {% endif %}
-                        <br/>
-                        {% if item.can_edit %}
-                            <a class="waves-btn btn red"
-                               href="{% url 'item_delete' item.id %}">Delete
-                                Item</a>
-                            <br/>
-                            <a class="waves-btn btn blue"
-                               href="{% url 'item_contract' item.id %}">Contract
-                                Item</a>
-                            <form action="{% url 'junk_item' item.id %}"
-                                  method="POST">
-                                {% csrf_token %}
-
-                                <button class="btn waves-effect waves-light"
-                                        type="submit" value="Submit">Junk
-                                    <i class="material-icons right">send</i>
-                                </button>
-                            </form>
-                        {% endif %}
-                    {% endif %}
                 </td>
             </tr>
         {% endfor %}
+        </tbody>
+        </table>
     {% endfor %}
-</tbody>
-</table>
 </div>
 </div>
 

@@ -2,6 +2,21 @@
     padding: 2px 2px !important;
     text-overflow: ellipsis;
     white-space: nowrap;
+    display: flex;
+    flex-wrap: wrap;
+}
+.action_link  {
+    color: #0f0f0f !important;
+    padding: 2px 5px !important;
+    margin: 0 !important;
+    margin-right: 5px !important;
+}
+.action_link:hover {
+    background-color: #e0f2f1 !important;
+}
+.action_link > i {
+    color: #0f0f0f !important;
+    margin-right: 2px !important;
 }
 
 .shrink_cell {

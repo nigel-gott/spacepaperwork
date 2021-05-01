@@ -255,7 +255,7 @@ $(function () {
         $(".filter").attr("disabled", false);
         $(this).attr("disabled", true);
     }).trigger("click");
-    $('#mine_filter').on('click', function(){
+    $('#sent_filter').on('click', function(){
         $("#top_row").data("filter", "mine");
         $("#top_row").html("<h3>Sent Contracts</h3>");
         table.draw();
@@ -271,4 +271,7 @@ $(function () {
         $(".filter").attr("disabled", false);
         $(this).attr("disabled", true);
     });
+    if(page_data["status_filter"]){
+        $(`#${page_data["status_filter"]}_filter`).click()
+    }
 });
