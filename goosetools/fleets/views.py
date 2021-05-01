@@ -18,7 +18,7 @@ from goosetools.fleets.models import (
     future_fleets_query,
     past_fleets_query,
 )
-from goosetools.ownership.models import LootGroup
+from goosetools.ownership.models import LootBucket, LootGroup
 from goosetools.ownership.views import generate_fleet_profit
 from goosetools.users.models import Character
 
@@ -101,7 +101,11 @@ def fleet_view(request, pk):
         if member.character.user.id not in by_user:
             by_user[member.character.user.id] = []
         by_user[member.character.user.id].append(member)
-    loot_buckets = f.lootbucket_set.prefetch_related("lootgroup_set").all()
+    loot_buckets = (
+        LootBucket.objects.filter(lootgroup__fleet_anom__fleet=f)
+        .prefetch_related("lootgroup_set")
+        .all()
+    )
     return render(
         request,
         "fleets/fleet_view.html",
