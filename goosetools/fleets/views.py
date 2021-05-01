@@ -45,10 +45,8 @@ def fleet_list_view(request, fleets_to_display, page_url_name):
         isk_and_eggs_balance=Sum(
             Case(
                 When(
-                    lootbucket__lootgroup__inventoryitem__eggtransaction__debt=False,
-                    then=F(
-                        "lootbucket__lootgroup__inventoryitem__eggtransaction__eggs"
-                    ),
+                    fleetanom__lootgroup__inventoryitem__eggtransaction__debt=False,
+                    then=F("fleetanom__lootgroup__inventoryitem__eggtransaction__eggs"),
                 ),
                 output_field=IntegerField(),
                 default=0,
