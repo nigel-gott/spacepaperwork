@@ -13,6 +13,7 @@ from django.utils import timezone
 
 from goosetools.fleets.models import (
     Fleet,
+    FleetAnom,
     FleetMember,
     active_fleets_query,
     future_fleets_query,
@@ -143,6 +144,7 @@ def fleet_end(request, pk):
             LootGroup.objects.filter(bucket__lootgroup__fleet_anom__fleet=f).update(
                 closed=True
             )
+            FleetAnom.objects.filter(fleet=f).update(minute_repeat_period=None)
         else:
             messages.error(
                 request, "You cannot end a future fleet or one that is already closed."
