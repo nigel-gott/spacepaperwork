@@ -12,6 +12,12 @@
         <div class="card blue-grey darken-1">
             <div class="card-content white-text">
         <span class="card-title">
+            {% if loot_group.closed %}
+                <i class='material-icons left'>lock</i>
+            {% endif %}
+            {% if loot_group.fleet_anom.minute_repeat_period %}
+                <i class='material-icons left'>autorenew</i>
+            {% endif %}
             {{ loot_group.display_name }}
         </span>
                 <p>
@@ -22,7 +28,8 @@
                     {% if loot_group.fleet_anom.minute_repeat_period %}
                         <b>Automatically Repeating Every</b>:
                         {{ loot_group.fleet_anom.minute_repeat_period }} Minutes <br/>
-                        <b>Next Repeat At</b>: {{ loot_group.fleet_anom.next_repeat }} <br/>
+                        <b>Next Repeat At</b>: {{ loot_group.fleet_anom.next_repeat }}
+                        <br/>
                     {% endif %}
                 </p>
                 {% if loot_group.closed %}

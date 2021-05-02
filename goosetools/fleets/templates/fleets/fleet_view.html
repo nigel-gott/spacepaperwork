@@ -217,6 +217,9 @@
                         {% if lootgroup.closed %}
                             <i class='material-icons left'>lock</i>
                         {% endif %}
+                        {% if lootgroup.fleet_anom.minute_repeat_period %}
+                        <i class='material-icons left'>autorenew</i>
+                        {% endif %}
                     </a>
                     {% endfor %}
                 </div>
