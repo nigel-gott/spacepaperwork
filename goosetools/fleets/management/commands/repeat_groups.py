@@ -13,8 +13,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         now = timezone.now()
         self.stdout.write(self.style.SUCCESS(f"Running at {now}"))
+        with_an_extra_minute = now + timezone.timedelta(minutes=1)
         anoms = FleetAnom.objects.filter(
-            minute_repeat_period__isnull=False, next_repeat__lte=now
+            minute_repeat_period__isnull=False, next_repeat__lte=with_an_extra_minute
         )
         for anom in anoms:
             lootgroup = anom.lootgroup_set.get()
