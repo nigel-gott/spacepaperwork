@@ -234,6 +234,7 @@ MIDDLEWARE = MIDDLEWARE + [
     # "django.middleware.common.BrokenLinkEmailsMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "config.middleware.TimezoneMiddleware",
+    "config.middleware.LocaleMiddleware",
     "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 

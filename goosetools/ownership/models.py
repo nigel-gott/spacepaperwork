@@ -6,6 +6,7 @@ from django.db.models.aggregates import Sum
 from django.db.models.expressions import Case, F, When
 from django.db.models.fields import IntegerField
 from django.db.models.functions import Coalesce
+from django.template.defaultfilters import date as _date
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
 from django.utils.timezone import localtime
@@ -126,13 +127,13 @@ class LootGroup(models.Model):
         if self.fleet_anom and self.fleet_anom.next_repeat:
             # noinspection PyProtectedMember
             local_start = localtime(self.fleet_anom.time)
-            start = local_start.strftime("%x %H:%M")
+            start = _date(local_start, "SHORT_DATETIME_FORMAT")
             local_end = localtime(self.fleet_anom.next_repeat)
             if local_end.date() != local_start.date():
-                prefix = "%x "
+                end_format = "SHORT_DATETIME_FORMAT"
             else:
-                prefix = ""
-            end = local_end.strftime(prefix + "%H:%M %Z")
+                end_format = "P"
+            end = _date(local_end, end_format) + local_end.strftime(" %Z")
             if self.name:
                 return f"{self.name} -- {start} - {end}"
             else:

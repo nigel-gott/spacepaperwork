@@ -2,7 +2,7 @@ import logging
 
 import pytz
 from django.contrib import auth
-from django.utils import timezone
+from django.utils import timezone, translation
 
 from goosetools.users.models import SiteUser
 
@@ -14,7 +14,8 @@ class TimezoneMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # TODO Move timezone upto SiteUser. Not done now as it would have to mean creating a SiteUser specific settings page?
+        # TODO Move timezone upto SiteUser. Not done now as it would have to mean
+        #  creating a SiteUser specific settings page?
         user: SiteUser = auth.get_user(request)
         if (
             request.tenant.name != "public"
@@ -30,3 +31,22 @@ class TimezoneMiddleware:
         else:
             timezone.deactivate()
         return self.get_response(request)
+
+
+class LocaleMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+
+        language_code = translation.get_language_from_request(request)
+
+        translation.activate(language_code)
+
+        print("Activating " + language_code)
+
+        response = self.get_response(request)
+
+        translation.deactivate()
+
+        return response
