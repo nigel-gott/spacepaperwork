@@ -14,7 +14,7 @@ class LootGroupForm(forms.Form):
     name = forms.CharField(max_length=100, required=False)
 
     minute_repeat_period = forms.IntegerField(
-        min_value=0,
+        min_value=5,
         help_text="Optional: set this to make a copy of the group every X minutes",
         required=False,
         initial=None,
