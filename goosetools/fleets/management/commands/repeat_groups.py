@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+from ownership.models import LootGroup
 
 from goosetools.fleets.models import FleetAnom
 from goosetools.ownership.forms import LootGroupForm
@@ -18,9 +19,9 @@ class Command(BaseCommand):
         anoms = FleetAnom.objects.filter(
             minute_repeat_period__isnull=False, next_repeat__lte=with_an_extra_minute
         )
-        FleetAnom.objects.filter(
-            minute_repeat_period__isnull=True,
-            next_repeat__lte=minus_10_minutes,
+        LootGroup.objects.filter(
+            fleetanom__minute_repeat_period__isnull=True,
+            fleetanom__next_repeat__lte=minus_10_minutes,
             closed=False,
         ).update(closed=True)
         for anom in anoms:
