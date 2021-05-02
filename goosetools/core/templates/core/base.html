@@ -532,10 +532,15 @@ document.addEventListener('DOMContentLoaded', function () {
     var elems = document.querySelectorAll('.datepicker')
     var instances = M.Datepicker.init(elems, {
         showClearBtn: true,
+        defaultDate: Date.now(),
+        setDefaultDate: true,
+        onOpen: function(){
+            this.setDate(new Date());
+        }
     })
     var elems = document.querySelectorAll('.timepicker')
     var instances = M.Timepicker.init(elems, {
-        showClearBtn: true
+        showClearBtn: true,
     })
     var elems = document.querySelectorAll('.sidenav')
     var instances = M.Sidenav.init(elems)

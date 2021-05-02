@@ -409,13 +409,20 @@ def loot_group_edit(request, pk):
                 fleet_anom.minute_repeat_period = form.cleaned_data[
                     "minute_repeat_period"
                 ]
+
+            if loot_group.closed and fleet_anom.minute_repeat_period:
+                messages.error(
+                    request, "Cannot make a closed group repeat, open it first."
+                )
+                return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
+            else:
                 fleet_anom.full_clean()
                 fleet_anom.save()
 
-            loot_group.full_clean()
-            loot_group.save()
+                loot_group.full_clean()
+                loot_group.save()
 
-            return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
+                return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
 
     else:
         form = LootGroupForm(
@@ -426,10 +433,10 @@ def loot_group_edit(request, pk):
                 "anom_faction": fleet_anom.anom_type.faction,
                 "anom_type": fleet_anom.anom_type.type,
                 "repeat_start_time": fleet_anom.next_repeat.time()
-                if fleet_anom.next_repeat
+                if fleet_anom.minute_repeat_period
                 else None,
                 "repeat_start_date": fleet_anom.next_repeat.date()
-                if fleet_anom.next_repeat
+                if fleet_anom.minute_repeat_period
                 else None,
                 "minute_repeat_period": fleet_anom.minute_repeat_period,
             }
