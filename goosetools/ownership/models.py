@@ -125,8 +125,14 @@ class LootGroup(models.Model):
     def display_name(self):
         if self.fleet_anom and self.fleet_anom.next_repeat:
             # noinspection PyProtectedMember
-            start = localtime(self.fleet_anom.time).strftime("%x %H:%M")
-            end = localtime(self.fleet_anom.next_repeat).strftime("%H:%M %Z")
+            local_start = localtime(self.fleet_anom.time)
+            start = local_start.strftime("%x %H:%M")
+            local_end = localtime(self.fleet_anom.next_repeat)
+            if local_end.date() == local_start.date():
+                prefix = "%x "
+            else:
+                prefix = ""
+            end = local_end.strftime(prefix + "%H:%M %Z")
             if self.name:
                 return f"{self.name} -- {start} - {end}"
             else:
