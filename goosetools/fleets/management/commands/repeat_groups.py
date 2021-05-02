@@ -26,8 +26,8 @@ class Command(BaseCommand):
             minute_repeat_period__isnull=False, next_repeat__lt=plus_5_minutes
         )
         count = LootGroup.objects.filter(
-            fleetanom__minute_repeat_period__isnull=True,
-            fleetanom__next_repeat__lte=minus_10_minutes,
+            fleet_anom__minute_repeat_period__isnull=True,
+            fleet_anom__next_repeat__lte=minus_10_minutes,
             closed=False,
         ).update(closed=True)
         self.stdout.write(
