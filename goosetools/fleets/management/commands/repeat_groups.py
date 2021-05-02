@@ -17,22 +17,12 @@ class Command(BaseCommand):
         plus_5_minutes = now + timezone.timedelta(minutes=5)
         plus_5_minutes = plus_5_minutes.replace(second=0, microsecond=0)
         minus_10_minutes = now - timezone.timedelta(minutes=10)
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"Searching for anoms with a next repeat upto {plus_5_minutes}"
-            )
-        )
         anoms = FleetAnom.objects.filter(
             minute_repeat_period__isnull=False, next_repeat__lt=plus_5_minutes
         )
-        count = LootGroup.objects.filter(
-            fleet_anom__minute_repeat_period__isnull=True,
-            fleet_anom__next_repeat__lte=minus_10_minutes,
-            closed=False,
-        ).update(closed=True)
         self.stdout.write(
             self.style.SUCCESS(
-                f"Closed {count} groups with a next repeat before or equal to {minus_10_minutes}"
+                f"Found {anoms.count()} anoms to repeat with a next repeat upto {plus_5_minutes}"
             )
         )
         for anom in anoms:
@@ -63,18 +53,31 @@ class Command(BaseCommand):
                 next_repeat,
                 new_rep_count,
             )
-            has_been_used = (
-                lootgroup.lootshare_set.exists() or lootgroup.inventoryitem_set.exists()
-            )
-            if has_been_used:
-                anom.minute_repeat_period = None
-                anom.save()
-            else:
-                self.stdout.write(
-                    self.style.SUCCESS(
-                        f"Deleting old group {anom.lootgroup_set.get().display_name()} as it has not been used."
-                    )
-                )
-                anom.delete()
+            anom.minute_repeat_period = None
+            anom.save()
 
             self.stdout.write(self.style.SUCCESS(f"Successfully repeated {new_group}"))
+
+        old_groups = LootGroup.objects.filter(
+            fleet_anom__minute_repeat_period__isnull=True,
+            fleet_anom__next_repeat__lte=minus_10_minutes,
+            closed=False,
+        )
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Found {old_groups.count()} to be cleaned up who finished before {minus_10_minutes}."
+            )
+        )
+        for old in old_groups:
+            has_been_used = old.lootshare_set.exists() or old.inventoryitem_set.exists()
+            if has_been_used:
+                old.closed = True
+                old.save()
+                self.stdout.write(
+                    self.style.SUCCESS(f"Closing {old} as it has been used.")
+                )
+            else:
+                self.stdout.write(
+                    self.style.SUCCESS(f"Deleting {old} as it has not been used.")
+                )
+                old.delete()
