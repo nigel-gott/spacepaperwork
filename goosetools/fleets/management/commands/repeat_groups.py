@@ -12,6 +12,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         now = timezone.now()
+        self.stdout.write(self.style.SUCCESS(f"Running at {now}"))
         anoms = FleetAnom.objects.filter(
             minute_repeat_period__isnull=False, next_repeat__lte=now
         )
