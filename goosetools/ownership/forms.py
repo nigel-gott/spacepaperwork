@@ -1,6 +1,7 @@
 from dal import autocomplete
 from django import forms
 from django.conf import settings
+from django.core.exceptions import ValidationError
 
 from goosetools.fleets.models import AnomType
 from goosetools.items.models import System
@@ -19,6 +20,14 @@ class LootGroupForm(forms.Form):
         required=False,
         initial=None,
     )
+
+    def clean_minute_repeat_period(self):
+        p = self.cleaned_data["minute_repeat_period"]
+        if p and p % 5 != 0:
+            raise ValidationError(
+                "The minute repeat period must be a multiple of 5 minutes."
+            )
+        return p
 
     loot_source = forms.ChoiceField(
         choices=[
