@@ -405,7 +405,9 @@ def loot_group_edit(request, pk):
                     faction=form.cleaned_data["anom_faction"],
                 )[0]
                 fleet_anom.system = form.cleaned_data["anom_system"]
-                fleet_anom.next_repeat = calc_next_repeat(form)
+                new_next_repeat = calc_next_repeat(form)
+                if new_next_repeat:
+                    fleet_anom.next_repeat = new_next_repeat
                 fleet_anom.minute_repeat_period = form.cleaned_data[
                     "minute_repeat_period"
                 ]
