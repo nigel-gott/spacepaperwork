@@ -1,5 +1,10 @@
 {% extends "core/base.html" %}
 {% load base_extras %}
+{% load static %}
+
+{% block extraheader %}
+    <link type="text/css" rel="stylesheet" href="{% static 'fleets/css/fleets.css' %}">
+{% endblock %}
 
 {% block body %}
 {% has_fleet_member fleet user as is_member %}
@@ -207,6 +212,7 @@
                         {% endif %}
                         href="{% url 'loot_group_view' lootgroup.id %}" class="collection-item
                         {% if lootgroup.closed %}red-text{% endif %}
+                        fleet_link
                     ">
                         {% if has_share_already %}
                             <span class="badge">
