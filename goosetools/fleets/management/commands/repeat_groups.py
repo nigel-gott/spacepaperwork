@@ -36,9 +36,11 @@ class Command(BaseCommand):
                 )
                 continue
             new_rep_count = anom.repeat_count + 1
-            next_repeat = anom.next_repeat + timezone.timedelta(
-                minutes=anom.minute_repeat_period
-            )
+            timedelta = timezone.timedelta(minutes=anom.minute_repeat_period)
+            next_repeat = anom.next_repeat + timedelta
+            if next_repeat <= timezone.now():
+                # Catchup Old groups
+                next_repeat = timezone.now() + timedelta
             new_group = loot_group_create_internal(
                 anom.fleet,
                 LootGroupForm.ANOM_LOOT_GROUP,
