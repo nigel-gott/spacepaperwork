@@ -128,7 +128,7 @@ class LootGroup(models.Model):
             local_start = localtime(self.fleet_anom.time)
             start = local_start.strftime("%x %H:%M")
             local_end = localtime(self.fleet_anom.next_repeat)
-            if local_end.date() == local_start.date():
+            if local_end.date() != local_start.date():
                 prefix = "%x "
             else:
                 prefix = ""
