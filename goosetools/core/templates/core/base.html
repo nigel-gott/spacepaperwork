@@ -188,6 +188,11 @@
                             {{ ns|length }}{% endif %}</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{% url 'core:help' %}">
+                        <i class="material-icons left">help</i>
+                    </a>
+                </li>
                 {% if is_loot_tracker %}
                     <li>
                         <a class="dropdown-trigger valign-wrapper"
@@ -347,6 +352,11 @@
                href="{% url "notifications:notifications-list" %}">
                 <i class="material-icons left">notifications_active</i>{% if ns %}
                 <span class="new badge red">{{ ns|length }}{% endif %}</span>
+            </a>
+        </li>
+        <li>
+            <a class="center valign-wrapper" href="{% url 'core:help' %}">
+                <i class="material-icons left">help</i> Help
             </a>
         </li>
         {% if GOOSEFLOCK_FEATURES %}

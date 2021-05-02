@@ -1,0 +1,68 @@
+{% extends "core/base.html" %}
+{% load materializecss %}
+{% load static %}
+{% block extraheader %}
+    <link href="{% static 'core/css/help.css' %}" rel="stylesheet" type="text/css">
+{% endblock %}
+{% block body %}
+
+<div>
+    <section id="introduction">
+        <h2>{{ SITE_NAME }} Documentation</h2>
+        <p><em>Need more help? Have a great idea? Want to help with the code? PM @thejanitor on Discord!</em>
+        </p>
+        <p>…</p>
+    </section>
+    <section id="features">
+        <h2>Feature Overview</h2>
+        <p>…</p>
+    </section>
+    <section id="fleets">
+        <h2>Fleets</h2>
+        <section id="fleets--repeating">
+            <h3>Repeating Loot Groups</h3>
+            <p>
+                Loot Groups can be set to repeat.
+            </p>
+        </section>
+    </section>
+</div>
+<div class="section-nav">
+    <ol>
+        <li><a href="#introduction">Introduction</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#fleets">Fleets</a>
+            <ul>
+                <li class=""><a href="#fleets--repeating">Repeating Loot Groups</a></li>
+            </ul>
+        </li>
+    </ol>
+</div>
+{% endblock body %}
+{% block extrafooter %}
+    <script>
+
+
+    window.addEventListener('DOMContentLoaded', () => {
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                const id = entry.target.getAttribute('id')
+                if (entry.intersectionRatio > 0) {
+                    document.querySelector(`.section-nav li a[href="#${id}"]`).parentElement.classList.add('active')
+                } else {
+                    document.querySelector(`.section-nav li a[href="#${id}"]`).parentElement.classList.remove('active')
+                }
+            })
+        })
+
+        // Track all sections that have an `id` applied
+        document.querySelectorAll('section[id]').forEach((section) => {
+            observer.observe(section)
+        })
+
+    })
+
+
+    </script>
+{% endblock %}

@@ -32,6 +32,13 @@ def core_home(request):
     return render(request, "core/home.html", context)
 
 
+def core_help(request):
+    if not hasattr(request.user, "gooseuser") or not request.gooseuser.is_approved():
+        return forbidden(request)
+
+    return render(request, "core/help.html")
+
+
 def core_conduct(request):
     code_of_conduct = AuthConfig.get_active().code_of_conduct
     if code_of_conduct:
