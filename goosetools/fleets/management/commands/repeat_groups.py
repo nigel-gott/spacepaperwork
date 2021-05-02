@@ -14,9 +14,15 @@ class Command(BaseCommand):
         now = timezone.now()
         self.stdout.write(self.style.SUCCESS(f"Running at {now}"))
         with_an_extra_minute = now + timezone.timedelta(minutes=1)
+        minus_10_minutes = now - timezone.timedelta(minutes=10)
         anoms = FleetAnom.objects.filter(
             minute_repeat_period__isnull=False, next_repeat__lte=with_an_extra_minute
         )
+        FleetAnom.objects.filter(
+            minute_repeat_period__isnull=True,
+            next_repeat__lte=minus_10_minutes,
+            closed=False,
+        ).update(closed=True)
         for anom in anoms:
             lootgroup = anom.lootgroup_set.get()
             if lootgroup.closed:
@@ -51,8 +57,6 @@ class Command(BaseCommand):
             if has_been_used:
                 anom.minute_repeat_period = None
                 anom.save()
-                lootgroup.closed = True
-                lootgroup.save()
             else:
                 self.stdout.write(
                     self.style.SUCCESS(
