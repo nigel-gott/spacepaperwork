@@ -41,6 +41,12 @@
                 <div class="row">
                     {{ form.minute_repeat_period|materializecss:'s12 m12, icon=access_alarms' }}
                 </div>
+                <div class="row">
+                    {{ form.repeat_start_date|materializecss:'s12 m12, icon=access_alarms' }}
+                </div>
+                <div class="row">
+                    {{ form.repeat_start_time|materializecss:'s12 m12, icon=access_alarms' }}
+                </div>
                 <button class="btn waves-effect waves-light" type="submit"
                         value="Submit">{{ title }}
                     <i class="material-icons right">send</i>

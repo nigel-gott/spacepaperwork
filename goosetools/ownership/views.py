@@ -280,7 +280,7 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
                 anom_faction = form.cleaned_data["anom_faction"]
                 system = form.cleaned_data["anom_system"]
                 name = form.cleaned_data["name"]
-                next_repeat = calc_next_repeat(form, spawned)
+                next_repeat = calc_next_repeat(form)
                 minute_repeat_period = form.cleaned_data["minute_repeat_period"]
                 new_group = loot_group_create_internal(
                     f,
@@ -312,10 +312,13 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
     )
 
 
-def calc_next_repeat(form, spawned):
-    minute_repeat_period = form.cleaned_data["minute_repeat_period"]
-    if minute_repeat_period:
-        next_repeat = spawned + timezone.timedelta(minutes=minute_repeat_period)
+def calc_next_repeat(form):
+    repeat_start_date = form.cleaned_data["repeat_start_date"]
+    repeat_start_time = form.cleaned_data["repeat_start_time"]
+    if repeat_start_date:
+        next_repeat = timezone.make_aware(
+            timezone.datetime.combine(repeat_start_date, repeat_start_time)
+        )
         return next_repeat
     else:
         return None
@@ -402,7 +405,7 @@ def loot_group_edit(request, pk):
                     faction=form.cleaned_data["anom_faction"],
                 )[0]
                 fleet_anom.system = form.cleaned_data["anom_system"]
-                fleet_anom.next_repeat = calc_next_repeat(form, timezone.now())
+                fleet_anom.next_repeat = calc_next_repeat(form)
                 fleet_anom.minute_repeat_period = form.cleaned_data[
                     "minute_repeat_period"
                 ]
@@ -422,7 +425,10 @@ def loot_group_edit(request, pk):
                 "anom_level": fleet_anom.anom_type.level,
                 "anom_faction": fleet_anom.anom_type.faction,
                 "anom_type": fleet_anom.anom_type.type,
-                "start_repeating_at": fleet_anom.next_repeat.time()
+                "repeat_start_time": fleet_anom.next_repeat.time()
+                if fleet_anom.next_repeat
+                else None,
+                "repeat_start_date": fleet_anom.next_repeat.date()
                 if fleet_anom.next_repeat
                 else None,
                 "minute_repeat_period": fleet_anom.minute_repeat_period,
