@@ -12,6 +12,14 @@ class LootGroupForm(forms.Form):
     KILL_MAIL_LOOT_GROUP = "Killmail"
     ANOM_LOOT_GROUP = "Anom"
     name = forms.CharField(max_length=100, required=False)
+
+    minute_repeat_period = forms.IntegerField(
+        min_value=0,
+        help_text="Optional: set this to make a copy of the group every X minutes",
+        required=False,
+        initial=None,
+    )
+
     loot_source = forms.ChoiceField(
         choices=[
             (ANOM_LOOT_GROUP, ANOM_LOOT_GROUP),

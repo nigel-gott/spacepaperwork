@@ -3,7 +3,6 @@ import math as m
 from decimal import Decimal
 from typing import Dict, List
 
-from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
@@ -256,6 +255,12 @@ def loot_group_open(request, pk):
         return HttpResponseNotAllowed("POST")
 
 
+class WrongFleetBucketException(Exception):
+    def __init__(self, message):
+        super().__init__()
+        self.message = message
+
+
 def loot_group_add(request, fleet_pk, loot_bucket_pk):
     f = get_object_or_404(Fleet, pk=fleet_pk)
     if request.method == "POST":
@@ -264,63 +269,36 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
             # Form will let you specify anom/km/other
             # depending on mode, a anom/km/other info will be created
             # also can come with participation filled in and items filled in all on one form
-            spawned = timezone.now()
-
-            if form.cleaned_data["loot_source"] == LootGroupForm.ANOM_LOOT_GROUP:
-                try:
-                    anom_type = AnomType.objects.get_or_create(
-                        level=form.cleaned_data["anom_level"],
-                        type=form.cleaned_data["anom_type"],
-                        faction=form.cleaned_data["anom_faction"],
-                    )[0]
-                    anom_type.full_clean()
-                    anom_type.save()
-                except forms.ValidationError as e:
-                    form.add_error(None, e)
-                    return render(
-                        request,
-                        "ownership/loot_group_form.html",
-                        {"form": form, "title": "Start New Loot Group"},
-                    )
-                if not loot_bucket_pk:
-                    loot_bucket = LootBucket()
-                    loot_bucket.save()
-                else:
-                    loot_bucket = get_object_or_404(LootBucket, pk=loot_bucket_pk)
-                    num_groups_for_this_fleet = loot_bucket.lootgroup_set.filter(
-                        fleet_anom__fleet=f
-                    ).count()
-                    if num_groups_for_this_fleet != loot_bucket.lootgroup_set.count():
-                        messages.error(
-                            request,
-                            "You cannot add a fleet anom to this "
-                            "bucket as this bucket is not for "
-                            "this fleet.",
-                        )
-                        return HttpResponseRedirect(reverse("fleet_view", args=[f.id]))
-
-                fleet_anom = FleetAnom(
-                    fleet=f,
-                    anom_type=anom_type,
-                    time=spawned,
-                    system=form.cleaned_data["anom_system"],
+            try:
+                spawned = timezone.now()
+                loot_source = form.cleaned_data["loot_source"]
+                anom_level = form.cleaned_data["anom_level"]
+                a_type = form.cleaned_data["anom_type"]
+                anom_faction = form.cleaned_data["anom_faction"]
+                system = form.cleaned_data["anom_system"]
+                name = form.cleaned_data["name"]
+                next_repeat = calc_next_repeat(form, spawned)
+                minute_repeat_period = form.cleaned_data["minute_repeat_period"]
+                new_group = loot_group_create_internal(
+                    f,
+                    loot_source,
+                    anom_level,
+                    a_type,
+                    anom_faction,
+                    loot_bucket_pk,
+                    spawned,
+                    system,
+                    name,
+                    minute_repeat_period,
+                    next_repeat,
+                    0,
                 )
-                fleet_anom.full_clean()
-                fleet_anom.save()
-
-                new_group = LootGroup(
-                    name=form.cleaned_data["name"],
-                    bucket=loot_bucket,
-                    fleet_anom=fleet_anom,
-                    created_at=timezone.now(),
-                )
-                new_group.full_clean()
-                new_group.save()
-
                 return HttpResponseRedirect(
                     reverse("loot_group_view", args=[new_group.id])
                 )
-
+            except WrongFleetBucketException as e:
+                messages.error(request, e.message)
+                return HttpResponseRedirect(reverse("fleet_view", args=[f.id]))
     else:
         form = LootGroupForm()
 
@@ -331,9 +309,81 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
     )
 
 
+def calc_next_repeat(form, spawned):
+    minute_repeat_period = form.cleaned_data["minute_repeat_period"]
+    if minute_repeat_period:
+        next_repeat = spawned + timezone.timedelta(minutes=minute_repeat_period)
+        return next_repeat
+    else:
+        return None
+
+
+def loot_group_create_internal(
+    f,
+    loot_source,
+    anom_level,
+    a_type,
+    anom_faction,
+    loot_bucket_pk,
+    spawned,
+    system,
+    name,
+    minute_repeat_period,
+    next_repeat,
+    repeat_count,
+):
+    if loot_source == LootGroupForm.ANOM_LOOT_GROUP:
+        anom_type = AnomType.objects.get_or_create(
+            level=anom_level,
+            type=a_type,
+            faction=anom_faction,
+        )[0]
+        anom_type.full_clean()
+        anom_type.save()
+        if not loot_bucket_pk:
+            loot_bucket = LootBucket()
+            loot_bucket.save()
+        else:
+            loot_bucket = get_object_or_404(LootBucket, pk=loot_bucket_pk)
+            num_groups_for_this_fleet = loot_bucket.lootgroup_set.filter(
+                fleet_anom__fleet=f
+            ).count()
+            if num_groups_for_this_fleet != loot_bucket.lootgroup_set.count():
+                raise WrongFleetBucketException(
+                    "You cannot add a fleet anom to this "
+                    "bucket as this bucket is not for "
+                    "this fleet.",
+                )
+
+        fleet_anom = FleetAnom(
+            fleet=f,
+            anom_type=anom_type,
+            time=spawned,
+            system=system,
+            next_repeat=next_repeat,
+            minute_repeat_period=minute_repeat_period,
+            repeat_count=repeat_count,
+        )
+        fleet_anom.full_clean()
+        fleet_anom.save()
+
+        new_group = LootGroup(
+            name=name,
+            bucket=loot_bucket,
+            fleet_anom=fleet_anom,
+            created_at=timezone.now(),
+        )
+        new_group.full_clean()
+        new_group.save()
+        return new_group
+    else:
+        return None
+
+
 def loot_group_edit(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
-    if not loot_group.fleet_anom:
+    fleet_anom = loot_group.fleet_anom
+    if not fleet_anom:
         raise Exception(f"Missing fleet anom for {loot_group}")
     raise_if_locked(request, loot_group)
     if request.method == "POST":
@@ -343,22 +393,18 @@ def loot_group_edit(request, pk):
 
             # todo handle more loot sources?
             if form.cleaned_data["loot_source"] == LootGroupForm.ANOM_LOOT_GROUP:
-                try:
-                    loot_group.fleet_anom.anom_type = AnomType.objects.get_or_create(
-                        level=form.cleaned_data["anom_level"],
-                        type=form.cleaned_data["anom_type"],
-                        faction=form.cleaned_data["anom_faction"],
-                    )[0]
-                    loot_group.fleet_anom.system = form.cleaned_data["anom_system"]
-                    loot_group.fleet_anom.full_clean()
-                    loot_group.fleet_anom.save()
-                except forms.ValidationError as e:
-                    form.add_error(None, e)
-                    return render(
-                        request,
-                        "ownership/loot_group_form.html",
-                        {"form": form, "title": "Edit Loot Group"},
-                    )
+                fleet_anom.anom_type = AnomType.objects.get_or_create(
+                    level=form.cleaned_data["anom_level"],
+                    type=form.cleaned_data["anom_type"],
+                    faction=form.cleaned_data["anom_faction"],
+                )[0]
+                fleet_anom.system = form.cleaned_data["anom_system"]
+                fleet_anom.next_repeat = calc_next_repeat(form, timezone.now())
+                fleet_anom.minute_repeat_period = form.cleaned_data[
+                    "minute_repeat_period"
+                ]
+                fleet_anom.full_clean()
+                fleet_anom.save()
 
             loot_group.full_clean()
             loot_group.save()
@@ -369,10 +415,14 @@ def loot_group_edit(request, pk):
         form = LootGroupForm(
             initial={
                 "name": loot_group.name,
-                "anom_system": loot_group.fleet_anom.system,
-                "anom_level": loot_group.fleet_anom.anom_type.level,
-                "anom_faction": loot_group.fleet_anom.anom_type.faction,
-                "anom_type": loot_group.fleet_anom.anom_type.type,
+                "anom_system": fleet_anom.system,
+                "anom_level": fleet_anom.anom_type.level,
+                "anom_faction": fleet_anom.anom_type.faction,
+                "anom_type": fleet_anom.anom_type.type,
+                "start_repeating_at": fleet_anom.next_repeat.time()
+                if fleet_anom.next_repeat
+                else None,
+                "minute_repeat_period": fleet_anom.minute_repeat_period,
             }
         )
 

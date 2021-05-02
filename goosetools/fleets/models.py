@@ -1,5 +1,7 @@
 from dateutil.relativedelta import relativedelta
 from django import forms
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
@@ -227,11 +229,26 @@ class AnomType(models.Model):
         return f"{self.faction} {self.type} Level {self.level}"
 
 
+def validate_nonzero(value):
+    if value == 0:
+        raise ValidationError(
+            "Quantity %(value)s is not allowed",
+            params={"value": value},
+        )
+
+
 class FleetAnom(models.Model):
     fleet = models.ForeignKey(Fleet, on_delete=models.CASCADE)
     anom_type = models.ForeignKey(AnomType, on_delete=models.CASCADE)
     time = models.DateTimeField()
     system = models.ForeignKey(System, on_delete=models.CASCADE)
+    minute_repeat_period = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        validators=[MaxValueValidator(60 * 24 * 7 * 52), validate_nonzero],
+    )
+    next_repeat = models.DateTimeField(null=True, blank=True)
+    repeat_count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.anom_type} @ {self.time} in {self.system}"

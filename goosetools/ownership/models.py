@@ -8,6 +8,7 @@ from django.db.models.fields import IntegerField
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
+from django.utils.timezone import localtime
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 
@@ -122,6 +123,14 @@ class LootGroup(models.Model):
             return False
 
     def display_name(self):
+        if self.fleet_anom and self.fleet_anom.next_repeat:
+            # noinspection PyProtectedMember
+            start = localtime(self.fleet_anom.time).strftime("%x %H:%M")
+            end = localtime(self.fleet_anom.next_repeat).strftime("%H:%M %Z")
+            if self.name:
+                return f"{self.name} -- {start} - {end}"
+            else:
+                return f"{start} - {end}"
         if self.name:
             return str(self.name)
         if self.fleet_anom:

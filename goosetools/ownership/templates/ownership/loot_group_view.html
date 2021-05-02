@@ -1,4 +1,5 @@
-{% extends "core/base.html" %} {% load base_extras %} {% block body %}
+{% extends "core/base.html" %} {% load base_extras %}
+{% block body %}
     {% has_group_admin loot_group user as admin %}
     {% if loot_group.fleet_anom %}
         <div>
@@ -18,6 +19,11 @@
                     <b>Location:</b> {{ loot_group.fleet_anom.system }}<br/>
                     <b>Total Profit So
                         Far:</b> {{ loot_group.isk_and_eggs_balance }}<br/>
+                    {% if loot_group.fleet_anom.minute_repeat_period %}
+                        <b>Automatically Repeating Every</b>:
+                        {{ loot_group.fleet_anom.minute_repeat_period }} Minutes <br/>
+                        <b>Next Repeat At</b>: {{ loot_group.fleet_anom.next_repeat }} <br/>
+                    {% endif %}
                 </p>
                 {% if loot_group.closed %}
                     <h5 class="red-text">Loot Group Closed.</h5>

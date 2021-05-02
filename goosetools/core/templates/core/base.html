@@ -520,9 +520,13 @@ document.addEventListener('DOMContentLoaded', function () {
         var instances = M.FormSelect.init(elems)
     {% endblock %}
     var elems = document.querySelectorAll('.datepicker')
-    var instances = M.Datepicker.init(elems)
+    var instances = M.Datepicker.init(elems, {
+        showClearBtn: true,
+    })
     var elems = document.querySelectorAll('.timepicker')
-    var instances = M.Timepicker.init(elems)
+    var instances = M.Timepicker.init(elems, {
+        showClearBtn: true
+    })
     var elems = document.querySelectorAll('.sidenav')
     var instances = M.Sidenav.init(elems)
     var elems = document.querySelectorAll('.dropdown-trigger')
