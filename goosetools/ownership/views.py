@@ -232,6 +232,9 @@ def loot_group_close(request, pk):
         return forbidden(request)
     if request.method == "POST":
         loot_group.closed = True
+        if loot_group.fleet_anom:
+            loot_group.fleet_anom.minute_repeat_period = None
+            loot_group.fleet_anom.save()
         loot_group.full_clean()
         loot_group.save()
         messages.success(request, f"Closed loot group: {loot_group}")
