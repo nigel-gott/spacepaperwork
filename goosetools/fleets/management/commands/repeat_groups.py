@@ -16,7 +16,6 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"Running at {now}"))
         plus_5_minutes = now + timezone.timedelta(minutes=5)
         plus_5_minutes = plus_5_minutes.replace(second=0, microsecond=0)
-        minus_10_minutes = now - timezone.timedelta(minutes=10)
         anoms = FleetAnom.objects.filter(
             minute_repeat_period__isnull=False, next_repeat__lt=plus_5_minutes
         )
@@ -58,14 +57,15 @@ class Command(BaseCommand):
 
             self.stdout.write(self.style.SUCCESS(f"Successfully repeated {new_group}"))
 
+        minus_9_minutes = now - timezone.timedelta(minutes=9)
         old_groups = LootGroup.objects.filter(
             fleet_anom__minute_repeat_period__isnull=True,
-            fleet_anom__next_repeat__lte=minus_10_minutes,
+            fleet_anom__next_repeat__lte=minus_9_minutes,
             closed=False,
         )
         self.stdout.write(
             self.style.SUCCESS(
-                f"Found {old_groups.count()} to be cleaned up who finished before {minus_10_minutes}."
+                f"Found {old_groups.count()} to be cleaned up who finished before {minus_9_minutes}."
             )
         )
         for old in old_groups:
