@@ -14,16 +14,27 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         now = timezone.now()
         self.stdout.write(self.style.SUCCESS(f"Running at {now}"))
-        with_an_extra_minute = now + timezone.timedelta(minutes=1)
+        plus_5_minutes = now + timezone.timedelta(minutes=5)
+        plus_5_minutes = plus_5_minutes.replace(second=0, microsecond=0)
         minus_10_minutes = now - timezone.timedelta(minutes=10)
-        anoms = FleetAnom.objects.filter(
-            minute_repeat_period__isnull=False, next_repeat__lte=with_an_extra_minute
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Searching for anoms with a next repeat upto {plus_5_minutes}"
+            )
         )
-        LootGroup.objects.filter(
+        anoms = FleetAnom.objects.filter(
+            minute_repeat_period__isnull=False, next_repeat__lt=plus_5_minutes
+        )
+        count = LootGroup.objects.filter(
             fleetanom__minute_repeat_period__isnull=True,
             fleetanom__next_repeat__lte=minus_10_minutes,
             closed=False,
         ).update(closed=True)
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Closed {count} groups with a next repeat before or equal to {minus_10_minutes}"
+            )
+        )
         for anom in anoms:
             lootgroup = anom.lootgroup_set.get()
             if lootgroup.closed:
