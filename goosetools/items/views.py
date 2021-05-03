@@ -2,7 +2,9 @@ import csv
 import math
 from typing import Any, Dict, List
 
+import numpy as np
 from bokeh.embed import components
+from bokeh.layouts import gridplot
 from bokeh.models import ColumnDataSource, HoverTool, NumeralTickFormatter
 from bokeh.plotting import figure
 from django import forms
@@ -566,7 +568,11 @@ def item_data(request, pk):
         form = DataForm()
 
     df = get_df(days, item)
-    div, script = render_graph(days, df, item, show_buy_sell, style)
+    if style == "bar":
+        div, script = render_bar_graph(days, df, item, show_buy_sell)
+
+    else:
+        div, script = render_graph(days, df, item, show_buy_sell, style)
 
     result = render(
         request,
@@ -585,14 +591,97 @@ def get_df(days, item):
     time_threshold = timezone.now() - timezone.timedelta(hours=int(days) * 24)
     events_last_week = (
         item.itemmarketdataevent_set.filter(time__gte=time_threshold)
-        .values("time", "sell", "buy", "highest_buy", "lowest_sell")
+        .values("time", "sell", "buy", "highest_buy", "lowest_sell", "volume")
         .order_by("time")
-        .distinct()
         .all()
     )
     df = read_frame(
         events_last_week,
-        fieldnames=["time", "sell", "buy", "highest_buy", "lowest_sell"],
+        fieldnames=["time", "sell", "buy", "highest_buy", "lowest_sell", "volume"],
+    )
+    return df
+
+
+def calc_vals_for_key(df, key):
+    df = df.groupby("day").agg(
+        min=(key, np.min),
+        max=(key, np.max),
+        first=(key, "first"),
+        close=(key, "last"),
+        volume=("volume", "sum"),
+    )
+    return df
+
+
+def render_bar_graph(days, df, item, show_buy_sell):
+    tools = "pan, wheel_zoom, box_zoom, reset, save"
+    title = f"Last {days} days of market data for {item}"
+    df["day"] = df["time"].dt.date
+    w = 12 * 60 * 60 * 1000
+    p = figure(
+        x_axis_type="datetime",
+        tools=tools,
+        plot_width=700,
+        plot_height=500,
+        title=title,
+    )
+    sell_key = "sell" if show_buy_sell else "lowest_sell"
+    buy_key = "buy" if show_buy_sell else "highest_buy"
+    df_agg = add_candlesticks(df, p, w, sell_key, "#D5E1DD", "#F2583E")
+    add_candlesticks(df, p, w, buy_key, "#80eb34", "#eba834")
+
+    p2 = figure(
+        x_axis_type="datetime",
+        tools="",
+        toolbar_location=None,
+        plot_width=700,
+        plot_height=200,
+        x_range=p.x_range,
+        title="volume",
+    )
+    p2.xaxis.major_label_orientation = math.pi / 4
+    p2.grid.grid_line_alpha = 0.3
+    p2.vbar(df_agg.index, w, df_agg.volume, [0] * df_agg.shape[0])
+
+    p.yaxis[0].formatter = NumeralTickFormatter(format="0,0 $")
+    p2.yaxis[0].formatter = NumeralTickFormatter(format="0,0")
+    script, div = components(gridplot([[p], [p2]]))
+    return div, script
+
+
+def add_candlesticks(df, p, w, key, increase_c, decrease_c):
+    df = calc_vals_for_key(df, key)
+    df["open"] = df["close"].shift(1)
+    df["open"][0] = df["first"][0]
+    df["min"] = df[["min", "open"]].min(axis=1)
+    df["max"] = df[["max", "open"]].max(axis=1)
+    increasing = df.open < df.close
+    decreasing = df.open > df.close
+    p.xaxis.major_label_orientation = math.pi / 4
+    p.grid.grid_line_alpha = 0.3
+    p.vbar(
+        df.index[increasing],
+        w,
+        df.open[increasing],
+        df.close[increasing],
+        fill_color=increase_c,
+        line_color="black",
+        legend_label=key,
+    )
+    p.vbar(
+        df.index[decreasing],
+        w,
+        df.open[decreasing],
+        df.close[decreasing],
+        fill_color=decrease_c,
+        line_color="black",
+    )
+    p.segment(
+        df.index,
+        df["max"],
+        df.index,
+        df["min"],
+        color="black",
     )
     return df
 
