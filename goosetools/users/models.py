@@ -376,6 +376,7 @@ LOOT_TRACKER = "loot_tracker"
 LOOT_TRACKER_ADMIN = "loot_tracker_admin"
 VENMO_ADMIN = "venmo_admin"
 DISCORD_ADMIN_PERMISSION = "discord_admin"
+ITEM_CHANGE_ADMIN = "item_change_admin"
 
 
 class GoosePermission(models.Model):
@@ -419,6 +420,11 @@ class GoosePermission(models.Model):
         (
             DISCORD_ADMIN_PERMISSION,
             "Able to change which discord server is connected to.",
+        ),
+        (
+            ITEM_CHANGE_ADMIN,
+            "Able to edit, update and delete items + approve proposals made by "
+            "others.",
         ),
     ]
     name = models.TextField(unique=True, choices=USER_PERMISSION_CHOICES)

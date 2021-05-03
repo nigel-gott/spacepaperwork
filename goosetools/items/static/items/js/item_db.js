@@ -6,6 +6,9 @@ $(function () {
             order: [[0, "asc"]],
             columns: [
                 {
+                    "data": "id", "title": "Id"
+                },
+                {
                     "data": "name", "title": "Name"
                 },
                 {
@@ -24,12 +27,15 @@ $(function () {
                     "data": "cached_lowest_sell", "title": "cached_lowest_sell"
                 },
                 {
-                    "data": "name", "title": "Actions",
+                    "data": "id", "title": "Actions",
                     "class": "right-align",
                     "width": "18em",
                     render: function (data, type, row) {
+                        const propose_url = page_data["propose_url"].replace("0", data);
+                        let proposeChangeUrl = `<a class="edit-btn green-text" href="${propose_url}">Propose Change</a>`
                         const data_url = page_data["data_url"].replace("0", data);
-                        return `<a class="edit-btn orange-text" href="${data_url}">Market Data</a>`;
+                        let dataUrl = `<a class="edit-btn" href="${data_url}">Market Data</a>`
+                        return `${proposeChangeUrl}/${dataUrl}`;
                     }
                 },
             ]

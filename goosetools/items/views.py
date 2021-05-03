@@ -15,18 +15,28 @@ from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views.generic import ListView
 from django_pandas.io import read_frame
 
-from goosetools.items.forms import DeleteItemForm, InventoryItemForm, JunkItemsForm
+from goosetools.items.forms import (
+    DeleteItemForm,
+    InventoryItemForm,
+    ItemChangeProposalForm,
+    ItemChangeProposalSelectForm,
+    JunkItemsForm,
+)
 from goosetools.items.models import (
     CharacterLocation,
     InventoryItem,
     Item,
+    ItemChangeError,
+    ItemChangeProposal,
     ItemLocation,
     JunkedItem,
     StackedInventoryItem,
     to_isk,
 )
+from goosetools.notifications.notification_types import NOTIFICATION_TYPES
 from goosetools.users.forms import CharacterForm
 from goosetools.users.models import Character
 
@@ -522,6 +532,7 @@ def item_db(request):
                 "site_prefix": f"/{request.site_prefix}",
                 "ajax_url": reverse("item-list"),
                 "data_url": reverse("item_data", args=[0]),
+                "propose_url": reverse("item-change-create-for-item", args=[0]),
             },
             "gooseuser": request.gooseuser,
         },
@@ -614,8 +625,10 @@ def render_graph(days, df, item, show_buy_sell, style):
         tooltips=tooltips,
         formatters={
             "$x": "datetime",  # use 'datetime' formatter for '@date' field
-            "@lowest_sell": "numeral",  # use 'printf' formatter for '@{adj close}' field
-            "@highest_buy": "numeral",  # use 'printf' formatter for '@{adj close}' field
+            "@lowest_sell": "numeral",
+            # use 'printf' formatter for '@{adj close}' field
+            "@highest_buy": "numeral",
+            # use 'printf' formatter for '@{adj close}' field
             "@sell": "numeral",  # use 'printf' formatter for '@{adj close}' field
             "@buy": "numeral",  # use 'printf' formatter for '@{adj close}' field
             # use default 'numeral' formatter for other fields
@@ -719,3 +732,170 @@ def render_graph(days, df, item, show_buy_sell, style):
     p.yaxis[0].formatter = NumeralTickFormatter(format="0,0 $")
     script, div = components(p)
     return div, script
+
+
+class ItemChangeProposalList(ListView):
+    queryset = ItemChangeProposal.open_proposals()
+    context_object_name = "change_list"
+    template_name = "items/item_change/item_change_list.html"
+
+
+def create_item_change_for_item(request, pk):
+    return create_item_form(request, get_object_or_404(Item, pk=pk))
+
+
+def create_item_form(request, existing_item):
+    if request.method == "POST":
+        form = ItemChangeProposalForm(request.POST, existing_item=existing_item)
+        if form.is_valid():
+            proposal = ItemChangeProposal()
+            save_proposal(existing_item, form, proposal, request)
+            NOTIFICATION_TYPES["itemchanges"].send()
+            messages.success(request, f"Successfully created {proposal}")
+            return HttpResponseRedirect(reverse("item-change-list"))
+    else:
+        initial = {}
+        if existing_item:
+            initial = {
+                "name": existing_item.name,
+                "item_type": existing_item.item_type,
+                "eve_echoes_market_id": existing_item.eve_echoes_market_id,
+            }
+        form = ItemChangeProposalForm(initial=initial, existing_item=existing_item)
+    return render(
+        request,
+        "items/item_change/item_change_form.html",
+        {"form": form, "existing_item": existing_item},
+    )
+
+
+def select_create_item_change(request):
+    if request.method == "POST":
+        form = ItemChangeProposalSelectForm(request.POST)
+        if form.is_valid():
+            existing_item = form.cleaned_data["existing_item"]
+            if existing_item:
+                return HttpResponseRedirect(
+                    reverse("item-change-create-for-item", args=[existing_item.pk])
+                )
+            else:
+                return HttpResponseRedirect(reverse("item-change-create-new"))
+    else:
+        form = ItemChangeProposalSelectForm()
+    return render(
+        request,
+        "items/item_change/item_change_select.html",
+        {"form": form},
+    )
+
+
+def create_item_change(request):
+    return create_item_form(request, None)
+
+
+def update_item_change(request, pk):
+    proposal = get_object_or_404(ItemChangeProposal, pk=pk)
+    if not proposal.has_edit_admin(request.gooseuser):
+        return forbidden(request)
+    existing_item = proposal.existing_item
+    if request.method == "POST":
+        form = ItemChangeProposalForm(request.POST, existing_item=existing_item)
+        if form.is_valid():
+            save_proposal(existing_item, form, proposal, request)
+            return HttpResponseRedirect(reverse("item-change-list"))
+    else:
+        initial = {"change": proposal.change}
+        if existing_item:
+            initial = {
+                "change": proposal.change,
+                "name": existing_item.name,
+                "item_type": existing_item.item_type,
+                "eve_echoes_market_id": existing_item.eve_echoes_market_id,
+            }
+        if proposal.name:
+            initial["name"] = proposal.name
+
+        if proposal.item_type:
+            initial["item_type"] = proposal.item_type
+
+        if proposal.eve_echoes_market_id:
+            initial["eve_echoes_market_id"] = proposal.eve_echoes_market_id
+        form = ItemChangeProposalForm(
+            initial=initial,
+            existing_item=existing_item,
+        )
+
+    return render(
+        request,
+        "items/item_change/item_change_form.html",
+        {"form": form, "itemchangeproposal": proposal},
+    )
+
+
+def save_proposal(existing_item, form, proposal, request):
+    proposal.proposed_by = request.gooseuser
+    proposal.proposed_at = timezone.now()
+    proposal.change = form.cleaned_data["change"]
+    proposal.existing_item = existing_item
+    if existing_item and existing_item.name == form.cleaned_data["name"]:
+        proposal.name = None
+    else:
+        proposal.name = form.cleaned_data["name"]
+    if existing_item and existing_item.item_type == form.cleaned_data["item_type"]:
+        proposal.item_type = None
+    else:
+        proposal.item_type = form.cleaned_data["item_type"]
+    proposal.eve_echoes_market_id = form.cleaned_data["eve_echoes_market_id"]
+    if (
+        existing_item
+        and existing_item.eve_echoes_market_id
+        == form.cleaned_data["eve_echoes_market_id"]
+    ):
+        proposal.eve_echoes_market_id = None
+    else:
+        proposal.eve_echoes_market_id = form.cleaned_data["eve_echoes_market_id"]
+    proposal.save()
+
+
+def approve_item_change(request, pk):
+    proposal = get_object_or_404(ItemChangeProposal, pk=pk)
+    if not proposal.has_approve_admin(request.gooseuser):
+        return forbidden(request)
+
+    if request.method == "POST":
+        try:
+            proposal.approve(request)
+            if ItemChangeProposal.open_proposals().count() == 0:
+                NOTIFICATION_TYPES["itemchanges"].dismiss()
+            messages.success(request, f"Succesfully approved {proposal}")
+        except ItemChangeError as e:
+            messages.error(request, e.message)
+        return HttpResponseRedirect(reverse("item-change-list"))
+    else:
+        return render(
+            request,
+            "items/item_change/item_change_approve.html",
+            {"itemchangeproposal": proposal},
+        )
+
+
+def delete_item_change(request, pk):
+    proposal = get_object_or_404(ItemChangeProposal, pk=pk)
+    if not proposal.has_edit_admin(request.gooseuser):
+        return forbidden(request)
+
+    if request.method == "POST":
+        try:
+            proposal.try_delete()
+            if ItemChangeProposal.open_proposals().count() == 0:
+                NOTIFICATION_TYPES["itemchanges"].dismiss()
+            messages.success(request, f"Succesfully deleted {proposal}")
+        except ItemChangeError as e:
+            messages.error(request, e.message)
+        return HttpResponseRedirect(reverse("item-change-list"))
+    else:
+        return render(
+            request,
+            "items/item_change/item_change_confirm_delete.html",
+            {"itemchangeproposal": proposal},
+        )

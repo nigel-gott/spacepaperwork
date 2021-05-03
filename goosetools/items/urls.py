@@ -10,7 +10,12 @@ from goosetools.items.autocomplete import (
     SystemAutocomplete,
 )
 from goosetools.items.views import (
+    ItemChangeProposalList,
     all_items,
+    approve_item_change,
+    create_item_change,
+    create_item_change_for_item,
+    delete_item_change,
     item_data,
     item_db,
     item_delete,
@@ -24,10 +29,12 @@ from goosetools.items.views import (
     junk_item,
     junk_items,
     junk_stack,
+    select_create_item_change,
     stack_delete,
     stack_items,
     stack_view,
     unjunk_item,
+    update_item_change,
 )
 
 router = routers.DefaultRouter()
@@ -74,4 +81,25 @@ urlpatterns = [
         name="item-sub-sub-type-autocomplete",
     ),
     path(r"item-autocomplete/", ItemAutocomplete.as_view(), name="item-autocomplete"),
+    path("itemchange/open/", ItemChangeProposalList.as_view(), name="item-change-list"),
+    path(
+        "itemchange/create/",
+        select_create_item_change,
+        name="item-change-create-select",
+    ),
+    path("itemchange/create/new", create_item_change, name="item-change-create-new"),
+    path(
+        "itemchange/create/<int:pk>",
+        create_item_change_for_item,
+        name="item-change-create-for-item",
+    ),
+    path("itemchange/<int:pk>/update", update_item_change, name="item-change-update"),
+    path(
+        "itemchange/<int:pk>/approve", approve_item_change, name="item-change-approve"
+    ),
+    path(
+        "itemchange/<int:pk>/delete/",
+        delete_item_change,
+        name="item-change-delete",
+    ),
 ]
