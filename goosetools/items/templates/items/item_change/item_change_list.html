@@ -52,6 +52,7 @@
                                         This will delete the item (only if it is
                                         unused).
                                     {% elif itemchangeproposal.change == 'update' %}
+                                        {{ itemchangeproposal.existing_item }}
                                         <div class="row">
                                             <div class="col s4 m4">Attribute Changing
                                             </div>
