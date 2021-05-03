@@ -542,7 +542,7 @@ def item_db(request):
 
 
 class DataForm(forms.Form):
-    days = forms.IntegerField(initial=7)
+    days = forms.IntegerField(initial=14)
     style = forms.ChoiceField(
         choices=[("lines", "Lines"), ("bar", "Bar Chart"), ("scatter", "Scatter")],
         initial="lines",
