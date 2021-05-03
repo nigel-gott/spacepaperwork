@@ -586,6 +586,7 @@ def get_df(days, item):
     events_last_week = (
         item.itemmarketdataevent_set.filter(time__gte=time_threshold)
         .values("time", "sell", "buy", "highest_buy", "lowest_sell")
+        .order_by("time")
         .distinct()
         .all()
     )
