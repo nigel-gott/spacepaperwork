@@ -4,7 +4,8 @@ from django.db import migrations, models, connection
 import django.db.models.deletion
 
 # noinspection PyPep8Naming
-def populate_fk():
+# pylint: disable=unused-argument
+def populate_fk(apps, schema_editor):
     # Truncate we'll resync with api later.
     cursor = connection.cursor()
     cursor.execute("TRUNCATE TABLE pricing_itemmarketdataevent")

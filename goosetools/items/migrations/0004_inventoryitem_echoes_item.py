@@ -4,7 +4,8 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 # noinspection PyPep8Naming
-def populate_fk(apps):
+# pylint: disable=unused-argument
+def populate_fk(apps, schema_editor):
     EchoesItem = apps.get_model("items", "EchoesItem")
     InventoryItem = apps.get_model("items", "InventoryItem")
     for i in InventoryItem.objects.all():

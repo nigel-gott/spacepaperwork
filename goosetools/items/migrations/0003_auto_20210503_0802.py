@@ -5,7 +5,8 @@ import django.db.models.deletion
 
 
 # noinspection PyPep8Naming
-def populate_new_items_table(apps):
+# pylint: disable=unused-argument
+def populate_new_items_table(apps, schema_editor):
     EchoesItem = apps.get_model("items", "EchoesItem")
     Item = apps.get_model("items", "Item")
     for i in Item.objects.all():
