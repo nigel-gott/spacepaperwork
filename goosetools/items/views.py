@@ -623,12 +623,24 @@ def render_bar_graph(days, df, item, show_buy_sell):
         tools=tools,
         plot_width=700,
         plot_height=500,
-        title=title,
+        title=title if show_buy_sell else title + " - Lowest Sell",
     )
     sell_key = "sell" if show_buy_sell else "lowest_sell"
     buy_key = "buy" if show_buy_sell else "highest_buy"
     df_agg = add_candlesticks(df, p, w, sell_key, "#D5E1DD", "#F2583E")
-    add_candlesticks(df, p, w, buy_key, "#80eb34", "#eba834")
+    if not show_buy_sell:
+        p3 = figure(
+            x_axis_type="datetime",
+            tools=tools,
+            plot_width=700,
+            plot_height=500,
+            title=title + " - Highest Buy",
+        )
+    else:
+        p3 = None
+    add_candlesticks(
+        df, p3 if not show_buy_sell else p, w, buy_key, "#80eb34", "#eba834"
+    )
 
     p2 = figure(
         x_axis_type="datetime",
@@ -645,7 +657,11 @@ def render_bar_graph(days, df, item, show_buy_sell):
 
     p.yaxis[0].formatter = NumeralTickFormatter(format="0,0 $")
     p2.yaxis[0].formatter = NumeralTickFormatter(format="0,0")
-    script, div = components(gridplot([[p], [p2]]))
+    if p3:
+        p3.yaxis[0].formatter = NumeralTickFormatter(format="0,0")
+        script, div = components(gridplot([[p], [p3], [p2]]))
+    else:
+        script, div = components(gridplot([[p], [p2]]))
     return div, script
 
 
