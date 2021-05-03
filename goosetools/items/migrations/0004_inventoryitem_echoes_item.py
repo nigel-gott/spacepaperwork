@@ -10,7 +10,7 @@ def populate_fk(apps, schema_editor):
     InventoryItem = apps.get_model("items", "InventoryItem")
     for i in InventoryItem.objects.all():
         new_item = EchoesItem.objects.get(name=i.item.name)
-        i.item = new_item
+        i.echoes_item = new_item
         i.save()
 
 
