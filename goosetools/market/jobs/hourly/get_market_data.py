@@ -34,13 +34,15 @@ class Job(HourlyJob):
                         try:
                             item = Item.objects.get(eve_echoes_market_id=market_id)
                             lowest_sell = decimal_or_none(line[5])
-                            event = ItemMarketDataEvent(
+                            event = ItemMarketDataEvent.objects.create_or_update(
                                 item=item,
                                 time=time,
-                                sell=decimal_or_none(line[3]),
-                                buy=decimal_or_none(line[4]),
-                                lowest_sell=lowest_sell,
-                                highest_buy=decimal_or_none(line[6]),
+                                defaults={
+                                    "sell": decimal_or_none(line[3]),
+                                    "buy": decimal_or_none(line[4]),
+                                    "lowest_sell": lowest_sell,
+                                    "highest_buy": decimal_or_none(line[6]),
+                                },
                             )
                             item.cached_lowest_sell = lowest_sell
                             item.save()

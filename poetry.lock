@@ -414,7 +414,7 @@ Django = ">=2.0"
 diff-match-patch = "*"
 
 [package.dependencies.tablib]
-extras = ["ods", "html", "xls", "yaml", "xlsx"]
+extras = ["html", "yaml", "xlsx", "xls", "ods"]
 version = ">=0.14.0"
 
 [[package]]
@@ -840,6 +840,14 @@ pipfile = ["pipreqs", "requirementslib"]
 pyproject = ["toml"]
 requirements = ["pipreqs", "pip-api"]
 xdg_home = ["appdirs (>=1.4.0)"]
+
+[[package]]
+category = "main"
+description = "Various helpers to pass data to untrusted environments and back."
+name = "itsdangerous"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+version = "1.1.0"
 
 [[package]]
 category = "main"
@@ -1548,6 +1556,26 @@ security = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)"]
 socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7)", "win-inet-pton"]
 
 [[package]]
+category = "main"
+description = "Persistent cache for requests library"
+name = "requests-cache"
+optional = false
+python-versions = ">=3.6"
+version = "0.6.3"
+
+[package.dependencies]
+itsdangerous = "*"
+requests = ">=2.0.0"
+url-normalize = ">=1.4"
+
+[package.extras]
+backends = ["boto3", "pymongo", "redis"]
+build = ["coveralls", "twine", "wheel"]
+dev = ["coveralls", "twine", "wheel", "boto3", "pymongo", "redis", "m2r2", "Sphinx (>=3.5.3,<3.6.0)", "sphinx-autodoc-typehints", "sphinx-copybutton", "sphinx-rtd-theme (>=0.5.2,<0.6.0)", "sphinxcontrib-apidoc", "black (20.8b1)", "flake8", "flake8-comprehensions", "flake8-polyfill", "isort", "pre-commit", "psutil", "pytest (>=5.0)", "pytest-cov (>=2.11)", "pytest-order (>=0.11.0,<0.12.0)", "pytest-xdist", "radon", "requests-mock (>=1.8)", "timeout-decorator"]
+docs = ["m2r2", "Sphinx (>=3.5.3,<3.6.0)", "sphinx-autodoc-typehints", "sphinx-copybutton", "sphinx-rtd-theme (>=0.5.2,<0.6.0)", "sphinxcontrib-apidoc"]
+test = ["black (20.8b1)", "flake8", "flake8-comprehensions", "flake8-polyfill", "isort", "pre-commit", "psutil", "pytest (>=5.0)", "pytest-cov (>=2.11)", "pytest-order (>=0.11.0,<0.12.0)", "pytest-xdist", "radon", "requests-mock (>=1.8)", "timeout-decorator"]
+
+[[package]]
 category = "dev"
 description = "Mock out responses from the requests package"
 name = "requests-mock"
@@ -1920,6 +1948,17 @@ version = "3.0.1"
 
 [[package]]
 category = "main"
+description = "URL normalization for Python"
+name = "url-normalize"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
+version = "1.4.3"
+
+[package.dependencies]
+six = "*"
+
+[[package]]
+category = "main"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 name = "urllib3"
 optional = false
@@ -2021,7 +2060,7 @@ python-versions = "*"
 version = "1.3.0"
 
 [metadata]
-content-hash = "ff6f8e215699ca9fc273df0981eba19eff7040e0ff07e02f1128de41164351f1"
+content-hash = "bcdfa4c71846dd36e0cc8646fee527f51989e0021fc6fd27dd4327340f192d9e"
 lock-version = "1.0"
 python-versions = "^3.8"
 
@@ -2338,6 +2377,10 @@ iniconfig = [
 isort = [
     {file = "isort-4.3.21-py2.py3-none-any.whl", hash = "sha256:6e811fcb295968434526407adb8796944f1988c5b65e8139058f2014cbe100fd"},
     {file = "isort-4.3.21.tar.gz", hash = "sha256:54da7e92468955c4fceacd0c86bd0ec997b0e1ee80d97f67c35a78b719dccab1"},
+]
+itsdangerous = [
+    {file = "itsdangerous-1.1.0-py2.py3-none-any.whl", hash = "sha256:b12271b2047cb23eeb98c8b5622e2e5c5e9abd9784a153e9d8ef9cb4dd09d749"},
+    {file = "itsdangerous-1.1.0.tar.gz", hash = "sha256:321b033d07f2a4136d3ec762eac9f16a10ccd60f53c0c91af90217ace7ba1f19"},
 ]
 jdcal = [
     {file = "jdcal-1.4.1-py2.py3-none-any.whl", hash = "sha256:1abf1305fce18b4e8aa248cf8fe0c56ce2032392bc64bbd61b5dff2a19ec8bba"},
@@ -2859,6 +2902,10 @@ requests = [
     {file = "requests-2.25.1-py2.py3-none-any.whl", hash = "sha256:c210084e36a42ae6b9219e00e48287def368a26d03a048ddad7bfee44f75871e"},
     {file = "requests-2.25.1.tar.gz", hash = "sha256:27973dd4a904a4f13b263a19c866c13b92a39ed1c964655f025f3f8d3d75b804"},
 ]
+requests-cache = [
+    {file = "requests-cache-0.6.3.tar.gz", hash = "sha256:0b9b5555b3b2ecda74a9aa5abd98174bc7332de2e1d32f9f8f056583b01d6e99"},
+    {file = "requests_cache-0.6.3-py2.py3-none-any.whl", hash = "sha256:6e28e461873415036ea383c2414691cf1164cb01391ad4c45b84b3ebf0fb9287"},
+]
 requests-mock = [
     {file = "requests-mock-1.8.0.tar.gz", hash = "sha256:e68f46844e4cee9d447150343c9ae875f99fa8037c6dcf5f15bf1fe9ab43d226"},
     {file = "requests_mock-1.8.0-py2.py3-none-any.whl", hash = "sha256:11215c6f4df72702aa357f205cf1e537cffd7392b3e787b58239bde5fb3db53b"},
@@ -3086,6 +3133,10 @@ typing-extensions = [
 uritemplate = [
     {file = "uritemplate-3.0.1-py2.py3-none-any.whl", hash = "sha256:07620c3f3f8eed1f12600845892b0e036a2420acf513c53f7de0abd911a5894f"},
     {file = "uritemplate-3.0.1.tar.gz", hash = "sha256:5af8ad10cec94f215e3f48112de2022e1d5a37ed427fbd88652fa908f2ab7cae"},
+]
+url-normalize = [
+    {file = "url-normalize-1.4.3.tar.gz", hash = "sha256:d23d3a070ac52a67b83a1c59a0e68f8608d1cd538783b401bc9de2c0fac999b2"},
+    {file = "url_normalize-1.4.3-py2.py3-none-any.whl", hash = "sha256:ec3c301f04e5bb676d333a7fa162fa977ad2ca04b7e652bfc9fac4e405728eed"},
 ]
 urllib3 = [
     {file = "urllib3-1.26.2-py2.py3-none-any.whl", hash = "sha256:d8ff90d979214d7b4f8ce956e80f4028fc6860e4431f731ea4a8c08f23f99473"},

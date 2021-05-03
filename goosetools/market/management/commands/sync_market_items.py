@@ -17,8 +17,8 @@ from goosetools.tenants.models import Client
 
 
 class Command(BaseCommand):
-    COMMAND_NAME = "repeat_groups"
-    help = "Deletes all existing market data, redownloads from source and updates."
+    COMMAND_NAME = "sync_market_items"
+    help = "Syncs goosetools items with eve echoes market."
 
     def add_arguments(self, parser):
         parser.add_argument("--approve", action="store_true")

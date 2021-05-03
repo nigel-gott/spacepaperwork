@@ -18,6 +18,7 @@ class ItemMarketDataEvent(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=["-time"])]
+        unique_together = (("item", "time"),)
 
     def __str__(self):
         return f"Market Price for {self.item}@{self.time}: ls={self.lowest_sell}, hb={self.highest_buy}, s={self.sell}, b={self.buy}"
