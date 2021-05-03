@@ -864,7 +864,7 @@ def approve_item_change(request, pk):
 
     if request.method == "POST":
         try:
-            proposal.approve(request)
+            proposal.approve(request.gooseuser)
             if ItemChangeProposal.open_proposals().count() == 0:
                 NOTIFICATION_TYPES["itemchanges"].dismiss()
             messages.success(request, f"Succesfully approved {proposal}")

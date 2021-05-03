@@ -25,4 +25,11 @@ create database goosetools with owner goosetools_user;
 EOF
 
 sudo -H -u postgres bash -c 'pg_restore -d goosetools /home/postgres/dump.dump'
+
+sudo -H -u postgres psql -d goosetools << EOF
+  UPDATE public.socialaccount_socialapp SET client_id='748478733077315645', secret='fake';
+  UPDATE public.tenants_domain SET domain='localhost';
+EOF
 echo "SUCCESS"
+
+./manage.py migrate

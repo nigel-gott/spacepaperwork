@@ -49,7 +49,7 @@ class ItemSubSubType(models.Model):
 
 class Item(models.Model):
     item_type = models.ForeignKey(ItemSubSubType, on_delete=models.CASCADE)
-    name = models.TextField(unique=True)
+    name = models.TextField()
     eve_echoes_market_id = models.TextField(null=True, blank=True, unique=True)
     cached_lowest_sell = models.DecimalField(
         max_digits=20, decimal_places=2, null=True, blank=True
@@ -155,7 +155,7 @@ class ItemChangeProposal(models.Model):
                 base += f", MarketId ='{self.eve_echoes_market_id}'"
         return base
 
-    def approve(self, request):
+    def approve(self, approved_by):
         # noinspection PyBroadException
         try:
             delete_existing = False
@@ -182,7 +182,7 @@ class ItemChangeProposal(models.Model):
                 has_items = self.existing_item.inventoryitem_set.count() > 0
                 if has_items:
                     raise ItemChangeError(
-                        f"Cannot delete {self.existing_item} as it is being used."
+                        f"Cannot delete {self.existing_item} as it is being used.", self
                     )
                 delete_existing = self.existing_item
                 self.deleted_existing_item = {
@@ -194,8 +194,8 @@ class ItemChangeProposal(models.Model):
                 }
                 self.existing_item = None
             else:
-                raise ItemChangeError(f"Unknown change type {self.change}")
-            self.approved_by = request.gooseuser
+                raise ItemChangeError(f"Unknown change type {self.change}", self)
+            self.approved_by = approved_by
             self.approved_at = timezone.now()
             self.save()
             if delete_existing:
@@ -203,17 +203,18 @@ class ItemChangeProposal(models.Model):
         except Exception as e:
             if hasattr(e, "message"):
                 # pylint: disable=no-member
-                raise ItemChangeError(e.message)
+                raise ItemChangeError(e.message, self)
             if hasattr(e, "messages"):
                 # pylint: disable=no-member
-                raise ItemChangeError(",".join(e.messages))
+                raise ItemChangeError(",".join(e.messages), self)
             if hasattr(e, "error"):
                 # pylint: disable=no-member
-                raise ItemChangeError(e.error)
+                raise ItemChangeError(e.error, self)
             raise ItemChangeError(
                 "An unknown error occurred approving this change, "
                 "please PM "
-                f"@thejanitor: {str(e)}"
+                f"@thejanitor: {str(e)}",
+                self,
             )
 
     def try_delete(self):
@@ -221,9 +222,12 @@ class ItemChangeProposal(models.Model):
 
 
 class ItemChangeError(Exception):
-    def __init__(self, message):
+    def __init__(self, message, item):
         super().__init__()
-        self.message = message
+        self.message = message + f" for {item}"
+
+    def __str__(self):
+        return self.message
 
 
 # class ItemTypeChangeProposal(models.Model):
