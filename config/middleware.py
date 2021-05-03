@@ -43,8 +43,6 @@ class LocaleMiddleware:
 
         translation.activate(language_code)
 
-        print("Activating " + language_code)
-
         response = self.get_response(request)
 
         translation.deactivate()

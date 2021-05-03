@@ -49,11 +49,12 @@ class ItemSubSubType(models.Model):
 
 class Item(models.Model):
     item_type = models.ForeignKey(ItemSubSubType, on_delete=models.CASCADE)
-    name = models.TextField(primary_key=True)
+    name = models.TextField()
     eve_echoes_market_id = models.TextField(null=True, blank=True, unique=True)
     cached_lowest_sell = models.DecimalField(
         max_digits=20, decimal_places=2, null=True, blank=True
     )
+    volume = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
 
     def latest_market_data(self):
         return self.itemmarketdataevent_set.order_by("-time").first()
