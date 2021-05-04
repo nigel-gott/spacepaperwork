@@ -677,6 +677,7 @@ def render_bar_graph(days, df, item, show_buy_sell):
         p3 = figure(
             x_axis_type="datetime",
             tools=tools,
+            x_range=p.x_range,
             # plot_width=700,
             # plot_height=500,
             title=title + " - Highest Buy",
