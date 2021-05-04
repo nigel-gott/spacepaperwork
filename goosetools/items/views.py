@@ -1,10 +1,11 @@
 import csv
 import math
+from decimal import Decimal
 from typing import Any, Dict, List
 
 import numpy as np
 from bokeh.embed import components
-from bokeh.layouts import gridplot
+from bokeh.layouts import column
 from bokeh.models import ColumnDataSource, HoverTool, NumeralTickFormatter
 from bokeh.plotting import figure
 from django import forms
@@ -551,6 +552,10 @@ class DataForm(forms.Form):
         initial=False,
         required=False,
     )
+    filter_outliers = forms.BooleanField(
+        initial=True,
+        required=False,
+    )
 
 
 def item_data(request, pk):
@@ -558,16 +563,18 @@ def item_data(request, pk):
     days = 14
     style = "lines"
     show_buy_sell = False
+    filter_outliers = True
     if request.GET:
         form = DataForm(request.GET)
         if form.is_valid():
             days = form.cleaned_data["days"]
             style = form.cleaned_data["style"]
             show_buy_sell = form.cleaned_data["show_buy_sell"]
+            filter_outliers = form.cleaned_data["filter_outliers"]
     else:
         form = DataForm()
 
-    df = get_df(days, item)
+    df = get_df(days, item, filter_outliers)
     if style == "bar":
         div, script = render_bar_graph(days, df, item, show_buy_sell)
 
@@ -587,7 +594,7 @@ def item_data(request, pk):
     return result
 
 
-def get_df(days, item):
+def get_df(days, item, filter_outliers):
     time_threshold = timezone.now() - timezone.timedelta(hours=int(days) * 24)
     events_last_week = (
         item.itemmarketdataevent_set.filter(time__gte=time_threshold)
@@ -599,7 +606,44 @@ def get_df(days, item):
         events_last_week,
         fieldnames=["time", "sell", "buy", "highest_buy", "lowest_sell", "volume"],
     )
+    if filter_outliers:
+        for f in ["sell", "buy", "highest_buy", "lowest_sell"]:
+            df[f] = df[f][~is_outlier(df[f])]
     return df
+
+
+def is_outlier(points, thresh=3.5):
+    """
+    Returns a boolean array with True if points are outliers and False
+    otherwise.
+
+    Parameters:
+    -----------
+        points : An numobservations by numdimensions array of observations
+        thresh : The modified z-score to use as a threshold. Observations with
+            a modified z-score (based on the median absolute deviation) greater
+            than this value will be classified as outliers.
+
+    Returns:
+    --------
+        mask : A numobservations-length boolean array.
+
+    References:
+    ----------
+        Boris Iglewicz and David Hoaglin (1993), "Volume 16: How to Detect and
+        Handle Outliers", The ASQC Basic References in Quality Control:
+        Statistical Techniques, Edward F. Mykytka, Ph.D., Editor.
+    """
+    if len(points.shape) == 1:
+        points = points[:, None]
+    median = np.median(points, axis=0)
+    diff = np.sum((points - median) ** 2, axis=-1)
+    diff = np.sqrt(diff)
+    med_abs_deviation = np.median(diff)
+
+    modified_z_score = Decimal(0.6745) * diff / med_abs_deviation
+
+    return modified_z_score > thresh
 
 
 def calc_vals_for_key(df, key):
@@ -617,13 +661,14 @@ def render_bar_graph(days, df, item, show_buy_sell):
     tools = "pan, wheel_zoom, box_zoom, reset, save"
     title = f"Last {days} days of market data for {item}"
     df["day"] = df["time"].dt.date
-    w = 12 * 60 * 60 * 1000
+    w = 12 * 60 * 60 * 1000 * 1.5
     p = figure(
         x_axis_type="datetime",
         tools=tools,
-        plot_width=700,
-        plot_height=500,
+        # plot_width=700,
+        # plot_height=500,
         title=title if show_buy_sell else title + " - Lowest Sell",
+        sizing_mode="stretch_both",
     )
     sell_key = "sell" if show_buy_sell else "lowest_sell"
     buy_key = "buy" if show_buy_sell else "highest_buy"
@@ -632,9 +677,10 @@ def render_bar_graph(days, df, item, show_buy_sell):
         p3 = figure(
             x_axis_type="datetime",
             tools=tools,
-            plot_width=700,
-            plot_height=500,
+            # plot_width=700,
+            # plot_height=500,
             title=title + " - Highest Buy",
+            sizing_mode="stretch_both",
         )
     else:
         p3 = None
@@ -646,10 +692,10 @@ def render_bar_graph(days, df, item, show_buy_sell):
         x_axis_type="datetime",
         tools="",
         toolbar_location=None,
-        plot_width=700,
         plot_height=200,
         x_range=p.x_range,
         title="volume",
+        sizing_mode="stretch_width",
     )
     p2.xaxis.major_label_orientation = math.pi / 4
     p2.grid.grid_line_alpha = 0.3
@@ -659,9 +705,9 @@ def render_bar_graph(days, df, item, show_buy_sell):
     p2.yaxis[0].formatter = NumeralTickFormatter(format="0,0")
     if p3:
         p3.yaxis[0].formatter = NumeralTickFormatter(format="0,0")
-        script, div = components(gridplot([[p], [p3], [p2]]))
+        script, div = components(column([p, p3, p2], sizing_mode="scale_both"))
     else:
-        script, div = components(gridplot([[p], [p2]]))
+        script, div = components(column([p, p2], sizing_mode="scale_width"))
     return div, script
 
 
@@ -673,6 +719,7 @@ def add_candlesticks(df, p, w, key, increase_c, decrease_c):
     df["max"] = df[["max", "open"]].max(axis=1)
     increasing = df.open < df.close
     decreasing = df.open > df.close
+    no_change = df.open == df.close
     p.xaxis.major_label_orientation = math.pi / 4
     p.grid.grid_line_alpha = 0.3
     p.vbar(
@@ -692,6 +739,14 @@ def add_candlesticks(df, p, w, key, increase_c, decrease_c):
         fill_color=decrease_c,
         line_color="black",
     )
+    p.vbar(
+        df.index[no_change],
+        w,
+        df.close[no_change] - 1,
+        df.close[no_change] + 1,
+        fill_color="#e6550d",
+        line_color="black",
+    )
     p.segment(
         df.index,
         df["max"],
@@ -709,8 +764,9 @@ def render_graph(days, df, item, show_buy_sell, style):
     p = figure(
         x_axis_type="datetime",
         tools=tools,
-        plot_width=700,
-        plot_height=500,
+        # plot_width=700,
+        # plot_height=500,
+        sizing_mode="scale_both",
         title=title,
     )
     tooltips = [

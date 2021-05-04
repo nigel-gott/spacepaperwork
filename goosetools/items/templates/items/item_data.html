@@ -21,7 +21,7 @@
                 <span class="white-text">
                     <b>Errors with form:</b>
                 <ul class="errors">
-                    {% for error in form.non_field_errors%}
+                    {% for error in form.non_field_errors %}
                         <li>{{ error|escape }}</li>
                     {% endfor %}
                 </ul>
@@ -31,15 +31,22 @@
                 </div>
             {% endif %}
 
-                <form action="" method="get">
+            <form action="" method="get">
                 {% csrf_token %}
-                    {{ form.days|materializecss:'s12 m4, icon=access_time'}}
-                    {{ form.show_buy_sell|materializecss:'s12 m4, icon=attach_money'}}
-                    {{ form.style|materializecss:'s12 m4, icon=graphic_eq'}}
-                    <a class="btn waves-effect waves-light grey" href="{% url 'item_db' %}">Back to Item Db
-                        <i class="material-icons right">arrow_back</i>
-                    </a>
-                <button class="btn waves-effect waves-light" type="submit" value="Submit">Change Graph Settings
+                <div class="row">
+                    {{ form.days|materializecss:'s12 m6, icon=access_time' }}
+                    {{ form.style|materializecss:'s12 m6, icon=graphic_eq' }}
+                </div>
+                <div class="row">
+                    {{ form.show_buy_sell|materializecss:'s12 m6, icon=attach_money' }}
+                    {{ form.filter_outliers|materializecss:'s12 m6, icon=vertical_align_center' }}
+                </div>
+                <a class="btn waves-effect waves-light grey" href="{% url 'item_db' %}">Back
+                    to Item Db
+                    <i class="material-icons right">arrow_back</i>
+                </a>
+                <button class="btn waves-effect waves-light" type="submit"
+                        value="Submit">Change Graph Settings
                     <i class="material-icons right">send</i>
                 </button>
             </form>
