@@ -34,7 +34,7 @@ class Job(HourlyJob):
                         try:
                             item = Item.objects.get(eve_echoes_market_id=market_id)
                             lowest_sell = decimal_or_none(line[5])
-                            event = ItemMarketDataEvent.objects.create_or_update(
+                            event = ItemMarketDataEvent.objects.update_or_create(
                                 item=item,
                                 time=time,
                                 defaults={
