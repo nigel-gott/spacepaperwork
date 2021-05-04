@@ -607,14 +607,18 @@ def get_df(request, days, item, filter_outliers):
         fieldnames=["time", "sell", "buy", "highest_buy", "lowest_sell", "volume"],
     )
     if filter_outliers:
+        bads = []
         for f in ["sell", "buy", "highest_buy", "lowest_sell"]:
             # noinspection PyBroadException
             try:
                 df[f] = df[f][~is_outlier(df[f])]
             except Exception:  # pylint: disable=broad-except
-                messages.warning(
-                    request, f"Failed to strip outliers due to bad input data for {f}"
-                )
+                bads.append(f)
+        if bads:
+            messages.warning(
+                request,
+                f"Failed to strip outliers due to bad input data for {','.join(bads)}",
+            )
     return df
 
 
