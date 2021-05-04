@@ -574,7 +574,7 @@ def item_data(request, pk):
     else:
         form = DataForm()
 
-    df = get_df(days, item, filter_outliers)
+    df = get_df(request, days, item, filter_outliers)
     if style == "bar":
         div, script = render_bar_graph(days, df, item, show_buy_sell)
 
@@ -594,7 +594,7 @@ def item_data(request, pk):
     return result
 
 
-def get_df(days, item, filter_outliers):
+def get_df(request, days, item, filter_outliers):
     time_threshold = timezone.now() - timezone.timedelta(hours=int(days) * 24)
     events_last_week = (
         item.itemmarketdataevent_set.filter(time__gte=time_threshold)
@@ -608,7 +608,13 @@ def get_df(days, item, filter_outliers):
     )
     if filter_outliers:
         for f in ["sell", "buy", "highest_buy", "lowest_sell"]:
-            df[f] = df[f][~is_outlier(df[f])]
+            # noinspection PyBroadException
+            try:
+                df[f] = df[f][~is_outlier(df[f])]
+            except Exception:  # pylint: disable=broad-except
+                messages.warning(
+                    request, f"Failed to strip outliers due to bad input data for {f}"
+                )
     return df
 
 
