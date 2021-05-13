@@ -234,6 +234,7 @@ MIDDLEWARE = MIDDLEWARE + [
     # "django.middleware.common.BrokenLinkEmailsMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "config.middleware.TimezoneMiddleware",
+    "config.middleware.LocaleMiddleware",
     "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
@@ -356,9 +357,6 @@ DBBACKUP_STORAGE_OPTIONS = {"location": env("DB_BACKUP_LOCATION")}
 REST_FRAMEWORK = {
     "DATETIME_FORMAT": "%Y-%m-%d %H:%M",
 }
-
-PROMETHEUS_METRICS_EXPORT_PORT_RANGE = range(8001, 8050)
-PROMETHEUS_METRICS_EXPORT_ADDRESS = ""
 
 VENMO_HOST_URL = env("VENMO_HOST_URL")
 VENMO_BASE_PATH = env("VENMO_BASE_PATH")

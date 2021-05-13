@@ -10,6 +10,10 @@
     <form action="" method="post">
         {% csrf_token %}
         <div class="row">
+            <button class="btn waves-effect waves-light green pulse" type="submit" value="Submit">
+                I CONFIRM I HAVE READ THE BELOW - CLICKING THIS WILL CREATE THE ORDER
+                <i class="material-icons right">send</i>
+            </button>
             <h5 class="red-text">Before Submitting Complete These Steps:</h5>
             <div class="col s12 m12">
                 <h6>Follow this GIF:</h6>
@@ -74,10 +78,6 @@
                 </p>
             </div>
         </div>
-        <button class="btn waves-effect waves-light green" type="submit" value="Submit">
-            Confirm
-            <i class="material-icons right">send</i>
-        </button>
     </form>
 </div>
 

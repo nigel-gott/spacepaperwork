@@ -1,11 +1,20 @@
 from dateutil.relativedelta import relativedelta
 from django import forms
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator
 from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
 from goosetools.core.models import System
-from goosetools.users.models import LOOT_TRACKER_ADMIN, Character, GooseUser
+from goosetools.users.models import (
+    LOOT_TRACKER,
+    LOOT_TRACKER_ADMIN,
+    Character,
+    CrudAccessController,
+    GooseUser,
+    PermissibleEntity,
+)
 
 
 def human_readable_relativedelta(delta):
@@ -60,17 +69,31 @@ class Fleet(models.Model):
     description = models.TextField(blank=True, null=True)
     location = models.TextField(blank=True, null=True)
     expected_duration = models.TextField(blank=True, null=True)
+    access_controller = models.ForeignKey(
+        CrudAccessController, on_delete=models.CASCADE
+    )
+
+    @staticmethod
+    def built_in_permissible_entities(fc):
+        return CrudAccessController.wrapper(
+            adminable_by=[
+                PermissibleEntity.allow_user(fc, built_in=True),
+                PermissibleEntity.allow_perm(LOOT_TRACKER_ADMIN, built_in=True),
+            ],
+        )
+
+    @staticmethod
+    def default_permissible_entities():
+        return [
+            ("view", PermissibleEntity.allow_perm(LOOT_TRACKER)),
+            ("use", PermissibleEntity.allow_perm(LOOT_TRACKER)),
+        ]
 
     def members_for_user(self, user):
         return FleetMember.objects.filter(fleet=self, character__user=user)
 
     def has_admin(self, user):
-        if user.has_perm(LOOT_TRACKER_ADMIN):
-            return True
-        for member in self.members_for_user(user):
-            if member.admin_permissions:
-                return True
-        return self.fc == user
+        return self.access_controller.can_admin(user)
 
     def has_member(self, user):
         return self.members_for_user(user).count() > 0
@@ -99,6 +122,9 @@ class Fleet(models.Model):
     def can_join(self, user):
         if self.in_the_past():
             return False, "Fleet is Closed"
+
+        if not self.access_controller.can_use(user):
+            return False, "You cannot join this fleet"
 
         num_chars = len(user.characters())
         characters_in_fleet = self.members_for_user(user)
@@ -227,11 +253,26 @@ class AnomType(models.Model):
         return f"{self.faction} {self.type} Level {self.level}"
 
 
+def validate_nonzero(value):
+    if value == 0:
+        raise ValidationError(
+            "Quantity %(value)s is not allowed",
+            params={"value": value},
+        )
+
+
 class FleetAnom(models.Model):
     fleet = models.ForeignKey(Fleet, on_delete=models.CASCADE)
     anom_type = models.ForeignKey(AnomType, on_delete=models.CASCADE)
     time = models.DateTimeField()
     system = models.ForeignKey(System, on_delete=models.CASCADE)
+    minute_repeat_period = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        validators=[MaxValueValidator(60 * 24 * 7 * 52), validate_nonzero],
+    )
+    next_repeat = models.DateTimeField(null=True, blank=True)
+    repeat_count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.anom_type} @ {self.time} in {self.system}"

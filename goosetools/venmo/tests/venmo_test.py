@@ -10,7 +10,9 @@ class VenmoTest(GooseToolsTestCase):
         uid = self.user.discord_uid()
         with requests_mock.Mocker() as mock:
             with self.settings(
-                VENMO_HOST_URL="some_other_host.com", VENMO_API_TOKEN="venmo_secret"
+                VENMO_HOST_URL="some_other_host.com",
+                VENMO_API_TOKEN="venmo_secret",
+                VENMO_BASE_PATH="/dev",
             ):
 
                 # pylint: disable=inconsistent-return-statements
@@ -49,7 +51,9 @@ class VenmoTest(GooseToolsTestCase):
     ):
         with requests_mock.Mocker() as mock:
             with self.settings(
-                VENMO_HOST_URL="some_other_host.com", VENMO_API_TOKEN="venmo_secret"
+                VENMO_HOST_URL="some_other_host.com",
+                VENMO_API_TOKEN="venmo_secret",
+                VENMO_BASE_PATH="/dev",
             ):
                 uid = self.user.discord_uid()
                 mock.get(

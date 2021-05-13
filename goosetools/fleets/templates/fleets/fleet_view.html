@@ -1,258 +1,280 @@
 {% extends "core/base.html" %}
 {% load base_extras %}
+{% load static %}
+
+{% block extraheader %}
+    <link type="text/css" rel="stylesheet" href="{% static 'fleets/css/fleets.css' %}">
+{% endblock %}
 
 {% block body %}
-{% has_fleet_member fleet user as is_member %}
-{% has_admin fleet user as admin %}
-{% still_can_join_alts fleet user as can_join_alts %}
-<div class="row">
-    <div class="col s12 m12">
-        <div class="card blue-grey darken-1">
-            <div class="card-content white-text">
+    {% has_fleet_member fleet user as is_member %}
+    {% has_admin fleet user as admin %}
+    {% still_can_join_alts fleet user as can_join_alts %}
+    <div class="row">
+        <div class="col s12 m12">
+            <div class="card blue-grey darken-1">
+                <div class="card-content white-text">
           <span class="card-title">
             {% if fleet.fc.discord_avatar_url %}
-            <img alt="" class="avatar" src="{{ fleet.fc.discord_avatar_url }}?size=64" style="width: 64px">
+                <img alt="" class="avatar"
+                     src="{{ fleet.fc.discord_avatar_url }}?size=64"
+                     style="width: 64px">
             {% else %}
-            <i class="circle material-icons">error</i>
+                <i class="circle material-icons">error</i>
             {% endif %}
-            {{fleet.name}} run by {{fleet.fc.display_name}}</span>
-                <b>Start: {{fleet.start}} ({{fleet.human_readable_started}})
-                    {% if fleet.auto_end %}
-                    <br/>End: {{fleet.auto_end}} ({{fleet.human_readable_ended}})
-                    {% else %}
-                    {% if fleet.expected_duration %}
-                    <br/> Duration: {{fleet.expected_duration}}
-                    {% endif %}
-                    {% endif %}
-                </b>
-                <p>
-                    <i>
-                        {% if fleet.gives_shares_to_alts %}
-                        This fleet gives loot shares to alts.
+              {{ fleet.name }} run by {{ fleet.fc.display_name }}</span>
+                    <b>Start: {{ fleet.start }} ({{ fleet.human_readable_started }})
+                        {% if fleet.auto_end %}
+                            <br/>End: {{ fleet.auto_end }} (
+                            {{ fleet.human_readable_ended }})
                         {% else %}
-                        In this fleet alts are not given loot shares.
+                            {% if fleet.expected_duration %}
+                                <br/> Duration: {{ fleet.expected_duration }}
+                            {% endif %}
                         {% endif %}
-                    </i>
-                    <br/>
-                    {{ fleet.description }}<br/>
-                    {{ fleet.location }}<br/>
-                </p>
-            </div>
-            <div class="card-action">
+                    </b>
+                    <p>
+                        <i>
+                            {% if fleet.gives_shares_to_alts %}
+                                This fleet gives loot shares to alts.
+                            {% else %}
+                                In this fleet alts are not given loot shares.
+                            {% endif %}
+                        </i>
+                        <br/>
+                        {{ fleet.description }}<br/>
+                        {{ fleet.location }}<br/>
+                    </p>
+                </div>
+                <div class="card-action">
 
-                {% can_join fleet user as can_join_fleet %}
-                {% if can_join_fleet %}
-                    {% if can_join_alts %}
-                        <a class="waves-effect waves-light btn purple lighten-2"
-                        href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Add Another Alt</a>
-                    {% else %}
-                        <a class="waves-effect waves-light btn purple lighten-2"
-                        href="{% url 'fleet_join' fleet.id %}"><i class='material-icons right'>add_circle</i>Join Fleet</a>
+                    {% can_join fleet user as can_join_fleet %}
+                    {% if can_join_fleet %}
+                        {% if can_join_alts %}
+                            <a class="waves-effect waves-light btn purple lighten-2"
+                               href="{% url 'fleet_join' fleet.id %}"><i
+                                    class='material-icons right'>add_circle</i>Add
+                                Another Alt</a>
+                        {% else %}
+                            <a class="waves-effect waves-light btn purple lighten-2"
+                               href="{% url 'fleet_join' fleet.id %}"><i
+                                    class='material-icons right'>add_circle</i>Join
+                                Fleet</a>
+                        {% endif %}
                     {% endif %}
-                {% endif %}
-                {% if admin %}
-                    <a class="waves-effect waves-light btn orange darken-2"
-                    href="{% url 'fleet_edit' fleet.id %}"><i class='material-icons right'>edit</i>Edit Fleet</a>
+                    {% if admin %}
+                        <a class="waves-effect waves-light btn orange darken-2"
+                           href="{% url 'fleet_edit' fleet.id %}"><i
+                                class='material-icons right'>edit</i>Edit Fleet</a>
 
-                    {% if fleet.is_open %}
-                        <a class="waves-effect waves-light btn red darken-2"
-                        href="{% url 'fleet_end' fleet.id %}"><i class='material-icons right'>close</i>End Fleet</a>
-                    {% else %}
-                        <a class="waves-effect waves-light btn green darken-2"
-                        href="{% url 'fleet_open' fleet.id %}"><i class='material-icons right'>close</i>Open Fleet</a>
+                        {% if fleet.is_open %}
+                            <a class="waves-effect waves-light btn red darken-2"
+                               href="{% url 'fleet_end' fleet.id %}"><i
+                                    class='material-icons right'>close</i>End Fleet</a>
+                        {% else %}
+                            <a class="waves-effect waves-light btn green darken-2"
+                               href="{% url 'fleet_open' fleet.id %}"><i
+                                    class='material-icons right'>close</i>Open Fleet</a>
+                        {% endif %}
+
                     {% endif %}
-
-                {% endif %}
+                    <a class="waves-effect waves-light btn purple lighten-2"
+                       href="{% url 'fleet_profit' fleet.id %}"><i
+                            class='material-icons right'>attach_money</i>Fleet Profit
+                        Tracker</a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-{% if fleet.is_master_looter %}
-<div class="row">
-    <div class="col s12 m12">
-        <div class="card blue-grey lighten-2">
-            <div class="card-content white-text">
-                <span class="card-title">
-                   <i class="material-icons">attach_money</i> Master Looting
-                </span>
-                <p>
-                    All wrecks, containers, and loot created by this fleet will be gathered by a designated looter.
-                </p>
-                <p>
-                    <strong>Do not loot unless given permission to do so by the fleet commander.</strong>
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<div class="row">
+    <div class="row">
     <div class="col m12 s12">
-        <ul class="collapsible">
-            <li>
-                <div class="collapsible-header"><i class="material-icons">add</i>Shareable Fleet Invite Link</div>
-                <div class="collapsible-body">
-                    <div class="input-field">
-                        <i class="material-icons prefix">share</i>
-                        <input id="shareurl" type="text" value="{{request.build_absolute_uri}}join">
-                        <label for="shareurl">Shareable Fleet Invite Link</label>
-                    </div>
-                    <button class="waves-effect waves-light btn" data-clipboard-target="#shareurl" id="share_button">
-                        Copy Invite Link
-                    </button>
-                </div>
-            </li>
-        </ul>
+        {% include 'users/includes/access_controller_display.html' with access_controller=fleet.access_controller hide_user_admins="Individual user fleet admins shown below are " title="Fleet Permissions" %}
     </div>
-</div>
-<div class="divider"></div>
-<div class="row">
-    <div class="col s12 m6">
-        <h5>Fleet Members</h5>
-        <table>
-            <thead>
-            <th>Discord User</th>
-            <th>Ingame Character</th>
-            <th>Actions</th>
-            </thead>
-            <tbody>
-            {% if admin %}
-            <tr>
-                <td colspan="3">
-                    <a class="waves-effect waves-light btn green darken-2"
-                       href="{% url 'fleet_add' fleet.id %}"><i class='material-icons right'>edit</i>Add Member</a>
 
-                </td>
-            </tr>
-            {% endif %}
-            {% for user_id, members in fleet_members_by_id.items %}
-            {% for member in members %}
-            <tr>
-                {% if forloop.first %}
-                <td rowspan="{{members|length}}">
-                    {% if member.has_admin %}
-                    <b>Fleet Admin</b><br/>
-                    {% endif %}
-                    {% if member.character.discord_avatar_url %}
-                    <img alt="" class="avatar"
-                         src="{{ member.character.discord_avatar_url }}?size=32" style="width: 32px">
-                    {% endif %}
-                    {{member.character.display_name}}
-                </td>
+    <div class="row">
+        <div class="col m12 s12">
+            <ul class="collapsible">
+                <li>
+                    <div class="collapsible-header"><i class="material-icons">add</i>Shareable
+                        Fleet Invite Link
+                    </div>
+                    <div class="collapsible-body">
+                        <div class="input-field">
+                            <i class="material-icons prefix">share</i>
+                            <input id="shareurl" type="text"
+                                   value="{{ request.build_absolute_uri }}join">
+                            <label for="shareurl">Shareable Fleet Invite Link</label>
+                        </div>
+                        <button class="waves-effect waves-light btn"
+                                data-clipboard-target="#shareurl" id="share_button">
+                            Copy Invite Link
+                        </button>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="divider"></div>
+    <div class="row">
+        <div class="col s12 m6">
+            <h5>Fleet Members</h5>
+            <table>
+                <thead>
+                <th>Discord User</th>
+                <th>Ingame Character</th>
+                <th>Actions</th>
+                </thead>
+                <tbody>
+                {% if admin %}
+                    <tr>
+                        <td colspan="3">
+                            <a class="waves-effect waves-light btn green darken-2"
+                               href="{% url 'fleet_add' fleet.id %}"><i
+                                    class='material-icons right'>edit</i>Add Member</a>
+
+                        </td>
+                    </tr>
                 {% endif %}
-                <td>
-                    {{member.character}}
-                </td>
-                <td>
+                {% for user_id, members in fleet_members_by_id.items %}
+                    {% for member in members %}
+                        <tr>
+                            {% if forloop.first %}
+                                <td rowspan="{{ members|length }}">
+                                    {% if member.has_admin %}
+                                        <b>Fleet Admin</b><br/>
+                                    {% endif %}
+                                    {% if member.character.discord_avatar_url %}
+                                        <img alt="" class="avatar"
+                                             src="{{ member.character.discord_avatar_url }}?size=32"
+                                             style="width: 32px">
+                                    {% endif %}
+                                    {{ member.character.display_name }}
+                                </td>
+                            {% endif %}
+                            <td>
+                                {{ member.character }}
+                            </td>
+                            <td>
 
-                    {% if member.character.user == user.gooseuser or admin %}
+                                {% if member.character.user == user.gooseuser or admin %}
 
-                    {% if admin %}
-                    <a class="red-text text-darken-3"
-                       href="{% url 'fleet_leave' member.id %}">Remove From Fleet</a>
-                    {% else %}
-                    <a class="red-text text-darken-3"
-                       href="{% url 'fleet_leave' member.id %}">Leave</a>
-                    {% endif %}
-                    {% endif %}
-                    <br/>
-                    {% if admin %}
+                                    {% if admin %}
+                                        <a class="red-text text-darken-3"
+                                           href="{% url 'fleet_leave' member.id %}">Remove
+                                            From Fleet</a>
+                                    {% else %}
+                                        <a class="red-text text-darken-3"
+                                           href="{% url 'fleet_leave' member.id %}">Leave</a>
+                                    {% endif %}
+                                {% endif %}
+                                <br/>
+                                {% if admin %}
 
-                    {% if member.admin_permissions %}
-                    <a class="orange-text text-darken-2" href="{% url 'fleet_remove_admin' member.id %}"
-                       title="Remove Admin">Remove Admin</a>
-                    {% else %}
-                    <a class="orange-text text-darken-2"
-                       href="{% url 'fleet_make_admin' member.id %}">Give Admin</a>
-                    {% endif %}
-                    {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <div class="col s12 m6">
-        <h5>Loot Buckets</h5>
-        <p><i>Loot and Participation between Anoms in the same Loot Bucket are shared</i></p>
-
-        {% for bucket in loot_buckets %}
-        <div class="card">
-            <div class="card-content">
-                <div class="row">
-                    <div class="col s12 m6">
-                        <span class="card-title">Bucket {{ bucket.id }}</span>
-                    </div>
-                    <div class="col s12 m6 right-align">
-                        {% if admin %}
-                        <a class="btn "
-                           href="{% url 'loot_group_add' fleet.id bucket.id %}"><i
-                                class='material-icons right'>add_circle</i>
-                            Add Anom</a>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="collection">
-                    {% for lootgroup in bucket.ordered_lootgroup_set %}
-                    {% has_share lootgroup user as has_share_already %}
-                    <a
-                        {% if has_share_already %}
-                         title="You have shares in this loot group"
-                        {% endif %}
-                        href="{% url 'loot_group_view' lootgroup.id %}" class="collection-item
-                        {% if lootgroup.closed %}red-text{% endif %}
-                    ">
-                        {% if has_share_already %}
-                            <span class="badge">
-                                <img class="avatar" src="{{ user.gooseuser.discord_avatar_url }}?size=16" style="width: 16px"/>
-                            </span>
-                        {% endif %}
-                        {{lootgroup.display_name}}
-                        {% if lootgroup.closed %}
-                            <i class='material-icons left'>lock</i>
-                        {% endif %}
-                    </a>
+                                    {% if member.has_admin %}
+                                        <a class="orange-text text-darken-2"
+                                           href="{% url 'fleet_remove_admin' member.id %}"
+                                           title="Remove Admin">Remove Admin</a>
+                                    {% else %}
+                                        <a class="orange-text text-darken-2"
+                                           href="{% url 'fleet_make_admin' member.id %}">Give
+                                            Admin</a>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
                     {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col s12 m6">
+            <h5>Loot Buckets</h5>
+            <p><i>Loot and Participation between Anoms in the same Loot Bucket are
+                shared</i></p>
+
+            {% for bucket in loot_buckets %}
+                <div class="card">
+                    <div class="card-content">
+                        <div class="row">
+                            <div class="col s12 m6">
+                                <span class="card-title">Bucket {{ bucket.id }}</span>
+                            </div>
+                            <div class="col s12 m6 right-align">
+                                {% if admin %}
+                                    <a class="btn "
+                                       href="{% url 'loot_group_add' fleet.id bucket.id %}"><i
+                                            class='material-icons right'>add_circle</i>
+                                        Add Anom</a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="collection">
+                            {% for lootgroup in bucket.ordered_lootgroup_set %}
+                                {% has_share lootgroup user as has_share_already %}
+                                <a
+                                        {% if has_share_already %}
+                                            title="You have shares in this loot group"
+                                        {% endif %}
+                                            href="{% url 'loot_group_view' lootgroup.id %}"
+                                            class="collection-item
+                        {% if lootgroup.closed %}red-text{% endif %}
+                        fleet_link
+                    ">
+                                    {% if has_share_already %}
+                                        <span class="badge">
+                                <img class="avatar"
+                                     src="{{ user.gooseuser.discord_avatar_url }}?size=16"
+                                     style="width: 16px"/>
+                            </span>
+                                    {% endif %}
+                                    {{ lootgroup.display_name }}
+                                    {% if lootgroup.closed %}
+                                        <i class='material-icons left'>lock</i>
+                                    {% endif %}
+                                    {% if lootgroup.fleet_anom.minute_repeat_period %}
+                                        <i class='material-icons left'>autorenew</i>
+                                    {% endif %}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        {% endfor %}
+            {% endfor %}
 
-        {% if admin %}
-        <div class="right-align">
-            <a class="waves-effect waves-light btn deep-orange lighten-2"
-               href="{% url 'loot_group_create' fleet.id %}"><i class='material-icons right'>add_circle</i>Add
+            {% if admin %}
+                <div class="right-align">
+                    <a class="waves-effect waves-light btn deep-orange lighten-2"
+                       href="{% url 'loot_group_create' fleet.id %}"><i
+                            class='material-icons right'>add_circle</i>Add
 
-                Bucket</a>
+                        Bucket</a>
+                </div>
+            {% endif %}
+
         </div>
-        {% endif %}
 
     </div>
-
-</div>
 
 
 {% endblock %}
 
 {% block extrafooter %}
 
-<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
 
 
-<script>
-    var clipboard = new ClipboardJS('.btn');
+    <script>
+    var clipboard = new ClipboardJS('.btn')
 
     document.addEventListener('DOMContentLoaded', function () {
-        var elems = document.querySelectorAll('.collapsible');
-        var instances = M.Collapsible.init(elems);
-    });
+        var elems = document.querySelectorAll('.collapsible')
+        var instances = M.Collapsible.init(elems)
+    })
 
 
-</script>
+    </script>
 
 
 {% endblock %}

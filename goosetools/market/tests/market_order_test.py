@@ -35,7 +35,8 @@ class MarketOrderTestCase(GooseToolsTestCase):
         self.assertEqual(sold_item.transfered_so_far(), False)
 
         response = self.client.post(
-            reverse("transfer_profit"), {"own_share_in_eggs": False}
+            reverse("transfer_profit"),
+            {"own_share_in_eggs": False, "transfer_method": "eggs"},
         )
         self.assertEqual(response.status_code, 302)
 
@@ -67,7 +68,8 @@ class MarketOrderTestCase(GooseToolsTestCase):
         self.assertEqual(sold_item.transfered_so_far(), False)
 
         response = self.client.post(
-            reverse("transfer_profit"), {"own_share_in_eggs": True}
+            reverse("transfer_profit"),
+            {"own_share_in_eggs": True, "transfer_method": "eggs"},
         )
         self.assertEqual(response.status_code, 302)
 
@@ -132,7 +134,8 @@ class MarketOrderTestCase(GooseToolsTestCase):
         self.assertEqual(sold_item.transfered_so_far(), False)
 
         response = self.client.post(
-            reverse("transfer_profit"), {"own_share_in_eggs": True}
+            reverse("transfer_profit"),
+            {"own_share_in_eggs": True, "transfer_method": "eggs"},
         )
         self.assertEqual(response.status_code, 302)
 
@@ -172,7 +175,8 @@ class MarketOrderTestCase(GooseToolsTestCase):
         self.assertEqual(sold_item.transfered_so_far(), False)
 
         response = self.client.post(
-            reverse("transfer_profit"), {"own_share_in_eggs": False}
+            reverse("transfer_profit"),
+            {"own_share_in_eggs": False, "transfer_method": "eggs"},
         )
         self.assertEqual(response.status_code, 302)
 
@@ -212,7 +216,8 @@ class MarketOrderTestCase(GooseToolsTestCase):
         self.assertEqual(sold_item.transfered_so_far(), False)
 
         response = self.client.post(
-            reverse("transfer_profit"), {"own_share_in_eggs": False}
+            reverse("transfer_profit"),
+            {"own_share_in_eggs": False, "transfer_method": "eggs"},
         )
         self.assertEqual(response.status_code, 302)
         messages = list(get_messages(response.wsgi_request))
@@ -266,7 +271,8 @@ class MarketOrderTestCase(GooseToolsTestCase):
         self.assertEqual(another_sold_item.transfered_so_far(), False)
 
         response = self.client.post(
-            reverse("transfer_profit"), {"own_share_in_eggs": False}
+            reverse("transfer_profit"),
+            {"own_share_in_eggs": False, "transfer_method": "eggs"},
         )
         self.assertEqual(response.status_code, 302)
         messages = list(get_messages(response.wsgi_request))
@@ -318,7 +324,8 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         # We transfer only that half sold so far
         response = self.client.post(
-            reverse("transfer_profit"), {"own_share_in_eggs": False}
+            reverse("transfer_profit"),
+            {"own_share_in_eggs": False, "transfer_method": "eggs"},
         )
         self.assertEqual(response.status_code, 302)
         messages = list(get_messages(response.wsgi_request))
@@ -349,7 +356,8 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         # We transfer The other half
         response = self.client.post(
-            reverse("transfer_profit"), {"own_share_in_eggs": False}
+            reverse("transfer_profit"),
+            {"own_share_in_eggs": False, "transfer_method": "eggs"},
         )
 
         self.assertEqual(self.user.isk_balance(), isk(0))

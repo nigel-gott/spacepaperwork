@@ -1,64 +1,101 @@
 GooseJs = function () {
-    function filterColumn(column, val, include_partial_matches, empty_filter_name){
-        search_regex = include_partial_matches ? val : `^${val}$`;
+    function filterColumn(column, val, include_partial_matches, empty_filter_name, id){
+        var search_regex = include_partial_matches ? val : `^${val}$`;
 
         if(val && empty_filter_name && empty_filter_name === val){
             search_regex = `^$`;
         }
 
+        col_ids[id]["search_applied"] = val ? search_regex : false
+
         column
             .search(val ? search_regex : '', true, false)
             .draw();
     }
-    function dataTableColumnFilterInit(settings, json) {
+    function setupOptions(column_info, select, column, id) {
+        if (column_info["filter_values"]) {
+            if (column_info["empty_filter_name"]) {
+                if (column_info["initial_filter_value"] === column_info["empty_filter_name"]) {
+                    select.append('<option value="' + column_info["empty_filter_name"] + '" selected>' + column_info["empty_filter_name"] + '</option>')
+                    filterColumn(column, column_info["empty_filter_name"], column_info["include_partial_matches"], column_info["empty_filter_name"], id)
+                } else {
+                    select.append('<option value="' + column_info["empty_filter_name"] + '">' + column_info["empty_filter_name"] + '</option>')
+                }
+            }
+            column_info["filter_values"].forEach(function (d) {
+                if (column_info["initial_filter_value"] === d) {
+                    select.append('<option value="' + d + '" selected>' + d + '</option>')
+                    filterColumn(column, d, column_info["include_partial_matches"], column_info["empty_filter_name"], id)
+                } else {
+                    select.append('<option value="' + d + '">' + d + '</option>')
+                }
+            })
+
+        } else {
+            const seen = {}
+            const stuff = []
+            table.rows({search:'applied'}).data().toArray().forEach((r) => {
+                let value = r[column_info['data']]
+                const alreadySeen = seen[value]
+                if(!alreadySeen){
+                    stuff.push(value)
+                    seen[value] = true
+                }
+            })
+            const sorted = stuff.sort()
+            sorted.forEach(function (d) {
+                if (column_info["initial_filter_value"] === d) {
+                    select.append('<option value="' + d + '" selected>' + d + '</option>')
+                    filterColumn(column, d, column_info["include_partial_matches"], column_info["empty_filter_name"], id)
+                } else {
+                    select.append('<option value="' + d + '">' + d + '</option>')
+                }
+            })
+        }
+    }
+
+    function reSetupColumnFilters(col_ids, ignore) {
+        Object.keys(col_ids).forEach((i) => {
+            if (i !== ignore) {
+                const col = col_ids[i]
+                if(!col['search_applied']) {
+                    const s = $('#' + i)
+                    s.empty()
+                    s.append('<option value=""></option>')
+                    setupOptions(col.column_info, s, col.column)
+                }
+            }
+        })
+    }
+
+    var col_ids = {}
+    function dataTableColumnFilterInit(settings) {
         table = settings.oInstance.api();
+        col_ids = {}
         const columns = table.settings().init().columns;
         this.api().columns().every(function (index) {
             const column_info = columns[index]
             var column = this;
             if (column_info["give_filter"] || column_info["filter_values"]) {
-                var select = $(`<label class="black-text">${column_info["title"]}</label>`)
-                    .appendTo($(column.header()).empty())
-
+                const col_id = column_info['data'] + "_select"
                 function filter_column() {
                     var val = $.fn.dataTable.util.escapeRegex(
                         $(this).val()
                     );
-                    filterColumn(column, val, column_info["include_partial_matches"], column_info["empty_filter_name"]);
+                    filterColumn(column, val, column_info["include_partial_matches"], column_info["empty_filter_name"], col_id);
+
+                    reSetupColumnFilters(col_ids, col_id, index)
                 }
-                var select = $('<select class="browser-default"><option value=""></option></select>')
+                col_ids[col_id] = { column:column, column_info:column_info, }
+                var select = $(`<select class="browser-default" id="${col_id}"><option` +
+                    ' value=""></option></select>')
                     .appendTo($(column.header()))
                     .on('change', filter_column
                     );
-
-                if (column_info["filter_values"]) {
-                    if(column_info["empty_filter_name"]){
-                        if (column_info["initial_filter_value"] === column_info["empty_filter_name"]) {
-                            select.append('<option value="' + column_info["empty_filter_name"] + '" selected>' + column_info["empty_filter_name"] + '</option>')
-                            filterColumn(column, column_info["empty_filter_name"], column_info["include_partial_matches"], column_info["empty_filter_name"]);
-                        } else {
-                            select.append('<option value="' + column_info["empty_filter_name"] + '">' + column_info["empty_filter_name"] + '</option>')
-                        }
-                    }
-                    column_info["filter_values"].forEach(function (d) {
-                        if (column_info["initial_filter_value"] === d) {
-                            select.append('<option value="' + d + '" selected>' + d + '</option>')
-                            filterColumn(column, d, column_info["include_partial_matches"], column_info["empty_filter_name"]);
-                        } else {
-                            select.append('<option value="' + d + '">' + d + '</option>')
-                        }
-                    });
-
-                } else {
-                    column.data().unique().sort().each(function (d, j) {
-                        if (column_info["initial_filter_value"] === d) {
-                            select.append('<option value="' + d + '" selected>' + d + '</option>')
-                            filterColumn(column, d, column_info["include_partial_matches"], column_info["empty_filter_name"]);
-                        } else {
-                            select.append('<option value="' + d + '">' + d + '</option>')
-                        }
-                    });
-                }
+                select.on('click', function(e){
+                    e.stopPropagation()
+                })
+                setupOptions(column_info, select, column, index)
 
             }
         });
@@ -156,8 +193,11 @@ GooseJs = function () {
         },
         numberWithCommas: function numberWithCommas(x) {
             var x = x.toString();
-            var x = x.replace(/,/g, '');
+            x = x.replace(/,/g, '');
             return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        },
+        reSetupColumnFilters: function (){
+            reSetupColumnFilters(col_ids, '')
         }
 
     };

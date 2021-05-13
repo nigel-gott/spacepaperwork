@@ -171,8 +171,23 @@ def has_admin(fleet, user):
 
 
 @register.simple_tag
+def has_group_admin(loot_group, user):
+    return loot_group.has_admin(user.gooseuser)
+
+
+@register.simple_tag
 def has_item_admin(item, user):
     return item.has_admin(user.gooseuser)
+
+
+@register.simple_tag
+def has_item_change_edit_admin(item_change, user):
+    return item_change.has_edit_admin(user.gooseuser)
+
+
+@register.simple_tag
+def has_item_change_approve_admin(item_change, user):
+    return item_change.has_approve_admin(user.gooseuser)
 
 
 @register.simple_tag

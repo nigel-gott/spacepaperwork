@@ -3,6 +3,20 @@ from dal import autocomplete
 from goosetools.users.models import Character, GooseUser
 
 
+class UserCharacterAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.gooseuser.is_authed_and_approved():
+            return Character.objects.none()
+
+        qs = Character.objects.filter(user=self.request.gooseuser).all()
+
+        if self.q:
+            qs = qs.filter(ingame_name__icontains=self.q)
+
+        return qs
+
+
 class CharacterAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !

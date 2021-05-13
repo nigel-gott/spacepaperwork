@@ -12,6 +12,7 @@ $(function () {
                             var column = dt.column(i);
                             column.visible(!column.visible());
                         }
+                        Goose.reSetupColumnFilters()
                     }
                 }
             ],
@@ -162,7 +163,7 @@ $(function () {
                     }
                 },
                 {
-                    "data": "to_char_ingame_name", "title": "Sent To", give_filter: true,
+                    "data": "to_char_ingame_name", "title": "Sent To", give_filter: true, include_partial_matches: true,
                     render: function (data, type, row) {
                         return `${data} (${row["to_char_display_name"]})`
                     }
@@ -250,13 +251,15 @@ $(function () {
         $("#top_row").data("filter", "actionable");
         $("#top_row").html("<h3>Pending Contracts</h3><p class='red-text'>You have been requested to make or accept the contracts shown below in-game. Please do so and click the action buttons to let the other user know it has happened.");
         table.draw();
+        Goose.reSetupColumnFilters()
         $(".filter").attr("disabled", false);
         $(this).attr("disabled", true);
     }).trigger("click");
-    $('#mine_filter').on('click', function(){
+    $('#sent_filter').on('click', function(){
         $("#top_row").data("filter", "mine");
         $("#top_row").html("<h3>Sent Contracts</h3>");
         table.draw();
+        Goose.reSetupColumnFilters()
         $(".filter").attr("disabled", false);
         $(this).attr("disabled", true);
     });
@@ -264,7 +267,11 @@ $(function () {
         $("#top_row").data("filter", "old");
         $("#top_row").html("<h3>Old Contracts</h3>");
         table.draw();
+        Goose.reSetupColumnFilters()
         $(".filter").attr("disabled", false);
         $(this).attr("disabled", true);
     });
+    if(page_data["status_filter"]){
+        $(`#${page_data["status_filter"]}_filter`).click()
+    }
 });

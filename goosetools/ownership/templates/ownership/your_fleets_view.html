@@ -33,7 +33,9 @@
             {% for item in items %}
             <tr>
                 <td>
+                    {% if item.fleet_id %}
                     <a href="{% url 'fleet_view' item.fleet_id %}">Fleet {{item.fleet_id}}</a>
+                    {% endif %}
                 </td>
                 <td>
                     {{item.loot_bucket}}

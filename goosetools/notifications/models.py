@@ -9,6 +9,7 @@ from goosetools.notifications.notification_types import NOTIFICATION_TYPES
 from goosetools.users.models import (
     ALL_CORP_ADMIN,
     DISCORD_ADMIN_PERMISSION,
+    ITEM_CHANGE_ADMIN,
     USER_ADMIN_PERMISSION,
     GoosePermission,
     GooseUser,
@@ -218,6 +219,15 @@ NOTIFICATION_TYPES["user_apps"] = UnStackablePermissionNotification(
         "There are pending user applications that require attention",
         "person",
         reverse_lazy("applications"),
+    ),
+)
+NOTIFICATION_TYPES["itemchanges"] = UnStackablePermissionNotification(
+    ITEM_CHANGE_ADMIN,
+    "itemchanges",
+    RenderedNotification(
+        "There are pending item change proposals that require attention",
+        "create",
+        reverse_lazy("item-change-list"),
     ),
 )
 NOTIFICATION_TYPES["corp_apps"] = UnStackablePermissionNotification(

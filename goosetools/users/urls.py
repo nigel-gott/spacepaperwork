@@ -2,7 +2,11 @@ from django.urls import path
 from django.urls.conf import include
 from rest_framework import routers
 
-from goosetools.users.autocomplete import CharacterAutocomplete, UsernameAutocomplete
+from goosetools.users.autocomplete import (
+    CharacterAutocomplete,
+    UserCharacterAutocomplete,
+    UsernameAutocomplete,
+)
 from goosetools.users.views import (
     CharacterQuerySet,
     GooseUserQuerySet,
@@ -74,11 +78,16 @@ urlpatterns = [
         name="character-autocomplete",
     ),
     path(
+        r"user-character-autocomplete/",
+        UserCharacterAutocomplete.as_view(),
+        name="user-character-autocomplete",
+    ),
+    path(
         r"username-autocomplete/",
         UsernameAutocomplete.as_view(),
         name="username-autocomplete",
     ),
-    path("api/", include((router.urls))),
+    path("api/", include(router.urls)),
     path("corps/", corps_list, name="corps_list"),
     path("corps/<int:pk>/edit", edit_corp, name="edit_corp"),
     path("corps/new", new_corp, name="new_corp"),

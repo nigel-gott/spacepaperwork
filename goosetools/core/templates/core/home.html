@@ -1,79 +1,130 @@
-
 {% extends "core/base.html" %}
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<div class="section">
-    {% if request.gooseuser.is_unapproved %}
-        <h4>Home</h4>
-        <p>You are logged in as {{request.gooseuser.display_name}}.
-        {% if request.gooseuser.latest_app %}
-            <br/><b>Your application is currently waiting approval. </b><br/>
-            {% if request.gooseuser.latest_app.ingame_name %}
-                <b>Please go and make the following application in-game now: </b><br/>
-                <blockquote>Apply with: {{request.gooseuser.latest_app.ingame_name}} to [{{request.gooseuser.latest_app.corp}}] {{request.gooseuser.latest_app.corp.full_name}}</blockquote>
-            {% else %}
-                <b>Please go and make the following application in-game now: </b><br/>
-                <blockquote>Apply with: {{request.gooseuser.latest_app.existing_character.ingame_name}} to [{{request.gooseuser.latest_app.corp}}] {{request.gooseuser.latest_app.corp.full_name}}</blockquote>
-            {% endif %}
-            <i>Once you have been accepted you can apply with alts by going into Settings->Characters and applying there.</i>
+    <div class="section">
+        {% if request.gooseuser.is_unapproved %}
+            <h4>Home</h4>
+            <p>You are logged in as {{ request.gooseuser.display_name }}.
+                {% if request.gooseuser.latest_app %}
+                    <br/><b>Your application is currently waiting approval. </b><br/>
+                    {% if request.gooseuser.latest_app.ingame_name %}
+                        <b>Please go and make the following application in-game
+                            now: </b><br/>
+                        <blockquote>Apply
+                            with: {{ request.gooseuser.latest_app.ingame_name }} to
+                            [{{ request.gooseuser.latest_app.corp }}] {{ request.gooseuser.latest_app.corp.full_name }}</blockquote>
+                    {% else %}
+                        <b>Please go and make the following application in-game
+                            now: </b><br/>
+                        <blockquote>Apply
+                            with: {{ request.gooseuser.latest_app.existing_character.ingame_name }}
+                            to
+                            [{{ request.gooseuser.latest_app.corp }}] {{ request.gooseuser.latest_app.corp.full_name }}</blockquote>
+                    {% endif %}
+                    <i>Once you have been accepted you can apply with alts by going into
+                        Settings->Characters and applying there.</i>
+                {% else %}
+                    <br/><b class="orange-text">You have been removed most likely due to
+                    in-activity, please re-apply below:</b>
+                    <br/>
+                    <a id="agree_button" class="btn waves-btn green btn-large pulse"
+                       href="{% url "corp_select" %}">ReApply</a>
+                {% endif %}
+
+        {% elif request.gooseuser.is_rejected %}
+            <h4>Home</h4>
+            <p>You are logged in as {{ request.gooseuser.display_name }}.
+                <br/><b class="red-text">Your application has been rejected.</b>
+            </p>
         {% else %}
-            <br/><b class="orange-text">You have been removed most likely due to in-activity, please re-apply below:</b>
-            <br/><a id="agree_button" class="btn waves-btn green btn-large pulse" href="{% url "corp_select" %}">ReApply</a>
-        {% endif %}
+            {% if not GOOSEFLOCK_FEATURES %}
+                <div class="card-panel white">
+                    <p>Shareable Invite Link For This {{ SITE_NAME }}
+                        Organization:</p>
+                    <div class="input-field">
+                        <i class="material-icons prefix">share</i>
+                        <input id="shareurl" type="text" value="{{ share_url }}">
+                    </div>
+                    <button class="waves-effect waves-light btn"
+                            data-clipboard-target="#shareurl" id="share_button">
+                        Copy Invite Link
+                    </button>
+                </div>
+                <div class="divider"></div>
+                <div class="section">
+                    {% if tenant.owner == request.user %}
+                        <h5>Getting Started with your {{ SITE_NAME }} Site:</h5>
+                        <ul class="browser-default splash-list">
+                            <li>Dive right into loot tracking and giving fleet
+                                members shares by creating a fleet under: <a
+                                        href="{% url 'fleet' %}">Fleets->Active
+                                    Fleets</a>.
+                            </li>
+                            <li>Finish setting up your site by going through your <a
+                                    href="{% url 'notifications:notifications-list' %}">notifications</a>
+                                under the bell above.
+                            </li>
+                            <li>Start selling, stacking or moving around your loot
+                                under the Items menu above.
+                            </li>
+                            <li><b>Hint</b>: As you <a
+                                    href="{% url 'items' %}">process</a>,
+                                <a href="{% url 'orders' %}">sell loot</a> and <a
+                                        href="{% url 'sold' %}">transfer profit</a>
+                                the items move down the pages shown in the Items
+                                menu.
+                            </li>
+                            <li>Configure your <a href="{% url 'settings' %}">personal
+                                settings</a> and <a href="{% url 'characters' %}">add
+                                new characters</a> under the Settings Menu above.
+                            </li>
+                            <li>Customize your {{ SITE_NAME }} site under the Admin
+                                Menu.
+                            </li>
+                        </ul>
+                    {% else %}
+                        <h5>Getting Started with {{ tenant.name }}'s {{ SITE_NAME }}
+                            site!</h5>
+                        <ul class="browser-default splash-list">
+                            <li>Dive right into loot tracking and giving fleet
+                                members shares by creating a fleet under: <a
+                                        href="{% url 'fleet' %}">Fleets->Active
+                                    Fleets</a>.
+                            </li>
+                            <li>Start selling, stacking or moving around your loot
+                                under the Items menu above.
+                            </li>
+                            <li><b>Hint</b>: As you <a
+                                    href="{% url 'items' %}">process</a>,
+                                <a href="{% url 'orders' %}">sell loot</a> and <a
+                                        href="{% url 'sold' %}">transfer profit</a>
+                                the items move down the pages shown in the Items
+                                menu.
+                            </li>
+                            <li>Configure your <a href="{% url 'settings' %}">personal
+                                settings</a> and <a href="{% url 'characters' %}">add
+                                new characters</a> under the Settings Menu above.
+                            </li>
+                        </ul>
+                    {% endif %}
 
-    {% elif request.gooseuser.is_rejected %}
-        <h4>Home</h4>
-        <p>You are logged in as {{request.gooseuser.display_name}}.
-        <br/><b class="red-text">Your application has been rejected.</b>
-    {% elif not GOOSEFLOCK_FEATURES %}
-        <div class="card-panel white">
-        <p>Shareable Invite Link For This {{SITE_NAME}} Organization:</p>
-        <div class="input-field">
-            <i class="material-icons prefix">share</i>
-            <input id="shareurl" type="text" value="{{share_url}}">
-        </div>
-        <button class="waves-effect waves-light btn" data-clipboard-target="#shareurl" id="share_button">
-            Copy Invite Link
-        </button>
-        </div>
-        <div class="divider"></div>
-        <div class="section">
-            {% if tenant.owner == request.user %}
-                <h5>Getting Started with your {{SITE_NAME}} Site:</h5>
-                <ul class="browser-default splash-list">
-                    <li>Dive right into loot tracking and giving fleet members shares by creating a fleet under: <a href="{% url 'fleet' %}">Fleets->Active Fleets</a>.</li>
-                    <li>Finish setting up your site by going through your <a href="{% url 'notifications:notifications-list' %}">notifications</a> under the bell above.</li>
-                    <li>Start selling, stacking or moving around your loot under the Sales menu above.</li>
-                    <li><b>Hint</b>: As you <a href="{% url 'items' %}">process</a>, <a href="{% url 'orders' %}">sell loot</a> and <a href="{% url 'sold' %}">transfer profit</a> the items move down the pages shown in the Sales Menu.</li>
-                    <li>Configure your <a href="{% url 'settings' %}">personal settings</a> and <a href="{% url 'characters' %}">add new characters</a> under the Settings Menu above.</li>
-                    <li>Customize your {{SITE_NAME}} site under the Admin Menu.</li>
-                </ul>
-            {% else %}
-                <h5>Getting Started with {{tenant.name}}'s {{SITE_NAME}} site!</h5>
-                <ul class="browser-default splash-list">
-                    <li>Dive right into loot tracking and giving fleet members shares by creating a fleet under: <a href="{% url 'fleet' %}">Fleets->Active Fleets</a>.</li>
-                    <li>Start selling, stacking or moving around your loot under the Sales menu above.</li>
-                    <li><b>Hint</b>: As you <a href="{% url 'items' %}">process</a>, <a href="{% url 'orders' %}">sell loot</a> and <a href="{% url 'sold' %}">transfer profit</a> the items move down the pages shown in the Sales Menu.</li>
-                    <li>Configure your <a href="{% url 'settings' %}">personal settings</a> and <a href="{% url 'characters' %}">add new characters</a> under the Settings Menu above.</li>
-                </ul>
+                </div>
             {% endif %}
-
-        </div>
-    {% endif %}
-    </p>
-</div>
+            {% include "core/changelog.html" %}
+        {% endif %}
+    </div>
 {% endblock body %}
 {% block extrafooter %}
 
-<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.6/dist/clipboard.min.js"></script>
 
 
-<script>
-    var clipboard = new ClipboardJS('.btn');
+    <script>
+    var clipboard = new ClipboardJS('.btn')
 
 
-</script>
+    </script>
 
 
 {% endblock %}

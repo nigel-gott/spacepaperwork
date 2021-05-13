@@ -1,0 +1,99 @@
+<h1>{{ SITE_NAME }} Changelog</h1>
+<table>
+    <thead>
+    <tr>
+        <th>
+            Date
+        </th>
+        <th>
+            Feature
+        </th>
+        <th>
+            Description
+        </th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>
+            2021/05/13
+        </td>
+        <td>
+            Fine grained Fleet permissions
+        </td>
+        <td>
+            <p>
+                You can now create fleets which only specified users, corps or users
+                with a certain global permission can join. You can also exclude specific
+                users and corps to create per fleet custom permissions.
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2021/05/06
+        </td>
+        <td>
+            The Item database
+        </td>
+        <td>
+            <p>
+                <a href="{% url 'item_db' %}">The Item Database</a> allows you to see
+                every item in {{ SITE_NAME }}, propose changes to any items data and
+                also view every items market data plotted on graphs.
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2021/05/06
+        </td>
+        <td>
+            Fixed Item name and data
+        </td>
+        <td>
+            <p>
+                All echoes items should now be in in {{ SITE_NAME }} with correct names
+                and market data.
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2021/05/02
+        </td>
+        <td>
+            Personal Items
+        </td>
+        <td>
+            <p>
+                Items can now be created in {{ SITE_NAME }} without first making a
+                fleet.
+            </p>
+            <p>
+                Visit <a href="{% url 'personal_items_add' %}">here</a> to do so or find
+                it under the newly renamed <strong>Items</strong> menu and then click
+                <strong>Your Items</strong>. Items created this way are owned 100% by
+                the character you select when adding the items. Otherwise they work just
+                like items added using a fleet, so you can still contract them to a
+                seller or sell them yourselves and you will get 100% of the profit.
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            2021/05/02
+        </td>
+        <td>
+            Repeating Loot Groups
+        </td>
+        <td>
+            <p>
+                Loot Groups can now be set to repeat every X minutes.
+            </p>
+            <p>
+            </p>
+        </td>
+    </tr>
+    </tbody>
+</table>

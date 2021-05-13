@@ -8,7 +8,7 @@ from djmoney.money import Money
 from goosetools.contracts.models import Contract
 from goosetools.core.models import System
 from goosetools.ownership.models import LootGroup
-from goosetools.users.models import Character, Corp
+from goosetools.users.models import ITEM_CHANGE_ADMIN, Character, Corp, GooseUser
 
 
 def to_isk(num):
@@ -23,6 +23,7 @@ def model_sum(queryset, key):
         return result
 
 
+# noinspection DuplicatedCode
 class ItemType(models.Model):
     name = models.TextField()
 
@@ -48,7 +49,7 @@ class ItemSubSubType(models.Model):
 
 class Item(models.Model):
     item_type = models.ForeignKey(ItemSubSubType, on_delete=models.CASCADE)
-    name = models.TextField(primary_key=True)
+    name = models.TextField()
     eve_echoes_market_id = models.TextField(null=True, blank=True, unique=True)
     cached_lowest_sell = models.DecimalField(
         max_digits=20, decimal_places=2, null=True, blank=True
@@ -90,6 +91,167 @@ class Item(models.Model):
 
     def __str__(self):
         return f"{str(self.name)}"
+
+
+class ItemChangeProposal(models.Model):
+    proposed_by = models.ForeignKey(
+        GooseUser,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="item_change_proposals",
+    )
+    proposed_by_process = models.TextField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        GooseUser,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="item_change_approvals",
+    )
+    proposed_at = models.DateTimeField(auto_now=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+    existing_item = models.ForeignKey(
+        Item, on_delete=models.CASCADE, null=True, blank=True
+    )
+    deleted_existing_item = models.JSONField(null=True, blank=True)
+    change = models.TextField(
+        choices=[("update", "update"), ("delete", "delete"), ("create", "create")],
+    )
+    name = models.TextField(null=True, blank=True)
+    eve_echoes_market_id = models.TextField(null=True, blank=True)
+    item_type = models.ForeignKey(
+        ItemSubSubType, on_delete=models.CASCADE, null=True, blank=True
+    )
+
+    @staticmethod
+    def open_proposals():
+        return ItemChangeProposal.objects.filter(approved_at__isnull=True).order_by(
+            "-proposed_at"
+        )
+
+    @staticmethod
+    def approved_proposals():
+        return ItemChangeProposal.objects.filter(approved_at__isnull=False).order_by(
+            "-proposed_at"
+        )
+
+    def has_edit_admin(self, gooseuser):
+        return gooseuser == self.proposed_by or gooseuser.has_perm(ITEM_CHANGE_ADMIN)
+
+    # noinspection PyMethodMayBeStatic
+    # pylint: disable=no-self-use
+    def has_approve_admin(self, gooseuser):
+        return gooseuser.has_perm(ITEM_CHANGE_ADMIN)
+
+    def __str__(self):
+        base = f"Proposal to {self.change} {self.existing_item or 'Item'}"
+        if self.change == "create" or self.change == "update":
+            if self.name:
+                base += f", Name = '{self.name}' "
+            if self.item_type:
+                base += f", Type = '{self.item_type}'"
+            if self.eve_echoes_market_id:
+                base += f", MarketId ='{self.eve_echoes_market_id}'"
+        return base
+
+    def approve(self, approved_by):
+        # noinspection PyBroadException
+        try:
+            delete_existing = False
+            if self.change == "create":
+                item = Item(
+                    name=self.name,
+                    item_type=self.item_type,
+                    eve_echoes_market_id=self.eve_echoes_market_id
+                    if self.eve_echoes_market_id
+                    else None,
+                )
+                item.full_clean()
+                item.save()
+            elif self.change == "update":
+                if self.name:
+                    self.existing_item.name = self.name
+                if self.item_type:
+                    self.existing_item.item_type = self.item_type
+                if self.eve_echoes_market_id:
+                    self.existing_item.eve_echoes_market_id = self.eve_echoes_market_id
+                self.existing_item.full_clean()
+                self.existing_item.save()
+            elif self.change == "delete":
+                has_items = self.existing_item.inventoryitem_set.count() > 0
+                if has_items:
+                    raise ItemChangeError(
+                        f"Cannot delete {self.existing_item} as it is being used.", self
+                    )
+                delete_existing = self.existing_item
+                self.deleted_existing_item = {
+                    "id": self.existing_item.id,
+                    "name": self.existing_item.name,
+                    "item_type": self.existing_item.item_type.name,
+                    "item_type_id": self.existing_item.item_type.id,
+                    "eve_echoes_market_id": self.existing_item.eve_echoes_market_id,
+                }
+                self.existing_item = None
+            else:
+                raise ItemChangeError(f"Unknown change type {self.change}", self)
+            self.approved_by = approved_by
+            self.approved_at = timezone.now()
+            self.save()
+            if delete_existing:
+                delete_existing.delete()
+        except Exception as e:
+            if hasattr(e, "message"):
+                # pylint: disable=no-member
+                raise ItemChangeError(e.message, self)
+            if hasattr(e, "messages"):
+                # pylint: disable=no-member
+                raise ItemChangeError(",".join(e.messages), self)
+            if hasattr(e, "error"):
+                # pylint: disable=no-member
+                raise ItemChangeError(e.error, self)
+            raise ItemChangeError(
+                "An unknown error occurred approving this change, "
+                "please PM "
+                f"@thejanitor: {str(e)}",
+                self,
+            )
+
+    def try_delete(self):
+        self.delete()
+
+
+class ItemChangeError(Exception):
+    def __init__(self, message, item):
+        super().__init__()
+        self.message = message + f" for {item}"
+
+    def __str__(self):
+        return self.message
+
+
+# class ItemTypeChangeProposal(models.Model):
+#     proposed_by = models.ForeignKey(
+#         GooseUser, on_delete=models.CASCADE, null=True, blank=True
+#     )
+#     proposed_by_process = models.TextField(null=True, blank=True)
+#     approved_by = models.ForeignKey(
+#         GooseUser, on_delete=models.CASCADE, null=True, blank=True
+#     )
+#     proposed_at = models.DateTimeField(auto_now=True)
+#     approved_at = models.DateTimeField(null=True, blank=True)
+#     change = models.TextField(
+#         choices=[("update", "update"), ("delete", "delete"), ("new", "new")]
+#     )
+#     type = models.TextField(
+#         choices=[
+#             ("item_type", "ItemType"),
+#             ("item_sub_type", "ItemSubType"),
+#             ("item_sub_sub_type", "ItemSubSubType"),
+#         ]
+#     )
+#     name = models.TextField(null=True, blank=True)
+#     parent = models.TextField(null=True, blank=True)
 
 
 class Station(models.Model):

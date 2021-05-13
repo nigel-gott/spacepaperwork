@@ -3,11 +3,11 @@ import math as m
 from decimal import Decimal
 from typing import Dict, List
 
-from django import forms
 from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import F, Sum
+from django.db.models.aggregates import Count
 from django.db.models.functions import Coalesce
 from django.forms.formsets import formset_factory
 from django.http.response import HttpResponseNotAllowed, HttpResponseRedirect
@@ -73,8 +73,17 @@ def forbidden(request):
     return render(request, "ownership/403.html")
 
 
+def raise_if_locked(request, loot_group):
+    if loot_group.locked_participation:
+        message = f"Cannot modify the locked group: {loot_group}"
+        messages.error(request, message)
+        raise Exception(message)
+
+
 def loot_share_join(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
+
+    raise_if_locked(request, loot_group)
     if request.method == "POST":
         form = LootJoinForm(request.POST)
         if form.is_valid():
@@ -131,6 +140,7 @@ def loot_share_add(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
     if not loot_group.has_admin(request.user.gooseuser):
         return forbidden(request)
+    raise_if_locked(request, loot_group)
     if request.method == "POST":
         form = LootShareForm(request.POST)
         if form.is_valid():
@@ -156,8 +166,9 @@ def loot_share_add(request, pk):
 
 def loot_share_delete(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
-    if not loot_share.loot_group.fleet().has_admin(request.user.gooseuser):
+    if not loot_share.has_admin(request.gooseuser):
         return forbidden(request)
+    raise_if_locked(request, loot_share.loot_group)
     if request.method == "POST":
         group_pk = loot_share.loot_group.pk
         loot_share.delete()
@@ -168,8 +179,9 @@ def loot_share_delete(request, pk):
 
 def loot_share_edit(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
-    if not loot_share.loot_group.fleet().has_admin(request.user.gooseuser):
+    if not loot_share.has_admin(request.gooseuser):
         return forbidden(request)
+    raise_if_locked(request, loot_share.loot_group)
     if request.method == "POST":
         form = LootShareForm(request.POST)
         if form.is_valid():
@@ -198,8 +210,8 @@ def loot_share_edit(request, pk):
 
 def loot_share_add_fleet_members(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
+    raise_if_locked(request, loot_group)
     if request.method == "POST":
-        # TODO Break coupling of fleet and loot shares
         for fleet_member in loot_group.fleet_anom.fleet.fleetmember_set.all():  # type: ignore
             LootShare.objects.get_or_create(
                 character=fleet_member.character,
@@ -214,31 +226,42 @@ def loot_share_add_fleet_members(request, pk):
 
 
 def loot_group_close(request, pk):
-    lg = get_object_or_404(LootGroup, pk=pk)
-    if not lg.fleet().has_admin(request.user.gooseuser):
+    loot_group = get_object_or_404(LootGroup, pk=pk)
+    raise_if_locked(request, loot_group)
+    if not loot_group.has_admin(request.user.gooseuser):
         return forbidden(request)
     if request.method == "POST":
-        lg.closed = True
-        lg.full_clean()
-        lg.save()
-        messages.success(request, f"Closed loot group: {lg}")
-        return HttpResponseRedirect(reverse("loot_group_view", args=[lg.id]))
+        loot_group.closed = True
+        if loot_group.fleet_anom:
+            loot_group.fleet_anom.minute_repeat_period = None
+            loot_group.fleet_anom.save()
+        loot_group.full_clean()
+        loot_group.save()
+        messages.success(request, f"Closed loot group: {loot_group}")
+        return HttpResponseRedirect(reverse("loot_group_view", args=[loot_group.id]))
     else:
         return HttpResponseNotAllowed("POST")
 
 
 def loot_group_open(request, pk):
-    lg = get_object_or_404(LootGroup, pk=pk)
-    if not lg.fleet().has_admin(request.user.gooseuser):
+    loot_group = get_object_or_404(LootGroup, pk=pk)
+    if not loot_group.has_admin(request.user.gooseuser):
         return forbidden(request)
+    raise_if_locked(request, loot_group)
     if request.method == "POST":
-        lg.closed = False
-        lg.full_clean()
-        lg.save()
-        messages.success(request, f"Opened loot group: {lg}")
-        return HttpResponseRedirect(reverse("loot_group_view", args=[lg.id]))
+        loot_group.closed = False
+        loot_group.full_clean()
+        loot_group.save()
+        messages.success(request, f"Opened loot group: {loot_group}")
+        return HttpResponseRedirect(reverse("loot_group_view", args=[loot_group.id]))
     else:
         return HttpResponseNotAllowed("POST")
+
+
+class WrongFleetBucketException(Exception):
+    def __init__(self, message):
+        super().__init__()
+        self.message = message
 
 
 def loot_group_add(request, fleet_pk, loot_bucket_pk):
@@ -249,52 +272,36 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
             # Form will let you specify anom/km/other
             # depending on mode, a anom/km/other info will be created
             # also can come with participation filled in and items filled in all on one form
-            spawned = timezone.now()
-
-            if form.cleaned_data["loot_source"] == LootGroupForm.ANOM_LOOT_GROUP:
-                try:
-                    anom_type = AnomType.objects.get_or_create(
-                        level=form.cleaned_data["anom_level"],
-                        type=form.cleaned_data["anom_type"],
-                        faction=form.cleaned_data["anom_faction"],
-                    )[0]
-                    anom_type.full_clean()
-                    anom_type.save()
-                except forms.ValidationError as e:
-                    form.add_error(None, e)
-                    return render(
-                        request,
-                        "ownership/loot_group_form.html",
-                        {"form": form, "title": "Start New Loot Group"},
-                    )
-                fleet_anom = FleetAnom(
-                    fleet=f,
-                    anom_type=anom_type,
-                    time=spawned,
-                    system=form.cleaned_data["anom_system"],
+            try:
+                spawned = timezone.now()
+                loot_source = form.cleaned_data["loot_source"]
+                anom_level = form.cleaned_data["anom_level"]
+                a_type = form.cleaned_data["anom_type"]
+                anom_faction = form.cleaned_data["anom_faction"]
+                system = form.cleaned_data["anom_system"]
+                name = form.cleaned_data["name"]
+                next_repeat = calc_next_repeat(form)
+                minute_repeat_period = form.cleaned_data["minute_repeat_period"]
+                new_group = loot_group_create_internal(
+                    f,
+                    loot_source,
+                    anom_level,
+                    a_type,
+                    anom_faction,
+                    loot_bucket_pk,
+                    spawned,
+                    system,
+                    name,
+                    minute_repeat_period,
+                    next_repeat,
+                    0,
                 )
-                fleet_anom.full_clean()
-                fleet_anom.save()
-
-                if not loot_bucket_pk:
-                    loot_bucket = LootBucket(fleet=f)
-                    loot_bucket.save()
-                else:
-                    loot_bucket = get_object_or_404(LootBucket, pk=loot_bucket_pk)
-
-                new_group = LootGroup(
-                    name=form.cleaned_data["name"],
-                    bucket=loot_bucket,
-                    fleet_anom=fleet_anom,
-                    created_at=timezone.now(),
-                )
-                new_group.full_clean()
-                new_group.save()
-
                 return HttpResponseRedirect(
                     reverse("loot_group_view", args=[new_group.id])
                 )
-
+            except WrongFleetBucketException as e:
+                messages.error(request, e.message)
+                return HttpResponseRedirect(reverse("fleet_view", args=[f.id]))
     else:
         form = LootGroupForm()
 
@@ -305,10 +312,86 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
     )
 
 
+def calc_next_repeat(form):
+    repeat_start_date = form.cleaned_data["repeat_start_date"]
+    repeat_start_time = form.cleaned_data["repeat_start_time"]
+    if repeat_start_date:
+        next_repeat = timezone.make_aware(
+            timezone.datetime.combine(repeat_start_date, repeat_start_time)
+        )
+        return next_repeat
+    else:
+        return None
+
+
+def loot_group_create_internal(
+    f,
+    loot_source,
+    anom_level,
+    a_type,
+    anom_faction,
+    loot_bucket_pk,
+    spawned,
+    system,
+    name,
+    minute_repeat_period,
+    next_repeat,
+    repeat_count,
+):
+    if loot_source == LootGroupForm.ANOM_LOOT_GROUP:
+        anom_type = AnomType.objects.get_or_create(
+            level=anom_level,
+            type=a_type,
+            faction=anom_faction,
+        )[0]
+        anom_type.full_clean()
+        anom_type.save()
+        if not loot_bucket_pk:
+            loot_bucket = LootBucket()
+            loot_bucket.save()
+        else:
+            loot_bucket = get_object_or_404(LootBucket, pk=loot_bucket_pk)
+            num_groups_for_this_fleet = loot_bucket.lootgroup_set.filter(
+                fleet_anom__fleet=f
+            ).count()
+            if num_groups_for_this_fleet != loot_bucket.lootgroup_set.count():
+                raise WrongFleetBucketException(
+                    "You cannot add a fleet anom to this "
+                    "bucket as this bucket is not for "
+                    "this fleet.",
+                )
+
+        fleet_anom = FleetAnom(
+            fleet=f,
+            anom_type=anom_type,
+            time=spawned,
+            system=system,
+            next_repeat=next_repeat,
+            minute_repeat_period=minute_repeat_period,
+            repeat_count=repeat_count,
+        )
+        fleet_anom.full_clean()
+        fleet_anom.save()
+
+        new_group = LootGroup(
+            name=name,
+            bucket=loot_bucket,
+            fleet_anom=fleet_anom,
+            created_at=timezone.now(),
+        )
+        new_group.full_clean()
+        new_group.save()
+        return new_group
+    else:
+        return None
+
+
 def loot_group_edit(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
-    if not loot_group.fleet_anom:
+    fleet_anom = loot_group.fleet_anom
+    if not fleet_anom:
         raise Exception(f"Missing fleet anom for {loot_group}")
+    raise_if_locked(request, loot_group)
     if request.method == "POST":
         form = LootGroupForm(request.POST)
         if form.is_valid():
@@ -316,36 +399,48 @@ def loot_group_edit(request, pk):
 
             # todo handle more loot sources?
             if form.cleaned_data["loot_source"] == LootGroupForm.ANOM_LOOT_GROUP:
-                try:
-                    loot_group.fleet_anom.anom_type = AnomType.objects.get_or_create(
-                        level=form.cleaned_data["anom_level"],
-                        type=form.cleaned_data["anom_type"],
-                        faction=form.cleaned_data["anom_faction"],
-                    )[0]
-                    loot_group.fleet_anom.system = form.cleaned_data["anom_system"]
-                    loot_group.fleet_anom.full_clean()
-                    loot_group.fleet_anom.save()
-                except forms.ValidationError as e:
-                    form.add_error(None, e)
-                    return render(
-                        request,
-                        "ownership/loot_group_form.html",
-                        {"form": form, "title": "Edit Loot Group"},
-                    )
+                fleet_anom.anom_type = AnomType.objects.get_or_create(
+                    level=form.cleaned_data["anom_level"],
+                    type=form.cleaned_data["anom_type"],
+                    faction=form.cleaned_data["anom_faction"],
+                )[0]
+                fleet_anom.system = form.cleaned_data["anom_system"]
+                new_next_repeat = calc_next_repeat(form)
+                if new_next_repeat:
+                    fleet_anom.next_repeat = new_next_repeat
+                fleet_anom.minute_repeat_period = form.cleaned_data[
+                    "minute_repeat_period"
+                ]
 
-            loot_group.full_clean()
-            loot_group.save()
+            if loot_group.closed and fleet_anom.minute_repeat_period:
+                messages.error(
+                    request, "Cannot make a closed group repeat, open it first."
+                )
+                return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
+            else:
+                fleet_anom.full_clean()
+                fleet_anom.save()
 
-            return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
+                loot_group.full_clean()
+                loot_group.save()
+
+                return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
 
     else:
         form = LootGroupForm(
             initial={
                 "name": loot_group.name,
-                "anom_system": loot_group.fleet_anom.system,
-                "anom_level": loot_group.fleet_anom.anom_type.level,
-                "anom_faction": loot_group.fleet_anom.anom_type.faction,
-                "anom_type": loot_group.fleet_anom.anom_type.type,
+                "anom_system": fleet_anom.system,
+                "anom_level": fleet_anom.anom_type.level,
+                "anom_faction": fleet_anom.anom_type.faction,
+                "anom_type": fleet_anom.anom_type.type,
+                "repeat_start_time": fleet_anom.next_repeat.time()
+                if fleet_anom.minute_repeat_period
+                else None,
+                "repeat_start_date": fleet_anom.next_repeat.date()
+                if fleet_anom.minute_repeat_period
+                else None,
+                "minute_repeat_period": fleet_anom.minute_repeat_period,
             }
         )
 
@@ -364,10 +459,19 @@ def loot_group_view(request, pk):
         if user_id not in by_user:
             by_user[user_id] = []
         by_user[user_id].append(loot_share)
+
+    if loot_group.gooseuser_or_false():
+        add_url = reverse("personal_items_add")
+    else:
+        add_url = reverse("item_add", args=[loot_group.pk])
     return render(
         request,
         "ownership/loot_group_view.html",
-        {"loot_group": loot_group, "loot_shares_by_user_id": by_user},
+        {
+            "loot_group": loot_group,
+            "loot_shares_by_user_id": by_user,
+            "item_add_url": add_url,
+        },
     )
 
 
@@ -396,8 +500,6 @@ def fleet_shares(request, pk):
         loot_group = loot_share.loot_group
         if loot_group.id in seen_groups:
             continue
-        if not loot_group.fleet_anom:
-            raise Exception(f"Missing fleet_anom from {loot_group}")
         seen_groups[loot_group.id] = True
 
         my_items = InventoryItem.objects.filter(
@@ -423,7 +525,9 @@ def fleet_shares(request, pk):
         items.append(
             {
                 "username": user.discord_username(),
-                "fleet_id": loot_group.fleet_anom.fleet.id,
+                "fleet_id": loot_group.fleet_anom.fleet.id
+                if loot_group.fleet_anom
+                else False,
                 "loot_bucket": loot_group.bucket.id,
                 "loot_group_id": loot_group.id,
                 "your_shares": estimated_participation["participation"][user.id][
@@ -466,6 +570,7 @@ def loot_share_plus(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
     if not loot_share.has_admin(request.user.gooseuser):
         return forbidden(request)
+    raise_if_locked(request, loot_share.loot_group)
     if request.method == "POST":
         loot_share.increment()
     return HttpResponseRedirect(
@@ -477,6 +582,7 @@ def loot_share_minus(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
     if not loot_share.has_admin(request.user.gooseuser):
         return forbidden(request)
+    raise_if_locked(request, loot_share.loot_group)
     if request.method == "POST":
         loot_share.decrement()
     return HttpResponseRedirect(
@@ -504,7 +610,7 @@ def transfered_items(request):
 def completed_profit_transfers(request):
     return render(
         request,
-        "ownership/completed_profit_transfers.html",
+        "ownership/completed_egg_transfers.html",
         {
             "transfer_logs": request.user.gooseuser.transferlog_set.filter(
                 all_done=True
@@ -840,21 +946,43 @@ def mark_transfer_as_done(request, pk):
         return HttpResponseNotAllowed("POST")
 
 
-def item_add(request, lg_pk):
-    extra = 10
-    InventoryItemFormset = formset_factory(InventoryItemForm, extra=0)  # noqa
-    loot_group = get_object_or_404(LootGroup, pk=lg_pk)
-    if not loot_group.fleet_anom:
-        raise Exception(f"Missing fleet_anom from {loot_group}")
+def personal_items_add(request):
+    return add_items_internal(
+        request,
+        10,
+        LootGroup.create_or_get_personal,
+        "Add New Personal Items",
+        reverse("items"),
+        reverse("personal_items_add"),
+    )
 
-    if not loot_group.fleet().has_admin(request.user.gooseuser):
+
+def item_add(request, lg_pk):
+    loot_group = get_object_or_404(LootGroup, pk=lg_pk)
+    if not loot_group.has_admin(request.gooseuser):
         return forbidden(request)
-    initial = [{"quantity": 1} for x in range(0, extra)]
+    return add_items_internal(
+        request,
+        10,
+        lambda _: loot_group,
+        "Add New Items to Loot Group " + loot_group.display_name(),
+        reverse("loot_group_view", args=[loot_group.pk]),
+        reverse("item_add", args=[loot_group.pk]),
+    )
+
+
+def add_items_internal(
+    request, extra, loot_group_getter, title, success_redirect, item_add_url
+):
+    initial = [{"quantity": 1} for _ in range(0, extra)]
+    InventoryItemFormset = formset_factory(InventoryItemForm, extra=0)  # noqa
     if request.method == "POST":
         formset = InventoryItemFormset(request.POST, request.FILES, initial=initial)
         char_form = CharacterForm(request.POST)
+        char_form.fields["character"].queryset = request.user.gooseuser.characters()
         if formset.is_valid() and char_form.is_valid():
             character = char_form.cleaned_data["character"]
+            loot_group = loot_group_getter(character)
             count = 0
             for form in formset:
                 item_type = form.cleaned_data["item"]
@@ -866,13 +994,24 @@ def item_add(request, lg_pk):
                     loc = ItemLocation.objects.get_or_create(
                         character_location=char_loc[0], corp_hanger=None
                     )
-                    # TODO bug can return multiple items
-                    item, created = InventoryItem.objects.get_or_create(
+                    items = InventoryItem.objects.filter(
                         location=loc[0],
                         loot_group=loot_group,
                         item=item_type,
-                        defaults={"quantity": quantity, "created_at": timezone.now()},
                     )
+                    if items.exists():
+                        created = False
+                        item = items.last()
+                    else:
+                        item = InventoryItem.objects.create(
+                            location=loc[0],
+                            loot_group=loot_group,
+                            item=item_type,
+                            quantity=quantity,
+                            created_at=timezone.now(),
+                        )
+                        created = True
+
                     count = count + quantity
                     if not created:
                         if item.can_edit():
@@ -892,9 +1031,9 @@ def item_add(request, lg_pk):
             add_another = request.POST.get("add_another", False)
             if add_another:
                 messages.success(request, f"Added {count} items")
-                return HttpResponseRedirect(reverse("item_add", args=[lg_pk]))
+                return HttpResponseRedirect(request.get_full_path())
             else:
-                return HttpResponseRedirect(reverse("loot_group_view", args=[lg_pk]))
+                return HttpResponseRedirect(success_redirect)
     else:
         char_form = CharacterForm(
             initial={"character": request.user.gooseuser.default_character}
@@ -907,6 +1046,87 @@ def item_add(request, lg_pk):
         {
             "formset": formset,
             "char_form": char_form,
-            "title": "Add New Items to Loot Bucket",
+            "title": title,
+            "item_add_url": item_add_url,
         },
     )
+
+
+def generate_fleet_profit(fleet):
+    by_user = {}
+    by_user_by_bucket = {}
+    total_item_shares_per_bucket = {}
+    total_shares = 0
+    bucket_info = {}
+
+    all_fleet_buckets = (
+        LootBucket.objects.filter(lootgroup__fleet_anom__fleet=fleet).distinct().all()
+    )
+    for bucket in all_fleet_buckets:
+        all_bucket_items = InventoryItem.objects.filter(loot_group__bucket=bucket)
+        total_items_in_bucket = all_bucket_items.count()
+
+        total_item_shares_per_bucket[bucket.id] = bucket.total_shares()
+        shares = LootShare.objects.filter(loot_group__bucket=bucket)
+        groups_with_shares = (
+            LootGroup.objects.annotate(shares=Sum("lootshare__share_quantity"))
+            .filter(bucket=bucket, shares__gt=0)
+            .count()
+        )
+        groups_with_items = (
+            LootGroup.objects.annotate(items=Count("inventoryitem"))
+            .filter(bucket=bucket, items__gt=0)
+            .count()
+        )
+        bucket_info.setdefault(bucket.id, {})
+        bucket_info[bucket.id]["groups_with_shares"] = groups_with_shares
+        bucket_info[bucket.id]["groups_with_items"] = groups_with_items
+        bucket_info[bucket.id]["total_items"] = total_items_in_bucket
+        bucket_info[bucket.id]["real_profit"] = to_isk(0)
+        bucket_info[bucket.id]["est_profit"] = to_isk(0)
+
+        for loot_group in bucket.lootgroup_set.all():
+            bucket_info[bucket.id]["est_profit"] += loot_group.estimated_profit()
+            bucket_info[bucket.id]["real_profit"] += loot_group.non_debt_egg_balance()
+
+        for share in shares:
+            user = share.character.user
+            shares = share.share_quantity
+            by_user.setdefault(user.id, 0)
+            by_user_by_bucket.setdefault(user.id, {})
+            total_item_shares_per_bucket.setdefault(bucket.id, 0)
+            by_user_by_bucket[user.id].setdefault(bucket.id, 0)
+            by_user_by_bucket[user.id][bucket.id] += shares
+            by_user[user.id] += shares
+            total_shares += shares
+
+    stats = {"buckets": bucket_info}
+    members = []
+    for user_id, user_total_shares in by_user.items():
+        user = GooseUser.objects.get(pk=user_id)
+        total_percent = round((Decimal(user_total_shares) / total_shares) * 100, 2)
+        buckets = []
+        for bucket_id, users_share_in_bucket in by_user_by_bucket[user_id].items():
+            total_shares = total_item_shares_per_bucket[bucket_id]
+            bucket_percent = percent(users_share_in_bucket, total_shares)
+            buckets.append(
+                {
+                    "id": bucket_id,
+                    "percent_owned": bucket_percent,
+                    "their_shares": users_share_in_bucket,
+                    "total_shares": total_shares,
+                }
+            )
+        members.append(
+            {
+                "username": user.username,
+                "total_percent": total_percent,
+                "buckets": buckets,
+            }
+        )
+    stats["members"] = sorted(members, key=lambda x: x["total_percent"], reverse=True)
+    return stats
+
+
+def percent(n, y):
+    return str(round((Decimal(n) / y) * 100, 2))

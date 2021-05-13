@@ -127,3 +127,5 @@ GitHub.sublime-settings
 .history
 
 token.pickle
+
+*.sqlite

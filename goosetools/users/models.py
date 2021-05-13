@@ -8,6 +8,7 @@ from django.contrib.postgres.aggregates.general import StringAgg
 from django.contrib.sites.models import Site
 from django.db import models
 from django.http.response import HttpResponseForbidden
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_comments.models import Comment
 from requests.exceptions import RequestException
@@ -370,12 +371,15 @@ SINGLE_CORP_ADMIN = "single_corp_admin"
 SHIP_ORDER_ADMIN = "ship_order_admin"
 SHIP_PRICE_ADMIN = "ship_price_admin"
 SHIP_ORDERER = "ship_orderer"
+SRP_CLAIMER = "srp_claimer"
+SRP_APPROVER = "srp_approver"
 FREE_SHIP_ORDERER = "free_ship_orderer"
 BASIC_ACCESS = "basic_access"
 LOOT_TRACKER = "loot_tracker"
 LOOT_TRACKER_ADMIN = "loot_tracker_admin"
 VENMO_ADMIN = "venmo_admin"
 DISCORD_ADMIN_PERMISSION = "discord_admin"
+ITEM_CHANGE_ADMIN = "item_change_admin"
 
 
 class GoosePermission(models.Model):
@@ -406,6 +410,8 @@ class GoosePermission(models.Model):
             "Able to approve corp applications for all corps and manage characters in all corps",
         ),
         (SHIP_ORDERER, "Able to place ship orders"),
+        (SRP_CLAIMER, "Able to claim SRP"),
+        (SRP_APPROVER, "Able to approve SRP claims"),
         (FREE_SHIP_ORDERER, "Able to place free ship orders"),
         (SHIP_ORDER_ADMIN, "Able to claim and work on ship orders"),
         (
@@ -420,10 +426,14 @@ class GoosePermission(models.Model):
             DISCORD_ADMIN_PERMISSION,
             "Able to change which discord server is connected to.",
         ),
+        (
+            ITEM_CHANGE_ADMIN,
+            "Able to edit, update and delete items + approve proposals made by "
+            "others.",
+        ),
     ]
     name = models.TextField(unique=True, choices=USER_PERMISSION_CHOICES)
     description = models.TextField()
-    corp = models.OneToOneField(Corp, on_delete=models.CASCADE, null=True, blank=True)
 
     @staticmethod
     def ensure_populated():
@@ -443,6 +453,9 @@ class GoosePermission(models.Model):
 
     def __str__(self) -> str:
         return self.name
+
+    def group_names(self):
+        return ", ".join(self.grouppermission_set.values_list("group__name", flat=True))
 
 
 class GroupPermission(models.Model):
@@ -563,6 +576,16 @@ class GooseUser(models.Model):
             > 0
         )
 
+    def has_perm_by_id(self, perm_id: int):
+        return self.groupmember_set.filter(
+            group__grouppermission__permission__id=perm_id
+        ).exists()
+
+    def permissions(self):
+        return self.groupmember_set.values(
+            "group__grouppermission__permission"
+        ).distinct()
+
     def give_group(self, group):
         return GroupMember.objects.get_or_create(user=self, group=group)
 
@@ -591,6 +614,9 @@ class GooseUser(models.Model):
 
     def characters(self):
         return self.character_set.all()
+
+    def in_corp(self, corp):
+        return self.characters().filter(corp=corp).exists()
 
     def _discord_account(self):
         return self.site_user.socialaccount_set.get(provider="discord")
@@ -653,7 +679,13 @@ class GooseUser(models.Model):
 
     @staticmethod
     def _construct_avatar_url(extra_data, uid):
-        avatar_hash = "avatar" in extra_data and extra_data["avatar"]
+        if "user" in extra_data and "avatar" in extra_data["user"]:
+            avatar_hash = extra_data["user"]["avatar"]
+        elif "avatar" in extra_data:
+            avatar_hash = extra_data["avatar"]
+        else:
+            avatar_hash = None
+
         discriminator = extra_data.get("discriminator")
         if GooseUser._has_default_avatar(avatar_hash):
             avatar_number = int(discriminator) % 5
@@ -821,3 +853,297 @@ class CorpApplication(models.Model):
     @staticmethod
     def unapproved_applications():
         return CorpApplication.objects.filter(status="unapproved")
+
+
+# Something you can grant a permission to.
+class PermissibleEntity(models.Model):
+    user = models.ForeignKey(GooseUser, on_delete=models.CASCADE, blank=True, null=True)
+    corp = models.ForeignKey(Corp, on_delete=models.CASCADE, blank=True, null=True)
+    permission = models.ForeignKey(
+        GoosePermission, on_delete=models.CASCADE, blank=True, null=True
+    )
+    allow_or_deny = models.BooleanField(default=True)
+    order = models.IntegerField(default=0)
+    # A built in permission which cannot be edited or removed.
+    built_in = models.BooleanField(default=False)
+
+    @staticmethod
+    def allow_user(gooseuser, built_in=False):
+        return PermissibleEntity(user=gooseuser, built_in=built_in)
+
+    def allowed(self, gooseuser, permissions_id_cache):
+        matches_user = self.user is None or self.user == gooseuser
+        matches_corp = self.corp is None or gooseuser.in_corp(self.corp)
+        matches_permission = (
+            self.permission_id is None or self.permission_id in permissions_id_cache
+        )
+        matches = matches_user and matches_corp and matches_permission
+        return matches, self.order, self.allow_or_deny
+
+    def reset_order_to_level(self):
+        self.order = self.calc_level()
+
+    def calc_level(self):
+        if self.user is not None:
+            if self.corp is None and self.permission is None:
+                # Just user
+                level = 10
+            elif self.corp is None:
+                # Permission and User
+                level = 12
+            elif self.permission is None:
+                # Corp and User
+                level = 15
+            else:
+                # Corp and User and Permission
+                level = 20
+        elif self.corp is not None:
+            # User is none
+            if self.permission is None:
+                # Just corp
+                level = 5
+            else:
+                # Corp and Permission
+                level = 7
+        elif self.permission is not None:
+            # Just permission
+            level = 3
+        else:
+            # No matcher set, matches everyone.
+            level = 0
+
+        if not self.allow_or_deny:
+            # A deny of the same level must override it.
+            level = level + 1
+
+        return level
+
+    @staticmethod
+    def allow_perm(permission, built_in=False):
+        permission = GoosePermission.objects.get(name=permission)
+        return PermissibleEntity(permission=permission, built_in=built_in)
+
+    def user_only(self):
+        return (
+            self.user is not None
+            and self.permission is None
+            and self.corp is None
+            and self.allow_or_deny
+        )
+
+    def everyone(self):
+        return self.user is None and self.permission is None and self.corp is None
+
+    def __str__(self):
+        return f"PermissibleEntity = user:{self.user}, corp:{self.corp}, perm={self.permission}, approve_or_deny={self.allow_or_deny}, built_in={self.built_in}, order={self.order}"
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "corp", "permission"]),
+        ]
+        ordering = ["order"]
+
+
+class CrudAccessController(models.Model):
+    adminable_by = models.ManyToManyField(PermissibleEntity, related_name="can_admin")
+    editable_by = models.ManyToManyField(PermissibleEntity, related_name="can_edit")
+    viewable_by = models.ManyToManyField(PermissibleEntity, related_name="can_view")
+    usable_by = models.ManyToManyField(PermissibleEntity, related_name="can_use")
+    deletable_by = models.ManyToManyField(PermissibleEntity, related_name="can_delete")
+
+    def ordered_adminable_by(self):
+        return self.adminable_by.order_by("order")
+
+    def ordered_editable_by(self):
+        return self.editable_by.order_by("order")
+
+    def ordered_viewable_by(self):
+        return self.viewable_by.order_by("order")
+
+    def ordered_usable_by(self):
+        return self.usable_by.order_by("order")
+
+    def ordered_deletable_by(self):
+        return self.deletable_by.order_by("order")
+
+    @staticmethod
+    def make_permissions_id_cache(gooseuser):
+        return set(
+            gooseuser.groupmember_set.values_list(
+                "group__grouppermission__permission__id", flat=True
+            )
+        )
+
+    def can_admin(self, gooseuser, permissions_id_cache=None):
+        return self._can_do(
+            gooseuser, permissions_id_cache, self.adminable_by, by_admin=False
+        )
+
+    def can_edit(self, gooseuser, permissions_id_cache=None):
+        return self._can_do(gooseuser, permissions_id_cache, self.editable_by)
+
+    def _can_do(self, gooseuser, permissions_id_cache, by, by_admin=True):
+        if not permissions_id_cache:
+            permissions_id_cache = self.make_permissions_id_cache(gooseuser)
+        allowed = self._allowed(gooseuser, by, permissions_id_cache)
+
+        if by_admin:
+            allowed = allowed or self.can_admin(gooseuser, permissions_id_cache)
+
+        return allowed
+
+    def can_view(self, gooseuser, permissions_id_cache=None):
+        return self._can_do(gooseuser, permissions_id_cache, self.viewable_by)
+
+    def can_use(self, gooseuser, permissions_id_cache=None):
+        return self._can_do(gooseuser, permissions_id_cache, self.usable_by)
+
+    def can_delete(self, gooseuser, permissions_id_cache=None):
+        return self._can_do(gooseuser, permissions_id_cache, self.deletable_by)
+
+    @staticmethod
+    def _allowed(gooseuser, perm_entity_qs, permissions_id_cache):
+        entities = perm_entity_qs
+        allowed_level = -2
+        denied_level = -1
+        for perm_entity in entities.all():
+            matches, level, allow_or_deny = perm_entity.allowed(
+                gooseuser, permissions_id_cache
+            )
+            if matches:
+                if allow_or_deny:
+                    allowed_level = max(allowed_level, level)
+                else:
+                    denied_level = max(denied_level, level)
+        return allowed_level > denied_level
+
+    @staticmethod
+    def wrapper(
+        adminable_by=None,
+        editable_by=None,
+        viewable_by=None,
+        usable_by=None,
+        deletable_by=None,
+    ):
+        if deletable_by is None:
+            deletable_by = []
+        if usable_by is None:
+            usable_by = []
+        if viewable_by is None:
+            viewable_by = []
+        if editable_by is None:
+            editable_by = []
+        if adminable_by is None:
+            adminable_by = []
+        return {
+            "adminable_by": adminable_by,
+            "editable_by": editable_by,
+            "viewable_by": viewable_by,
+            "deletable_by": deletable_by,
+            "usable_by": usable_by,
+        }
+
+    def give_admin(self, user):
+        allow_user = PermissibleEntity.allow_user(user)
+        allow_user.save()
+        self.adminable_by.add(allow_user)
+
+    def remove_admin(self, user):
+        self.adminable_by.filter(
+            user=user, permission=None, corp=None, built_in=False
+        ).delete()
+
+
+def can_view(clazz):
+    """
+    Decorator for views that checks that the user has the specified permission
+    otherwise returning HttpForbidden
+    """
+
+    def outer_wrapper(function):
+        @wraps(function)
+        def wrap(request, pk, *args, **kwargs):
+            f = get_object_or_404(clazz, pk=pk)
+            if f.access_controller.can_view(request.gooseuser):
+                return function(request, pk, *args, **kwargs)
+            return HttpResponseForbidden()
+
+        return wrap
+
+    return outer_wrapper
+
+
+def can_admin(clazz):
+    """
+    Decorator for views that checks that the user has the specified permission
+    otherwise returning HttpForbidden
+    """
+
+    def outer_wrapper(function):
+        @wraps(function)
+        def wrap(request, pk, *args, **kwargs):
+            f = get_object_or_404(clazz, pk=pk)
+            if f.access_controller.can_admin(request.gooseuser):
+                return function(request, pk, *args, **kwargs)
+            return HttpResponseForbidden()
+
+        return wrap
+
+    return outer_wrapper
+
+
+def can_edit(clazz):
+    """
+    Decorator for views that checks that the user has the specified permission
+    otherwise returning HttpForbidden
+    """
+
+    def outer_wrapper(function):
+        @wraps(function)
+        def wrap(request, pk, *args, **kwargs):
+            f = get_object_or_404(clazz, pk=pk)
+            if f.access_controller.can_edit(request.gooseuser):
+                return function(request, pk, *args, **kwargs)
+            return HttpResponseForbidden()
+
+        return wrap
+
+    return outer_wrapper
+
+
+def can_delete(clazz):
+    """
+    Decorator for views that checks that the user has the specified permission
+    otherwise returning HttpForbidden
+    """
+
+    def outer_wrapper(function):
+        @wraps(function)
+        def wrap(request, pk, *args, **kwargs):
+            f = get_object_or_404(clazz, pk=pk)
+            if f.access_controller.can_delete(request.gooseuser):
+                return function(request, pk, *args, **kwargs)
+            return HttpResponseForbidden()
+
+        return wrap
+
+    return outer_wrapper
+
+
+def can_use(clazz):
+    """
+    Decorator for views that checks that the user has the specified permission
+    otherwise returning HttpForbidden
+    """
+
+    def outer_wrapper(function):
+        @wraps(function)
+        def wrap(request, pk, *args, **kwargs):
+            f = get_object_or_404(clazz, pk=pk)
+            if f.access_controller.can_use(request.gooseuser):
+                return function(request, pk, *args, **kwargs)
+            return HttpResponseForbidden()
+
+        return wrap
+
+    return outer_wrapper

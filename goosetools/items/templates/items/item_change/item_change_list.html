@@ -1,0 +1,161 @@
+{% extends "core/base.html" %}
+{% load base_extras %}
+{% load static %}
+{% block extraheader %}
+    <link rel="stylesheet" href="{% static 'items/css/item_changes.css' %}">
+{% endblock %}
+{% block body %}
+    <div class="section">
+        <h4>Pending Item Change Proposals</h4>
+        <p>Here you will find proposed changes for the items in <a
+                href="{% url 'item_db' %}">{{ SITE_NAME }}'s Item Database</a>.</p>
+        <a class="waves-btn btn green" href="{% url 'item-change-create-select' %}">Create
+            New
+            Item Change Proposal</a>
+        <ul class="collection" style="overflow: visible;">
+            {% if change_list %}
+                <li class="collection-item">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Proposed By</th>
+                            <th>Change Type</th>
+                            <th>Change</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for itemchangeproposal in change_list %}
+                            <tr>
+                                <td class="item_change_username">
+                                    {% if itemchangeproposal.proposed_by_process %}
+                                        {{ itemchangeproposal.proposed_by_process }}
+                                    {% else %}
+                                        <a href="{% url 'user_view' itemchangeproposal.proposed_by.id %}">{{ itemchangeproposal.proposed_by }}</a>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong class="
+                    {% if itemchangeproposal.change == 'delete' %}
+                    red-text
+                    {% elif itemchangeproposal.change == 'update' %}
+                    orange-text
+                    {% else %}
+                    green-text
+                    {% endif %}
+                    ">
+                                        {{ itemchangeproposal.change }}
+                                    </strong>
+                                </td>
+                                <td>
+                                    {% if itemchangeproposal.change == 'delete' %}
+                                        <strong>{{ itemchangeproposal.existing_item }}</strong>
+                                        This will delete the item (only if it is
+                                        unused).
+                                    {% elif itemchangeproposal.change == 'update' %}
+                                        <strong>{{ itemchangeproposal.existing_item }}</strong>
+                                        <div class="row">
+                                            <div class="col s4 m4">Attribute Changing
+                                            </div>
+                                            <div class="col s4 m4">Old Value</div>
+                                            <div class="col s4 m4">New Value</div>
+                                        </div>
+                                        <div class="divider"></div>
+                                        {% if itemchangeproposal.name %}
+                                            <div class="row">
+                                                <div class="col s4 m4">Name</div>
+                                                <div class="col s4 m4">
+                                                    {{ itemchangeproposal.existing_item.name }}
+                                                </div>
+                                                <div class="col s4 m4">
+                                                    {{ itemchangeproposal.name }}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        {% if itemchangeproposal.item_type %}
+                                            <div class="row">
+                                                <div class="col s4 m4">
+                                                    Item Sub Sub Type
+                                                </div>
+                                                <div class="col s4 m4">
+                                                    {{ itemchangeproposal.existing_item.item_type }}
+                                                </div>
+                                                <div class="col s4 m4">
+                                                    {{ itemchangeproposal.item_type }}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        {% if itemchangeproposal.eve_echoes_market_id %}
+                                            <div class="row">
+                                                <div class="col s4 m4">
+                                                    eve_echoes_market_id
+                                                </div>
+                                                <div class="col s4 m4">
+                                                    {{ itemchangeproposal.existing_item.eve_echoes_market_id }}
+                                                </div>
+                                                <div class="col s4 m4">
+                                                    {{ itemchangeproposal.eve_echoes_market_id }}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="row">
+                                            <div class="col s6 m6">Attribute
+                                            </div>
+                                            <div class="col s6 m6">Value</div>
+                                        </div>
+                                        <div class="divider"></div>
+                                        <div class="row">
+                                            <div class="col s6 m6">Name
+                                            </div>
+                                            <div class="col s6 m6">
+                                                {{ itemchangeproposal.name }}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col s6 m6">Item Sub Sub Type
+                                            </div>
+                                            <div class="col s6 m6">
+                                                {{ itemchangeproposal.item_type }}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col s6 m6">Eve Echoes Market Id
+                                            </div>
+                                            <div class="col s6 m6">
+                                                {{ itemchangeproposal.eve_echoes_market_id }}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% has_item_change_edit_admin itemchangeproposal user as can_edit %}
+                                    {% has_item_change_approve_admin itemchangeproposal user as can_approve %}
+                                    {% if can_edit %}
+                                        <a href="{% url 'item-change-update' itemchangeproposal.id %}"
+                                           class="waves-btn btn">Edit Proposal</a>
+                                        <br/>
+                                    {% endif %}
+                                    {% if can_approve %}
+                                        <a href="{% url 'item-change-approve' itemchangeproposal.id %}"
+                                           class="waves-btn btn green ">Approve
+                                            Proposal</a>
+                                        <br/>
+                                    {% endif %}
+                                    {% if can_edit %}
+                                        <a href="{% url 'item-change-delete' itemchangeproposal.id %}"
+                                           class="waves-btn btn red">Delete Proposal</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </li>
+            {% else %}
+                <li class="collection-item"> There are no proposed item changes.</li>
+            {% endif %}
+        </ul>
+    </div>
+
+{% endblock %}

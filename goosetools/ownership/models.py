@@ -6,11 +6,14 @@ from django.db.models.aggregates import Sum
 from django.db.models.expressions import Case, F, When
 from django.db.models.fields import IntegerField
 from django.db.models.functions import Coalesce
+from django.template.defaultfilters import date as _date
 from django.utils import timezone
+from django.utils.datetime_safe import datetime
+from django.utils.timezone import localtime
 from djmoney.models.fields import MoneyField
 from djmoney.money import Money
 
-from goosetools.fleets.models import Fleet, FleetAnom, KillMail
+from goosetools.fleets.models import FleetAnom, KillMail
 from goosetools.users.models import Character, GooseUser
 
 
@@ -27,8 +30,6 @@ def model_sum(queryset, key):
 
 
 class LootBucket(models.Model):
-    fleet = models.ForeignKey(Fleet, on_delete=models.CASCADE)
-
     def ordered_lootgroup_set(self):
         return self.lootgroup_set.order_by("-created_at").all()
 
@@ -93,6 +94,12 @@ class LootBucket(models.Model):
 
 
 class LootGroup(models.Model):
+    character = models.OneToOneField(
+        Character,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
     fleet_anom = models.ForeignKey(
         FleetAnom, on_delete=models.CASCADE, null=True, blank=True
     )
@@ -104,21 +111,50 @@ class LootGroup(models.Model):
     manual = models.BooleanField(default=False)
     closed = models.BooleanField(default=False)
     created_at = models.DateTimeField(default=timezone.now)
+    locked_participation = models.BooleanField(default=False)
 
     # TODO Uncouple the fleet requirement from LootGroups
     def fleet(self):
         return self.fleet_anom and self.fleet_anom.fleet
 
+    def gooseuser_or_false(self):
+        if hasattr(self, "character") and self.character:
+            return self.character.user
+        else:
+            return False
+
     def display_name(self):
+        if self.fleet_anom and self.fleet_anom.next_repeat:
+            # noinspection PyProtectedMember
+            local_start = localtime(self.fleet_anom.time)
+            start = _date(local_start, "SHORT_DATE_FORMAT") + _date(local_start, " H:i")
+            local_end = localtime(self.fleet_anom.next_repeat)
+            if local_end.date() != local_start.date():
+                prefix = _date(local_end, "SHORT_DATE_FORMAT") + " "
+            else:
+                prefix = ""
+            end = prefix + _date(local_end, "H:i") + local_end.strftime(" %Z")
+            if self.name:
+                return f"{self.name} -- {start} - {end}"
+            else:
+                return f"{start} - {end}"
         if self.name:
-            return self.name
+            return str(self.name)
         if self.fleet_anom:
-            return self.fleet_anom.anom_type
+            return str(self.fleet_anom.anom_type)
+        if self.gooseuser_or_false():
+            return f"{self.character}'s personal items"
         else:
             return f"Loot Group {self.id}"
 
     def has_admin(self, user):
-        return self.fleet() and self.fleet().has_admin(user)
+        gooseuser = self.gooseuser_or_false()
+        return (
+            self.fleet()
+            and self.fleet().has_admin(user)
+            or gooseuser
+            and gooseuser == user
+        )
 
     def has_share(self, user):
         return (
@@ -145,7 +181,7 @@ class LootGroup(models.Model):
         )
 
     def still_open(self):
-        return not self.fleet().in_the_past() and not self.closed
+        return not self.fleet() or (not self.fleet().in_the_past() and not self.closed)
 
     def still_can_join_alts(self, user):
         num_chars = len(user.characters())
@@ -192,8 +228,25 @@ class LootGroup(models.Model):
             or 0
         )
 
+    @staticmethod
+    def create_or_get_personal(character):
+        if hasattr(character, "lootgroup"):
+            return character.lootgroup
+        else:
+            bucket = LootBucket.objects.create()
+            loot_group = LootGroup.objects.create(
+                character=character, bucket=bucket, locked_participation=True
+            )
+            LootShare.objects.create(
+                loot_group=loot_group,
+                character=character,
+                share_quantity=1,
+                created_at=datetime.now(),
+            )
+            return loot_group
+
     def __str__(self):
-        return str(self.fleet_anom)
+        return self.display_name()
 
 
 class LootShare(models.Model):

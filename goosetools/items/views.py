@@ -1,32 +1,45 @@
 import csv
 import math
+from decimal import Decimal
 from typing import Any, Dict, List
 
+import numpy as np
+from bokeh.embed import components
+from bokeh.layouts import column
+from bokeh.models import ColumnDataSource, HoverTool, NumeralTickFormatter
+from bokeh.plotting import figure
 from django import forms
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import ExpressionWrapper, F, Sum
 from django.db.models.fields import FloatField
 from django.db.models.functions import Coalesce
-from django.http.response import (
-    HttpResponse,
-    HttpResponseNotAllowed,
-    HttpResponseRedirect,
-)
+from django.http.response import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views.generic import ListView
+from django_pandas.io import read_frame
 
-from goosetools.items.forms import DeleteItemForm, InventoryItemForm, JunkItemsForm
+from goosetools.items.forms import (
+    DeleteItemForm,
+    InventoryItemForm,
+    ItemChangeProposalForm,
+    ItemChangeProposalSelectForm,
+    JunkItemsForm,
+)
 from goosetools.items.models import (
     CharacterLocation,
     InventoryItem,
     Item,
+    ItemChangeError,
+    ItemChangeProposal,
     ItemLocation,
     JunkedItem,
     StackedInventoryItem,
     to_isk,
 )
+from goosetools.notifications.notification_types import NOTIFICATION_TYPES
 from goosetools.users.forms import CharacterForm
 from goosetools.users.models import Character
 
@@ -268,7 +281,11 @@ def unjunk_item(request, pk):
             junked_item.unjunk()
         return HttpResponseRedirect(reverse("junk"))
     else:
-        return HttpResponseNotAllowed("POST")
+        return render(
+            request,
+            "items/junk_single.html",
+            {"title": f"Unjunk Item {junked_item}"},
+        )
 
 
 @transaction.atomic
@@ -286,7 +303,11 @@ def junk_stack(request, pk):
             )
         return HttpResponseRedirect(reverse("items"))
     else:
-        return HttpResponseNotAllowed("POST")
+        return render(
+            request,
+            "items/junk_single.html",
+            {"title": f"Junk Stack {stack}"},
+        )
 
 
 @transaction.atomic
@@ -304,7 +325,11 @@ def junk_item(request, pk):
             )
         return HttpResponseRedirect(reverse("items"))
     else:
-        return HttpResponseNotAllowed("POST")
+        return render(
+            request,
+            "items/junk_single.html",
+            {"title": f"Junk Item {item}"},
+        )
 
 
 @transaction.atomic
@@ -498,3 +523,552 @@ def item_delete(request, pk):
         "items/item_delete.html",
         {"form": form, "title": "Delete Item", "item": item},
     )
+
+
+def item_db(request):
+    return render(
+        request,
+        "items/item_db.html",
+        {
+            "page_data": {
+                "gooseuser_id": request.gooseuser.id,
+                "site_prefix": f"/{request.site_prefix}",
+                "ajax_url": reverse("item-list"),
+                "data_url": reverse("item_data", args=[0]),
+                "propose_url": reverse("item-change-create-for-item", args=[0]),
+            },
+            "gooseuser": request.gooseuser,
+        },
+    )
+
+
+class DataForm(forms.Form):
+    days = forms.IntegerField(initial=14)
+    style = forms.ChoiceField(
+        choices=[("lines", "Lines"), ("bar", "Bar Chart"), ("scatter", "Scatter")],
+        initial="lines",
+    )
+    show_buy_sell = forms.BooleanField(
+        initial=False,
+        required=False,
+    )
+    filter_outliers = forms.BooleanField(
+        initial=True,
+        required=False,
+    )
+
+
+def item_data(request, pk):
+    item = get_object_or_404(Item, pk=pk)
+    days = 14
+    style = "lines"
+    show_buy_sell = False
+    filter_outliers = True
+    if request.GET:
+        form = DataForm(request.GET)
+        if form.is_valid():
+            days = form.cleaned_data["days"]
+            style = form.cleaned_data["style"]
+            show_buy_sell = form.cleaned_data["show_buy_sell"]
+            filter_outliers = form.cleaned_data["filter_outliers"]
+    else:
+        form = DataForm()
+
+    df = get_df(request, days, item, filter_outliers)
+    if style == "bar":
+        div, script = render_bar_graph(days, df, item, show_buy_sell)
+
+    else:
+        div, script = render_graph(days, df, item, show_buy_sell, style)
+
+    result = render(
+        request,
+        "items/item_data.html",
+        {
+            "item": item,
+            "script": script,
+            "div": div,
+            "form": form,
+        },
+    )
+    return result
+
+
+def get_df(request, days, item, filter_outliers):
+    time_threshold = timezone.now() - timezone.timedelta(hours=int(days) * 24)
+    events_last_week = (
+        item.itemmarketdataevent_set.filter(time__gte=time_threshold)
+        .values("time", "sell", "buy", "highest_buy", "lowest_sell", "volume")
+        .order_by("time")
+        .all()
+    )
+    df = read_frame(
+        events_last_week,
+        fieldnames=["time", "sell", "buy", "highest_buy", "lowest_sell", "volume"],
+    )
+    if filter_outliers:
+        bads = []
+        for f in ["sell", "buy", "highest_buy", "lowest_sell"]:
+            # noinspection PyBroadException
+            try:
+                df[f] = df[f][~is_outlier(df[f])]
+            except Exception:  # pylint: disable=broad-except
+                bads.append(f)
+        if bads:
+            messages.warning(
+                request,
+                f"Failed to strip outliers due to bad input data for {','.join(bads)}",
+            )
+    return df
+
+
+def is_outlier(points, thresh=3.5):
+    """
+    Returns a boolean array with True if points are outliers and False
+    otherwise.
+
+    Parameters:
+    -----------
+        points : An numobservations by numdimensions array of observations
+        thresh : The modified z-score to use as a threshold. Observations with
+            a modified z-score (based on the median absolute deviation) greater
+            than this value will be classified as outliers.
+
+    Returns:
+    --------
+        mask : A numobservations-length boolean array.
+
+    References:
+    ----------
+        Boris Iglewicz and David Hoaglin (1993), "Volume 16: How to Detect and
+        Handle Outliers", The ASQC Basic References in Quality Control:
+        Statistical Techniques, Edward F. Mykytka, Ph.D., Editor.
+    """
+    if len(points.shape) == 1:
+        points = points[:, None]
+    median = np.median(points, axis=0)
+    diff = np.sum((points - median) ** 2, axis=-1)
+    diff = np.sqrt(diff)
+    med_abs_deviation = np.median(diff)
+
+    modified_z_score = Decimal(0.6745) * diff / med_abs_deviation
+
+    return modified_z_score > thresh
+
+
+def calc_vals_for_key(df, key):
+    df = df.groupby("day").agg(
+        min=(key, np.min),
+        max=(key, np.max),
+        first=(key, "first"),
+        close=(key, "last"),
+        volume=("volume", "sum"),
+    )
+    return df
+
+
+def render_bar_graph(days, df, item, show_buy_sell):
+    tools = "pan, wheel_zoom, box_zoom, reset, save"
+    title = f"Last {days} days of market data for {item}"
+    df["day"] = df["time"].dt.date
+    w = 12 * 60 * 60 * 1000 * 1.5
+    p = figure(
+        x_axis_type="datetime",
+        tools=tools,
+        # plot_width=700,
+        # plot_height=500,
+        title=title if show_buy_sell else title + " - Lowest Sell",
+        sizing_mode="stretch_both",
+    )
+    sell_key = "sell" if show_buy_sell else "lowest_sell"
+    buy_key = "buy" if show_buy_sell else "highest_buy"
+    df_agg = add_candlesticks(df, p, w, sell_key, "#D5E1DD", "#F2583E")
+    if not show_buy_sell:
+        p3 = figure(
+            x_axis_type="datetime",
+            tools=tools,
+            x_range=p.x_range,
+            # plot_width=700,
+            # plot_height=500,
+            title=title + " - Highest Buy",
+            sizing_mode="stretch_both",
+        )
+    else:
+        p3 = None
+    add_candlesticks(
+        df, p3 if not show_buy_sell else p, w, buy_key, "#80eb34", "#eba834"
+    )
+
+    p2 = figure(
+        x_axis_type="datetime",
+        tools="",
+        toolbar_location=None,
+        plot_height=200,
+        x_range=p.x_range,
+        title="volume",
+        sizing_mode="stretch_width",
+    )
+    p2.xaxis.major_label_orientation = math.pi / 4
+    p2.grid.grid_line_alpha = 0.3
+    p2.vbar(df_agg.index, w, df_agg.volume, [0] * df_agg.shape[0])
+
+    p.yaxis[0].formatter = NumeralTickFormatter(format="0,0 $")
+    p2.yaxis[0].formatter = NumeralTickFormatter(format="0,0")
+    if p3:
+        p3.yaxis[0].formatter = NumeralTickFormatter(format="0,0")
+        script, div = components(column([p, p3, p2], sizing_mode="scale_both"))
+    else:
+        script, div = components(column([p, p2], sizing_mode="scale_width"))
+    return div, script
+
+
+def add_candlesticks(df, p, w, key, increase_c, decrease_c):
+    df = calc_vals_for_key(df, key)
+    df["open"] = df["close"].shift(1)
+    df["open"][0] = df["first"][0]
+    df["min"] = df[["min", "open"]].min(axis=1)
+    df["max"] = df[["max", "open"]].max(axis=1)
+    increasing = df.open < df.close
+    decreasing = df.open > df.close
+    no_change = df.open == df.close
+    p.xaxis.major_label_orientation = math.pi / 4
+    p.grid.grid_line_alpha = 0.3
+    p.vbar(
+        df.index[increasing],
+        w,
+        df.open[increasing],
+        df.close[increasing],
+        fill_color=increase_c,
+        line_color="black",
+        legend_label=key,
+    )
+    p.vbar(
+        df.index[decreasing],
+        w,
+        df.open[decreasing],
+        df.close[decreasing],
+        fill_color=decrease_c,
+        line_color="black",
+    )
+    p.vbar(
+        df.index[no_change],
+        w,
+        df.close[no_change] - 1,
+        df.close[no_change] + 1,
+        fill_color="#e6550d",
+        line_color="black",
+    )
+    p.segment(
+        df.index,
+        df["max"],
+        df.index,
+        df["min"],
+        color="black",
+    )
+    return df
+
+
+def render_graph(days, df, item, show_buy_sell, style):
+    tools = "pan, wheel_zoom, box_zoom, reset, save"
+    title = f"Last {days} days of market data for {item}"
+    source = ColumnDataSource(df)
+    p = figure(
+        x_axis_type="datetime",
+        tools=tools,
+        # plot_width=700,
+        # plot_height=500,
+        sizing_mode="scale_both",
+        title=title,
+    )
+    tooltips = [
+        ("time", "$x{%F %R}"),
+        (
+            "highest_buy",
+            "@highest_buy{0,0 $}",
+        ),  # use @{ } for field names with spaces
+        (
+            "lowest_sell",
+            "@lowest_sell{0,0 $}",
+        ),  # use @{ } for field names with spaces
+    ]
+    if show_buy_sell:
+        tooltips.append(("sell", "@sell{0,0 $}"))
+        tooltips.append(("buy", "@buy{0,0 $}"))
+    h = HoverTool(
+        tooltips=tooltips,
+        formatters={
+            "$x": "datetime",  # use 'datetime' formatter for '@date' field
+            "@lowest_sell": "numeral",
+            # use 'printf' formatter for '@{adj close}' field
+            "@highest_buy": "numeral",
+            # use 'printf' formatter for '@{adj close}' field
+            "@sell": "numeral",  # use 'printf' formatter for '@{adj close}' field
+            "@buy": "numeral",  # use 'printf' formatter for '@{adj close}' field
+            # use default 'numeral' formatter for other fields
+        },
+        mode="mouse",
+    )
+    p.add_tools(h)
+    p.xaxis.major_label_orientation = math.pi / 4
+    p.grid.grid_line_alpha = 0.3
+    if style == "bar":
+        p.vbar(
+            "time",
+            60 * 60 * 2 * 1000,
+            "highest_buy",
+            "lowest_sell",
+            fill_color="#D5E1DD",
+            line_color="black",
+            source=source,
+        )
+        if show_buy_sell:
+            p.segment(
+                "time",
+                "sell",
+                "time",
+                "buy",
+                color="black",
+                source=source,
+            )
+    elif style == "lines":
+        p.line(
+            "time",
+            "highest_buy",
+            legend_label="Highest Buy",
+            line_width=2,
+            color="green",
+            source=source,
+        )
+        p.line(
+            "time",
+            "lowest_sell",
+            legend_label="Lowest Sell",
+            line_width=2,
+            color="blue",
+            source=source,
+        )
+        if show_buy_sell:
+            p.line(
+                "time",
+                "buy",
+                legend_label="Buy",
+                line_width=2,
+                color="purple",
+                source=source,
+            )
+            p.line(
+                "time",
+                "sell",
+                legend_label="Sell",
+                line_width=2,
+                color="brown",
+                source=source,
+            )
+    else:
+        if show_buy_sell:
+            p.circle(
+                "time",
+                "sell",
+                size=5,
+                color="purple",
+                alpha=0.5,
+                legend_label="Sell",
+                source=source,
+            )
+            p.square(
+                "time",
+                "buy",
+                size=5,
+                color="brown",
+                alpha=0.5,
+                legend_label="Buy",
+                source=source,
+            )
+        p.circle(
+            "time",
+            "lowest_sell",
+            size=3,
+            color="navy",
+            alpha=0.5,
+            legend_label="Lowest Sell",
+            source=source,
+        )
+        p.square(
+            "time",
+            "highest_buy",
+            size=3,
+            color="green",
+            alpha=0.5,
+            legend_label="Highest Buy",
+            source=source,
+        )
+    p.yaxis[0].formatter = NumeralTickFormatter(format="0,0 $")
+    script, div = components(p)
+    return div, script
+
+
+class ItemChangeProposalList(ListView):
+    queryset = ItemChangeProposal.open_proposals()
+    context_object_name = "change_list"
+    template_name = "items/item_change/item_change_list.html"
+
+
+def create_item_change_for_item(request, pk):
+    return create_item_form(request, get_object_or_404(Item, pk=pk))
+
+
+def create_item_form(request, existing_item):
+    if request.method == "POST":
+        form = ItemChangeProposalForm(request.POST, existing_item=existing_item)
+        if form.is_valid():
+            proposal = ItemChangeProposal()
+            save_proposal(existing_item, form, proposal, request)
+            NOTIFICATION_TYPES["itemchanges"].send()
+            messages.success(request, f"Successfully created {proposal}")
+            return HttpResponseRedirect(reverse("item-change-list"))
+    else:
+        initial = {}
+        if existing_item:
+            initial = {
+                "name": existing_item.name,
+                "item_type": existing_item.item_type,
+                "eve_echoes_market_id": existing_item.eve_echoes_market_id,
+            }
+        form = ItemChangeProposalForm(initial=initial, existing_item=existing_item)
+    return render(
+        request,
+        "items/item_change/item_change_form.html",
+        {"form": form, "existing_item": existing_item},
+    )
+
+
+def select_create_item_change(request):
+    if request.method == "POST":
+        form = ItemChangeProposalSelectForm(request.POST)
+        if form.is_valid():
+            existing_item = form.cleaned_data["existing_item"]
+            if existing_item:
+                return HttpResponseRedirect(
+                    reverse("item-change-create-for-item", args=[existing_item.pk])
+                )
+            else:
+                return HttpResponseRedirect(reverse("item-change-create-new"))
+    else:
+        form = ItemChangeProposalSelectForm()
+    return render(
+        request,
+        "items/item_change/item_change_select.html",
+        {"form": form},
+    )
+
+
+def create_item_change(request):
+    return create_item_form(request, None)
+
+
+def update_item_change(request, pk):
+    proposal = get_object_or_404(ItemChangeProposal, pk=pk)
+    if not proposal.has_edit_admin(request.gooseuser):
+        return forbidden(request)
+    existing_item = proposal.existing_item
+    if request.method == "POST":
+        form = ItemChangeProposalForm(request.POST, existing_item=existing_item)
+        if form.is_valid():
+            save_proposal(existing_item, form, proposal, request)
+            return HttpResponseRedirect(reverse("item-change-list"))
+    else:
+        initial = {"change": proposal.change}
+        if existing_item:
+            initial = {
+                "change": proposal.change,
+                "name": existing_item.name,
+                "item_type": existing_item.item_type,
+                "eve_echoes_market_id": existing_item.eve_echoes_market_id,
+            }
+        if proposal.name:
+            initial["name"] = proposal.name
+
+        if proposal.item_type:
+            initial["item_type"] = proposal.item_type
+
+        if proposal.eve_echoes_market_id:
+            initial["eve_echoes_market_id"] = proposal.eve_echoes_market_id
+        form = ItemChangeProposalForm(
+            initial=initial,
+            existing_item=existing_item,
+        )
+
+    return render(
+        request,
+        "items/item_change/item_change_form.html",
+        {"form": form, "itemchangeproposal": proposal},
+    )
+
+
+def save_proposal(existing_item, form, proposal, request):
+    proposal.proposed_by = request.gooseuser
+    proposal.proposed_at = timezone.now()
+    proposal.change = form.cleaned_data["change"]
+    proposal.existing_item = existing_item
+    if existing_item and existing_item.name == form.cleaned_data["name"]:
+        proposal.name = None
+    else:
+        proposal.name = form.cleaned_data["name"]
+    if existing_item and existing_item.item_type == form.cleaned_data["item_type"]:
+        proposal.item_type = None
+    else:
+        proposal.item_type = form.cleaned_data["item_type"]
+    proposal.eve_echoes_market_id = form.cleaned_data["eve_echoes_market_id"]
+    if (
+        existing_item
+        and existing_item.eve_echoes_market_id
+        == form.cleaned_data["eve_echoes_market_id"]
+    ):
+        proposal.eve_echoes_market_id = None
+    else:
+        proposal.eve_echoes_market_id = form.cleaned_data["eve_echoes_market_id"]
+    proposal.save()
+
+
+def approve_item_change(request, pk):
+    proposal = get_object_or_404(ItemChangeProposal, pk=pk)
+    if not proposal.has_approve_admin(request.gooseuser):
+        return forbidden(request)
+
+    if request.method == "POST":
+        try:
+            proposal.approve(request.gooseuser)
+            if ItemChangeProposal.open_proposals().count() == 0:
+                NOTIFICATION_TYPES["itemchanges"].dismiss()
+            messages.success(request, f"Succesfully approved {proposal}")
+        except ItemChangeError as e:
+            messages.error(request, e.message)
+        return HttpResponseRedirect(reverse("item-change-list"))
+    else:
+        return render(
+            request,
+            "items/item_change/item_change_approve.html",
+            {"itemchangeproposal": proposal},
+        )
+
+
+def delete_item_change(request, pk):
+    proposal = get_object_or_404(ItemChangeProposal, pk=pk)
+    if not proposal.has_edit_admin(request.gooseuser):
+        return forbidden(request)
+
+    if request.method == "POST":
+        try:
+            proposal.try_delete()
+            if ItemChangeProposal.open_proposals().count() == 0:
+                NOTIFICATION_TYPES["itemchanges"].dismiss()
+            messages.success(request, f"Succesfully deleted {proposal}")
+        except ItemChangeError as e:
+            messages.error(request, e.message)
+        return HttpResponseRedirect(reverse("item-change-list"))
+    else:
+        return render(
+            request,
+            "items/item_change/item_change_confirm_delete.html",
+            {"itemchangeproposal": proposal},
+        )

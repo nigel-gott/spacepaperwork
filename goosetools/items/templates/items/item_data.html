@@ -1,0 +1,66 @@
+{% extends "core/base.html" %}
+{% load materializecss %}
+{% load static %}
+{% block extraheader %}
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.4.0/css/bulma.css"/>
+{% endblock %}
+{% block body %}
+    <div class="row">
+        <div class="s12 m12">
+            <h1>Market Data for {{ item }}</h1>
+        </div>
+    </div>
+    <div class="row">
+        {% if form %}
+            <!-- Form Errors -->
+            {% if form.non_field_errors %}
+                <div class="row">
+                    <div class="col s12 m5">
+                        <div class="card-panel red darken-1">
+                <span class="white-text">
+                    <b>Errors with form:</b>
+                <ul class="errors">
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error|escape }}</li>
+                    {% endfor %}
+                </ul>
+                </span>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <form action="" method="get">
+                {% csrf_token %}
+                <div class="row">
+                    {{ form.days|materializecss:'s12 m6, icon=access_time' }}
+                    {{ form.style|materializecss:'s12 m6, icon=graphic_eq' }}
+                </div>
+                <div class="row">
+                    {{ form.show_buy_sell|materializecss:'s12 m6, icon=attach_money' }}
+                    {{ form.filter_outliers|materializecss:'s12 m6, icon=vertical_align_center' }}
+                </div>
+                <a class="btn waves-effect waves-light grey" href="{% url 'item_db' %}">Back
+                    to Item Db
+                    <i class="material-icons right">arrow_back</i>
+                </a>
+                <button class="btn waves-effect waves-light" type="submit"
+                        value="Submit">Change Graph Settings
+                    <i class="material-icons right">send</i>
+                </button>
+            </form>
+            </div>
+
+        {% endif %}
+    <div class="divider"></div>
+    <div class="section">{{ div | safe }}
+
+    </div>
+{% endblock %}
+
+{% block extrafooter %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bokeh/2.3.1/bokeh.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bokeh/2.3.1/bokeh-widgets.min.js"></script>
+    {{ script | safe }}
+{% endblock %}
