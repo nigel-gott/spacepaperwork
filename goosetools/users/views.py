@@ -158,7 +158,7 @@ def user_signup(request, pk):
                     corp=corp,
                     answers=corp_form.as_dict() if corp_form else {},
                 )
-                if settings.GOOSEFLOCK_FEATURES:
+                if settings.PRONOUN_ROLES:
                     _give_pronoun_roles(
                         gooseuser.discord_uid(), data["prefered_pronouns"]
                     )
@@ -194,11 +194,11 @@ def user_signup(request, pk):
 def _give_pronoun_roles(uid, prefered_pronouns):
     try:
         if prefered_pronouns == "they":
-            DiscordGuild.try_give_role(uid, 762405572136927242)
+            DiscordGuild.try_give_role(uid, settings.PRONOUN_THEY_DISCORD_ROLE)
         elif prefered_pronouns == "she":
-            DiscordGuild.try_give_role(uid, 762405484614910012)
+            DiscordGuild.try_give_role(uid, settings.PRONOUN_SHE_DISCORD_ROLE)
         elif prefered_pronouns == "he":
-            DiscordGuild.try_give_role(uid, 762404773512740905)
+            DiscordGuild.try_give_role(uid, settings.PRONOUN_HE_DISCORD_ROLE)
     except HTTPError:
         pass
 

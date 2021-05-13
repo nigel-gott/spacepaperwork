@@ -49,19 +49,17 @@
         {% endif %}
     </ul>
     <ul class="dropdown-content" id="dropdown_tools">
-        {% if GOOSEFLOCK_FEATURES %}
-            <li>
-                <a href="{% url 'mapbot:mapbot_index' %}">MapBot</a>
-            </li>
-        {% endif %}
+        <li>
+            <a href="{% url 'mapbot:mapbot_index' %}">MapBot</a>
+        </li>
         <li>
             <a href="{% url 'character_search' %}">Char/User Search</a>
         </li>
         <li>
             <a href="{% url 'item_db' %}">Item Database</a>
         </li>
-        {% if GOOSEFLOCK_FEATURES %}
-            <li><a href="https://wiki.goosetools.com">HONK Wiki</a></li>
+        {% if WIKI_NAME %}
+            <li><a href="{{ WIKI_URL }}">{{ WIKI_NAME }}</a></li>
         {% endif %}
     </ul>
     <ul class="dropdown-content" id="dropdown_fleets">
@@ -129,9 +127,11 @@
     {% has_perm user "venmo_admin" as is_venmo_admin %}
     {% if is_venmo_admin %}
         <ul class="dropdown-content" id="dropdown_venmo">
-            <li><a href="{% url 'venmo:dashboard' 'default' %}">Eggs<i class="material-icons left">attach_money</i></a></li>
-            <li >
-                <a href="{% url 'venmo:currency-list' %}">Currency Admin<i class="material-icons left">settings</i></a>
+            <li><a href="{% url 'venmo:dashboard' 'default' %}">Eggs<i
+                    class="material-icons left">attach_money</i></a></li>
+            <li>
+                <a href="{% url 'venmo:currency-list' %}">Currency Admin<i
+                        class="material-icons left">settings</i></a>
             </li>
         </ul>
     {% endif %}
@@ -156,7 +156,7 @@
                 <a href="{% url 'groups_view' %}">User Groups Admin</a>
             </li>
         {% endif %}
-        {% if is_ship_price_admin and GOOSEFLOCK_FEATURES %}
+        {% if is_ship_price_admin %}
             <li>
                 <a href="{% url 'industry:ship_dashboard' %}">Ship Admin</a>
             </li>
@@ -236,21 +236,21 @@
                     </a></li>
                 {% endif %}
                 {% if is_venmo_admin %}
-                <li><a class="dropdown-trigger valign-wrapper" data-target="dropdown_venmo" href="#!">
-                    <i class="material-icons left" style="margin-right:0px;">attach_money</i>Eggs
-                    <i class="material-icons right">arrow_drop_down</i>
+                    <li><a class="dropdown-trigger valign-wrapper"
+                           data-target="dropdown_venmo" href="#!">
+                        <i class="material-icons left" style="margin-right:0px;">attach_money</i>Eggs
+                        <i class="material-icons right">arrow_drop_down</i>
                     </a></li>
                 {% else %}
-                <li><a  href="{% url 'venmo:dashboard' 'default' %}">Eggs<i class="material-icons left">attach_money</i>
+                    <li><a href="{% url 'venmo:dashboard' 'default' %}">Eggs<i
+                            class="material-icons left">attach_money</i></a></li>
                 {% endif %}
-                {% if GOOSEFLOCK_FEATURES %}
-                    {% if is_ship_orderer or is_srp_claimer %}
-                        <li><a class="dropdown-trigger valign-wrapper"
-                               data-target="dropdown_ships" href="#!">
-                            <i class="material-icons left" style="margin-right:0px;">directions_boat</i>Ships
-                            <i class="material-icons right">arrow_drop_down</i>
-                        </a></li>
-                    {% endif %}
+                {% if is_ship_orderer or is_srp_claimer %}
+                    <li><a class="dropdown-trigger valign-wrapper"
+                           data-target="dropdown_ships" href="#!">
+                        <i class="material-icons left" style="margin-right:0px;">directions_boat</i>Ships
+                        <i class="material-icons right">arrow_drop_down</i>
+                    </a></li>
                 {% endif %}
                 <li>
                     <a class="dropdown-trigger valign-wrapper"
@@ -280,11 +280,6 @@
                 <li>
                     <a href="{% url 'tenants:splash' %}">
                         <i class="material-icons left">star</i>Features
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'tenants:pricing' %}">
-                        <i class="material-icons left">attach_money</i>Pricing
                     </a>
                 </li>
                 <li>
@@ -350,7 +345,7 @@
                 <a href="{% url 'groups_view' %}">User Groups Admin</a>
             </li>
         {% endif %}
-        {% if is_ship_price_admin and GOOSEFLOCK_FEATURES %}
+        {% if is_ship_price_admin %}
             <li>
                 <a href="{% url 'industry:ship_dashboard' %}">Ship Admin</a>
             </li>
@@ -393,28 +388,28 @@
                 <i class="material-icons left">help</i> Help
             </a>
         </li>
-        {% if GOOSEFLOCK_FEATURES %}
-            {% if is_ship_orderer %}
-                <li>
-                    <a href="{% url 'industry:shiporders_view' %}">
-                        Ship Orders
-                    </a>
-                </li>
-            {% endif %}
-            {% if is_srp_claimer %}
-                <li>
-                    <a href="{% url 'core:home' %}">
-                        SRP
-                    </a>
-                </li>
-            {% endif %}
+        {% if is_ship_orderer %}
+            <li>
+                <a href="{% url 'industry:shiporders_view' %}">
+                    Ship Orders
+                </a>
+            </li>
         {% endif %}
-        <li >
-            <a href="{% url 'venmo:dashboard' 'default' %}">Eggs<i class="material-icons right">attach_money</i></a>
+        {% if is_srp_claimer %}
+            <li>
+                <a href="{% url 'core:home' %}">
+                    SRP
+                </a>
+            </li>
+        {% endif %}
+        <li>
+            <a href="{% url 'venmo:dashboard' 'default' %}">Eggs<i
+                    class="material-icons right">attach_money</i></a>
         </li>
         {% if is_venmo_admin %}
-            <li >
-                <a href="{% url 'venmo:currency-list' %}">Currency Admin<i class="material-icons right">attach_money</i></a>
+            <li>
+                <a href="{% url 'venmo:currency-list' %}">Currency Admin<i
+                        class="material-icons right">attach_money</i></a>
             </li>
         {% endif %}
 
@@ -476,20 +471,18 @@
                     class="material-icons right">find_replace</i></a></li>
         {% endif %}
 
-        {% if GOOSEFLOCK_FEATURES %}
-            <li>
-                <a href="{% url 'mapbot:mapbot_index' %}">MapBot</a>
-            </li>
-        {% endif %}
+        <li>
+            <a href="{% url 'mapbot:mapbot_index' %}">MapBot</a>
+        </li>
         <li>
             <a href="{% url 'character_search' %}">Char/User Search</a>
         </li>
         <li>
             <a href="{% url 'item_db' %}">Item Database</a>
         </li>
-        {% if GOOSEFLOCK_FEATURES %}
+        {% if WIKI_NAME %}
             <li>
-                <a href="https://wiki.goosetools.com">HONK Wiki</a>
+                <a href="{{ WIKI_URL }}">{{ WIKI_NAME }}</a>
             </li>
         {% endif %}
 
@@ -512,11 +505,6 @@
             <li>
                 <a href="{% url 'tenants:splash' %}">
                     <i class="material-icons left">star</i>Features
-                </a>
-            </li>
-            <li>
-                <a href="{% url 'tenants:pricing' %}">
-                    <i class="material-icons left">attach_money</i>Pricing
                 </a>
             </li>
             <li>
@@ -552,13 +540,15 @@
         <div class="container">
             <h5 class="white-text">{{ SITE_NAME }}</h5>
             <ul>
-                {% if GOOSEFLOCK_FEATURES %}
+                {% if HELP_URL %}
                     <li><a class="grey-text text-lighten-3"
-                           href="https://wiki.goosetools.com/index.php?title=Goosetools">How
-                        to use GooseTools</a>
+                           href="{{ HELP_URL }}">How
+                        to use {{ SITE_NAME }}</a>
                     </li>
+                {% endif %}
+                {% if WIKI_NAME %}
                     <li><a class="grey-text text-lighten-3"
-                           href="https://wiki.goosetools.com">HONK Wiki</a></li>
+                           href="{{ WIKI_URL }}">{{ WIKI_NAME }}</a></li>
                 {% endif %}
                 <li>
                     <i class="material-icons left">help</i>

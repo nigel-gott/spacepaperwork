@@ -12,7 +12,7 @@ from goosetools.users.models import Character, Corp
 FOG_VENMO_API_TYPE = "fog_venmo"
 SPACE_VENMO_API_TYPE = "space_venmo"
 api_choices = [(SPACE_VENMO_API_TYPE, "space_venmo")]
-if settings.GOOSEFLOCK_FEATURES:
+if settings.VENMO_HOST_URL:
     api_choices.append((FOG_VENMO_API_TYPE, "Fog Venmo"))
 
 

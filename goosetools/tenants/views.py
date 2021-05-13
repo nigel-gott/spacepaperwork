@@ -76,7 +76,7 @@ class ClientCreate(CreateView):
             return HttpResponseRedirect(reverse("tenants:splash"))
 
     def form_valid(self, form):
-        if settings.GOOSEFLOCK_FEATURES:
+        if settings.SINGLE_TENANT:
             return HttpResponseBadRequest()
         context = self.get_context_data()
         signup_form = context["signup_form"]
@@ -97,7 +97,7 @@ class ClientCreate(CreateView):
 
 
 def splash(request):
-    if settings.GOOSEFLOCK_FEATURES:
+    if settings.SINGLE_TENANT:
         return HttpResponseRedirect(reverse("core:splash"))
     owner_orgs, member_orgs = find_tenants_for_user(request)
     return render(
@@ -112,24 +112,8 @@ def splash(request):
     )
 
 
-def pricing(request):
-    if settings.GOOSEFLOCK_FEATURES:
-        return HttpResponseRedirect(reverse("core:splash"))
-    owner_orgs, member_orgs = find_tenants_for_user(request)
-    return render(
-        request,
-        "tenants/pricing.html",
-        {
-            "tenant_subfolder_prefix": settings.TENANT_SUBFOLDER_PREFIX,
-            "owner_orgs": owner_orgs,
-            "member_orgs": member_orgs,
-            "orgs": owner_orgs + member_orgs,
-        },
-    )
-
-
 def help_page(request):
-    if settings.GOOSEFLOCK_FEATURES:
+    if settings.SINGLE_TENANT:
         return HttpResponseRedirect(reverse("core:splash"))
     owner_orgs, member_orgs = find_tenants_for_user(request)
     return render(

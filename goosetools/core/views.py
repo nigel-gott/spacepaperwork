@@ -24,10 +24,10 @@ def core_splash(request):
 
 def core_home(request):
     context = {}
-    if not settings.GOOSEFLOCK_FEATURES:
+    if not settings.SINGLE_TENANT:
         context[
             "share_url"
-        ] = f"https://www.spacepaperwork.com/{settings.TENANT_SUBFOLDER_PREFIX}/{request.tenant.name}/"
+        ] = f"{settings.BASE_URL}{settings.TENANT_SUBFOLDER_PREFIX}/{request.tenant.name}/"
 
     return render(request, "core/home.html", context)
 

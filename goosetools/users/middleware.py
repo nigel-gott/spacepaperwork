@@ -109,7 +109,7 @@ class LoginAndApprovedUserMiddleware(AuthenticationMiddleware):
                 hasattr(request.user, "gooseuser") and request.user.gooseuser
             )
 
-        if settings.GOOSEFLOCK_FEATURES:
+        if settings.SINGLE_TENANT:
             request.site_prefix = settings.URL_PREFIX
         else:
             if in_public:

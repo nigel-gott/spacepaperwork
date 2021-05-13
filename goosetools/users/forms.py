@@ -81,7 +81,7 @@ class SignupFormWithTimezone(forms.Form):
         )
         super().__init__(*args, **kwargs)
 
-        if not settings.GOOSEFLOCK_FEATURES:
+        if not settings.PRONOUN_ROLES:
             self._disable_field("prefered_pronouns")
 
         self.fields["existing_character"].queryset = existing_characters

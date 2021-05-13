@@ -378,7 +378,7 @@ class UserAuthTest(GooseToolsTestCase):
                 },
             )
 
-    @override_settings(GOOSEFLOCK_FEATURES="on")
+    @override_settings(PRONOUN_ROLES="on")
     def test_signing_up_gives_preffered_pronoun_role_if_specified(
         self,
     ):

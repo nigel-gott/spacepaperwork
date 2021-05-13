@@ -56,13 +56,11 @@
     {% endfor %}
     </ul>
             </td></tr>
-    {% if GOOSEFLOCK_FEATURES %}
             <tr> <td>
             Venmo:
                 </td><td>
     <a href="{% url 'venmo:other_dashboard' 'default' viewed_user.id %}">Their Venmo Transactions</a>
             </td></tr>
-    {% endif %}
         {% for field in form %}
             <tr> <td>
                     {{ field.label_tag }}

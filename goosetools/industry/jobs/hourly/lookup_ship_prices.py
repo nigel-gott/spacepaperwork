@@ -18,16 +18,15 @@ from goosetools.tenants.models import Client
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
-# The ID and range of a sample spreadsheet.
-SAMPLE_SPREADSHEET_ID = "1YlJsd_HnHSRQBtmqkfGpB83Wle6PpbP0s5NGX_8PScw"
-SAMPLE_RANGE_NAME = "Ship Pricing!A1:J700"
-
 
 class Job(HourlyJob):
-    help = "Downloads ship prices from walmarx"
+    help = "Downloads ship prices"
 
     def execute(self):
-        if settings.GOOSEFLOCK_FEATURES:
+        if (
+            settings.SHIP_PRICE_GOOGLE_SHEET_ID
+            and settings.SHIP_PRICE_GOOGLE_SHEET_CELL_RANGE
+        ):
             for tenant in Client.objects.all():
                 if tenant.name != "public":
                     with tenant_context(tenant):
@@ -51,50 +50,53 @@ class Job(HourlyJob):
                             with open("token.pickle", "wb") as token:
                                 pickle.dump(creds, token)
 
-                        service = build("sheets", "v4", credentials=creds)
+                    service = build("sheets", "v4", credentials=creds)
 
-                        # Call the Sheets API
-                        sheet = service.spreadsheets()
-                        result = (
-                            sheet.values()
-                            .get(
-                                spreadsheetId=SAMPLE_SPREADSHEET_ID,
-                                range=SAMPLE_RANGE_NAME,
-                            )
-                            .execute()
+                    # Call the Sheets API
+                    sheet = service.spreadsheets()
+                    result = (
+                        sheet.values()
+                        .get(
+                            spreadsheetId=settings.SHIP_PRICE_GOOGLE_SHEET_ID,
+                            range=settings.SHIP_PRICE_GOOGLE_SHEET_CELL_RANGE,
                         )
-                        values = result.get("values", [])
+                        .execute()
+                    )
+                    values = result.get("values", [])
 
-                        if not values:
-                            print("No data found.")
-                        else:
-                            i = 0
-                            for row in values:
-                                try:
-                                    if len(row) > 2:
-                                        ship_name = row[0]
-                                        ship = Ship.objects.get(name=ship_name.strip())
-                                        try:
-                                            isk_price = parse_price(row[1])
-                                            eggs_price = parse_price(row[2])
-                                            ship.isk_price = to_isk(isk_price)
-                                            ship.eggs_price = to_isk(eggs_price)
-                                        except Exception as e:  # pylint: disable=broad-except
-                                            ship.isk_price = None
-                                            ship.eggs_price = None
-                                            print(
-                                                f"Failed parsing prices for {ship_name}"
-                                            )
-                                            print(e)
+                    if not values:
+                        print("No data found.")
+                    else:
+                        i = 0
+                        for row in values:
+                            try:
+                                if len(row) > 2:
+                                    ship_name = row[0]
+                                    ship = Ship.objects.get(name=ship_name.strip())
+                                    try:
+                                        isk_price = parse_price(row[1])
+                                        eggs_price = parse_price(row[2])
+                                        ship.isk_price = to_isk(isk_price)
+                                        ship.eggs_price = to_isk(eggs_price)
+                                    except Exception as e:  # pylint: disable=broad-except
+                                        ship.isk_price = None
+                                        ship.eggs_price = None
+                                        print(f"Failed parsing prices for {ship_name}")
+                                        print(e)
 
-                                        ship.prices_last_updated = timezone.now()
-                                        ship.full_clean()
-                                        ship.save()
-                                        print(f"Added {ship}")
-                                except Exception as e:  # pylint: disable=broad-except
-                                    print(f"Failed for row {i}")
-                                    print(e)
-                                i = i + 1
+                                    ship.prices_last_updated = timezone.now()
+                                    ship.full_clean()
+                                    ship.save()
+                                    print(f"Added {ship}")
+                            except Exception as e:  # pylint: disable=broad-except
+                                print(f"Failed for row {i}")
+                                print(e)
+                            i = i + 1
+        else:
+            print(
+                "Not looking up ship prices as no spreadsheet and range is "
+                "configured."
+            )
 
 
 def parse_price(price_str: str) -> int:

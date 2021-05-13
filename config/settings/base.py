@@ -14,12 +14,27 @@ from moneyed.localization import _FORMATTER
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 APPS_DIR = ROOT_DIR / "goosetools"
 env = environ.Env(
-    USE_NEW_VENMO_COMMANDS=(bool, False), GOOSEFLOCK_FEATURES=(bool, False)
+    USE_NEW_VENMO_COMMANDS=(bool, False),
+    SINGLE_TENANT=(bool, False),
+    GOOSEFLOCK_FEATURES=(bool, False),
+    PRONOUN_ROLES=(bool, False),
 )
 
 env.read_env(str(ROOT_DIR / ".env"))
 
+SINGLE_TENANT = env("SINGLE_TENANT")
+PRONOUN_ROLES = env("PRONOUN_ROLES")
+PRONOUN_THEY_DISCORD_ROLE = env("PRONOUN_THEY_DISCORD_ROLE")
+PRONOUN_SHE_DISCORD_ROLE = env("PRONOUN_SHE_DISCORD_ROLE")
+PRONOUN_HE_DISCORD_ROLE = env("PRONOUN_HE_DISCORD_ROLE")
 GOOSEFLOCK_FEATURES = env("GOOSEFLOCK_FEATURES")
+WIKI_NAME = env("WIKI_NAME", default=False)
+WIKI_URL = env("WIKI_URL", default=False)
+BASE_URL = env("BASE_URL")
+SHIP_PRICE_GOOGLE_SHEET_ID = env("SHIP_PRICE_GOOGLE_SHEET_ID", default=False)
+SHIP_PRICE_GOOGLE_SHEET_CELL_RANGE = env(
+    "SHIP_PRICE_GOOGLE_SHEET_CELL_RANGE", default=False
+)
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
@@ -66,10 +81,6 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # APPS
 # ------------------------------------------------------------------------------
-GOOSEFLOCK_APPS = [
-    "goosetools.mapbot.apps.MapBotConfig",
-    "goosetools.industry.apps.IndustryConfig",
-]
 
 SHARED_APPS = [
     "django_tenants",  # mandatory
@@ -120,12 +131,11 @@ TENANT_APPS = [
     "goosetools.user_forms.apps.UserFormsConfig",
     "goosetools.notifications.apps.NotificationsConfig",
     "goosetools.venmo.apps.VenmoConfig",
+    "goosetools.mapbot.apps.MapBotConfig",
+    "goosetools.industry.apps.IndustryConfig",
 ]
 
-# https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
-if GOOSEFLOCK_FEATURES:
-    TENANT_APPS = TENANT_APPS + GOOSEFLOCK_APPS
-else:
+if not SINGLE_TENANT:
     TENANT_SUBFOLDER_PREFIX = "t"
 INSTALLED_APPS = list(SHARED_APPS) + [
     app for app in TENANT_APPS if app not in SHARED_APPS
@@ -215,7 +225,7 @@ LOGIN_REQUIRED_UNAPPROVED_USER_REDIRECT = "tenants:splash"
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#middleware
-if GOOSEFLOCK_FEATURES:
+if SINGLE_TENANT:
     MIDDLEWARE = ["django_tenants.middleware.main.TenantMainMiddleware"]
 else:
     MIDDLEWARE = ["django_tenants.middleware.TenantSubfolderMiddleware"]
@@ -358,10 +368,10 @@ REST_FRAMEWORK = {
     "DATETIME_FORMAT": "%Y-%m-%d %H:%M",
 }
 
-VENMO_HOST_URL = env("VENMO_HOST_URL")
-VENMO_BASE_PATH = env("VENMO_BASE_PATH")
-VENMO_API_TOKEN = env("VENMO_API_TOKEN")
-USE_NEW_VENMO_COMMANDS = env("USE_NEW_VENMO_COMMANDS")
+VENMO_HOST_URL = env("VENMO_HOST_URL", default=False)
+VENMO_BASE_PATH = env("VENMO_BASE_PATH", default=False)
+VENMO_API_TOKEN = env("VENMO_API_TOKEN", default=False)
+USE_NEW_VENMO_COMMANDS = env("USE_NEW_VENMO_COMMANDS", default=False)
 BOT_TOKEN = env("BOT_TOKEN")
 SITE_NAME = env("SITE_NAME", default="GooseTools")
 LOGIN_URL = env("LOGIN_URL", default="/accounts/discord/login/")
