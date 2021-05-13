@@ -17,6 +17,15 @@
     {% endblock %}
 </head>
 <body>
+{% has_perm user "user_admin" as is_user_admin %}
+{% has_perm user "loot_tracker" as is_loot_tracker %}
+{% has_perm user "ship_orderer" as is_ship_orderer %}
+{% has_perm user "srp_claimer" as is_srp_claimer %}
+{% has_perm user "user_group_admin" as is_user_group_admin %}
+{% has_perm user "single_corp_admin" as is_single_corp_admin %}
+{% has_perm user "all_corp_admin" as is_all_corp_admin %}
+{% has_perm user "ship_price_admin" as is_ship_price_admin %}
+{% has_perm user "discord_admin" as is_discord_admin %}
 {% if user.is_authenticated and user.gooseuser.is_approved %}
     <ul class="dropdown-content" id="dropdown_notifications">
         {% notifications user as ns %}
@@ -75,6 +84,22 @@
         <li><a href="{% url 'settings' %}">Settings</a></li>
         <li><a href="{% url 'characters' %}">Characters</a></li>
     </ul>
+    <ul class="dropdown-content" id="dropdown_ships">
+        {% if is_ship_orderer %}
+            <li>
+                <a href="{% url 'industry:shiporders_view' %}">
+                    Ship Orders
+                </a>
+            </li>
+        {% endif %}
+        {% if is_srp_claimer %}
+            <li>
+                <a href="{% url 'core:home' %}">
+                    SRP
+                </a>
+            </li>
+        {% endif %}
+    </ul>
     <ul class="dropdown-content" id="dropdown_sales">
         {% num_items user as num_to_sell %}
         {% num_contracts user as contracts %}
@@ -102,14 +127,6 @@
         </li>
     </ul>
 {% endif %}
-{% has_perm user "user_admin" as is_user_admin %}
-{% has_perm user "loot_tracker" as is_loot_tracker %}
-{% has_perm user "ship_orderer" as is_ship_orderer %}
-{% has_perm user "user_group_admin" as is_user_group_admin %}
-{% has_perm user "single_corp_admin" as is_single_corp_admin %}
-{% has_perm user "all_corp_admin" as is_all_corp_admin %}
-{% has_perm user "ship_price_admin" as is_ship_price_admin %}
-{% has_perm user "discord_admin" as is_discord_admin %}
 {% if is_user_admin or is_user_group_admin or is_single_corp_admin or is_all_corp_admin or is_ship_price_admin or is_discord_admin %}
     <ul class="dropdown-content" id="dropdown_admin">
         {% if is_user_admin %}
@@ -210,14 +227,18 @@
                     </a></li>
                 {% endif %}
                 {% if GOOSEFLOCK_FEATURES %}
-                    <li><a href="{% url 'venmo:dashboard' %}">Eggs<i
-                            class="material-icons left">attach_money</i>
-                        {% if is_ship_orderer %}
-                            <li><a href="{% url 'industry:shiporders_view' %}">Orders
-                            <i class="material-icons left">directions_boat</i>
-                        {% endif %}
+                    <li>
+                        <a href="{% url 'venmo:dashboard' %}">Eggs<i
+                                class="material-icons left">attach_money</i>
+                        </a></li>
+                    {% if is_ship_orderer or is_srp_claimer %}
+                        <li><a class="dropdown-trigger valign-wrapper"
+                               data-target="dropdown_ships" href="#!">
+                            <i class="material-icons left" style="margin-right:0px;">directions_boat</i>Ships
+                            <i class="material-icons right">arrow_drop_down</i>
+                        </a></li>
+                    {% endif %}
                 {% endif %}
-            </a></li>
                 <li>
                     <a class="dropdown-trigger valign-wrapper"
                        data-target="dropdown_tools" href="#!">
@@ -362,14 +383,18 @@
         {% if GOOSEFLOCK_FEATURES %}
             {% if is_ship_orderer %}
                 <li>
-                    <a href="{% url 'industry:shiporders_view' %}">Orders<i
-                            class="material-icons right">directions_boat</i></a>
+                    <a href="{% url 'industry:shiporders_view' %}">
+                        Ship Orders
+                    </a>
                 </li>
             {% endif %}
-            <li>
-                <a href="{% url 'venmo:dashboard' %}">Eggs<i
-                        class="material-icons right">attach_money</i></a>
-            </li>
+            {% if is_srp_claimer %}
+                <li>
+                    <a href="{% url 'core:home' %}">
+                        SRP
+                    </a>
+                </li>
+            {% endif %}
         {% endif %}
 
         {% if is_loot_tracker %}
@@ -537,8 +562,8 @@ document.addEventListener('DOMContentLoaded', function () {
         showClearBtn: true,
         defaultDate: Date.now(),
         setDefaultDate: true,
-        onOpen: function(){
-            this.setDate(new Date());
+        onOpen: function () {
+            this.setDate(new Date())
         }
     })
     var elems = document.querySelectorAll('.timepicker')

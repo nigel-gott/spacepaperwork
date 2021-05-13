@@ -1,0 +1,112 @@
+{% if access_controller %}
+    <ul class="collapsible">
+        <li>
+            <div class="collapsible-header"><i
+                    class="material-icons">add</i>{{ title|default:"Permissions" }}
+            </div>
+            <div class="collapsible-body">
+                <em>Allows/Denies are listed
+                    in order of
+                    application, so one lower down will override an earlier one.
+                </em>
+
+                {% if access_controller.viewable_by.count > 0 %}
+                    <div class="card blue-grey lighten-5">
+                        <div class="card-content">
+                    <span class="card-title"><i
+                            class="material-icons">remove_red_eye</i> Viewers:</span>
+
+                            <ul class="browser-default">
+                                {% for entity in access_controller.ordered_viewable_by %}
+                                    <li>
+                                        {% include 'users/includes/access_controller_single_display.html' with access_type="view" %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if access_controller.usable_by.count > 0 %}
+                    <div class="card blue-grey lighten-5">
+                        <div class="card-content">
+                            <span class="card-title"><i
+                                    class="material-icons">person</i> Users:</span>
+                            <ul class="browser-default">
+                                {% for entity in access_controller.ordered_usable_by %}
+                                    <li>
+                                        {% include 'users/includes/access_controller_single_display.html' with access_type="use" %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if access_controller.editable_by.count > 0 %}
+                    <div class="card blue-grey lighten-5">
+                        <div class="card-content">
+                            <span class="card-title"><i class="material-icons">edit</i> Editors:</span>
+                            <ul class="browser-default">
+                                {% for entity in access_controller.ordered_editable_by %}
+                                    <li>
+                                        {% include 'users/includes/access_controller_single_display.html' with access_type="edit" %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if access_controller.deletable_by.count > 0 %}
+                    <div class="card blue-grey lighten-5">
+                        <div class="card-content">
+                    <span class="card-title">
+                    <i class="material-icons">delete</i> Deleters:</span>
+                            <ul class="browser-default">
+                                {% for entity in access_controller.ordered_deletable_by %}
+                                    <li>
+                                        {% include 'users/includes/access_controller_single_display.html' with access_type="delete" %}
+                                    </li>
+                                {% endfor %}
+                                <ul>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% if access_controller.adminable_by.count > 0 %}
+                    <div class="card blue-grey lighten-5">
+                        <div class="card-content">
+                            <span class="card-title">
+                                <i class="material-icons">security</i> Admins:</span>
+                            <em>Admins implicitly have all other permissions.</em>
+                            <ul class="browser-default">
+
+                                {% for entity in access_controller.ordered_adminable_by %}
+                                    {% if hide_user_admins and entity.user_only %}
+
+                                    {% else %}
+                                        <li>
+                                            {% include 'users/includes/access_controller_single_display.html' with access_type="admin" %}
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if hide_user_admins %}
+                                    <li>
+                                        {{ hide_user_admins }} <strong
+                                            class="green-text">
+                                        allowed to
+                                        admin</strong>.
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </li>
+    </ul>
+
+{% else %}
+    ERROR MISSING ACCESS CONTROLLER.
+{% endif %}

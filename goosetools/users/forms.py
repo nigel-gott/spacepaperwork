@@ -1,6 +1,8 @@
 from dal import autocomplete
 from django import forms
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.forms import formset_factory
 from tinymce.widgets import TinyMCE
 
 from goosetools.user_forms.models import DynamicForm
@@ -12,6 +14,7 @@ from goosetools.users.models import (
     GooseGroup,
     GoosePermission,
     GooseUser,
+    PermissibleEntity,
 )
 
 
@@ -216,3 +219,192 @@ class EditGroupForm(forms.Form):
     permissions = forms.ModelMultipleChoiceField(
         GoosePermission.objects.all(), widget=forms.CheckboxSelectMultiple
     )
+
+
+class PermissibleEntityForm(forms.Form):
+    existing_entity = forms.ModelChoiceField(
+        PermissibleEntity.objects.all(), required=False, widget=forms.HiddenInput()
+    )
+    control = forms.ChoiceField(
+        choices=[
+            ("view", "Viewing"),
+            ("use", "Using"),
+            ("edit", "Editing"),
+            ("admin", "Admining"),
+            ("delete", "Deleting"),
+        ],
+        label="access type",
+        help_text="The type of access to allow or deny.",
+    )
+    allow_or_deny = forms.ChoiceField(
+        choices=[("allow", "Allow Access "), ("deny", "Deny Access")],
+        help_text="Whether to allow access or deny access to the users who match.",
+    )
+    permission = forms.ModelChoiceField(
+        GoosePermission.objects.all(),
+        required=False,
+        empty_label="Any Permission",
+        help_text="Match users who have this global permission type.",
+    )
+    corp = forms.ModelChoiceField(
+        Corp.objects.all(),
+        required=False,
+        empty_label="Any Corp",
+        help_text="Match users in this corp.",
+    )
+    user = forms.ModelChoiceField(
+        queryset=GooseUser.objects.all(),
+        widget=autocomplete.ModelSelect2(
+            url="username-autocomplete", attrs={"class": "mat_select_ignore"}
+        ),
+        required=False,
+        empty_label="Any User",
+        help_text="Match this specific user, leave blank to match any user.",
+    )
+
+
+PermissibleEntityFormSet = formset_factory(
+    form=PermissibleEntityForm, extra=0, can_delete=True
+)
+
+
+def control_to_relation(
+    control,
+    controller,
+):
+    if control == "view":
+        return controller.viewable_by
+    elif control == "use":
+        return controller.usable_by
+    elif control == "edit":
+        return controller.editable_by
+    elif control == "admin":
+        return controller.adminable_by
+    elif control == "delete":
+        return controller.deletable_by
+    raise ValidationError(f"Unknown control {control}")
+
+
+def setup_new_permissible_entity_formset(owner, controllable_class):
+    initials = []
+    for control, initial in controllable_class.default_permissible_entities():
+        initials.append(
+            {
+                "control": control,
+                "allow_or_deny": "allow" if initial.allow_or_deny else "deny",
+                "user": initial.user,
+                "corp": initial.corp,
+                "permission": initial.permission,
+            }
+        )
+    form_set = PermissibleEntityFormSet(initial=initials)
+    form_set.builtin_wrapper = controllable_class.built_in_permissible_entities(owner)
+    return form_set
+
+
+def setup_existing_permissible_entity_formset(
+    owner, controllable_instance, request=None
+):
+    controller = controllable_instance.access_controller
+    bys = {
+        "view": controller.viewable_by,
+        "edit": controller.editable_by,
+        "use": controller.usable_by,
+        "delete": controller.deletable_by,
+        "admin": controller.adminable_by,
+    }
+    initials = []
+    for control, qs in bys.items():
+        for e in qs.filter(built_in=False):
+            initials.append(
+                {
+                    "existing_entity": e,
+                    "control": control,
+                    "allow_or_deny": "allow" if e.allow_or_deny else "deny",
+                    "user": e.user,
+                    "corp": e.corp,
+                    "permission": e.permission,
+                }
+            )
+    if request:
+        form_set = PermissibleEntityFormSet(
+            request.POST, request.FILES, initial=initials
+        )
+    else:
+        form_set = PermissibleEntityFormSet(initial=initials)
+    form_set.builtin_wrapper = controllable_instance.built_in_permissible_entities(
+        owner
+    )
+    return form_set
+
+
+def handle_permissible_entity_formset(owning_user, formset, controllable_instance):
+    controller = controllable_instance.access_controller
+    if formset.is_valid():
+        for form in formset.deleted_forms:
+            existing = form.cleaned_data["existing_entity"]
+            if existing:
+                if existing.built_in:
+                    raise ValidationError("Cannot edit a built in permissible entity")
+                existing.delete()
+
+        for form in formset:
+            if "DELETE" in form.cleaned_data and form.cleaned_data["DELETE"]:
+                continue
+            by = control_to_relation(form.cleaned_data["control"], controller)
+            existing = form.cleaned_data["existing_entity"]
+            permission = form.cleaned_data["permission"]
+            corp = form.cleaned_data["corp"]
+            user = form.cleaned_data["user"]
+            allow_or_deny = form.cleaned_data["allow_or_deny"] == "allow"
+            existing_qs = by.filter(
+                permission=permission, corp=corp, user=user, allow_or_deny=allow_or_deny
+            )
+            already = existing_qs.exists()
+            if existing and existing.built_in:
+                raise ValidationError("Cannot edit a built in permissible entity")
+            if not already and existing:
+                controller.viewable_by.remove(existing)
+                controller.adminable_by.remove(existing)
+                controller.editable_by.remove(existing)
+                controller.usable_by.remove(existing)
+                controller.deletable_by.remove(existing)
+                existing.permission = permission
+                existing.corp = corp
+                existing.user = user
+                existing.allow_or_deny = allow_or_deny
+                existing.reset_order_to_level()
+                existing.save()
+                by.add(existing)
+
+            if already and existing:
+                if not existing_qs.filter(id=existing.id).exists():
+                    existing.delete()
+            if not already and not existing:
+                entity = PermissibleEntity(
+                    permission=permission,
+                    corp=corp,
+                    user=user,
+                    allow_or_deny=allow_or_deny,
+                    built_in=False,
+                )
+                entity.reset_order_to_level()
+                entity.save()
+                by.add(entity)
+
+        for attr_name, items in controllable_instance.built_in_permissible_entities(
+            owning_user
+        ).items():
+            for item in items:
+                qs = getattr(controller, attr_name)
+                built_in_exists = qs.filter(
+                    permission=item.permission,
+                    corp=item.corp,
+                    user=item.user,
+                    allow_or_deny=item.allow_or_deny,
+                    built_in=True,
+                ).exists()
+                if not built_in_exists:
+                    item.reset_order_to_level()
+                    item.save()
+                    qs.add(item)

@@ -10,6 +10,12 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse
 from django.utils import timezone
+from users.forms import (
+    PermissibleEntityFormSet,
+    handle_permissible_entity_formset,
+    setup_existing_permissible_entity_formset,
+    setup_new_permissible_entity_formset,
+)
 
 from goosetools.fleets.models import (
     Fleet,
@@ -21,7 +27,14 @@ from goosetools.fleets.models import (
 )
 from goosetools.ownership.models import LootBucket, LootGroup
 from goosetools.ownership.views import generate_fleet_profit
-from goosetools.users.models import Character
+from goosetools.users.models import (
+    Character,
+    CrudAccessController,
+    can_admin,
+    can_edit,
+    can_use,
+    can_view,
+)
 
 from .forms import FleetAddMemberForm, FleetForm, JoinFleetForm
 
@@ -32,17 +45,33 @@ def forbidden(request):
 
 
 def fleet_list_view(request, fleets_to_display, page_url_name):
+    fleets_to_display = fleets_to_display.select_related(
+        "access_controller"
+    ).prefetch_related(
+        "access_controller__viewable_by",
+        "access_controller__adminable_by",
+    )
+    viewable_fleets = []
+    permissions_id_cache = CrudAccessController.make_permissions_id_cache(
+        request.gooseuser
+    )
+    for f in fleets_to_display.all():
+        if f.access_controller.can_view(request.gooseuser, permissions_id_cache):
+            viewable_fleets.append(f)
+
     page = int(request.GET.get("page", 0))
     page_size = 20
-    total_pages = math.floor(fleets_to_display.count() / page_size)
-    this_page_fleets = fleets_to_display[page * page_size : (page + 1) * page_size]
+    total_pages = math.floor(len(viewable_fleets) / page_size)
+    this_page_fleets = viewable_fleets[page * page_size : (page + 1) * page_size]
     header = "Active Fleets"
     if page_url_name == "fleet_past":
         header = "Past Fleets"
     elif page_url_name == "fleet_future":
         header = "Future Fleets"
 
-    fleets_annotated_with_isk_and_eggs_balance = this_page_fleets.annotate(
+    fleets_annotated_with_isk_and_eggs_balance = Fleet.objects.filter(
+        id__in=[f.id for f in this_page_fleets]
+    ).annotate(
         isk_and_eggs_balance=Sum(
             Case(
                 When(
@@ -92,9 +121,14 @@ def fleet_leave(request, pk):
     return HttpResponseRedirect(reverse("fleet_view", args=[fleet.pk]))
 
 
+@can_view(Fleet)
 def fleet_view(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
-    fleet_members = f.fleetmember_set.all()
+    fleet_members = (
+        f.fleetmember_set.prefetch_related("character__user")
+        .prefetch_related("fleet__access_controller__adminable_by")
+        .all()
+    )
     by_user: Dict[int, List[FleetMember]] = {}
     for member in fleet_members:
         if member.character.user.id not in by_user:
@@ -118,6 +152,7 @@ def fleet_view(request, pk):
 
 
 @transaction.atomic
+@can_edit(Fleet)
 def fleet_open(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     if f.has_admin(request.gooseuser):
@@ -134,6 +169,7 @@ def fleet_open(request, pk):
 
 
 @transaction.atomic
+@can_edit(Fleet)
 def fleet_end(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     if f.has_admin(request.gooseuser):
@@ -157,9 +193,7 @@ def fleet_end(request, pk):
 def fleet_make_admin(request, pk):
     f = get_object_or_404(FleetMember, pk=pk)
     if f.fleet.has_admin(request.gooseuser):
-        f.admin_permissions = True
-        f.full_clean()
-        f.save()
+        f.fleet.access_controller.give_admin(f.character.user)
     else:
         return forbidden(request)
     return HttpResponseRedirect(reverse("fleet_view", args=[f.fleet.pk]))
@@ -168,18 +202,15 @@ def fleet_make_admin(request, pk):
 def fleet_remove_admin(request, pk):
     f = get_object_or_404(FleetMember, pk=pk)
     if f.fleet.has_admin(request.gooseuser):
-        f.admin_permissions = False
-        f.full_clean()
-        f.save()
+        f.fleet.access_controller.remove_admin(f.character.user)
     else:
         return forbidden(request)
     return HttpResponseRedirect(reverse("fleet_view", args=[f.fleet.pk]))
 
 
+@can_admin(Fleet)
 def fleet_add(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
-    if not f.has_admin(request.gooseuser):
-        return forbidden(request)
     if request.method == "POST":
         form = FleetAddMemberForm(request.POST)
         if form.is_valid():
@@ -202,6 +233,7 @@ def fleet_add(request, pk):
     return render(request, "fleets/add_fleet_form.html", {"form": form, "fleet": f})
 
 
+@can_use(Fleet)
 def fleet_join(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
     if request.method == "POST":
@@ -237,7 +269,8 @@ def non_member_chars(fleet_id, user):
 def fleet_create(request):
     if request.method == "POST":
         form = FleetForm(request.POST)
-        if form.is_valid():
+        formset = PermissibleEntityFormSet(request.POST, request.FILES)
+        if form.is_valid() and formset.is_valid():
             combined_start = timezone.make_aware(
                 timezone.datetime.combine(
                     form.cleaned_data["start_date"], form.cleaned_data["start_time"]
@@ -267,6 +300,7 @@ def fleet_create(request):
                     gives_shares_to_alts=form.cleaned_data["gives_shares_to_alts"],
                     start=combined_start,
                     end=combined_end,
+                    access_controller=CrudAccessController.objects.create(),
                 )
                 new_fleet.full_clean()
                 new_fleet.save()
@@ -279,6 +313,7 @@ def fleet_create(request):
                 )
                 fc_member.full_clean()
                 fc_member.save()
+                handle_permissible_entity_formset(request.gooseuser, formset, new_fleet)
                 return HttpResponseRedirect(reverse("fleet_view", args=[new_fleet.pk]))
 
     else:
@@ -292,19 +327,24 @@ def fleet_create(request):
         )
 
         form.fields["fc_character"].queryset = request.gooseuser.characters()
+        formset = setup_new_permissible_entity_formset(request.gooseuser, Fleet)
 
     return render(
-        request, "fleets/fleet_form.html", {"form": form, "title": "Create Fleet"}
+        request,
+        "fleets/fleet_form.html",
+        {"form": form, "title": "Create Fleet", "formset": formset},
     )
 
 
+@can_edit(Fleet)
 def fleet_edit(request, pk):
     existing_fleet = Fleet.objects.get(pk=pk)
-    if not existing_fleet.has_admin(request.gooseuser):
-        return forbidden(request)
     if request.method == "POST":
         form = FleetForm(request.POST)
-        if form.is_valid():
+        formset = setup_existing_permissible_entity_formset(
+            existing_fleet.fc, existing_fleet, request
+        )
+        if formset.is_valid() and form.is_valid():
             combined_start = timezone.make_aware(
                 timezone.datetime.combine(
                     form.cleaned_data["start_date"], form.cleaned_data["start_time"]
@@ -339,6 +379,9 @@ def fleet_edit(request, pk):
                 ]
                 existing_fleet.full_clean()
                 existing_fleet.save()
+                handle_permissible_entity_formset(
+                    request.gooseuser, formset, existing_fleet
+                )
                 return HttpResponseRedirect(reverse("fleet_view", args=[pk]))
 
     else:
@@ -357,12 +400,18 @@ def fleet_edit(request, pk):
             }
         )
         form.fields["fc_character"].queryset = existing_fleet.fc.characters()
+        formset = setup_existing_permissible_entity_formset(
+            existing_fleet.fc, existing_fleet
+        )
 
     return render(
-        request, "fleets/fleet_form.html", {"form": form, "title": "Edit Fleet"}
+        request,
+        "fleets/fleet_form.html",
+        {"form": form, "title": "Edit Fleet", "formset": formset},
     )
 
 
+@can_view(Fleet)
 def fleet_profit(request, pk):
     existing_fleet = Fleet.objects.get(pk=pk)
     stats = generate_fleet_profit(existing_fleet)
