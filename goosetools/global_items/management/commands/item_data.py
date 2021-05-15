@@ -42,9 +42,12 @@ def import_global_items_from_global_files():
     with connection.cursor() as cursor:
         dir_path = data_dir()
         for table, table_name in TABLES.items():
+            print(f"Truncating global {table_name}")
+            cursor.execute(f"TRUNCATE public.global_items_global{table_name} CASCADE;")
+
+        for table, table_name in TABLES.items():
             import_file = os.path.abspath(os.path.join(dir_path, f"{table}.csv"))
             print(f"Global importing {table_name} from {import_file}")
-            cursor.execute(f"TRUNCATE public.global_items_global{table_name} CASCADE;")
             copy_cmd = (
                 f"\\copy public.global_items_global{table_name} "
                 f"FROM '{os.path.abspath(import_file)}' "
@@ -61,7 +64,7 @@ def run_cmd(copy_cmd):
     name = settings.DATABASES["default"]["NAME"]
     env_with_pwd = os.environ.copy()
     env_with_pwd["PGPASSWORD"] = password
-    subprocess.Popen(
+    p = subprocess.Popen(
         [
             "psql",
             f"--host={host}",
@@ -75,6 +78,7 @@ def run_cmd(copy_cmd):
         ],
         env=env_with_pwd,
     )
+    p.wait()
 
 
 def export_tenant_items_to_global_files():
