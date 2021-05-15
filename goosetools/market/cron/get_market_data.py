@@ -4,26 +4,36 @@ from decimal import Decimal
 import requests
 from django.conf import settings
 from django.utils.dateparse import parse_datetime
-from django_extensions.management.jobs import HourlyJob
+from django_cron import CronJobBase, Schedule
 from django_tenants.utils import tenant_context
 
 from goosetools.items.models import Item
 from goosetools.pricing.models import ItemMarketDataEvent
 from goosetools.tenants.models import Client
+from goosetools.utils import cron_header_line
 
 
-class Job(HourlyJob):
-    help = "Market Data Download Job"
+class GetMarketData(CronJobBase):
+    RUN_EVERY_MINS = 60
 
-    def execute(self):
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    code = "market.get_market_data"
+
+    def do(self):
+        cron_header_line(self.code)
         r = requests.get("https://api.eve-echoes-market.com/market-stats/stats.csv")
         content = r.content
         decoded_content = content.decode("UTF-8")
         csv_lines = csv.reader(decoded_content.splitlines(), delimiter=",")
+        lines = list(csv_lines)[1:]
+        print(
+            f"Found {len(lines)} lines of market data from https://api.eve-echoes-market.com/market-stats/stats.csv"
+        )
         for tenant in Client.objects.all():
             with tenant_context(tenant):
                 if tenant.name != "public":
-                    for line in list(csv_lines)[1:]:
+                    print(f"Inserting latest market data for {tenant.name}")
+                    for line in lines:
                         market_id = line[0]
                         datetime_str = line[2]
                         time = parse_datetime(datetime_str)

@@ -100,6 +100,7 @@ SHARED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.discord",
+    "django_cron",
 ]
 
 TENANT_APPS = [
@@ -381,3 +382,12 @@ BOT_USER_ID = env("BOT_USER_ID")
 
 HORDAK_DECIMAL_PLACES = 0
 HORDAK_MAX_DIGITS = 16
+
+CRON_CLASSES = [
+    "goosetools.industry.cron.lookup_ship_prices.LookupShipPrices",
+    "goosetools.industry.cron.cleanup_old_orders.CleanUpOldOrders",
+    "goosetools.market.cron.get_market_data.GetMarketData",
+    "goosetools.market.cron.sync_past_market_data.SyncPastMarketData",
+    "goosetools.users.cron.update_discord_roles.UpdateDiscordRoles",
+    "goosetools.fleets.cron.repeat_groups.RepeatGroups",
+]

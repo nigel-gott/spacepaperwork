@@ -6,7 +6,7 @@ import pickle
 
 from django.conf import settings
 from django.utils import timezone
-from django_extensions.management.jobs import HourlyJob
+from django_cron import CronJobBase, Schedule
 from django_tenants.utils import tenant_context
 from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -14,15 +14,20 @@ from googleapiclient.discovery import build
 
 from goosetools.industry.models import Ship, to_isk
 from goosetools.tenants.models import Client
+from goosetools.utils import cron_header_line
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
 
-class Job(HourlyJob):
-    help = "Downloads ship prices"
+class LookupShipPrices(CronJobBase):
+    RUN_EVERY_MINS = 60
 
-    def execute(self):
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    code = "industry.lookup_ship_prices"
+
+    def do(self):
+        cron_header_line(self.code)
         if (
             settings.SHIP_PRICE_GOOGLE_SHEET_ID
             and settings.SHIP_PRICE_GOOGLE_SHEET_CELL_RANGE

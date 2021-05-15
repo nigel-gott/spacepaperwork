@@ -76,3 +76,13 @@
     ```
     pre-commit install
     ```
+
+# Cron setup
+Spacepaperwork runs various jobs at timed intervals such as market data import,
+repeating loot groups etc. You must run `./manage.py runcrons` every 5 minutes for this
+to work. To do so I suggest you setup and use cron like so:
+```
+crontab -e
+# Now edit and add the following lines:
+*/5 * * * * source /home/ubuntu/.bashrc && source /home/ubuntu/work/your-project/bin/activate && python /home/ubuntu/spacepaperwork/manage.py runcrons > /home/ubuntu/cronjob.log
+```

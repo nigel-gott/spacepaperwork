@@ -16,7 +16,7 @@ from goosetools.pricing.models import ItemMarketDataEvent
 from goosetools.tenants.models import Client
 
 session = requests_cache.CachedSession(
-    "past_market_data_sync", expire_after=timedelta(hours=1)
+    "past_market_data_sync", expire_after=timedelta(hours=12)
 )
 
 
@@ -61,6 +61,9 @@ class Command(BaseCommand):
                             self.sync_item(cutoff, item_data, market_id)
                         except Exception as e:  # pylint: disable=broad-except
                             print(f"WARNING EXCEPTION = {e}")
+                    # After the first tenant we have cached all market data, turn off
+                    # the sleep!
+                    request_sleep = 0
 
     @staticmethod
     def sync_item(cutoff, item_data, market_id):

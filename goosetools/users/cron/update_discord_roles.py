@@ -3,7 +3,7 @@ import time
 import requests
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
-from django_extensions.management.jobs import HourlyJob
+from django_cron import CronJobBase, Schedule
 from django_tenants.utils import tenant_context
 from requests.models import HTTPError
 
@@ -13,6 +13,7 @@ from goosetools.users.discord_helpers import (
     setup_user_groups_from_discord_guild_roles,
 )
 from goosetools.users.models import DiscordGuild, GooseGroup, GooseUser
+from goosetools.utils import cron_header_line
 
 
 def refresh_from_discord():
@@ -120,8 +121,12 @@ def refresh_from_discord_all():
     return output
 
 
-class Job(HourlyJob):
-    help = "Checks discord roles and updates permissions accordingly"
+class UpdateDiscordRoles(CronJobBase):
+    RUN_EVERY_MINS = 60
 
-    def execute(self):
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    code = "users.update_discord_roles"
+
+    def do(self):
+        cron_header_line(self.code)
         print(refresh_from_discord_all())

@@ -26,6 +26,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from goosetools.notifications.notification_types import NOTIFICATION_TYPES
 from goosetools.user_forms.forms import GeneratedForm
+from goosetools.users.cron.update_discord_roles import refresh_from_discord
 from goosetools.users.forms import (
     AddEditCharacterForm,
     AdminEditCharacterForm,
@@ -39,7 +40,6 @@ from goosetools.users.forms import (
     SignupFormWithTimezone,
     UserApplicationUpdateForm,
 )
-from goosetools.users.jobs.hourly.update_discord_roles import refresh_from_discord
 from goosetools.users.models import (
     ALL_CORP_ADMIN,
     DISCORD_ADMIN_PERMISSION,
