@@ -33,10 +33,15 @@ def clear_tenant_items():
 
 
 def import_global_items_from_global_files():
+    if connection.schema_name != "public":
+        print(
+            f"Skipping import as schema name is not public but instead {connection.schema_name}"
+        )
     with connection.cursor() as cursor:
         dir_path = data_dir()
         for table, table_name in TABLES.items():
             import_file = os.path.abspath(os.path.join(dir_path, f"{table}.csv"))
+            print(f"Global importing {table_name} from {import_file}")
             cursor.execute(f"TRUNCATE public.global_items_global{table_name} CASCADE;")
             copy_cmd = (
                 f"\\copy public.global_items_global{table_name} "
