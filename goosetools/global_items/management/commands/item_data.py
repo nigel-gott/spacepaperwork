@@ -19,6 +19,7 @@ TABLES = OrderedDict(
 
 
 def import_tenant_items_from_global():
+    print("IMPORTING TENANT ITEMS FROM GLOBAL?")
     with connection.cursor() as cursor:
         for table, name in TABLES.items():
             cursor.execute(
@@ -37,6 +38,7 @@ def import_global_items_from_global_files():
         print(
             f"Skipping import as schema name is not public but instead {connection.schema_name}"
         )
+        return
     with connection.cursor() as cursor:
         dir_path = data_dir()
         for table, table_name in TABLES.items():
