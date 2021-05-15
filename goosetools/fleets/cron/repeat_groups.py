@@ -74,7 +74,10 @@ def _run_for_tenant(now):
 
 
 class RepeatGroups(CronJobBase):
-    RUN_EVERY_MINS = 5
+    # We run the cron job every 5 minutes, if we set this to 5 minutes then django_cron
+    # can skip 5 minute intervals. This way as 4 < 5 we are guaranteed that the job will
+    # run every time we do runcrons.
+    RUN_EVERY_MINS = 4
 
     schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     code = "fleets.repeat_groups"
