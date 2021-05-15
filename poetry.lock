@@ -414,7 +414,7 @@ Django = ">=2.0"
 diff-match-patch = "*"
 
 [package.dependencies.tablib]
-extras = ["html", "yaml", "xlsx", "xls", "ods"]
+extras = ["ods", "html", "yaml", "xls", "xlsx"]
 version = ">=0.14.0"
 
 [[package]]

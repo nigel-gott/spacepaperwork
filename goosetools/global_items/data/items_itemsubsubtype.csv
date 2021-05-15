@@ -1,0 +1,270 @@
+id,name,item_sub_type_id
+224,Warping Scrambling Modules,17
+227,Target Painting Modules,17
+230,Warp Disruption Field Generators,67
+231,Interdiction Modules,55
+232,Kernite,49
+233,Medium Jetstream Decomposer,74
+234,Damage Control,70
+235,Heavy Interdiction Cruisers,4
+236,Amarr Cruiser SKINs,76
+237,Corporation Citadel,58
+238,Spodumain,49
+239,Amarr Battlecruiser SKINs,72
+240,Small Jetstream Decomposer,74
+241,Amarr Frigate SKINs,59
+242,Shuttles,71
+243,Interdictors,3
+244,Non-Empire Factions Battleship SKINs,63
+245,Other Ship SKINs,68
+246,Expedition Frigate,6
+247,Amarr Battleship SKINs,63
+248,Plagioclase,49
+249,Arkonor,49
+250,Dark Ochre,49
+251,Hemorphite,49
+252,Minmatar Industrial Ship SKINs,75
+253,Caldari Industrial Ship SKINs,75
+254,Crokite,49
+255,Gallente Industrial Ship SKINs,75
+256,Non-Empire Factions Frigate SKINs,59
+257,Veldspar,49
+258,Omber,49
+259,Special Item,73
+260,Hedbergite,49
+261,Amarr Destroyer SKINs,77
+262,Amarr Industrial Ship SKINs,75
+263,Non-Empire Factions Cruiser SKINs,76
+264,Scordite,49
+265,Bistot,49
+266,Logistics Battlecruiser,5
+267,Mercoxit,49
+268,Jaspet,49
+225,Sensor Dampeners,17
+228,Guidance Disruption Modules,17
+0,PLEX,0
+1,Skill Chip,1
+2,Basic Frigates,2
+3,Frigates,2
+4,Interceptors,2
+5,Assault Frigates,2
+6,Covert Ops,2
+7,Stealth Bombers,2
+8,Logistics Frigates,2
+9,Destroyers,3
+10,Command Destroyers,3
+11,Tactical Destroyers,3
+12,Cruisers,4
+13,Force Recon Ships,4
+14,Heavy Assault Cruisers,4
+15,Combat Battlecruisers,5
+16,Assault Battlecruisers,5
+17,Logistics Battlecruisers,5
+18,Force Field Battlecruisers,5
+19,Transport Ships,6
+20,Expedition Frigates,6
+21,Mining Barges,6
+22,Battleships,7
+23,Small Pulse Lasers,8
+24,Medium Pulse Lasers,8
+25,Large Pulse Lasers,8
+26,Small Beam Lasers,8
+27,Medium Beam Lasers,8
+28,Large Beam Lasers,8
+29,Small Rifled Railguns,9
+30,Medium Rifled Railguns,9
+31,Large Rifled Railguns,9
+32,Small Snubnosed Railguns,9
+33,Medium Snubnosed Railguns,9
+34,Large Snubnosed Railguns,9
+35,Small AutoCannons,10
+36,Medium AutoCannons,10
+37,Large AutoCannons,10
+38,Small Strike Cannons,10
+39,Medium Strike Cannons,10
+40,Large Strike Cannons,10
+41,Small Jetstream Decomposers,11
+42,Medium Jetstream Decomposers,11
+43,Small Missile Launchers,12
+44,Small Torpedo Launchers,12
+151,Ombers,49
+45,Medium Rapid Missile Launchers,12
+46,Medium Missile Launchers,12
+47,Medium Torpedo Launchers,12
+48,Large Rapid Missile Launchers,12
+49,Large Missile Launchers,12
+50,Large Torpedo Launchers,12
+51,Mining Lasers,13
+52,Strip Miners,13
+53,Small Remote Shield Boosters,14
+54,Medium Remote Shield Boosters,14
+55,Large Remote Shield Boosters,14
+56,Small Remote Armor Repairers,15
+57,Medium Remote Armor Repairers,15
+58,Large Remote Armor Repairers,15
+59,Small Drones,16
+60,Medium Drones,16
+61,Large Drones,16
+62,Stasis Webifiers,17
+63,Warp Jammers,17
+64,Small Energy Nosferatus,18
+65,Medium Energy Nosferatus,18
+66,Large Energy Nosferatus,18
+67,Small Energy Neutralizers,19
+68,Medium Energy Neutralizers,19
+69,Large Energy Neutralizers,19
+70,Small Shield Field Modules,20
+71,Medium Shield Field Modules,20
+72,Large Shield Field Modules,20
+73,Small Armor Link Modules,21
+74,Medium Armor Link Modules,21
+75,Large Armor Link Modules,21
+76,Small Remote Capacitor Transmitters,22
+77,Medium Remote Capacitor Transmitters,22
+78,Large Remote Capacitor Transmitters,22
+79,Small Group Shield Boosters,23
+80,Medium Group Shield Boosters,23
+81,Large Group Shield Boosters,23
+82,Small Group Armor Repairers,24
+83,Medium Group Armor Repairers,24
+84,Large Group Armor Repairers,24
+85,Small Group Capacitor Transmitters,25
+86,Medium Group Capacitor Transmitters,25
+87,Large Group Capacitor Transmitters,25
+88,Small Shield Boosters,26
+89,Medium Shield Boosters,26
+90,Large Shield Boosters,26
+91,Small Shield Extenders,27
+92,Medium Shield Extenders,27
+93,Large Shield Extenders,27
+94,Reactive Shield Hardeners,28
+95,Adaptive Shield Hardeners,28
+96,Small Armor Repairers,29
+97,Medium Armor Repairers,29
+98,Large Armor Repairers,29
+99,Small Armor Plates,30
+100,Medium Armor Plates,30
+101,Large Armor Plates,30
+102,Reactive Armor Hardeners,31
+103,Adaptive Armor Hardeners,31
+104,Damage Controls,32
+105,Small Capacitor Batteries,33
+106,Medium Capacitor Batteries,33
+107,Large Capacitor Batteries,33
+108,Small Afterburners,34
+109,Medium Afterburners,34
+110,Large Afterburners,34
+111,Small Microwarpdrives,35
+112,Medium Microwarpdrives,35
+113,Large Microwarpdrives,35
+114,Inertial Stabilizers,36
+115,Warp Core Stabilizers,36
+116,Heat Sinks,37
+117,Magnetic Field Stabilizers,37
+118,Gyrostabilizers,37
+119,Macro Particle Stabilizers,37
+120,Ballistic Control Systems,37
+121,Drone Damage Amplifiers,37
+122,Tracking Computers,37
+123,Missile Guidance Computers,37
+124,Drone Navigation Computers,37
+125,Omnidirectional Tracking Links,37
+126,Cloaking Devices,38
+127,Covert Ops,38
+128,Railgun Rigs,39
+129,Laser Rigs,39
+130,Cannon Rigs,39
+131,Decomposer Rigs,39
+132,Missile Launcher Rigs,39
+133,Drone Rigs,40
+134,Shield Rigs,41
+135,Armor Rigs,41
+136,Structure Rigs,41
+137,Navigation Rigs,42
+138,Engineer Rigs,43
+139,Scan Rigs,44
+140,Mining Rigs,45
+141,Basic Structure Components,46
+142,Personal Citadel Components,46
+143,Structure Weapons,47
+144,Structure Modules,47
+145,Structure Services,47
+146,Minerals,48
+147,Veldspars,49
+148,Scordites,49
+149,Pyroxeres,49
+150,Plagioclases,49
+152,Kernites,49
+153,Jaspets,49
+154,Hemorphites,49
+155,Hedbergites,49
+156,Spodumains,49
+157,Dark Ochres,49
+158,Gneiss,49
+159,Crokites,49
+160,Bistots,49
+161,Arkonors,49
+162,Mercoxits,49
+163,Planet Yields,50
+164,Salvaged Materials,51
+165,Amarr Ship Debris,52
+166,Caldari Ship Debris,52
+167,Gallente Ship Debris,52
+168,Minmatar Ship Debris,52
+169,Faction Ship Debris,52
+170,Datacores,53
+171,Frigate Blueprints,54
+172,Destroyer Blueprints,54
+173,Cruiser Blueprints,54
+174,Battlecruiser Blueprints,54
+175,Battleship Blueprints,54
+176,Industrial Blueprints,54
+177,Group Repairing Modules,55
+178,Defensive Force Field Modules,55
+179,Cloaking Devices,55
+180,Small Drone Blueprints,56
+181,Medium Drone Blueprints,56
+182,Large Drone Blueprints,56
+183,Railgun Rig Blueprints,57
+184,Laser Rig Blueprints,57
+185,Cannon Rig Blueprints,57
+186,Launcher Rig Blueprints,57
+187,Drone Rig Blueprints,57
+188,Shield Rig Blueprints,57
+189,Armor Rig Blueprints,57
+190,Hull Rig Blueprints,57
+191,Navigation Rig Blueprints,57
+192,Engineer Rig Blueprints,57
+193,Scan Rig Blueprints,57
+194,Mining Rig Blueprints,57
+195,Basic Structure Component Blueprints,58
+196,Personal Citadel Component Blueprints,58
+197,Structure Weapon Blueprints,58
+198,Structure Module Blueprints,58
+199,Structure Service Blueprints,58
+200,Ammar Frigate SKINs,59
+201,Caldari frigate SKINs,59
+202,Gallente frigate SKINs,59
+203,Minmatar frigate SKINs,59
+204,Ammar Destroyer SKINs,60
+205,Caldari Destroyer SKINs,60
+206,Gallente Destroyer SKINs,60
+207,Minmatar Destroyer SKINs,60
+208,Non-Empire Factions Destroyer SKINs,60
+209,Ammar Cruiser SKINs,61
+210,Caldari Cruiser SKINs,61
+211,Gallente Cruiser SKINs,61
+212,Minmatar Cruiser SKINs,61
+213,Ammar Battlecruiser SKINs,62
+214,Caldari Battlecruiser SKINs,62
+215,Gallente Battle Cruiser SKINs,62
+216,Minmatar Battle Cruiser SKINs,62
+217,Ammar Battleship SKINs,63
+218,Caldari Battleship SKINs,63
+219,Gallente Battleship SKINs,63
+220,Minmatar Battleship SKINs,63
+221,Non-imperial force industrial ship SKINs,64
+222,Mission Items,65
+223,Mission Supply Chests,66
+226,Tracking Disruption Modules,17
+229,Interdiction Sphere Launchers,67

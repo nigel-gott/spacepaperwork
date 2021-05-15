@@ -11,6 +11,12 @@ def clear_data(apps, schema_editor):
     cursor.execute("TRUNCATE TABLE pricing_itemmarketdataevent")
 
 
+# noinspection PyPep8Naming
+# pylint: disable=unused-argument
+def reverse(apps, schema_editor):
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -19,7 +25,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(clear_data),
+        migrations.RunPython(clear_data, reverse),
         migrations.AlterUniqueTogether(
             name="itemmarketdataevent",
             unique_together={("item", "time")},

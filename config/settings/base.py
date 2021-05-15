@@ -44,7 +44,6 @@ TIME_ZONE = "UTC"
 # https://docs.djangoproject.com/en/dev/ref/settings/#language-code
 LANGUAGE_CODE = "en-us"
 # https://docs.djangoproject.com/en/dev/ref/settings/#site-id
-SITE_ID = 1
 # https://docs.djangoproject.com/en/dev/ref/settings/#use-i18n
 USE_I18N = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#use-l10n
@@ -54,7 +53,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#locale-paths
 LOCALE_PATHS = [str(ROOT_DIR / "locale")]
 
-SITE_ID = env("SITE_ID")
+SITE_ID = env("SITE_ID", default=1)
 SECRET_KEY = env("SECRET_KEY")
 URL_PREFIX = env("URL_PREFIX", default="")
 
@@ -87,6 +86,7 @@ SHARED_APPS = [
     "dal",
     "dal_select2",
     "goosetools.tenants.apps.TenantsConfig",
+    "goosetools.global_items.apps.GlobalItemsConfig",
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "django.contrib.sessions",

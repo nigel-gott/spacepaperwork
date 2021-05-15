@@ -1,0 +1,79 @@
+id,name,item_type_id
+0,Pilot Service,0
+1,Skill Chip,0
+2,Frigates,1
+3,Destroyers,1
+4,Cruisers,1
+5,Battlecruisers,1
+6,Industrial Ships,1
+7,Battleships,1
+8,Lasers,2
+9,Railguns,2
+10,Cannons,2
+11,Decomposers,2
+12,Missile Launchers,2
+13,Harvest Equipments,2
+14,Remote Shield Boosters,2
+15,Remote Armor Repairers,2
+16,Drones,3
+17,Electronic Warfares,3
+18,Energy Nosferatus,3
+19,Energy Neutralizers,3
+20,Shield Field Modules,3
+21,Armor Link Modules,3
+22,Remote Capacitor Transmitters,3
+23,Group Shield Boosters,3
+24,Group Armor Repairers,3
+25,Group Capacitor Transmitters,3
+26,Shield Boosters,4
+27,Shield Extenders,4
+28,Shield Hardeners,4
+29,Armor Repairers,4
+30,Armor Plates,4
+31,Armor Hardeners,4
+32,Damage Controls,4
+33,Capacitor Batteries,4
+34,Afterburners,4
+35,Microwarpdrives,4
+36,Thruster Upgrades,4
+37,Weapon Upgrades,4
+38,Cloaking Devices,4
+39,Weapon Rigs,5
+40,Drone Rigs,5
+41,Defensive Rigs,5
+42,Navigation Rigs,6
+43,Engineering Rigs,6
+44,Electronic Rigs,6
+45,Industrial Rigs,6
+46,Structures,7
+47,Structure Modules,7
+48,Minerals,8
+49,Raw Ores,8
+50,Planetary Resources,8
+51,Salvaged Materials,8
+52,Vessel Debris,8
+53,Datacores,8
+54,Ship Blueprints,9
+55,Module Blueprints,9
+56,Drone Blueprints,9
+57,Rig Blueprints,9
+58,Structure Blueprints,9
+59,Frigate SKINs,10
+60,Destroyer Skins,10
+61,Cruiser Skins,10
+62,Battlecruiser Skins,10
+63,Battleship SKINs,10
+64,Industrial Ship Skins,10
+65,Mission Items,11
+66,Supply Chests,11
+67,Interdiction Modules,3
+68,Other Ship SKINs,10
+69,Electronic Warfare,3
+70,Damage Control,4
+71,Shuttles,1
+72,Battlecruiser SKINs,10
+73,Special Item,11
+74,Decomposer,2
+75,Industrial Ship SKINs,10
+76,Cruiser SKINs,10
+77,Destroyer SKINs,10

@@ -1,8 +1,10 @@
 from django.conf import settings
-from django.db import connection
 from django_tenants.utils import schema_context, tenant_context
 from requests.exceptions import HTTPError
 
+from goosetools.global_items.management.commands.item_data import (
+    import_tenant_items_from_global,
+)
 from goosetools.notifications.notification_types import NOTIFICATION_TYPES
 from goosetools.users.models import (
     BASIC_ACCESS,
@@ -68,19 +70,7 @@ def setup_tenant(tenant, request, signup_form):
             if n_type.send_on_new_org:
                 n_type.send()
 
-        with connection.cursor() as cursor:
-            tables = [
-                ("core", "region"),
-                ("core", "system"),
-                ("items", "itemsubsubtype"),
-                ("items", "itemsubtype"),
-                ("items", "itemtype"),
-                ("items", "item"),
-            ]
-            for app, table in tables:
-                cursor.execute(
-                    f"INSERT INTO {tenant.schema_name}.{app}_{table}(SELECT * FROM public.tenants_global{table});"
-                )
+        import_tenant_items_from_global()
 
 
 def setup():
