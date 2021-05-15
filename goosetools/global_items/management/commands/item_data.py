@@ -19,7 +19,6 @@ TABLES = OrderedDict(
 
 
 def import_tenant_items_from_global():
-    print("IMPORTING TENANT ITEMS FROM GLOBAL?")
     with connection.cursor() as cursor:
         for table, name in TABLES.items():
             cursor.execute(
@@ -102,7 +101,6 @@ class Command(BaseCommand):
         parser.add_argument("--import_global", action="store_true")
         parser.add_argument("--import_tenant", action="store_true")
         parser.add_argument("--clear_tenant", action="store_true")
-        parser.add_argument("--sync_global_schema_from_tenant", action="store_true")
 
     def handle(self, *args, **options):
 

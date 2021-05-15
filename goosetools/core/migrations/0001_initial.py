@@ -21,14 +21,14 @@ class Migration(migrations.Migration):
             name="System",
             fields=[
                 ("name", models.TextField(primary_key=True, serialize=False)),
-                ("jumps_to_jita", models.PositiveIntegerField(blank=True, null=True)),
-                ("security", models.TextField()),
                 (
                     "region",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE, to="core.region"
                     ),
                 ),
+                ("jumps_to_jita", models.PositiveIntegerField(blank=True, null=True)),
+                ("security", models.TextField()),
             ],
         ),
     ]
