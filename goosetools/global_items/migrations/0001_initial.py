@@ -36,6 +36,8 @@ class Migration(migrations.Migration):
             name="GlobalSystem",
             fields=[
                 ("name", models.TextField(primary_key=True, serialize=False)),
+                ("jumps_to_jita", models.PositiveIntegerField(blank=True, null=True)),
+                ("security", models.TextField()),
                 (
                     "region",
                     models.ForeignKey(
@@ -43,8 +45,6 @@ class Migration(migrations.Migration):
                         to="global_items.globalregion",
                     ),
                 ),
-                ("jumps_to_jita", models.PositiveIntegerField(blank=True, null=True)),
-                ("security", models.TextField()),
             ],
         ),
         migrations.CreateModel(
