@@ -22,57 +22,53 @@
 
 # Running For Local Development using VirtualEnv
 1. ```git clone git@github.com:GROON-Echoes-Dev-Team/goosetools.git && cd goosetools```
-2.
+1.
     ```
     cp .env.local.example .env
     ```
-3. Edit ```.env``` to match your environment
-4. Setup a virtual env:
+1. Edit ```.env``` to match your environment
+1. Install poetry dependencies:
     ```
-    python3 -m venv venv
+    poetry install
     ```
-5. Activate virtual env:
+1. Activate virtual env:
     ```
-    source venv/bin/activate
+   poetry shell
     ```
-6. Install dependencies :
-    ```
-    pip install -r requirements.txt
-    ```
-7. Run the server:
+1. Run the server:
     ```
     ./manage.py runserver_plus
     ```
-8. Visit and Sign Up On http://localhost:8000/goosetools
-9. Make yourself an admin by:
+1. Visit and Sign Up On http://localhost:8000/goosetools
+1. Make yourself an admin by:
     ```
     ./manage.py runscript make_user_admin --script-args=REPLACE_WITH_YOUR_USERNAME_ENTERED_ON_GOOSETOOLS_SIGNUP
     ```
-10. Import market data using:
+1. Import market data using:
     ```
     ./manage.py runjobs hourly
     ```
-11. Get an interactive python shell into goosetools:
+1. Get an interactive python shell into goosetools:
     ```
     ./manage.py shell_plus
     ```
-12. Run non-integration tests:
+1. Run non-integration tests:
     ```
     pytest
     ```
-13. Run integration tests:
+1. Run integration tests:
     ```
     ./integration_test.sh
     ```
-14. Watch filesystem for changes and re-run non-integration tests when something changes:
+1. Watch filesystem for changes and re-run non-integration tests when something changes:
     ```
     ptw
     ```
-15. Run pre-commit checks:
+1. Run pre-commit checks:
     ```
     pre-commit run --all-files
     ```
-16. Install pre-commit checks:
+1. Install pre-commit checks:
     ```
     pre-commit install
     ```
@@ -84,5 +80,5 @@ to work. To do so I suggest you setup and use cron like so:
 ```
 crontab -e
 # Now edit and add the following lines:
-*/5 * * * * source /home/ubuntu/.bashrc && source /home/ubuntu/work/your-project/bin/activate && python /home/ubuntu/spacepaperwork/manage.py runcrons > /home/ubuntu/cronjob.log
+*/5 * * * * TODO INSERT YOUR PYTHON EXEC HERE manage.py runcrons > /home/ubuntu/cronjob.log
 ```
