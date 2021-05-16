@@ -21,21 +21,23 @@ env = environ.Env(
 
 env.read_env(str(ROOT_DIR / ".env"))
 
-SINGLE_TENANT = env("SINGLE_TENANT", default=False)
-VAR_ROOT = env("VAR_ROOT", default="/var/")
-WITHDRAW_INGAME_CHAR = env("WITHDRAW_INGAME_CHAR", default="a corp admin")
-PRONOUN_ROLES = env("PRONOUN_ROLES", default=False)
-PRONOUN_THEY_DISCORD_ROLE = env("PRONOUN_THEY_DISCORD_ROLE", default=False)
-PRONOUN_SHE_DISCORD_ROLE = env("PRONOUN_SHE_DISCORD_ROLE", default=False)
-PRONOUN_HE_DISCORD_ROLE = env("PRONOUN_HE_DISCORD_ROLE", default=False)
-WIKI_NAME = env("WIKI_NAME", default=False)
-WIKI_URL = env("WIKI_URL", default=False)
-BASE_URL = env("BASE_URL")
-SHIP_PRICE_GOOGLE_SHEET_ID = env("SHIP_PRICE_GOOGLE_SHEET_ID", default=False)
-SHIP_PRICE_GOOGLE_SHEET_CELL_RANGE = env(
-    "SHIP_PRICE_GOOGLE_SHEET_CELL_RANGE", default=False
+SINGLE_TENANT = env.bool("SINGLE_TENANT", default=False)
+VAR_ROOT = env.str("VAR_ROOT", default="/var/")
+WITHDRAW_INGAME_CHAR = env.str("WITHDRAW_INGAME_CHAR", default="a corp admin")
+PRONOUN_ROLES = env.bool("PRONOUN_ROLES", default=False)
+PRONOUN_THEY_DISCORD_ROLE = env.str("PRONOUN_THEY_DISCORD_ROLE", default=None)
+PRONOUN_SHE_DISCORD_ROLE = env.str("PRONOUN_SHE_DISCORD_ROLE", default=None)
+PRONOUN_HE_DISCORD_ROLE = env.str("PRONOUN_HE_DISCORD_ROLE", default=None)
+WIKI_NAME = env.str("WIKI_NAME", default=None)
+WIKI_URL = env.str("WIKI_URL", default=None)
+BASE_URL = env.str("BASE_URL")
+SHIP_PRICE_GOOGLE_SHEET_ID = env.str("SHIP_PRICE_GOOGLE_SHEET_ID", default=None)
+SHIP_PRICE_GOOGLE_SHEET_CELL_RANGE = env.str(
+    "SHIP_PRICE_GOOGLE_SHEET_CELL_RANGE", default=None
 )
-RUN_WEEKLY_MARKET_DATA_FULL_SYNC = env("RUN_WEEKLY_MARKET_DATA_FULL_SYNC")
+RUN_WEEKLY_MARKET_DATA_FULL_SYNC = env.bool(
+    "RUN_WEEKLY_MARKET_DATA_FULL_SYNC", default=False
+)
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
