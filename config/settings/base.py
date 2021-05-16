@@ -56,9 +56,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#locale-paths
 LOCALE_PATHS = [str(ROOT_DIR / "locale")]
 
-SITE_ID = env("SITE_ID", default=1)
+SITE_ID = env.int("SITE_ID", default=1)
 SECRET_KEY = env("SECRET_KEY")
-URL_PREFIX = env("URL_PREFIX", default="")
+URL_PREFIX = env.str("URL_PREFIX", default="")
 
 # DATABASES
 # ------------------------------------------------------------------------------
@@ -347,21 +347,21 @@ CURRENCIES = ["EEI"]
 
 # DB Backup
 DBBACKUP_STORAGE = "django.core.files.storage.FileSystemStorage"
-DBBACKUP_STORAGE_OPTIONS = {"location": env("DB_BACKUP_LOCATION")}
+DBBACKUP_STORAGE_OPTIONS = {"location": env.str("DB_BACKUP_LOCATION")}
 
 REST_FRAMEWORK = {
     "DATETIME_FORMAT": "%Y-%m-%d %H:%M",
 }
 
-VENMO_HOST_URL = env("VENMO_HOST_URL", default=False)
-VENMO_BASE_PATH = env("VENMO_BASE_PATH", default=False)
-VENMO_API_TOKEN = env("VENMO_API_TOKEN", default=False)
-BOT_TOKEN = env("BOT_TOKEN")
-SITE_NAME = env("SITE_NAME", default="GooseTools")
-LOGIN_URL = env("LOGIN_URL", default="/accounts/discord/login/")
-DISCORD_OAUTH_URL = env("DISCORD_OAUTH_URL")
-DISCORD_OAUTH_URL_WITHOUT_MANAGE = env("DISCORD_OAUTH_URL_WITHOUT_MANAGE")
-BOT_USER_ID = env("BOT_USER_ID")
+VENMO_HOST_URL = env.str("VENMO_HOST_URL", default=None)
+VENMO_BASE_PATH = env.str("VENMO_BASE_PATH", default=None)
+VENMO_API_TOKEN = env.str("VENMO_API_TOKEN", default=None)
+BOT_TOKEN = env.str("BOT_TOKEN")
+SITE_NAME = env.str("SITE_NAME", default="GooseTools")
+LOGIN_URL = env.str("LOGIN_URL", default="/accounts/discord/login/")
+DISCORD_OAUTH_URL = env.str("DISCORD_OAUTH_URL")
+DISCORD_OAUTH_URL_WITHOUT_MANAGE = env.str("DISCORD_OAUTH_URL_WITHOUT_MANAGE")
+BOT_USER_ID = env.str("BOT_USER_ID")
 
 HORDAK_DECIMAL_PLACES = 0
 HORDAK_MAX_DIGITS = 16
