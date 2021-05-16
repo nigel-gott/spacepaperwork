@@ -70,8 +70,8 @@ def parse_transactions(discord_id_to_gooseuser, ts, resulting_transactions):
             value=row["value"],
             transaction_type=row["transaction_type"],
             transaction_status=row["transaction_status"],
-            created_at=row["created_at"],
-            updated_at=row["updated_at"],
+            created_at=row["createdAt"],
+            updated_at=row["updatedAt"],
         )
 
 
@@ -193,11 +193,8 @@ class FogVenmo(VenmoInterface):
 
     @staticmethod
     def _transactions_with_filter(**kwargs) -> List[VenmoTransaction]:
-        logger.info(kwargs)
         client = fog_venmo_client(use_models=False)
-        logger.info("A")
         transactions = client.transactions.listTransactions(**kwargs)
-        logger.info("B")
         targeted_at_user = transactions.response().result
         discord_id_to_gooseuser: Dict[str, Union[GooseUser, bool]] = {}
         resulting_transactions: Dict[str, VenmoTransaction] = {}
