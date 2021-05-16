@@ -191,7 +191,10 @@ class FogVenmo(VenmoInterface):
     @staticmethod
     def _transactions_with_filter(**kwargs) -> List[VenmoTransaction]:
         targeted_at_user = (
-            fog_venmo_client().transactions.listTransactions(kwargs).response().result
+            fog_venmo_client(use_models=False)
+            .transactions.listTransactions(kwargs)
+            .response()
+            .result
         )
         discord_id_to_gooseuser: Dict[str, Union[GooseUser, bool]] = {}
         resulting_transactions: Dict[str, VenmoTransaction] = {}
