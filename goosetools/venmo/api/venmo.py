@@ -20,6 +20,7 @@ class VenmoTransaction(dict):
         updated_at: datetime,
     ) -> None:
         dict.__init__(
+            self,
             transaction_id=transaction_id,
             source_discord_id=source_discord_id,  # Display Name or just Id
             source_gooseuser_id=source_gooseuser_id,  # Optional
