@@ -50,14 +50,14 @@ class Command(BaseCommand):
                     if options["truncate"]:
                         self.truncate_if_sure()
                     for line in list(csv_lines)[1:]:
-                        market_id = line[0]
-                        print("------------------------------------------")
-                        print(f"Syncing item id :{market_id}")
-                        url = f"https://api.eve-echoes-market.com/market-stats/{market_id}"
-
-                        time.sleep(request_sleep)
-                        item_data = requests.get(url).json()
                         try:
+                            market_id = line[0]
+                            print("------------------------------------------")
+                            print(f"Syncing item id :{market_id}")
+                            url = f"https://api.eve-echoes-market.com/market-stats/{market_id}"
+
+                            time.sleep(request_sleep)
+                            item_data = requests.get(url).json()
                             self.sync_item(cutoff, item_data, market_id)
                         except Exception as e:  # pylint: disable=broad-except
                             print(f"WARNING EXCEPTION = {e}")

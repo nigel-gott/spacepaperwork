@@ -158,6 +158,7 @@ def user_signup(request, pk):
                     corp=corp,
                     answers=corp_form.as_dict() if corp_form else {},
                 )
+                print("huh")
                 if settings.PRONOUN_ROLES:
                     print("ROLES ON")
                     _give_pronoun_roles(
