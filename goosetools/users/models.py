@@ -162,6 +162,7 @@ class DiscordGuild(models.Model):
 
     @staticmethod
     def try_give_role(uid, role_id):
+        print(f"GIVING {role_id} to {uid}")
         try:
             guild = DiscordGuild.objects.get(active=True)
             bot_headers = {
@@ -170,6 +171,7 @@ class DiscordGuild(models.Model):
             url = f"https://discord.com/api/guilds/{guild.guild_id}/members/{uid}/roles/{role_id}"
             request = requests.put(url, headers=bot_headers)
             request.raise_for_status()
+            print(f"GAVE {role_id}")
         except DiscordGuild.DoesNotExist:
             pass
 
