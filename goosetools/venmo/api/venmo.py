@@ -4,7 +4,7 @@ from typing import List
 
 
 # pylint: disable=too-many-instance-attributes
-class VenmoTransaction:
+class VenmoTransaction(dict):
     def __init__(
         self,
         transaction_id: str,
@@ -19,19 +19,21 @@ class VenmoTransaction:
         created_at: datetime,
         updated_at: datetime,
     ) -> None:
-        self.transaction_id = transaction_id
-        self.source_discord_id = source_discord_id  # Display Name or just Id
-        self.source_gooseuser_id = source_gooseuser_id  # Optional
-        self.target_discord_id = target_discord_id  # Display Name or just Id
-        self.target_gooseuser_id = target_gooseuser_id  # Optional
-        self.note = note
-        self.value = value
-        self.transaction_type = transaction_type  # deposit, withdrawal, credit, debit
-        self.transaction_status = (
-            transaction_status  # pending, complete, rejected, cancelled
+        dict.__init__(
+            transaction_id=transaction_id,
+            source_discord_id=source_discord_id,  # Display Name or just Id
+            source_gooseuser_id=source_gooseuser_id,  # Optional
+            target_discord_id=target_discord_id,  # Display Name or just Id
+            target_gooseuser_id=target_gooseuser_id,  # Optional
+            note=note,
+            value=value,
+            transaction_type=transaction_type,  # deposit, withdrawal, credit, debit
+            transaction_status=(
+                transaction_status  # pending, complete, rejected, cancelled
+            ),
+            created_at=created_at,  # datetime str
+            updated_at=updated_at,
         )
-        self.created_at = created_at  # datetime str
-        self.updated_at = updated_at
 
 
 class VenmoUserBalance:
