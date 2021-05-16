@@ -203,6 +203,6 @@ class FogVenmo(VenmoInterface):
         )
         return sorted(
             resulting_transactions.values(),
-            key=lambda t: t.updated_at.timestamp(),
+            key=lambda t: t["updated_at"].timestamp(),
             reverse=True,
         )
