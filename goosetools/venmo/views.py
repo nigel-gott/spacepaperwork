@@ -153,7 +153,7 @@ def withdraw(request, ccy):
                 venmo_api(ccy).withdraw(
                     request.gooseuser.discord_uid(), form.cleaned_data["quantity"]
                 )
-                return HttpResponseRedirect(reverse("venmo:dashboard"))
+                return HttpResponseRedirect(reverse("venmo:dashboard", args=[ccy.name]))
             except VenmoError as e:
                 messages.error(request, e.message)
     else:
@@ -173,7 +173,7 @@ def transfer(request, ccy):
                     form.cleaned_data["user"],
                     form.cleaned_data["quantity"],
                 )
-                return HttpResponseRedirect(reverse("venmo:dashboard"))
+                return HttpResponseRedirect(reverse("venmo:dashboard", args=[ccy.name]))
             except VenmoError as e:
                 messages.error(request, e.message)
     else:
@@ -193,7 +193,7 @@ def deposit(request, ccy):
                     form.cleaned_data["quantity"],
                     form.cleaned_data["note"],
                 )
-                return HttpResponseRedirect(reverse("venmo:dashboard"))
+                return HttpResponseRedirect(reverse("venmo:dashboard", args=[ccy.name]))
             except VenmoError as e:
                 messages.error(request, e.message)
     else:
