@@ -73,12 +73,12 @@ class DiscordGuild(models.Model):
             bot_info_request = requests.get(url, headers=DiscordGuild.bot_headers())
             bot_info_request.raise_for_status()
         except RequestException as e:
-            print("Error querying discord for bot info: " + str(e))
+            logger.info("Error querying discord for bot info: " + str(e))
             self.discord_connection_issue = True
             return False
         bot_info = bot_info_request.json()
         if "id" not in bot_info or not bot_info["bot"]:
-            print("Missing Id from bot info request: " + bot_info_request.text)
+            logger.info("Missing Id from bot info request: " + bot_info_request.text)
             self.discord_connection_issue = True
             return False
         return True
@@ -90,10 +90,12 @@ class DiscordGuild(models.Model):
             bot_member_request = requests.get(url, headers=DiscordGuild.bot_headers())
             bot_member_request.raise_for_status()
         except RequestException as e:
-            print("Error querying discord for member info: " + str(e))
+            logger.info("Error querying discord for member info: " + str(e))
         bot_member_info = bot_member_request.json()
         if "roles" not in bot_member_info:
-            print("Missing roles discord bot info request: " + bot_member_request.text)
+            logger.info(
+                "Missing roles discord bot info request: " + bot_member_request.text
+            )
         else:
             try:
                 url = f"https://discord.com/api/guilds/{self.guild_id}/roles"
@@ -103,7 +105,7 @@ class DiscordGuild(models.Model):
                     )
                     roles_request.raise_for_status()
                 except RequestException as e:
-                    print("Error querying discord for roles info: " + str(e))
+                    logger.info("Error querying discord for roles info: " + str(e))
 
                 roles_by_id = {role["id"]: role for role in roles_request.json()}
 
@@ -115,9 +117,11 @@ class DiscordGuild(models.Model):
                     if self.has_manage_roles:
                         return
             except (ValueError, KeyError):
-                print("Weird permissions from discord guild:" + bot_member_request.text)
+                logger.info(
+                    "Weird permissions from discord guild:" + bot_member_request.text
+                )
                 if roles_request and hasattr(roles_request, "text"):
-                    print(roles_request.text)
+                    logger.info(roles_request.text)
 
     def _check_discord_guild_is_valid(self):
         self.server_name = None
@@ -126,11 +130,11 @@ class DiscordGuild(models.Model):
             guild_info_request = requests.get(url, headers=DiscordGuild.bot_headers())
             guild_info_request.raise_for_status()
         except RequestException as e:
-            print("Error querying discord for guild info: " + str(e))
+            logger.error("Error querying discord for guild info: " + str(e))
             return False
         guild_info = guild_info_request.json()
         if "name" not in guild_info:
-            print(
+            logger.info(
                 "Missing Name from discord guild info request: "
                 + guild_info_request.text
             )
@@ -162,7 +166,7 @@ class DiscordGuild(models.Model):
 
     @staticmethod
     def try_give_role(uid, role_id):
-        print(f"GIVING {role_id} to {uid}")
+        logger.info(f"GIVING {role_id} to {uid}")
         try:
             guild = DiscordGuild.objects.get(active=True)
             bot_headers = {
@@ -171,7 +175,7 @@ class DiscordGuild(models.Model):
             url = f"https://discord.com/api/guilds/{guild.guild_id}/members/{uid}/roles/{role_id}"
             request = requests.put(url, headers=bot_headers)
             request.raise_for_status()
-            print(f"GAVE {role_id}")
+            logger.info(f"GAVE {role_id}")
         except DiscordGuild.DoesNotExist:
             pass
 
@@ -538,7 +542,6 @@ class GooseUser(models.Model):
             comment=f"Removed Manual Group {new_group}",
             submit_date=timezone.now(),
         )
-        print(new_group)
         self.groupmember_set.filter(group=new_group).delete()
 
     def change_status(self, admin_making_change, new_status):

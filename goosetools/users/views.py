@@ -1,3 +1,4 @@
+import logging
 from itertools import groupby
 
 from django.conf import settings
@@ -60,6 +61,8 @@ from goosetools.users.models import (
     has_perm,
 )
 from goosetools.users.serializers import CharacterSerializer, GooseUserSerializer
+
+logger = logging.getLogger(__name__)
 
 
 def _corps_site_user_can_apply_to(request):
@@ -158,14 +161,14 @@ def user_signup(request, pk):
                     corp=corp,
                     answers=corp_form.as_dict() if corp_form else {},
                 )
-                print("huh")
+                logger.info("huh")
                 if settings.PRONOUN_ROLES:
-                    print("ROLES ON")
+                    logger.info("ROLES ON")
                     _give_pronoun_roles(
                         gooseuser.discord_uid(), data["prefered_pronouns"]
                     )
                 else:
-                    print("ROLES OFF")
+                    logger.info("ROLES OFF")
                 application.full_clean()
                 application.save()
                 if corp.auto_approve:
