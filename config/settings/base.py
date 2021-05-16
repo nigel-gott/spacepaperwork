@@ -21,7 +21,8 @@ env = environ.Env(
 
 env.read_env(str(ROOT_DIR / ".env"))
 
-SINGLE_TENANT = env("SINGLE_TENANT")
+SINGLE_TENANT = env("VAR_ROOT", "")
+VAR_ROOT = env("SINGLE_TENANT")
 WITHDRAW_INGAME_CHAR = env("WITHDRAW_INGAME_CHAR", default="a corp admin")
 PRONOUN_ROLES = env("PRONOUN_ROLES", default=False)
 PRONOUN_THEY_DISCORD_ROLE = env("PRONOUN_THEY_DISCORD_ROLE", default=False)
@@ -318,24 +319,6 @@ FIXTURE_DIRS = (str(APPS_DIR / "fixtures"),)
 # https://docs.djangoproject.com/en/dev/ref/settings/#logging
 # See https://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "%(levelname)s %(asctime)s %(module)s "
-            "%(process)d %(thread)d %(message)s"
-        }
-    },
-    "handlers": {
-        "console": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-            "formatter": "verbose",
-        }
-    },
-    "root": {"level": "INFO", "handlers": ["console"]},
-}
 
 # Money Setup
 # ------------------------------------------------------------------------------
@@ -393,3 +376,36 @@ if RUN_WEEKLY_MARKET_DATA_FULL_SYNC:
     CRON_CLASSES.append(
         "goosetools.market.cron.sync_past_market_data.SyncPastMarketData"
     )
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
+        },
+        "simple": {"format": "%(levelname)s %(message)s"},
+    },
+    "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
+    "handlers": {
+        "null": {
+            "level": "DEBUG",
+            "class": "django.utils.log.NullHandler",
+        },
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+        # I always add this handler to facilitate separating loggings
+        "log_file": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": os.path.join(VAR_ROOT, "logs/goosetools/goosetools.log"),
+            "maxBytes": "16777216",  # 16megabytes
+            "formatter": "verbose",
+        },
+    },
+    # you can also shortcut 'loggers' and just configure logging for EVERYTHING at once
+    "root": {"handlers": ["console", "log_file"], "level": "INFO"},
+}
