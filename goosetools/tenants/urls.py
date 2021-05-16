@@ -4,7 +4,6 @@ from goosetools.tenants.views import ClientCreate, help_page, login_cancelled, s
 
 app_name = "tenants"
 
-
 urlpatterns = [
     path("", splash, name="splash"),
     path("help", help_page, name="help"),

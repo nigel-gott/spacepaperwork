@@ -45,10 +45,14 @@ class FormUpdate(UpdateView):
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         if self.request.POST:
-            data["questions"] = FormQuestionFormSet(self.request.POST, instance=self.object)  # type: ignore
+            data["questions"] = FormQuestionFormSet(
+                self.request.POST, instance=self.object
+            )  # type: ignore
             data["questions"].full_clean()
         else:
-            data["questions"] = FormQuestionFormSet(instance=self.object)  # type: ignore
+            data["questions"] = FormQuestionFormSet(
+                instance=self.object
+            )  # type: ignore
         return data
 
     def form_valid(self, form):

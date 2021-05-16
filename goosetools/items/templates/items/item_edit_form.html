@@ -2,74 +2,76 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<h4>{{title}}</h4>
-<div class="divider"></div>
-<form action="" method="post">
-    <div class="section">
-        <button class="btn waves-effect waves-light" type="submit" value="Submit">{{title}}
-            <i class="material-icons right">send</i>
-        </button>
-    </div>
-    <div class="section">
-        {% if char_form.non_field_errors %}
-        <div class="row">
-            <div class="col s12 m5">
-                <div class="card-panel red darken-1">
-                    <span class="white-text">
-                        <b>Errors with form:</b>
-                    <ul class="errors">
-                        {% for error in char_form.non_field_errors%}
-                        <li>{{ error|escape }}</li>
-                        {% endfor %}
-                    </ul>
-                    </span>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-        <div class="row">
-            {{ char_form.character|materializecss:'s12 m12, icon=person'}}
-        </div>
-    </div>
+    <h4>{{ title }}</h4>
     <div class="divider"></div>
-    <div class="section">
-        {% if form %}
-        <!-- Form Errors -->
-        {% if form.non_field_errors %}
-        <div class="row">
-            <div class="col s12 m5">
-                <div class="card-panel red darken-1">
+    <form action="" method="post">
+        <div class="section">
+            <button class="btn waves-effect waves-light" type="submit"
+                    value="Submit">{{ title }}
+                <i class="material-icons right">send</i>
+            </button>
+        </div>
+        <div class="section">
+            {% if char_form.non_field_errors %}
+                <div class="row">
+                    <div class="col s12 m5">
+                        <div class="card-panel red darken-1">
                     <span class="white-text">
                         <b>Errors with form:</b>
                     <ul class="errors">
-                        {% for error in form.non_field_errors%}
-                        <li>{{ error|escape }}</li>
+                        {% for error in char_form.non_field_errors %}
+                            <li>{{ error|escape }}</li>
                         {% endfor %}
                     </ul>
                     </span>
+                        </div>
+                    </div>
                 </div>
+            {% endif %}
+            <div class="row">
+                {{ char_form.character|materializecss:'s12 m12, icon=person' }}
             </div>
         </div>
-        {% endif %}
+        <div class="divider"></div>
+        <div class="section">
+            {% if form %}
+                <!-- Form Errors -->
+                {% if form.non_field_errors %}
+                    <div class="row">
+                        <div class="col s12 m5">
+                            <div class="card-panel red darken-1">
+                    <span class="white-text">
+                        <b>Errors with form:</b>
+                    <ul class="errors">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error|escape }}</li>
+                        {% endfor %}
+                    </ul>
+                    </span>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
 
-        {% csrf_token %}
-        <div class="row">
-            {{ form.item|materializecss:'s12 m6, icon=directions_boat'}}
-            {{ form.quantity|materializecss:'s12 m6, icon=directions_boat'}}
+                {% csrf_token %}
+                <div class="row">
+                    {{ form.item|materializecss:'s12 m6, icon=directions_boat' }}
+                    {{ form.quantity|materializecss:'s12 m6, icon=directions_boat' }}
+                </div>
+
+
+            {% endif %}
         </div>
-
-
-        {% endif %}
-    </div>
-</form>
+    </form>
 
 
 {% endblock %}
 
 {% block extrafooter %}
 
-<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
+    <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"
+            type="text/javascript"></script>
 
-{{form.media}}
+    {{ form.media }}
 
 {% endblock %}

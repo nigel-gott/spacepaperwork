@@ -10,7 +10,6 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"
 
-
 # TODO: Setup and test all these https options;
 # TODO: set this to 60 seconds first and then to 518400 once you prove the former works
 # SECURE_HSTS_SECONDS = 60

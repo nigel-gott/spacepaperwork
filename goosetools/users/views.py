@@ -481,7 +481,6 @@ def character_list(request):
 
 
 def character_search(request):
-
     characters = None
     users = None
     if request.GET and "name" in request.GET:

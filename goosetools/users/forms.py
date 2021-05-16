@@ -285,9 +285,9 @@ def control_to_relation(
     raise ValidationError(f"Unknown control {control}")
 
 
-def setup_new_permissible_entity_formset(owner, controllable_class):
+def setup_new_permissible_entity_formset(owner, controllable_class, request):
     initials = []
-    for control, initial in controllable_class.default_permissible_entities():
+    for control, initial in controllable_class.default_permissible_entities(None):
         initials.append(
             {
                 "control": control,
@@ -297,8 +297,15 @@ def setup_new_permissible_entity_formset(owner, controllable_class):
                 "permission": initial.permission,
             }
         )
-    form_set = PermissibleEntityFormSet(initial=initials)
-    form_set.builtin_wrapper = controllable_class.built_in_permissible_entities(owner)
+    if request.method == "POST":
+        form_set = PermissibleEntityFormSet(
+            request.POST, request.FILES, initial=initials
+        )
+    else:
+        form_set = PermissibleEntityFormSet(initial=initials)
+    form_set.builtin_wrapper = controllable_class.built_in_permissible_entities(
+        None, owner
+    )
     return form_set
 
 
@@ -326,7 +333,7 @@ def setup_existing_permissible_entity_formset(
                     "permission": e.permission,
                 }
             )
-    if request:
+    if request.method == "POST":
         form_set = PermissibleEntityFormSet(
             request.POST, request.FILES, initial=initials
         )

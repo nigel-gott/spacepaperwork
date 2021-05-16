@@ -3,33 +3,34 @@
 {% load static %}
 {% load materializecss %}
 {% block body %}
-<div class="row">
-    <div class="col s12 m12">
-        <h5>Withdraw Eggs</h5>
-        <div class="divider"></div>
+    <div class="row">
+        <div class="col s12 m12">
+            <h5>Withdraw Eggs</h5>
+            <div class="divider"></div>
+        </div>
     </div>
-</div>
-<div class="row">
-    <div class="col s12 m12">
-        <form action="" method="post">
-            {% csrf_token %}
-            {% for field in form %}
-            <div class="row">
-                <div class="input-field col s12">
-                    {{ field.errors }}
-                    {{ field }}
-                    {{ field.label_tag }}
-                    {% if field.help_text %}
-                    <p class="help">{{ field.help_text|safe }}</p>
-                    {% endif %}
-                </div>
-            </div>
+    <div class="row">
+        <div class="col s12 m12">
+            <form action="" method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="row">
+                        <div class="input-field col s12">
+                            {{ field.errors }}
+                            {{ field }}
+                            {{ field.label_tag }}
+                            {% if field.help_text %}
+                                <p class="help">{{ field.help_text|safe }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
 
-            {% endfor %}
-            <button class="btn waves-effect waves-light" type="submit" value="Submit">Submit
-                <i class="material-icons right">send</i>
-            </button>
-        </form>
+                {% endfor %}
+                <button class="btn waves-effect waves-light" type="submit"
+                        value="Submit">Submit
+                    <i class="material-icons right">send</i>
+                </button>
+            </form>
+        </div>
     </div>
-</div>
 {% endblock %}

@@ -39,7 +39,8 @@ class Contract(models.Model):
             (
                 "requested",
                 "requested",
-            ),  # A requested contract is the system asking from_user to make a contract to to_char
+            ),
+            # A requested contract is the system asking from_user to make a contract to to_char
             ("pending", "pending"),
             ("rejected", "rejected"),
             ("accepted", "accepted"),

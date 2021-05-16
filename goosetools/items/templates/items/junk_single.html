@@ -2,17 +2,18 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<h4>{{title}}</h4>
-<div class="divider"></div>
-<div class="section">
+    <h4>{{ title }}</h4>
+    <div class="divider"></div>
+    <div class="section">
 
-    <form action="" method="post">
-        {% csrf_token %}
-        <button class="btn waves-effect waves-light" type="submit" value="Submit">{{title}}
-            <i class="material-icons right">send</i>
-        </button>
-    </form>
-</div>
+        <form action="" method="post">
+            {% csrf_token %}
+            <button class="btn waves-effect waves-light" type="submit"
+                    value="Submit">{{ title }}
+                <i class="material-icons right">send</i>
+            </button>
+        </form>
+    </div>
 
 
 {% endblock %}

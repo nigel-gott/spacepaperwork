@@ -68,7 +68,8 @@ class Ship(models.Model):
     def total_order_quantity_last_month(self):
         now = timezone.now()
         now_minus_1_month = now - timezone.timedelta(weeks=4)
-        result = self.shiporder_set.filter(created_at__gt=now_minus_1_month).aggregate(  # type: ignore
+        result = self.shiporder_set.filter(created_at__gt=now_minus_1_month).aggregate(
+            # type: ignore
             total=Sum("quantity")
         )
         if result:
@@ -93,7 +94,8 @@ class Ship(models.Model):
     def total_isk_and_eggs_quantity_last_month(self):
         now = timezone.now()
         now_minus_1_month = now - timezone.timedelta(weeks=4)
-        result = self.shiporder_set.filter(created_at__gt=now_minus_1_month).aggregate(  # type: ignore
+        result = self.shiporder_set.filter(created_at__gt=now_minus_1_month).aggregate(
+            # type: ignore
             total=Sum("price")
         )
         if result:
@@ -158,7 +160,9 @@ class ShipOrder(models.Model):
 
     def availible_transitions(self):
         # pylint: disable=no-member
-        return {t.name: t for t in self.get_available_state_transitions()}  # type: ignore
+        return {
+            t.name: t for t in self.get_available_state_transitions()
+        }  # type: ignore
 
     def availible_transition_names(self):
         # pylint: disable=no-member

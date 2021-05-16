@@ -1,103 +1,109 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
-{% load materializecss %}
-<div class="row">
-    <div class="col s12 m12">
-        <h5>Outstanding Profit Transfers</h5>
-        <a class="waves-btn btn" href="{% url 'completed_profit_transfers' %}">View Completed Profit Transfers</h5></a>
-        {% if transfer_logs %}
-        <table>
-            <thead>
-            <th>Time</th>
-            <th>Transfer</th>
-            <th>Count</th>
-            <th>Total Eggs</th>
-            </thead>
-            <tbody>
-                {% for transfer_log in transfer_logs %}
-                <tr>
-                    <td>
-                        {{transfer_log.time}}
-                    </td>
-                    <td>
-                        <a class="waves-btn btn green" href="{% url 'view_transfer_log' transfer_log.id %}">Complete Transfer</a>
-                    </td>
-                    <td>
-                        {{transfer_log.count}}
-                    </td>
-                    <td>
-                        {{transfer_log.total}}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-            <p>You have no Outstanding profit transfers</p>
-        {% endif %}
-    </div>
-</div>
-<div class="row">
-    <div class="col s12 m12">
-        <div class="divider"></div>
-        <div class="section">
-            <h5>Your Sold Items With Un-Transfered Profit</h5>
-            {% if user.gooseuser.can_deposit %}
-            <a class="waves-effect waves-light pulse btn green lighten-2"
-               href="{% url 'transfer_profit' %}"><i class="material-icons right">info</i>Transfer Profit From Sold Items</a>
+    {% load materializecss %}
+    <div class="row">
+        <div class="col s12 m12">
+            <h5>Outstanding Profit Transfers</h5>
+            <a class="waves-btn btn" href="{% url 'completed_profit_transfers' %}">View
+                Completed Profit Transfers</h5></a>
+            {% if transfer_logs %}
+                <table>
+                    <thead>
+                    <th>Time</th>
+                    <th>Transfer</th>
+                    <th>Count</th>
+                    <th>Total Eggs</th>
+                    </thead>
+                    <tbody>
+                    {% for transfer_log in transfer_logs %}
+                        <tr>
+                            <td>
+                                {{ transfer_log.time }}
+                            </td>
+                            <td>
+                                <a class="waves-btn btn green"
+                                   href="{% url 'view_transfer_log' transfer_log.id %}">Complete
+                                    Transfer</a>
+                            </td>
+                            <td>
+                                {{ transfer_log.count }}
+                            </td>
+                            <td>
+                                {{ transfer_log.total }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>You have no Outstanding profit transfers</p>
             {% endif %}
-            <table>
-                <thead>
-                <th>Location</th>
-                <th>Loot Group</th>
-                <th>Item</th>
-                <th>Sold Via</th>
-                <th>Quantity</th>
-                <th>Profit</th>
-                <th>Status</th>
-                <th>Actions</th>
-                </thead>
-                <tbody>
-                {% for loc_items in all_sold %}
-                {% for item in loc_items.sold %}
-                <tr>
-                    {% if forloop.first %}
-                    <td rowspan="{{loc_items.sold|length}}">
-                        {{loc_items.loc}}
-                    </td>
-                    {% endif %}
-                    <td>
-                        {% if item.item.loot_group %}
-                        <a href="{% url 'loot_group_view' item.item.loot_group.id %}">Loot Group
-                            {{item.item.loot_group.id}}</a>
-                        {% else %}
-                        No Loot Group
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{% url 'item_view' item.item.id %}">{{item.item}}</a>
-                    </td>
-                    <td>
-                        {{item.sold_via}}
-                    </td>
-                    <td>
-                        {{item.quantity}}
-                    </td>
-                    <td>
-                        {{item.item.isk_and_eggs_balance}}
-                    </td>
-                    <td>
-                        {{item.status}}
-                    </td>
-                    <td>
-                    </td>
-                </tr>
-                {% endfor %}
-                {% endfor %}
-                </tbody>
-            </table>
         </div>
     </div>
-</div>
+    <div class="row">
+        <div class="col s12 m12">
+            <div class="divider"></div>
+            <div class="section">
+                <h5>Your Sold Items With Un-Transfered Profit</h5>
+                {% if user.gooseuser.can_deposit %}
+                    <a class="waves-effect waves-light pulse btn green lighten-2"
+                       href="{% url 'transfer_profit' %}"><i
+                            class="material-icons right">info</i>Transfer Profit From
+                        Sold Items</a>
+                {% endif %}
+                <table>
+                    <thead>
+                    <th>Location</th>
+                    <th>Loot Group</th>
+                    <th>Item</th>
+                    <th>Sold Via</th>
+                    <th>Quantity</th>
+                    <th>Profit</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                    </thead>
+                    <tbody>
+                    {% for loc_items in all_sold %}
+                        {% for item in loc_items.sold %}
+                            <tr>
+                                {% if forloop.first %}
+                                    <td rowspan="{{ loc_items.sold|length }}">
+                                        {{ loc_items.loc }}
+                                    </td>
+                                {% endif %}
+                                <td>
+                                    {% if item.item.loot_group %}
+                                        <a href="{% url 'loot_group_view' item.item.loot_group.id %}">Loot
+                                            Group
+                                            {{ item.item.loot_group.id }}</a>
+                                    {% else %}
+                                        No Loot Group
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'item_view' item.item.id %}">{{ item.item }}</a>
+                                </td>
+                                <td>
+                                    {{ item.sold_via }}
+                                </td>
+                                <td>
+                                    {{ item.quantity }}
+                                </td>
+                                <td>
+                                    {{ item.item.isk_and_eggs_balance }}
+                                </td>
+                                <td>
+                                    {{ item.status }}
+                                </td>
+                                <td>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
 
 {% endblock %}

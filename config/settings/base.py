@@ -14,9 +14,7 @@ from moneyed.localization import _FORMATTER
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 APPS_DIR = ROOT_DIR / "goosetools"
 env = environ.Env(
-    USE_NEW_VENMO_COMMANDS=(bool, False),
-    SINGLE_TENANT=(bool, False),
-    GOOSEFLOCK_FEATURES=(bool, False),
+    SINGLE_TENANT=(bool, True),
     PRONOUN_ROLES=(bool, False),
     RUN_WEEKLY_MARKET_DATA_FULL_SYNC=(bool, False),
 )
@@ -24,11 +22,11 @@ env = environ.Env(
 env.read_env(str(ROOT_DIR / ".env"))
 
 SINGLE_TENANT = env("SINGLE_TENANT")
+WITHDRAW_INGAME_CHAR = env("WITHDRAW_INGAME_CHAR", default="a corp admin")
 PRONOUN_ROLES = env("PRONOUN_ROLES", default=False)
 PRONOUN_THEY_DISCORD_ROLE = env("PRONOUN_THEY_DISCORD_ROLE", default=False)
 PRONOUN_SHE_DISCORD_ROLE = env("PRONOUN_SHE_DISCORD_ROLE", default=False)
 PRONOUN_HE_DISCORD_ROLE = env("PRONOUN_HE_DISCORD_ROLE", default=False)
-GOOSEFLOCK_FEATURES = env("GOOSEFLOCK_FEATURES", default=False)
 WIKI_NAME = env("WIKI_NAME", default=False)
 WIKI_URL = env("WIKI_URL", default=False)
 BASE_URL = env("BASE_URL")
@@ -136,6 +134,7 @@ TENANT_APPS = [
     "goosetools.venmo.apps.VenmoConfig",
     "goosetools.mapbot.apps.MapBotConfig",
     "goosetools.industry.apps.IndustryConfig",
+    "goosetools.discord_bot.apps.DiscordBotConfig",
 ]
 
 if not SINGLE_TENANT:
@@ -149,7 +148,6 @@ COMMENTS_APP = "goosetools.goose_comments"
 TENANT_MODEL = "tenants.Client"  # app.Model
 
 TENANT_DOMAIN_MODEL = "tenants.Domain"  # app.Model
-
 
 # AUTHENTICATION
 # ------------------------------------------------------------------------------
@@ -315,7 +313,6 @@ FORM_RENDERER = "django.forms.renderers.TemplatesSetting"
 # https://docs.djangoproject.com/en/dev/ref/settings/#fixture-dirs
 FIXTURE_DIRS = (str(APPS_DIR / "fixtures"),)
 
-
 # LOGGING
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#logging
@@ -374,7 +371,6 @@ REST_FRAMEWORK = {
 VENMO_HOST_URL = env("VENMO_HOST_URL", default=False)
 VENMO_BASE_PATH = env("VENMO_BASE_PATH", default=False)
 VENMO_API_TOKEN = env("VENMO_API_TOKEN", default=False)
-USE_NEW_VENMO_COMMANDS = env("USE_NEW_VENMO_COMMANDS", default=False)
 BOT_TOKEN = env("BOT_TOKEN")
 SITE_NAME = env("SITE_NAME", default="GooseTools")
 LOGIN_URL = env("LOGIN_URL", default="/accounts/discord/login/")

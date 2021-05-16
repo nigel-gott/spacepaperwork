@@ -1,64 +1,68 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
-{% load materializecss %}
-<div class="row">
-    <div class="col s12 m12">
-        <h5>Market Orders</h5>
-        <table>
-            <thead>
-            <th>Location</th>
-            <th>Loot Group</th>
-            <th>Item</th>
-            <th>Quantity</th>
-            <th>Buy/Sell</th>
-            <th>Internal/External</th>
-            <th>List Price</th>
-            <th>Action</th>
-            </thead>
-            <tbody>
-            {% for loc_items in all_orders %}
-            {% for item in loc_items.orders %}
-            <tr>
-                {% if forloop.first %}
-                <td rowspan="{{items|length}}">
-                    {{loc_items.loc}}
-                </td>
-                {% endif %}
-                <td>
-                    {% if item.item.loot_group %}
-                    <a href="{% url 'loot_group_view' item.item.loot_group.id %}">Loot Group
-                        {{item.item.loot_group.id}}</a>
-                    {% else %}
-                    No Loot Group
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{% url 'item_view' item.item.id %}">
-                        {{item.item}}
-                    </a>
-                </td>
-                <td>
-                    {{item.quantity}}
-                </td>
-                <td>
-                    {{item.buy_or_sell}}
-                </td>
-                <td>
-                    {{item.internal_or_external}}
-                </td>
-                <td>
-                    {{item.listed_at_price}}
-                </td>
-                <td>
-                    <a class="waves-btn btn orange" href="{% url 'edit_order_price' item.id %}">Edit Price</a>
-                    <a class="waves-btn btn green" href="{% url 'order_sold' item.id %}">Sold</a>
-                </td>
-            </tr>
-            {% endfor %}
-            {% endfor %}
-            </tbody>
-        </table>
-        </form>
+    {% load materializecss %}
+    <div class="row">
+        <div class="col s12 m12">
+            <h5>Market Orders</h5>
+            <table>
+                <thead>
+                <th>Location</th>
+                <th>Loot Group</th>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Buy/Sell</th>
+                <th>Internal/External</th>
+                <th>List Price</th>
+                <th>Action</th>
+                </thead>
+                <tbody>
+                {% for loc_items in all_orders %}
+                    {% for item in loc_items.orders %}
+                        <tr>
+                            {% if forloop.first %}
+                                <td rowspan="{{ items|length }}">
+                                    {{ loc_items.loc }}
+                                </td>
+                            {% endif %}
+                            <td>
+                                {% if item.item.loot_group %}
+                                    <a href="{% url 'loot_group_view' item.item.loot_group.id %}">Loot
+                                        Group
+                                        {{ item.item.loot_group.id }}</a>
+                                {% else %}
+                                    No Loot Group
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'item_view' item.item.id %}">
+                                    {{ item.item }}
+                                </a>
+                            </td>
+                            <td>
+                                {{ item.quantity }}
+                            </td>
+                            <td>
+                                {{ item.buy_or_sell }}
+                            </td>
+                            <td>
+                                {{ item.internal_or_external }}
+                            </td>
+                            <td>
+                                {{ item.listed_at_price }}
+                            </td>
+                            <td>
+                                <a class="waves-btn btn orange"
+                                   href="{% url 'edit_order_price' item.id %}">Edit
+                                    Price</a>
+                                <a class="waves-btn btn green"
+                                   href="{% url 'order_sold' item.id %}">Sold</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+            </form>
+        </div>
     </div>
-</div>
 
 {% endblock %}

@@ -6,4 +6,5 @@ class VenmoConfig(AppConfig):
 
     def ready(self):
         # pylint: disable=unused-import
+        # noinspection PyUnresolvedReferences
         import goosetools.venmo.signals

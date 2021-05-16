@@ -1,11 +1,11 @@
 from dal import autocomplete
 from django import forms
-from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from goosetools.fleets.models import AnomType
 from goosetools.items.models import System
 from goosetools.users.models import Character
+from goosetools.venmo.models import TransferMethod
 
 
 class LootGroupForm(forms.Form):
@@ -112,30 +112,20 @@ class LootShareForm(forms.Form):
     )
 
 
-if settings.GOOSEFLOCK_FEATURES:
-    TRANSFER_CHOICES = [
-        ("contract", "Tell Recipients To Send You Contracts"),
-        ("eggs", "Send Eggs to Recipients"),
-    ]
-    INITIAL_CHOICE = "eggs"
-else:
-    TRANSFER_CHOICES = [
-        ("contract", "Tell Recipients To Send You Contracts"),
-    ]
-    INITIAL_CHOICE = "contract"
-
-
 class TransferProfitForm(forms.Form):
-    transfer_method = forms.ChoiceField(
-        choices=TRANSFER_CHOICES,
-        initial=INITIAL_CHOICE,
+    transfer_method = forms.ModelChoiceField(
+        queryset=TransferMethod.objects.all(),
+        initial=TransferMethod.objects.filter(default=True),
     )
     character_to_send_contracts_to = forms.ModelChoiceField(
         required=False,
         queryset=Character.objects.all(),
     )
     own_share_in_eggs = forms.BooleanField(
+        label="Include your own share in generated commands",
         required=False,
         initial=False,
-        help_text="Tick if you want to also move your share of the profit into eggs rather than keeping it as isk.",
+        help_text="Tick if you want to also include your person share of the profit "
+        "in the generated commands. If un-ticked your share will be left "
+        "as isk on your character.",
     )

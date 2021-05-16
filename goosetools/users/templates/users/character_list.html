@@ -1,46 +1,49 @@
 {% extends "core/base.html" %}
 {% block body %}
-<div class="section">
-    <h4>Your Corp Applications</h4>
-</div>
-<div class="section">
-    <ul class="collection" style="overflow: visible;">
-    {% for app in corp_apps %}
-        <li class="collection-item ">
-            {% if app.status == "unapproved" %}
-                {% if character.corp %}
-                <span class="title">Your Request to move character {{app.character.ingame_name}} from [{{app.character.corp}}] to [{{app.corp}}] is pending approval.</span>
-                {% else %}
-                <span class="title">Your Request to join character {{app.character.ingame_name}} into [{{app.corp}}] is pending approval.</span>
-                {% endif %}
-            {% else %}
-                {% if character.corp %}
-                <span class="title red-text">Your Request to move character {{app.character.ingame_name}} from [{{app.character.corp}}] to [{{app.corp}}] was rejected.</span>
-                {% else %}
-                <span class="title red-text">Your Request to join character {{app.character.ingame_name}} into [{{app.corp}}] was rejected.</span>
-                {% endif %}
-            {% endif %}
-        </li>
-    {% endfor %}
-    </ul>
-</div>
-<div class="section">
-    <h4>Your Characters</h4>
-</div>
-<div class="section">
-    <ul class="collection" style="overflow: visible;">
-    {% for character in characters %}
-        <li class="collection-item ">
-            <span class="title">[{{character.corp}}] {{character.ingame_name}}</span>
-            <div class="divider"></div>
-            <p>
-                <a href="{% url 'character_edit' character.id %}" class="waves-btn btn orange">Edit<i class="material-icons right">edit</i></a>
-            </p>
-        </li>
-    {% endfor %}
-    </ul>
-    <a href="{% url 'character_new' %}" class="waves-btn btn green"><i class="material-icons right">add_circle</i>Add New Character</a>
+    <div class="section">
+        <h4>Your Corp Applications</h4>
+    </div>
+    <div class="section">
+        <ul class="collection" style="overflow: visible;">
+            {% for app in corp_apps %}
+                <li class="collection-item ">
+                    {% if app.status == "unapproved" %}
+                        {% if character.corp %}
+                            <span class="title">Your Request to move character {{ app.character.ingame_name }} from [{{ app.character.corp }}] to [{{ app.corp }}] is pending approval.</span>
+                        {% else %}
+                            <span class="title">Your Request to join character {{ app.character.ingame_name }} into [{{ app.corp }}] is pending approval.</span>
+                        {% endif %}
+                    {% else %}
+                        {% if character.corp %}
+                            <span class="title red-text">Your Request to move character {{ app.character.ingame_name }} from [{{ app.character.corp }}] to [{{ app.corp }}] was rejected.</span>
+                        {% else %}
+                            <span class="title red-text">Your Request to join character {{ app.character.ingame_name }} into [{{ app.corp }}] was rejected.</span>
+                        {% endif %}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="section">
+        <h4>Your Characters</h4>
+    </div>
+    <div class="section">
+        <ul class="collection" style="overflow: visible;">
+            {% for character in characters %}
+                <li class="collection-item ">
+                    <span class="title">[{{ character.corp }}] {{ character.ingame_name }}</span>
+                    <div class="divider"></div>
+                    <p>
+                        <a href="{% url 'character_edit' character.id %}"
+                           class="waves-btn btn orange">Edit<i
+                                class="material-icons right">edit</i></a>
+                    </p>
+                </li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'character_new' %}" class="waves-btn btn green"><i
+                class="material-icons right">add_circle</i>Add New Character</a>
 
-</div>
+    </div>
 
 {% endblock %}

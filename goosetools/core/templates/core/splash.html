@@ -2,9 +2,10 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<div class="section center">
-    <div class="mb-5">
-        <a id="conduct_button" class="btn waves-btn green btn-large pulse" href="{% url "core:conduct" %}">Apply Now</a>
+    <div class="section center">
+        <div class="mb-5">
+            <a id="conduct_button" class="btn waves-btn green btn-large pulse"
+               href="{% url "core:conduct" %}">Apply Now</a>
+        </div>
     </div>
-</div>
 {% endblock body %}

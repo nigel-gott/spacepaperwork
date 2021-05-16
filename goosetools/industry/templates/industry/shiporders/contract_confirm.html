@@ -2,84 +2,97 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<div class="section">
-    <h3>Create Order Contract</h3>
-</div>
-<div class="divider"></div>
-<div class="section">
-    <form action="" method="post">
-        {% csrf_token %}
-        <div class="row">
-            <button class="btn waves-effect waves-light green pulse" type="submit" value="Submit">
-                I CONFIRM I HAVE READ THE BELOW - CLICKING THIS WILL CREATE THE ORDER
-                <i class="material-icons right">send</i>
-            </button>
-            <h5 class="red-text">Before Submitting Complete These Steps:</h5>
-            <div class="col s12 m12">
-                <h6>Follow this GIF:</h6>
-                <span>You must put in the contract's description the following code: </span>
-                <blockquote>
-                {{ship_order.uid}}
-                </blockquote>
-                {% if ship_order.payment_method == "isk" %}
-                    {% if ship_order.valid_price %}
-                        <span>You are paying with ISK so you must enter the below price into the "I'll pay" section of the contract.</span>
-                        <blockquote>{{ship_order.price}}</blockquote>
-                    {% else %}
-                        <span class="red-text">You are paying with ISK however {{SITE_NAME}} was unable to find a valid price for the ship. Please ping @KrisWolfe#5428 on discord before making the contract.</span>
+    <div class="section">
+        <h3>Create Order Contract</h3>
+    </div>
+    <div class="divider"></div>
+    <div class="section">
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="row">
+                <button class="btn waves-effect waves-light green pulse" type="submit"
+                        value="Submit">
+                    I CONFIRM I HAVE READ THE BELOW - CLICKING THIS WILL CREATE THE
+                    ORDER
+                    <i class="material-icons right">send</i>
+                </button>
+                <h5 class="red-text">Before Submitting Complete These Steps:</h5>
+                <div class="col s12 m12">
+                    <h6>Follow this GIF:</h6>
+                    <span>You must put in the contract's description the following code: </span>
+                    <blockquote>
+                        {{ ship_order.uid }}
+                    </blockquote>
+                    {% if ship_order.payment_method == "isk" %}
+                        {% if ship_order.valid_price %}
+                            <span>You are paying with ISK so you must enter the below price into the "I'll pay" section of the contract.</span>
+                            <blockquote>{{ ship_order.price }}</blockquote>
+                        {% else %}
+                            <span class="red-text">You are paying with ISK however {{ SITE_NAME }} was unable to find a valid price for the ship. Please ping @KrisWolfe#5428 on discord before making the contract.</span>
+                        {% endif %}
                     {% endif %}
-                {% endif %}
-                {% if ship_order.blocked_until %}
-                        <span class="red-text">This ship order will not be processed until after {{ship_order.blocked_until}}, make sure the contract you make will not expire by a week after that date by either extending the contract expiry or waiting to make the contract.</span>
-                {% endif %}
-                <img src="{% static "how_to_contract.gif" %}"/>
-            </div>
-            <div class="col s12 m12">
-                <ol>
-                    <li>
-                        Make an in-game contract with visibility set to "Alliance"
-                    </li>
-                    <li>
-                        Select Jita IV - Moon 4 ITC as the station location (if you don't see this option buy something cheap there first and it will become visible)
-                    </li>
-                    <li>
-                        You must put in the contract's description the following code:
-                        <blockquote>
-                        {{ship_order.uid}}
-                        </blockquote>
-                    </li>
-                {% if ship_order.payment_method == "isk" %}
+                    {% if ship_order.blocked_until %}
+                        <span class="red-text">This ship order will not be processed until after {{ ship_order.blocked_until }}, make sure the contract you make will not expire by a week after that date by either extending the contract expiry or waiting to make the contract.</span>
+                    {% endif %}
+                    <img src="{% static "how_to_contract.gif" %}"/>
+                </div>
+                <div class="col s12 m12">
+                    <ol>
                         <li>
-                    {% if ship_order.valid_price %}
-                        You are paying with ISK so you must enter the below price into the "I'll pay" section of the contract.
-                        <blockquote>{{ship_order.price}}</blockquote>
-                    {% else %}
-                        <span class="red-text">You are paying with ISK however {{SITE_NAME}} was unable to find a valid price for the order. Please ping @KrisWolfe#5428 on discord before making the contract.</span>
-                    {% endif %}
+                            Make an in-game contract with visibility set to "Alliance"
                         </li>
-                {% endif %}
-                    <li>
-                {% if ship_order.blocked_until %}
-                        This ship order will not be processed until after {{ship_order.blocked_until}}, make sure the contract you make will not expire by a week after that date by either setting the contract expiry to be 2 weeks, or waiting to make the contract until {{ship_order.blocked_until}}.
-                {% else %}
-                        Make sure the expiry is set to 1 week, or 2 weeks for a battleship
-                {% endif %}
-                    </li>
-                    <li>
-                        Scroll down, click 'Add Item' to add the item you ordered
-                    </li>
-                    <li>
-                        Finally, create the contract
-                    </li>
-                </ol>
-                <p class="red-text">
-                    If you mess up any of these steps, your order might not be filled as the industry team will not be
-                    able to find or verify your contract
-                </p>
+                        <li>
+                            Select Jita IV - Moon 4 ITC as the station location (if you
+                            don't see this option buy something cheap there first and it
+                            will become visible)
+                        </li>
+                        <li>
+                            You must put in the contract's description the following
+                            code:
+                            <blockquote>
+                                {{ ship_order.uid }}
+                            </blockquote>
+                        </li>
+                        {% if ship_order.payment_method == "isk" %}
+                            <li>
+                                {% if ship_order.valid_price %}
+                                    You are paying with ISK so you must enter the below
+                                    price into the "I'll pay" section of the contract.
+                                    <blockquote>{{ ship_order.price }}</blockquote>
+                                {% else %}
+                                    <span class="red-text">You are paying with ISK however {{ SITE_NAME }} was unable to find a valid price for the order. Please ping @KrisWolfe#5428 on discord before making the contract.</span>
+                                {% endif %}
+                            </li>
+                        {% endif %}
+                        <li>
+                            {% if ship_order.blocked_until %}
+                                This ship order will not be processed until after
+                                {{ ship_order.blocked_until }}, make sure the contract
+                                you make will not expire by a week after that date by
+                                either setting the contract expiry to be 2 weeks, or
+                                waiting to make the contract until
+                                {{ ship_order.blocked_until }}.
+                            {% else %}
+                                Make sure the expiry is set to 1 week, or 2 weeks for a
+                                battleship
+                            {% endif %}
+                        </li>
+                        <li>
+                            Scroll down, click 'Add Item' to add the item you ordered
+                        </li>
+                        <li>
+                            Finally, create the contract
+                        </li>
+                    </ol>
+                    <p class="red-text">
+                        If you mess up any of these steps, your order might not be
+                        filled as the industry team will not be
+                        able to find or verify your contract
+                    </p>
+                </div>
             </div>
-        </div>
-    </form>
-</div>
+        </form>
+    </div>
 
 
 {% endblock %}

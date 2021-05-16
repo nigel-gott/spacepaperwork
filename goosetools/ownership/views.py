@@ -3,7 +3,6 @@ import math as m
 from decimal import Decimal
 from typing import Dict, List
 
-from django.conf import settings
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import F, Sum
@@ -40,6 +39,8 @@ from goosetools.ownership.models import (
 )
 from goosetools.users.forms import CharacterForm
 from goosetools.users.models import Character, GooseUser
+from goosetools.users.utils import filter_controlled_qs_to_usable
+from goosetools.venmo.models import TransferMethod
 
 
 class ComplexEncoder(json.JSONEncoder):
@@ -52,11 +53,12 @@ class ComplexEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, o)
 
 
-# Two types needed - one without bucket which makes it, one which adds group to existing bucket
-# Buckets group up all shares in underlying groups and split all items in underlying groups by total shares
+# Two types needed - one without bucket which makes it, one which adds group to
+# existing bucket Buckets group up all shares in underlying groups and split all
+# items in underlying groups by total shares
 def loot_group_create(request, pk):
     f = get_object_or_404(Fleet, pk=pk)
-    if not f.has_admin(request.user.gooseuser):
+    if not f.has_admin(request.gooseuser):
         return forbidden(request)
     return loot_group_add(request, pk, False)
 
@@ -88,10 +90,11 @@ def loot_share_join(request, pk):
         form = LootJoinForm(request.POST)
         if form.is_valid():
             selected_character = form.cleaned_data["character"]
-            if selected_character not in request.user.gooseuser.characters():
+            if selected_character not in request.gooseuser.characters():
                 messages.error(
                     request,
-                    f"{selected_character} is not your Character, you cannot join the loot group with it.",
+                    f"{selected_character} is not your Character, you cannot join the "
+                    f"loot group with it.",
                 )
             elif not loot_group.can_join(selected_character):
                 messages.error(
@@ -109,22 +112,24 @@ def loot_share_join(request, pk):
                 ls.save()
             return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
     else:
-        can_still_join = non_participation_chars(loot_group, request.user.gooseuser)
+        can_still_join = non_participation_chars(loot_group, request.gooseuser)
         if len(can_still_join) == 0:
             messages.error(
                 request,
-                "You have no more characters that can join this loot group. Don't worry you have probably already been added check below to make sure!",
+                "You have no more characters that can join this loot group. Don't "
+                "worry you have probably already been added check below to make sure!",
             )
             return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
         if loot_group.has_share(
-            request.user.gooseuser
-        ) and not loot_group.still_can_join_alts(request.user.gooseuser):
+            request.gooseuser
+        ) and not loot_group.still_can_join_alts(request.gooseuser):
             messages.error(
                 request,
-                "You cannot join with more characters as the fleet doesn't allow alts to have shares.",
+                "You cannot join with more characters as the fleet doesn't allow alts "
+                "to have shares.",
             )
             return HttpResponseRedirect(reverse("loot_group_view", args=[pk]))
-        default_char = request.user.gooseuser.default_character
+        default_char = request.gooseuser.default_character
         if default_char not in can_still_join:
             default_char = can_still_join[0]
         form = LootJoinForm(initial={"character": default_char})
@@ -138,7 +143,7 @@ def loot_share_join(request, pk):
 
 def loot_share_add(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
-    if not loot_group.has_admin(request.user.gooseuser):
+    if not loot_group.has_admin(request.gooseuser):
         return forbidden(request)
     raise_if_locked(request, loot_group)
     if request.method == "POST":
@@ -212,7 +217,8 @@ def loot_share_add_fleet_members(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
     raise_if_locked(request, loot_group)
     if request.method == "POST":
-        for fleet_member in loot_group.fleet_anom.fleet.fleetmember_set.all():  # type: ignore
+        fleet_members = loot_group.fleet_anom.fleet.fleetmember_set.all()
+        for fleet_member in fleet_members:  # type: ignore
             LootShare.objects.get_or_create(
                 character=fleet_member.character,
                 loot_group=loot_group,
@@ -228,7 +234,7 @@ def loot_share_add_fleet_members(request, pk):
 def loot_group_close(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
     raise_if_locked(request, loot_group)
-    if not loot_group.has_admin(request.user.gooseuser):
+    if not loot_group.has_admin(request.gooseuser):
         return forbidden(request)
     if request.method == "POST":
         loot_group.closed = True
@@ -245,7 +251,7 @@ def loot_group_close(request, pk):
 
 def loot_group_open(request, pk):
     loot_group = get_object_or_404(LootGroup, pk=pk)
-    if not loot_group.has_admin(request.user.gooseuser):
+    if not loot_group.has_admin(request.gooseuser):
         return forbidden(request)
     raise_if_locked(request, loot_group)
     if request.method == "POST":
@@ -269,9 +275,9 @@ def loot_group_add(request, fleet_pk, loot_bucket_pk):
     if request.method == "POST":
         form = LootGroupForm(request.POST)
         if form.is_valid():
-            # Form will let you specify anom/km/other
-            # depending on mode, a anom/km/other info will be created
-            # also can come with participation filled in and items filled in all on one form
+            # Form will let you specify anom/km/other depending on mode,
+            # a anom/km/other info will be created also can come with participation
+            # filled in and items filled in all on one form
             try:
                 spawned = timezone.now()
                 loot_source = form.cleaned_data["loot_source"]
@@ -476,7 +482,7 @@ def loot_group_view(request, pk):
 
 
 def your_fleet_shares(request):
-    return fleet_shares(request, request.user.gooseuser.pk)
+    return fleet_shares(request, request.gooseuser.pk)
 
 
 def fleet_shares(request, pk):
@@ -488,7 +494,7 @@ def fleet_shares(request, pk):
     your_total_est_sales = 0
 
     user = GooseUser.objects.get(pk=pk)
-    for_you = user == request.user.gooseuser
+    for_you = user == request.gooseuser
     if for_you:
         prefix = "Your"
         prefix2 = "Your"
@@ -568,7 +574,7 @@ def fleet_shares(request, pk):
 
 def loot_share_plus(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
-    if not loot_share.has_admin(request.user.gooseuser):
+    if not loot_share.has_admin(request.gooseuser):
         return forbidden(request)
     raise_if_locked(request, loot_share.loot_group)
     if request.method == "POST":
@@ -580,7 +586,7 @@ def loot_share_plus(request, pk):
 
 def loot_share_minus(request, pk):
     loot_share = get_object_or_404(LootShare, pk=pk)
-    if not loot_share.has_admin(request.user.gooseuser):
+    if not loot_share.has_admin(request.gooseuser):
         return forbidden(request)
     raise_if_locked(request, loot_share.loot_group)
     if request.method == "POST":
@@ -591,7 +597,7 @@ def loot_share_minus(request, pk):
 
 
 def transfered_items(request):
-    characters = request.user.gooseuser.characters()
+    characters = request.gooseuser.characters()
     all_sold = []
     for char in characters:
         char_locs = CharacterLocation.objects.filter(character=char)
@@ -612,9 +618,7 @@ def completed_profit_transfers(request):
         request,
         "ownership/completed_egg_transfers.html",
         {
-            "transfer_logs": request.user.gooseuser.transferlog_set.filter(
-                all_done=True
-            )
+            "transfer_logs": request.gooseuser.transferlog_set.filter(all_done=True)
             .order_by("-time")
             .all()
         },
@@ -632,15 +636,19 @@ def view_transfer_log(request, pk):
 
 def generate_contract_requests(
     total_participation,
-    transfering_user: GooseUser,
+    transferring_user: GooseUser,
     character_with_profit: Character,
     transfer,
 ):
-    command = f"Your loot has been sold!\n Please send a contract in-game to '{character_with_profit.ingame_name}' for the amount of ISK you are owed shown below:\n\n"
+    command = (
+        f"Your loot has been sold!\n Please send a contract in-game to "
+        f"'{character_with_profit.ingame_name}' for the amount "
+        f"of ISK you are owed shown below:\n\n"
+    )
     deposit_total = 0
     for user_id, isk in total_participation.items():
         floored_isk = m.floor(isk.amount)
-        if user_id != transfering_user.id:
+        if user_id != transferring_user.id:
             user = GooseUser.objects.get(id=user_id)
             command = command + f"<@!{user.discord_uid()}> {floored_isk} \n"
 
@@ -657,52 +665,44 @@ def generate_contract_requests(
     return deposit_total, command
 
 
-def make_transfer_command(total_participation, transfering_user: GooseUser):
-    if settings.USE_NEW_VENMO_COMMANDS:
-        command = "/bulk transfer: "
-    else:
-        command = "$bulk\n"
-    length_since_last_bulk = len(command)
-    commands_issued = False
+def make_transfer_command(
+    total_participation,
+    transferring_user: GooseUser,
+    transfer_method: TransferMethod,
+    request,
+):
     deposit_total = 0
+    user_transfers = []
     for user_id, isk in total_participation.items():
         floored_isk = m.floor(isk.amount)
-        if user_id != transfering_user.id:
+        if user_id != transferring_user.id:
             user = GooseUser.objects.get(id=user_id)
-            commands_issued = True
-            if settings.USE_NEW_VENMO_COMMANDS:
-                next_user = f"<@!{user.discord_uid()}> {floored_isk} "
-            else:
-                next_user = f"<@{user.discord_uid()}> {floored_isk}\n"
-            if length_since_last_bulk + len(next_user) > 1500:
-                if settings.USE_NEW_VENMO_COMMANDS:
-                    new_bulk = "/bulk transfer: "
-                else:
-                    new_bulk = "$bulk\n"
-                command = (
-                    command
-                    + "\nNEW MESSAGE TO AVOID DISCORD CHARACTER LIMIT:\n"
-                    + new_bulk
-                )
-                length_since_last_bulk = len(new_bulk)
-
-            command = command + next_user
-            length_since_last_bulk = length_since_last_bulk + len(next_user)
+            user_transfers.append((user.discord_uid(), floored_isk))
             deposit_total = deposit_total + floored_isk
-    if not commands_issued:
-        command = "no one to transfer to"
-    return command
+
+    return transfer_method.make_transfer_command(
+        transferring_user.discord_uid(),
+        deposit_total,
+        user_transfers,
+        lambda msg: messages.warning(request, msg),
+    )
 
 
-def make_deposit_command(others_share, own_share, own_share_in_eggs, left_over):
+def make_deposit_command(
+    others_share,
+    own_share,
+    own_share_in_eggs,
+    left_over,
+    transferring_user: GooseUser,
+    transfer_method: TransferMethod,
+):
     if own_share_in_eggs:
         deposit = others_share + own_share + left_over
     else:
         deposit = others_share
-    if settings.USE_NEW_VENMO_COMMANDS:
-        return f"/deposit amount: {int(deposit.amount)}"
-    else:
-        return f"$deposit {int(deposit.amount)}"
+    return transfer_method.make_deposit_command(
+        transferring_user.discord_uid(), deposit.amount
+    )
 
 
 def transfer_sold_items(
@@ -736,7 +736,7 @@ def transfer_sold_items(
             user = GooseUser.objects.get(id=user_id)
             isk = result["total_isk"]
             floored_isk = to_isk(m.floor(isk.amount))
-            if request.user.gooseuser == user:
+            if request.gooseuser == user:
                 sellers_isk = sellers_isk + floored_isk
             else:
                 others_isk = others_isk + floored_isk
@@ -775,7 +775,8 @@ def transfer_sold_items(
     if left_over.amount > 0:
         if last_item is None:
             raise Exception(
-                "Error trying to transfer 0 sold items somehow so nothing to attach leftovers onto"
+                "Error trying to transfer 0 sold items somehow so nothing to attach "
+                "leftovers onto "
             )
         item_to_attach_left_overs_onto = last_item
         IskTransaction.objects.create(
@@ -793,25 +794,31 @@ def transfer_sold_items(
                 time=current_now,
                 eggs=left_over_floored,
                 debt=False,
-                counterparty=request.user.gooseuser,
+                counterparty=request.gooseuser,
                 notes="Fractional leftovers assigned to the loot seller ",
             )
 
     transfer_command = ""
     deposit_command = ""
-    if transfer_method == "eggs":
+    if transfer_method.transfer_type == "generate_command":
         deposit_command = make_deposit_command(
-            others_isk, sellers_isk, own_share_in_eggs, left_over
+            others_isk,
+            sellers_isk,
+            own_share_in_eggs,
+            left_over,
+            request.gooseuser,
+            transfer_method,
         )
         transfer_command = make_transfer_command(
-            total_participation, request.user.gooseuser
+            total_participation, request.gooseuser, transfer_method, request
         )
         messages.success(
             request,
-            f"Generated Deposit and Transfer commands for {total} eggs from {count} sold items!.",
+            f"Generated Deposit and Transfer commands for {total} ISK from {count} "
+            f"sold items!.",
         )
     log = TransferLog(
-        user=request.user.gooseuser,
+        user=request.gooseuser,
         time=timezone.now(),
         total=total,
         own_share=sellers_isk,
@@ -822,11 +829,11 @@ def transfer_sold_items(
         all_done=False,
         legacy_transfer=False,
         own_share_in_eggs=own_share_in_eggs,
-        transfer_method=transfer_method,
+        new_transfer_method=transfer_method,
     )
     log.full_clean()
     log.save()
-    if transfer_method == "contract":
+    if transfer_method.transfer_type == "contract":
         t, text = generate_contract_requests(
             total_participation, request.gooseuser, contract_character, log
         )
@@ -834,7 +841,8 @@ def transfer_sold_items(
         log.save()
         messages.success(
             request,
-            f"Told all recipients to Send {contract_character} contracts in-game for {t} ISK from {count} sold items!.",
+            f"Told all recipients to Send {contract_character} contracts in-game for "
+            f"{t} ISK from {count} sold items!.",
         )
     to_transfer.update(transfer_log=log.id)
     return log.id
@@ -846,10 +854,13 @@ def valid_transfer(to_transfer, request, form):
         return False
 
     if (
-        form.cleaned_data["transfer_method"] == "contract"
+        form.cleaned_data["transfer_method"].transfer_type == "contract"
         and not form.cleaned_data["character_to_send_contracts_to"]
     ):
-        error_message = "You must specify a character which people will be sending the contracts to get their profit"
+        error_message = (
+            "You must specify a character which people will be sending "
+            "the contracts to get their profit "
+        )
         messages.error(request, mark_safe(error_message))
         return False
 
@@ -865,23 +876,29 @@ def valid_transfer(to_transfer, request, form):
         .filter(share_sum__lte=0)
     )
     if len(invalid_groups) > 0:
-        error_message = "The following loot groups you are attempting to transfer isk for have no participation at all, you must first setup some participation for these groups before you can deposit isk:"
+        error_message = (
+            "The following loot groups you are attempting to transfer isk "
+            "for have no participation at all, you must first setup some "
+            "participation for these groups before you can deposit isk: "
+        )
         for invalid_group in invalid_groups:
+            url = reverse("loot_group_view", args=[invalid_group.pk])
             error_message = (
-                error_message
-                + f"<br/> *  <a href='{reverse('loot_group_view', args=[invalid_group.pk])}'>{invalid_group}</a> "
+                error_message + f"<br/> *  <a href='{url}'>{invalid_group}</a> "
             )
         messages.error(request, mark_safe(error_message))
         return False
 
     negative_items = list(to_transfer.filter(isk_balance__lt=0).all())
     if len(negative_items) > 0:
-        error_message = "You are trying to transfer an item which has made a negative profit, something has probably gone wrong please PM @thejanitor immediately."
+        error_message = (
+            "You are trying to transfer an item which has made a negative "
+            "profit, something has probably gone wrong please PM "
+            "@thejanitor immediately. "
+        )
         for sold_item in negative_items:
-            error_message = (
-                error_message
-                + f"<br/> *  <a href='{reverse('item_view', args=[sold_item.item.pk])}'>{sold_item}</a> "
-            )
+            url = reverse("item_view", args=[sold_item.item.pk])
+            error_message = error_message + f"<br/> *  <a href='{url}'>{sold_item}</a> "
         messages.error(request, mark_safe(error_message))
         return False
 
@@ -895,6 +912,9 @@ def transfer_profit(request):
         form.fields[
             "character_to_send_contracts_to"
         ].queryset = request.gooseuser.characters()
+        form.fields["transfer_method"].queryset = filter_controlled_qs_to_usable(
+            TransferMethod.objects.all(), request, return_as_qs=True
+        )
 
         if form.is_valid():
             to_transfer = SoldItem.objects.filter(
@@ -917,8 +937,11 @@ def transfer_profit(request):
     else:
         form = TransferProfitForm(
             initial={
-                "character_to_send_contracts_to": request.user.gooseuser.default_character
+                "character_to_send_contracts_to": request.gooseuser.default_character
             }
+        )
+        form.fields["transfer_method"].queryset = filter_controlled_qs_to_usable(
+            TransferMethod.objects.all(), request, return_as_qs=True
         )
         form.fields[
             "character_to_send_contracts_to"
@@ -934,7 +957,7 @@ def transfer_profit(request):
 def mark_transfer_as_done(request, pk):
     log = get_object_or_404(TransferLog, pk=pk)
     if request.method == "POST":
-        if log.user != request.user.gooseuser:
+        if log.user != request.gooseuser:
             messages.error(request, "You cannot mark someone else's transfer as done.")
             return HttpResponseRedirect(reverse("sold"))
         else:
@@ -979,7 +1002,7 @@ def add_items_internal(
     if request.method == "POST":
         formset = InventoryItemFormset(request.POST, request.FILES, initial=initial)
         char_form = CharacterForm(request.POST)
-        char_form.fields["character"].queryset = request.user.gooseuser.characters()
+        char_form.fields["character"].queryset = request.gooseuser.characters()
         if formset.is_valid() and char_form.is_valid():
             character = char_form.cleaned_data["character"]
             loot_group = loot_group_getter(character)
@@ -1036,9 +1059,9 @@ def add_items_internal(
                 return HttpResponseRedirect(success_redirect)
     else:
         char_form = CharacterForm(
-            initial={"character": request.user.gooseuser.default_character}
+            initial={"character": request.gooseuser.default_character}
         )
-        char_form.fields["character"].queryset = request.user.gooseuser.characters()
+        char_form.fields["character"].queryset = request.gooseuser.characters()
         formset = InventoryItemFormset(initial=initial)
     return render(
         request,

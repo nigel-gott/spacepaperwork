@@ -1,29 +1,30 @@
 {% extends "core/base.html" %}
 {% block body %}
-<div class="section">
-    <h5>Edit Character</h5>
-</div>
-<div class="divider"></div>
-<div class="section">
-    <form action="" method="post">
-        {% csrf_token %}
-        {% for field in form %}
-        <div class="row">
-            <div class="input-field col s12">
-                {{ field.errors }}
-                {{ field }}
-                {{ field.label_tag }}
-                {% if field.help_text %}
-                <p class="help">{{ field.help_text|safe }}</p>
-                {% endif %}
-            </div>
-        </div>
+    <div class="section">
+        <h5>Edit Character</h5>
+    </div>
+    <div class="divider"></div>
+    <div class="section">
+        <form action="" method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="row">
+                    <div class="input-field col s12">
+                        {{ field.errors }}
+                        {{ field }}
+                        {{ field.label_tag }}
+                        {% if field.help_text %}
+                            <p class="help">{{ field.help_text|safe }}</p>
+                        {% endif %}
+                    </div>
+                </div>
 
-        {% endfor %}
-        <label>
-        <button class="btn waves-effect waves-light" type="submit" value="Submit">Submit Change Request
-            <i class="material-icons right">send</i>
-        </button>
-    </form>
-</div>
+            {% endfor %}
+            <label>
+                <button class="btn waves-effect waves-light" type="submit"
+                        value="Submit">Submit Change Request
+                    <i class="material-icons right">send</i>
+                </button>
+        </form>
+    </div>
 {% endblock %}

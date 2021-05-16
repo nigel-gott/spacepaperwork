@@ -2,118 +2,170 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<h4>{{title}}</h4>
-<div class="section">
-    <b>Id:</b> {{log.id}}<br/>
-    <b>Made By:</b> {{log.user.display_name}}<br/>
-    <b>At:</b> {{log.time}}<br/>
-    <b>Number of Items worth of Profit Transfered:</b> {{log.count}}<br/>
-    <b>Total isk Transfered:</b> {{log.total}}<br/>
-</div>
-<div class="section">
-    {% if not log.legacy_transfer %}
-    <h5>Commands</h5>
-        {% if not log.all_done %}
-            <form action="{% url 'mark_transfer_as_done' log.id %}" method="POST">
-                {% csrf_token %}
-                <button class="waves-effect waves-light btn" type="submit">Mark Transfer As All Done</button>
-            </form>
-            <br/>
-        {% if GOOSEFLOCK_FEATURES %}
-            <b class="green-text"> Please send the command below to the <a
-                href="https://discord.com/channels/747575380436713583/754139786679156807/764900253358227506">#general-bot-spam</a>
-            channel on GooseFleet discord. </b>
-            <br/>
-        {% endif %}
-        {% else %}
-            <b class="red-text"> Commands Already Sent </b>
-            <br/>
-        {% endif %}
-
-        {% if GOOSEFLOCK_FEATURES %}
-        {% if log.own_share_in_eggs %}
-            First Deposit {{log.egg_deposit_amount}} which includes {{log.safe_own_share}} of your own share and {{log.other_peoples_share}} of other peoples share:
-            <blockquote>
-                {{log.deposit_command|linebreaks}}
-            </blockquote>
-        {% else %}
-            First Deposit {{log.egg_deposit_amount}} which is entirely other peoples share's (you have opted to keep your share of {{log.own_share}} in ISK and not deposit it into eggs):
-            <blockquote>
-                {{log.deposit_command|linebreaks}}
-            </blockquote>
-        {% endif %}
-        Then transfer the deposited eggs to the participants:
-        <blockquote>
-            {{log.transfer_command|linebreaks}}
-        </blockquote>
-        Finally click the "Mark Transfer As All Done" button above
-        {% else %}
-        {% if log.transfer_method == "contract" %}
-        Send the following command to your Discord Server to let people know how much to contract you for:
-        <blockquote>
-            {{log.transfer_command|linebreaks}}
-        </blockquote>
-        {{SITE_NAME}} has also made these requested contracts visible for each user on their <a href="{% url 'contracts' %}">contracts page</a>.
-        {% else %}
-        <p>Currently Unsupported</p>
-        {% endif %}
-        {% endif %}
-    {% endif %}
-
-</div>
-<div class="divider"></div>
-<div class="section">
-    <h5>Breakdown of Split</h5>
-    <table>
-        <thead>
-        <th>Item</th>
-        <th>Discord Username</th>
-        <th>Shares</th>
-        <th>Flat Cut</th>
-        <th>Share Isk</th>
-        <th>Cut Isk</th>
-        <th>Total Isk</th>
-        </thead>
-        <tbody>
-        {% for item_id, item_details in explaination.items %}
-        {% for user_id, details in item_details.participation.items %}
-        <tr>
-            {% if forloop.first %}
-            <td rowspan="{{item_details.participation.values|length}}">
-                <a href="{% url 'item_view' item_id %}">{{item_details.item}}</a><br/>
-                {% if item_details.transfered_quantity %}
-                    Quantity Transfered: {{item_details.transfered_quantity}}<br/>
+    <h4>{{ title }}</h4>
+    <div class="section">
+        <b>Id:</b> {{ log.id }}<br/>
+        <b>Made By:</b> {{ log.user.display_name }}<br/>
+        <b>At:</b> {{ log.time }}<br/>
+        <b>Number of Items worth of Profit Transfered:</b> {{ log.count }}<br/>
+        <b>Total isk Transfered:</b> {{ log.total }}<br/>
+    </div>
+    <div class="section">
+        {% if not log.legacy_transfer %}
+            <h5>Commands</h5>
+            <em>Please follow the instructions below to transfer everyone's profit which
+                you currently have to the deserving individuals.</em>
+            {% if not log.all_done %}
+                <br/>
+                {% if log.new_transfer_method.generated_command_help_text %}
+                    <b class="green-text">
+                        {{ log.new_transfer_method.generated_command_help_text|linebreaks|urlize }}
+                    </b>
+                    <br/>
                 {% endif %}
-                Total Profit: {{item_details.total_isk}}<br/>
-                Total Shares: {{item_details.total_shares}}<br/>
-                Total Flat Cuts: {{item_details.total_flat_cuts}}%
-            </td>
+            {% else %}
+                <b class="red-text"> Commands Already Sent </b>
+                <br/>
             {% endif %}
-            <td>
-                {{details.username}}
-            </td>
-            <td>
-                {{details.shares}}/{{item_details.total_shares}}
-            </td>
-            <td>
-                {{details.flat_cut}}%
-            </td>
-            <td>
-                {{details.share_isk}}
-            </td>
-            <td>
-                {{details.flat_cut_isk}}
-            </td>
-            <td>
-                {{details.total_isk}}
-            </td>
-        </tr>
-        {% endfor %}
-        {% endfor %}
 
-        </tbody>
-    </table>
+            {% if log.transfer_method == "contract" or log.new_transfer_method.transfer_type == "contract" %}
+                Send the following command to your Discord Server to let people know
+                how much to contract you for:
+                <blockquote>
+                    {{ log.transfer_command|linebreaks }}
+                </blockquote>
+                {{ SITE_NAME }} has also made these requested contracts visible for
+                each user on their
+                <a href="{% url 'contracts' %}">contracts page</a>.
+            {% elif log.transfer_method == "eggs" or log.new_transfer_method.transfer_type == "generate_command" or log.transfer_command or log.deposit_commit %}
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Step Number</th>
+                        <th>Instructions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>
+                            1
+                        </td>
+                        <td>
+                            {% if log.own_share_in_eggs %}
+                                First deposit {{ log.egg_deposit_amount }} which
+                                includes
+                                {{ log.safe_own_share }} of your own share and
+                                {{ log.other_peoples_share }} of other peoples share:
+                                <blockquote>
+                                    {{ log.deposit_command|linebreaks }}
+                                </blockquote>
+                            {% else %}
+                                First Deposit {{ log.egg_deposit_amount }} which is
+                                entirely other
+                                peoples share's (you have opted to keep your share of
+                                {{ log.own_share }} in ISK and not deposit it):
+                                <blockquote>
+                                    {{ log.deposit_command|linebreaks }}
+                                </blockquote>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            2
+                        </td>
+                        <td>
+                            Then transfer the deposited isk to the participants:
+                            <blockquote>
+                                {{ log.transfer_command|linebreaks }}
+                            </blockquote>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>
+                            {% if not log.all_done %}
+                                Finally click this button once everything has been
+                                transferred and settled.
+                                This has no effect it just moves this transfer to the
+                                completed transfers
+                                page.
+                                <form action="{% url 'mark_transfer_as_done' log.id %}"
+                                      method="POST">
+                                    {% csrf_token %}
+                                    <button class="waves-effect waves-light btn"
+                                            type="submit">Mark
+                                        Transfer As All Done
+                                    </button>
+                                </form>
+                            {% else %}
+                                You have marked this transfer as done, everything is
+                                settled and done!
+                            {% endif %}
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            {% else %}
+                <strong class="red-text">ERROR UNKNOWN TRANSFER TYPE FOUND, PLEASE PM @thejanitor </strong>
+            {% endif %}
+        {% endif %}
 
-</div>
+    </div>
+    <div class="divider"></div>
+    <div class="section">
+        <h5>Breakdown of Split</h5>
+        <table>
+            <thead>
+            <th>Item</th>
+            <th>Discord Username</th>
+            <th>Shares</th>
+            <th>Flat Cut</th>
+            <th>Share Isk</th>
+            <th>Cut Isk</th>
+            <th>Total Isk</th>
+            </thead>
+            <tbody>
+            {% for item_id, item_details in explaination.items %}
+                {% for user_id, details in item_details.participation.items %}
+                    <tr>
+                        {% if forloop.first %}
+                            <td rowspan="{{ item_details.participation.values|length }}">
+                                <a href="{% url 'item_view' item_id %}">{{ item_details.item }}</a><br/>
+                                {% if item_details.transfered_quantity %}
+                                    Quantity Transfered:
+                                    {{ item_details.transfered_quantity }}<br/>
+                                {% endif %}
+                                Total Profit: {{ item_details.total_isk }}<br/>
+                                Total Shares: {{ item_details.total_shares }}<br/>
+                                Total Flat Cuts: {{ item_details.total_flat_cuts }}%
+                            </td>
+                        {% endif %}
+                        <td>
+                            {{ details.username }}
+                        </td>
+                        <td>
+                            {{ details.shares }}/{{ item_details.total_shares }}
+                        </td>
+                        <td>
+                            {{ details.flat_cut }}%
+                        </td>
+                        <td>
+                            {{ details.share_isk }}
+                        </td>
+                        <td>
+                            {{ details.flat_cut_isk }}
+                        </td>
+                        <td>
+                            {{ details.total_isk }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+
+            </tbody>
+        </table>
+
+    </div>
 
 {% endblock %}

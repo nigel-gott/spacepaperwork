@@ -40,7 +40,8 @@ class FleetTest(FastTenantTestCase):
             provider="discord",
             extra_data={
                 "username": "Test Goose User",
-                "avatar": "1",  # When a user has a default avatar the hash is just a single number
+                "avatar": "1",
+                # When a user has a default avatar the hash is just a single number
                 "discriminator": "1",
             },
             user=s,

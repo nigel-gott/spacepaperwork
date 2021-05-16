@@ -1,25 +1,50 @@
 {% extends "core/base.html" %} {% load base_extras %}
 {% block title %}
-View Contract | {{SITE_NAME}}
+    View Contract | {{ SITE_NAME }}
 {% endblock %}
 {% block body %}
-{% load materializecss %}
-<div class="row">
+    {% load materializecss %}
+    <div class="row">
     <div class="col s12 m12">
-        <h5>Contract {{contract.id}}</h5>
+        <h5>Contract {{ contract.id }}</h5>
         <a href="{% url 'contracts' %}">Back to Contracts</a>
         <p>
         <table>
 
-            <tr><td> From:</td><td> {{contract.from_user}} </td></tr>
-            <tr><td> To:</td><td> {{contract.to_char}} </td></tr>
-            <tr><td> Created At:</td><td> {{contract.created}} </td></tr>
-            <tr><td> In System:</td><td> {{contract.system}} </td></tr>
-            <tr><td> Isk:</td><td> {{contract.isk_display}} </td></tr>
-            <tr><td> Total Items:</td><td> {{contract.total_items}} </td></tr>
-            <tr><td> Status:</td><td> {{contract.status}} </td></tr>
+            <tr>
+                <td> From:</td>
+                <td> {{ contract.from_user }} </td>
+            </tr>
+            <tr>
+                <td> To:</td>
+                <td> {{ contract.to_char }} </td>
+            </tr>
+            <tr>
+                <td> Created At:</td>
+                <td> {{ contract.created }} </td>
+            </tr>
+            <tr>
+                <td> In System:</td>
+                <td> {{ contract.system }} </td>
+            </tr>
+            <tr>
+                <td> Isk:</td>
+                <td> {{ contract.isk_display }} </td>
+            </tr>
+            <tr>
+                <td> Total Items:</td>
+                <td> {{ contract.total_items }} </td>
+            </tr>
+            <tr>
+                <td> Status:</td>
+                <td> {{ contract.status }} </td>
+            </tr>
             {% if contract.transfer %}
-            <tr><td> From Profit Transfer:</td><td> <a href="{% url 'view_transfer_log' contract.transfer.id %}">Transfer Log {{contract.transfer.id}}</a> </td></tr>
+                <tr>
+                    <td> From Profit Transfer:</td>
+                    <td><a href="{% url 'view_transfer_log' contract.transfer.id %}">Transfer
+                        Log {{ contract.transfer.id }}</a></td>
+                </tr>
             {% endif %}
         </table>
 
@@ -30,38 +55,42 @@ View Contract | {{SITE_NAME}}
         {% if can_pending %}
             <form action="{% url 'pending_contract' contract.id %}" method="post">
                 {% csrf_token %}
-                <button class="btn waves-effect waves-light green" type="submit" value="Submit">
+                <button class="btn waves-effect waves-light green" type="submit"
+                        value="Submit">
                     I've Made This Contract In-Game
                     <i class="material-icons right">send</i>
                 </button>
             </form>
         {% endif %}
         {% if can_reject %}
-                <form action="{% url 'reject_contract' contract.id %}" method="post">
-                    {% csrf_token %}
-                    <button class="btn waves-effect waves-light red" type="submit" value="Submit">
-                        Reject
-                        <i class="material-icons right">send</i>
-                    </button>
-                </form>
+            <form action="{% url 'reject_contract' contract.id %}" method="post">
+                {% csrf_token %}
+                <button class="btn waves-effect waves-light red" type="submit"
+                        value="Submit">
+                    Reject
+                    <i class="material-icons right">send</i>
+                </button>
+            </form>
         {% endif %}
         {% if can_accept %}
-        <form action="{% url 'accept_contract' contract.id %}" method="post">
-            {% csrf_token %}
-            <button class="btn waves-effect waves-light green" type="submit" value="Submit">
-                I've accepted this contract
-                <i class="material-icons right">send</i>
-            </button>
-        </form>
+            <form action="{% url 'accept_contract' contract.id %}" method="post">
+                {% csrf_token %}
+                <button class="btn waves-effect waves-light green" type="submit"
+                        value="Submit">
+                    I've accepted this contract
+                    <i class="material-icons right">send</i>
+                </button>
+            </form>
         {% endif %}
         {% if can_cancel %}
-        <form action="{% url 'cancel_contract' contract.id %}" method="post">
-            {% csrf_token %}
-            <button class="btn waves-effect waves-light grey" type="submit" value="Submit">
-                Cancel
-                <i class="material-icons right">send</i>
-            </button>
-        </form>
+            <form action="{% url 'cancel_contract' contract.id %}" method="post">
+                {% csrf_token %}
+                <button class="btn waves-effect waves-light grey" type="submit"
+                        value="Submit">
+                    Cancel
+                    <i class="material-icons right">send</i>
+                </button>
+            </form>
         {% endif %}
         <div class="row">
             <table>
@@ -73,24 +102,25 @@ View Contract | {{SITE_NAME}}
                 </thead>
                 <tbody>
                 {% for item in log %}
-                <tr>
-                    <td>
-                        <a href="{% url 'item_view' item.id %}">{{item.item}}</a>
-                    </td>
-                    <td>
-                        {{item.quantity}}
-                    </td>
-                    <td>
-                        {{item.status}}
-                    </td>
-                    <td>
-                        {% if item.loot_group_id %}
-                        <a href="{% url 'loot_group_view' item.loot_group_id %}">Loot Group {{item.loot_group_id}}</a>
-                        {% else %}
-                        No Loot Group
-                        {% endif %}
-                    </td>
-                </tr>
+                    <tr>
+                        <td>
+                            <a href="{% url 'item_view' item.id %}">{{ item.item }}</a>
+                        </td>
+                        <td>
+                            {{ item.quantity }}
+                        </td>
+                        <td>
+                            {{ item.status }}
+                        </td>
+                        <td>
+                            {% if item.loot_group_id %}
+                                <a href="{% url 'loot_group_view' item.loot_group_id %}">Loot
+                                    Group {{ item.loot_group_id }}</a>
+                            {% else %}
+                                No Loot Group
+                            {% endif %}
+                        </td>
+                    </tr>
                 {% endfor %}
                 </tbody>
             </table>
@@ -98,4 +128,4 @@ View Contract | {{SITE_NAME}}
         </div>
     </div>
 
-    {% endblock %}
+{% endblock %}

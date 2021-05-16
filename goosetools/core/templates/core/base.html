@@ -133,6 +133,10 @@
                 <a href="{% url 'venmo:currency-list' %}">Currency Admin<i
                         class="material-icons left">settings</i></a>
             </li>
+            <li>
+                <a href="{% url 'venmo:transfer-list' %}">Transfer Admin<i
+                        class="material-icons left">autorenew</i></a>
+            </li>
         </ul>
     {% endif %}
 {% endif %}
@@ -410,6 +414,10 @@
             <li>
                 <a href="{% url 'venmo:currency-list' %}">Currency Admin<i
                         class="material-icons right">attach_money</i></a>
+            </li>
+            <li>
+                <a href="{% url 'venmo:transfer-list' %}">Transfer Admin<i
+                        class="material-icons right">autorenew</i></a>
             </li>
         {% endif %}
 

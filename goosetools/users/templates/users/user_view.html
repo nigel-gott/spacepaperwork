@@ -1,18 +1,19 @@
 {% extends "core/base.html" %}
 {% block body %}
-<div class="section">
-    <h4>{{viewed_user.display_name}}</h4>
-</div>
-<div class="section">
-    <h6>Their Characters:</h6>
-    <a href="{% url 'venmo:other_dashboard' 'default' viewed_user.id %}">Their Venmo Transactions</a>
-    <ul class="collection" style="overflow: visible;">
-    {% for character in viewed_user.character_set.all %}
-        <li class="collection-item ">
-            <span class="title">[{{character.corp}}] {{character.ingame_name}}</span>
-        </li>
-    {% endfor %}
-    </ul>
-</div>
+    <div class="section">
+        <h4>{{ viewed_user.display_name }}</h4>
+    </div>
+    <div class="section">
+        <h6>Their Characters:</h6>
+        <a href="{% url 'venmo:other_dashboard' 'default' viewed_user.id %}">Their Venmo
+            Transactions</a>
+        <ul class="collection" style="overflow: visible;">
+            {% for character in viewed_user.character_set.all %}
+                <li class="collection-item ">
+                    <span class="title">[{{ character.corp }}] {{ character.ingame_name }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 
 {% endblock %}

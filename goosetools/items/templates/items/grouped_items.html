@@ -1,39 +1,39 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
-{% load materializecss %}
-<div class="row">
-    <div class="col s12 m12">
-        <h5>{{title}}</h5>
-        <table>
-            <thead>
-            <th>Item Category</th>
-            <th>Item Group</th>
-            <th>Item Type</th>
-            <th>Item</th>
-            <th>Quantity</th>
-            </thead>
-            <tbody>
-            {% for item in items %}
-            <tr>
-                <td>
-                    {{item.item_type.item_sub_type.item_type}}
-                </td>
-                <td>
-                    {{item.item_type.item_sub_type}}
-                </td>
-                <td>
-                    {{item.item_type}}
-                </td>
-                <td>
-                    {{item}}
-                </td>
-                <td>
-                    {{item.total}}
-                </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+    {% load materializecss %}
+    <div class="row">
+        <div class="col s12 m12">
+            <h5>{{ title }}</h5>
+            <table>
+                <thead>
+                <th>Item Category</th>
+                <th>Item Group</th>
+                <th>Item Type</th>
+                <th>Item</th>
+                <th>Quantity</th>
+                </thead>
+                <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>
+                            {{ item.item_type.item_sub_type.item_type }}
+                        </td>
+                        <td>
+                            {{ item.item_type.item_sub_type }}
+                        </td>
+                        <td>
+                            {{ item.item_type }}
+                        </td>
+                        <td>
+                            {{ item }}
+                        </td>
+                        <td>
+                            {{ item.total }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
 {% endblock %}

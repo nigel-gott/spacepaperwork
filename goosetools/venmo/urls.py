@@ -1,6 +1,12 @@
 from django.urls import path
 
 from goosetools.venmo.views import (
+    TransferMethodCreateView,
+    TransferMethodDeleteView,
+    TransferMethodDetailView,
+    TransferMethodListView,
+    TransferMethodSelectCreateView,
+    TransferMethodUpdateView,
     VirtualCurrencyCreateView,
     VirtualCurrencyDeleteView,
     VirtualCurrencyDetailView,
@@ -57,5 +63,29 @@ urlpatterns = [
         "currency/<int:pk>/delete/",
         VirtualCurrencyDeleteView.as_view(),
         name="currency-delete",
+    ),
+    path("transfer/", TransferMethodListView.as_view(), name="transfer-list"),
+    path(
+        "transfer/create/", TransferMethodCreateView.as_view(), name="transfer-create"
+    ),
+    path(
+        "transfer/<int:pk>/update/",
+        TransferMethodUpdateView.as_view(),
+        name="transfer-update",
+    ),
+    path(
+        "transfer/<int:pk>/delete/",
+        TransferMethodDeleteView.as_view(),
+        name="transfer-delete",
+    ),
+    path(
+        "transfer/select/",
+        TransferMethodSelectCreateView.as_view(),
+        name="transfer-select",
+    ),
+    path(
+        "transfer/<int:pk>/",
+        TransferMethodDetailView.as_view(),
+        name="transfer-detail",
     ),
 ]

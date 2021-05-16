@@ -1,16 +1,17 @@
 {% extends "core/base.html" %}
 {% load materializecss %}
 {% block body %}
-<div class="section">
-    <h5>Approve Item Change Proposal {{itemchangeproposal.id}}</h5>
-</div>
-<div class="divider"></div>
-<div class="section">
-    <form action="" method="post">
-        {% csrf_token %}
-        <button class="btn waves-effect waves-light green" type="submit" value="Submit">Approve
-            <i class="material-icons right">send</i>
-        </button>
-    </form>
-</div>
+    <div class="section">
+        <h5>Approve Item Change Proposal {{ itemchangeproposal.id }}</h5>
+    </div>
+    <div class="divider"></div>
+    <div class="section">
+        <form action="" method="post">
+            {% csrf_token %}
+            <button class="btn waves-effect waves-light green" type="submit"
+                    value="Submit">Approve
+                <i class="material-icons right">send</i>
+            </button>
+        </form>
+    </div>
 {% endblock %}

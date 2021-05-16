@@ -2,66 +2,69 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<div class="section">
-    <h5>Create New User Group</h5>
-</div>
-<div class="divider"></div>
-<div class="section">
+    <div class="section">
+        <h5>Create New User Group</h5>
+    </div>
+    <div class="divider"></div>
+    <div class="section">
         {% if form.non_field_errors %}
-        <div class="row">
-            <div class="col s12 m5">
-                <div class="card-panel red darken-1">
+            <div class="row">
+                <div class="col s12 m5">
+                    <div class="card-panel red darken-1">
                     <span class="white-text">
                         <b>Errors with form:</b>
                     <ul class="errors">
-                        {% for error in form.non_field_errors%}
-                        <li>{{ error|escape }}</li>
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error|escape }}</li>
                         {% endfor %}
                     </ul>
                     </span>
+                    </div>
                 </div>
             </div>
-        </div>
         {% endif %}
-    <form action="" method="post">
-        {% csrf_token %}
+        <form action="" method="post">
+            {% csrf_token %}
             <div class="row">
-                {{ form.name|materializecss:'s12 m12, icon=directions_boat'}}
+                {{ form.name|materializecss:'s12 m12, icon=directions_boat' }}
             </div>
             <div class="row">
-                {{ form.description|materializecss:'s12 m12, icon=directions_boat'}}
+                {{ form.description|materializecss:'s12 m12, icon=directions_boat' }}
             </div>
             <div class="row">
-                {{ form.manually_given|materializecss:'s12 m12, icon=directions_boat'}}
+                {{ form.manually_given|materializecss:'s12 m12, icon=directions_boat' }}
             </div>
             <div class="row" id="role_id">
-                {{ form.required_discord_role_id|materializecss:'s12 m12, icon=directions_boat'}}
+                {{ form.required_discord_role_id|materializecss:'s12 m12, icon=directions_boat' }}
             </div>
             <div class="row">
-                {{ form.permissions|materializecss:'s12 m12, icon=directions_boat'}}
+                {{ form.permissions|materializecss:'s12 m12, icon=directions_boat' }}
             </div>
-        <button class="btn waves-effect waves-light" type="submit" value="Submit">Create Group
-            <i class="material-icons right">send</i>
-        </button>
-        <br/>
-    </form>
-</div>
+            <button class="btn waves-effect waves-light" type="submit" value="Submit">
+                Create Group
+                <i class="material-icons right">send</i>
+            </button>
+            <br/>
+        </form>
+    </div>
 {% endblock %}
 
 {% block extrafooter %}
-<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
-<script>
-$(document).ready(function() {
-    function hide_roles_if_manually_given(){
-        if(this.checked) {
-            $("#role_id").hide();
-        } else {
-            $("#role_id").show();
+    <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"
+            type="text/javascript"></script>
+    <script>
+    $(document).ready(function () {
+        function hide_roles_if_manually_given() {
+            if (this.checked) {
+                $("#role_id").hide()
+            } else {
+                $("#role_id").show()
+            }
         }
-    }
-   $("#id_manually_given").change(hide_roles_if_manually_given).trigger("change");
 
-});
-</script>
+        $("#id_manually_given").change(hide_roles_if_manually_given).trigger("change")
+
+    })
+    </script>
 
 {% endblock %}

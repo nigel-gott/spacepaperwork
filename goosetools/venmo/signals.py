@@ -5,6 +5,7 @@ from hordak.models.core import Account
 from goosetools.venmo.models import VirtualCurrency, VirtualCurrencyStorageAccount
 
 
+# noinspection PyUnusedLocal
 @receiver(pre_save, sender=VirtualCurrency)
 # pylint: disable=unused-argument
 def create_root_account(sender, instance, **kwargs):
@@ -19,6 +20,7 @@ def create_root_account(sender, instance, **kwargs):
     )
 
 
+# noinspection PyUnusedLocal
 @receiver(post_delete, sender=VirtualCurrencyStorageAccount)
 # pylint: disable=unused-argument
 def delete_storage_account(sender, instance, **kwargs):
@@ -28,6 +30,7 @@ def delete_storage_account(sender, instance, **kwargs):
         instance.account.delete()
 
 
+# noinspection PyUnusedLocal
 @receiver(post_delete, sender=VirtualCurrency)
 # pylint: disable=unused-argument
 def delete_root_account(sender, instance, **kwargs):

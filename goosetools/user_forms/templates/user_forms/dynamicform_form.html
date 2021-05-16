@@ -2,92 +2,96 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<div class="section">
-    {% if dynamicform %}
-        <h5>Edit Form: {{dynamicform.title}}</h5>
-    {% else %}
-        <h5>Create New Form</h5>
-    {% endif %}
-</div>
-<div class="divider"></div>
-<div class="section">
-    <form action="" method="post">
-        {% if form.non_field_errors %}
-        <div class="row">
-            <div class="col s12 m5">
-                <div class="card-panel red darken-1">
+    <div class="section">
+        {% if dynamicform %}
+            <h5>Edit Form: {{ dynamicform.title }}</h5>
+        {% else %}
+            <h5>Create New Form</h5>
+        {% endif %}
+    </div>
+    <div class="divider"></div>
+    <div class="section">
+        <form action="" method="post">
+            {% if form.non_field_errors %}
+                <div class="row">
+                    <div class="col s12 m5">
+                        <div class="card-panel red darken-1">
                     <span class="white-text">
                         <b>Errors with form:</b>
                     <ul class="errors">
-                        {% for error in form.non_field_errors%}
-                        <li>{{ error|escape }}</li>
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error|escape }}</li>
                         {% endfor %}
                     </ul>
                     </span>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-        {% csrf_token %}
-
-        {% for field in form %}
-        <div class="row">
-            {{ field|materializecss:'s12 m12'}}
-        </div>
-        {% endfor %}
-
-        {{ questions.management_form }}
-
-        <div id="formset-wrapper">
-            <div class="row">
-                <div class="col s12">
-                    <h6>Form Questions</h6><br/>
-                </div>
-            </div>
-            <ul class="collection items">
-                {% for question_form in questions %}
-                    <li class="collection-item" id="{{ question_form.prefix }}-row">
-                        <div class="row">
-                            {% if question_form.instance.pk %}{{ question_form.DELETE }}{% endif %}
-                            {% for field in question_form %}
-                                {% if field.name == "id" or field.name == "form" %}
-                                    {{ field}}
-                                {% elif field.name != "DELETE" %}
-                                    {{ field|materializecss}}
-                                {% endif %}
-                            {% endfor %}
                         </div>
-                    </li>
-                {% endfor %}
-            </ul>
-        </div>
-        <li class="collection-item" id="form_template" style="display:none">
-            <div class="row">
-                {% for field in questions.empty_form %}
-                    {% if field.name == "id" or field.name == "form" %}
-                        {{ field}}
-                    {% elif field.name != "DELETE" %}
-                        {{ field|materializecss}}
-                    {% endif %}
-                {% endfor %}
-            </div>
-        </li>
+                    </div>
+                </div>
+            {% endif %}
+            {% csrf_token %}
 
-        <button class="btn waves-effect waves-light" type="submit" value="Submit">Submit
-            <i class="material-icons right">send</i>
-        </button>
-    </form>
-</div>
+            {% for field in form %}
+                <div class="row">
+                    {{ field|materializecss:'s12 m12' }}
+                </div>
+            {% endfor %}
+
+            {{ questions.management_form }}
+
+            <div id="formset-wrapper">
+                <div class="row">
+                    <div class="col s12">
+                        <h6>Form Questions</h6><br/>
+                    </div>
+                </div>
+                <ul class="collection items">
+                    {% for question_form in questions %}
+                        <li class="collection-item" id="{{ question_form.prefix }}-row">
+                            <div class="row">
+                                {% if question_form.instance.pk %}
+                                    {{ question_form.DELETE }}{% endif %}
+                                {% for field in question_form %}
+                                    {% if field.name == "id" or field.name == "form" %}
+                                        {{ field }}
+                                    {% elif field.name != "DELETE" %}
+                                        {{ field|materializecss }}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <li class="collection-item" id="form_template" style="display:none">
+                <div class="row">
+                    {% for field in questions.empty_form %}
+                        {% if field.name == "id" or field.name == "form" %}
+                            {{ field }}
+                        {% elif field.name != "DELETE" %}
+                            {{ field|materializecss }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </li>
+
+            <button class="btn waves-effect waves-light" type="submit" value="Submit">
+                Submit
+                <i class="material-icons right">send</i>
+            </button>
+        </form>
+    </div>
 {% endblock %}
 {% block extrafooter %}
 
-<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
-<script src="{% static 'core/js/jquery.formset.js' %}" type="text/javascript"></script>
+    <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"
+            type="text/javascript"></script>
+    <script src="{% static 'core/js/jquery.formset.js' %}"
+            type="text/javascript"></script>
 
-<script>
-    $(function(){
-        var elems = document.querySelectorAll('#formset-wrapper select');
-        var instances = M.FormSelect.init(elems);
+    <script>
+    $(function () {
+        var elems = document.querySelectorAll('#formset-wrapper select')
+        var instances = M.FormSelect.init(elems)
         $('#formset-wrapper .collection-item').formset({
             formTemplate: "#form_template",
             prefix: 'formquestion_set',
@@ -95,14 +99,14 @@
             deleteText: 'remove',            // Text for the delete link
             addCssClass: 'waves-btn btn green',
             deleteCssClass: 'waves-btn btn red',
-            added: function(){
-                var elems = document.querySelectorAll('#formset-wrapper select');
-                var instances = M.FormSelect.init(elems);
+            added: function () {
+                var elems = document.querySelectorAll('#formset-wrapper select')
+                var instances = M.FormSelect.init(elems)
             }
-        });
+        })
 
-    });
-</script>
+    })
+    </script>
 
 
 {% endblock %}

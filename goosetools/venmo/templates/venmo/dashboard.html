@@ -3,172 +3,195 @@
 {% load static %}
 {% load materializecss %}
 {% block body %}
-<div class="row">
-    <div class="col s12 m12">
-        {% if all_ccy|length > 1 %}
-            <h6>Switch To Other Currency</h6>
-            {% for ccy in all_ccy %}
-                {% if gooseuser == user.gooseuser %}
-                    <a class="btn waves-btn" href="{% url 'venmo:dashboard' ccy.name %}">{{ccy.name}}</a>
-                {% else %}
-                    <a class="btn waves-btn" href="{% url 'venmo:dashboard' ccy.name gooseuser.id %}">{{ccy.name}}</a>
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-        <div class="divider"></div>
-        {% if gooseuser == user.gooseuser %}
-            <h5>Your Venmo Dashboard For {{ccy.name}}</h5>
-        {% else %}
-            <h5>{{gooseuser.display_name}}'s Venmo Transactions For {{ccy.name}}</h5>
-            <a href="{% url 'venmo:dashboard' ccy.name %}">Back To Your Venmo Dashboard</a>
-        {% endif %}
-        <div class="divider"></div>
+    <div class="row">
+        <div class="col s12 m12">
+            {% if all_ccy|length > 1 %}
+                <h6>Switch To Other Currency</h6>
+                {% for ccy in all_ccy %}
+                    {% if gooseuser == user.gooseuser %}
+                        <a class="btn waves-btn"
+                           href="{% url 'venmo:dashboard' ccy.name %}">{{ ccy.name }}</a>
+                    {% else %}
+                        <a class="btn waves-btn"
+                           href="{% url 'venmo:dashboard' ccy.name gooseuser.id %}">{{ ccy.name }}</a>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            <div class="divider"></div>
+            {% if gooseuser == user.gooseuser %}
+                <h5>Your Venmo Dashboard For {{ ccy.name }}</h5>
+            {% else %}
+                <h5>{{ gooseuser.display_name }}'s Venmo Transactions
+                    For {{ ccy.name }}</h5>
+                <a href="{% url 'venmo:dashboard' ccy.name %}">Back To Your Venmo
+                    Dashboard</a>
+            {% endif %}
+            <div class="divider"></div>
+        </div>
     </div>
-</div>
-<div class="row">
-    <div class="col s12 m1">
-        <img class="avatar" src="{{gooseuser.discord_avatar_url}}" style="width: 100%"/>
+    <div class="row">
+        <div class="col s12 m1">
+            <img class="avatar" src="{{ gooseuser.discord_avatar_url }}"
+                 style="width: 100%"/>
+        </div>
+        <div class="col s12 m8">
+            <b>{{ gooseuser.display_name }}</b><br/>
+            Current Balance: Ƶ {{ venmo_user_balance.balance|nicemoney }} /
+            ({{ venmo_user_balance.balance|commanumber }})<br/>
+            Available Balance: Ƶ {{ venmo_user_balance.balance|nicemoney }} /
+            ({{ venmo_user_balance.available_balance|commanumber }})<br/>
+            Pending Balance : Ƶ {{ venmo_user_balance.net_pending_change|nicemoney }} /
+            ({{ venmo_user_balance.net_pending_change|commanumber }})<br/>
+            {% if gooseuser != user.gooseuser %}
+                Their Characters:
+                {% for character in gooseuser.characters %}
+                    [{{ character.corp }}]
+                    {{ character.ingame_name }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            {% endif %}
+        </div>
+        <div class="col s12 m3">
+            <b>Available Actions</b><br/>
+            <a href="{% url 'venmo:withdraw' ccy.name %}">Withdraw Eggs as Isk</a><br/>
+            <a href="{% url 'venmo:transfer' ccy.name %}">Transfer Eggs to
+                Someone</a><br/>
+            <a href="{% url 'venmo:deposit' ccy.name %}">Deposit Eggs</a><br/>
+            {% has_perm user "venmo_admin" as is_venmo_admin %}
+            {% if is_venmo_admin %}
+                <a href="{% url 'venmo:pending' ccy.name %}">Approve/Deny Pending
+                    Transactions</a><br/>
+            {% endif %}
+        </div>
+        <div class="col s12 m12">
+            <a id="load" href="#" class="waves-btn btn green">Load Transaction
+                History</a>
+            <p id="loading">Loading data...</p>
+            <table id="transactions_table"></table>
+        </div>
     </div>
-    <div class="col s12 m8">
-        <b>{{gooseuser.display_name}}</b><br/>
-        Current Balance:  Ƶ {{venmo_user_balance.balance|nicemoney}} / ({{venmo_user_balance.balance|commanumber}})<br/>
-        Available Balance: Ƶ {{venmo_user_balance.balance|nicemoney}} / ({{venmo_user_balance.available_balance|commanumber}})<br/>
-        Pending Balance : Ƶ {{venmo_user_balance.net_pending_change|nicemoney}} / ({{venmo_user_balance.net_pending_change|commanumber}})<br/>
-        {% if gooseuser != user.gooseuser %}
-            Their Characters:
-            {% for character in gooseuser.characters %}
-                [{{character.corp}}] {{character.ingame_name}}{% if not forloop.last %}, {%endif%}
-            {% endfor %}
-        {% endif %}
-    </div>
-    <div class="col s12 m3">
-        <b>Available Actions</b><br/>
-        <a href="{% url 'venmo:withdraw' ccy.name %}">Withdraw Eggs as Isk</a><br/>
-        <a href="{% url 'venmo:transfer' ccy.name %}">Transfer Eggs to Someone</a><br/>
-        <a href="{% url 'venmo:deposit' ccy.name %}">Deposit Eggs</a><br/>
-        {% has_perm user "venmo_admin" as is_venmo_admin %}
-        {% if is_venmo_admin %}
-            <a href="{% url 'venmo:pending' ccy.name %}">Approve/Deny Pending Transactions</a><br/>
-        {% endif %}
-    </div>
-    <div class="col s12 m12">
-        <a id="load" href="#" class="waves-btn btn green">Load Transaction History</a>
-        <p id="loading">Loading data...</p>
-        <table id="transactions_table"></table>
-    </div>
-</div>
 {% endblock %}
 
 {% block extrafooter %}
-<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
-<script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"> </script>
-{{ page_data|json_script:"page-data" }}
-<script>
-function numberWithCommas(x) {
-    var x = x.toString();
-    var x = x.replace(/,/g, '');
-    return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-function render_link_if_other_user(page_data, prefix, row){
-    discord_id = row[prefix+'_discord_id'];
-    gooseuser_id = row[prefix+'_gooseuser_id'];
-    ccy_name = page_data['ccy']['name']
-    if(gooseuser_id && gooseuser_id != page_data['gooseuser_id']){
-        return `<a href="${page_data['site_prefix']}venmo/user/${ccy_name}/${gooseuser_id}/dashboard">${discord_id}</a>`;
-    } else{
-        return discord_id;
+    <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"
+            type="text/javascript"></script>
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+    {{ page_data|json_script:"page-data" }}
+    <script>
+    function numberWithCommas(x) {
+        var x = x.toString()
+        var x = x.replace(/,/g, '')
+        return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
     }
-}
-$(function() {
-    const page_data = JSON.parse(document.getElementById('page-data').textContent);
-    columns = [
-            { "data": "transaction_status", "title": "Status" },
-            { "data": "transaction_type", "title": "Type" },
-            { "data": "updated_at", "title":"Time",
-                render: function ( data, type, row ) {
-                    created_at = row['created_at'];
-                    updated_at = row['updated_at'];
-                    if(created_at < updated_at){
-                        return updated_at;
+
+    function render_link_if_other_user(page_data, prefix, row) {
+        discord_id = row[prefix + '_discord_id']
+        gooseuser_id = row[prefix + '_gooseuser_id']
+        ccy_name = page_data['ccy']['name']
+        if (gooseuser_id && gooseuser_id != page_data['gooseuser_id']) {
+            return `<a href="${page_data['site_prefix']}venmo/user/${ccy_name}/${gooseuser_id}/dashboard">${discord_id}</a>`
+        } else {
+            return discord_id
+        }
+    }
+
+    $(function () {
+        const page_data = JSON.parse(document.getElementById('page-data').textContent)
+        columns = [
+            {"data": "transaction_status", "title": "Status"},
+            {"data": "transaction_type", "title": "Type"},
+            {
+                "data": "updated_at", "title": "Time",
+                render: function (data, type, row) {
+                    created_at = row['created_at']
+                    updated_at = row['updated_at']
+                    if (created_at < updated_at) {
+                        return updated_at
                     } else {
-                        return created_at;
+                        return created_at
                     }
                 }
             },
-            { "data": "source_discord_id", "title": "From -> To",
-                render: function ( data, type, row ) {
-                    source = render_link_if_other_user(page_data, 'source', row);
-                    target = render_link_if_other_user(page_data, 'target', row);
-                    if(source===target){
-                        return 'N/A';
+            {
+                "data": "source_discord_id", "title": "From -> To",
+                render: function (data, type, row) {
+                    source = render_link_if_other_user(page_data, 'source', row)
+                    target = render_link_if_other_user(page_data, 'target', row)
+                    if (source === target) {
+                        return 'N/A'
                     } else {
-                        return `From ${source} to ${target}`;
+                        return `From ${source} to ${target}`
                     }
                 }
-            } ,
-            { "data": "note", "title":"Note"} ,
-            { "data": "value", "title":"Quantity",
-                render: function ( data, type, row ) {
-                    value = row['value'];
-                    return `Ƶ ${numberWithCommas(value)}`;
+            },
+            {"data": "note", "title": "Note"},
+            {
+                "data": "value", "title": "Quantity",
+                render: function (data, type, row) {
+                    value = row['value']
+                    return `Ƶ ${numberWithCommas(value)}`
                 },
                 className: "right-align"
 
-            } ,
-    ];
-    table = $('#transactions_table').DataTable( {
-        data: [],
-        pageLength: 50,
-        columns: columns,
-        order: [[ 2, "desc" ]]
-    } );
-    $('#transactions_table_wrapper').hide();
-    $('#loading').hide();
-
-    $('#load').on('click', function(){
-        $('#loading').show();
-        $('#transactions_table_wrapper').hide();
-        fetch(new Request("{% url 'venmo:transactions-list' ccy.name gooseuser.pk %}"), {
-            method: 'GET',
-            mode: 'same-origin',
+            },
+        ]
+        table = $('#transactions_table').DataTable({
+            data: [],
+            pageLength: 50,
+            columns: columns,
+            order: [[2, "desc"]]
         })
-        .then(response => response.json())
-        .then(response_data => {
-            table.clear();
-            table.rows.add(response_data["result"]);
-            table.draw();
-            $('#transactions_table_wrapper').show();
-            $('#loading').hide();
-            $('#load').text("reload transaction history");
-        }).catch(e => {
-            M.toast({ html: "Failed to Load Transactions because of error: " + e})
-            console.log(e);
-            $('#transactions_table_wrapper').hide();
-            $('#loading').hide();
-            $('#load').text("load transaction history");
+        $('#transactions_table_wrapper').hide()
+        $('#loading').hide()
+
+        $('#load').on('click', function () {
+            $('#loading').show()
+            $('#transactions_table_wrapper').hide()
+            fetch(new Request("{% url 'venmo:transactions-list' ccy.name gooseuser.pk %}"), {
+                method: 'GET',
+                mode: 'same-origin',
+            })
+                .then(response => response.json())
+                .then(response_data => {
+                    table.clear()
+                    table.rows.add(response_data["result"])
+                    table.draw()
+                    $('#transactions_table_wrapper').show()
+                    $('#loading').hide()
+                    $('#load').text("reload transaction history")
+                }).catch(e => {
+                M.toast({html: "Failed to Load Transactions because of error: " + e})
+                console.log(e)
+                $('#transactions_table_wrapper').hide()
+                $('#loading').hide()
+                $('#load').text("load transaction history")
+            })
+
         })
 
-    });
+    })
 
-});
+    function django_request(url) {
+        const csrftoken = Cookies.get('csrftoken')
+        return new Request(
+            url,
+            {headers: {'X-CSRFToken': csrftoken}}
+        )
+    }
 
-function django_request(url){
-    const csrftoken = Cookies.get('csrftoken');
-    return new Request(
-        url,
-        {headers: {'X-CSRFToken': csrftoken}}
-    );
-}
-function json_django_request(url){
-    const csrftoken = Cookies.get('csrftoken');
-    return new Request(
-        url,
-        {headers: {'X-CSRFToken': csrftoken,
-            'Content-Type': 'application/json'
-        }}
-    );
-}
-</script>
+    function json_django_request(url) {
+        const csrftoken = Cookies.get('csrftoken')
+        return new Request(
+            url,
+            {
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                }
+            }
+        )
+    }
+    </script>
 
 {% endblock %}

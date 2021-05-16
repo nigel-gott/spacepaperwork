@@ -10,13 +10,8 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls.base import reverse
 from django.utils import timezone
-from users.forms import (
-    PermissibleEntityFormSet,
-    handle_permissible_entity_formset,
-    setup_existing_permissible_entity_formset,
-    setup_new_permissible_entity_formset,
-)
 
+from goosetools.fleets.forms import FleetAddMemberForm, FleetForm, JoinFleetForm
 from goosetools.fleets.models import (
     Fleet,
     FleetAnom,
@@ -27,16 +22,20 @@ from goosetools.fleets.models import (
 )
 from goosetools.ownership.models import LootBucket, LootGroup
 from goosetools.ownership.views import generate_fleet_profit
-from goosetools.users.models import (
-    Character,
-    CrudAccessController,
+from goosetools.users.forms import (
+    PermissibleEntityFormSet,
+    handle_permissible_entity_formset,
+    setup_existing_permissible_entity_formset,
+    setup_new_permissible_entity_formset,
+)
+from goosetools.users.models import Character, CrudAccessController
+from goosetools.users.utils import (
     can_admin,
     can_edit,
     can_use,
     can_view,
+    filter_controlled_qs_to_viewable,
 )
-
-from .forms import FleetAddMemberForm, FleetForm, JoinFleetForm
 
 
 def forbidden(request):
@@ -45,19 +44,7 @@ def forbidden(request):
 
 
 def fleet_list_view(request, fleets_to_display, page_url_name):
-    fleets_to_display = fleets_to_display.select_related(
-        "access_controller"
-    ).prefetch_related(
-        "access_controller__viewable_by",
-        "access_controller__adminable_by",
-    )
-    viewable_fleets = []
-    permissions_id_cache = CrudAccessController.make_permissions_id_cache(
-        request.gooseuser
-    )
-    for f in fleets_to_display.all():
-        if f.access_controller.can_view(request.gooseuser, permissions_id_cache):
-            viewable_fleets.append(f)
+    viewable_fleets = filter_controlled_qs_to_viewable(fleets_to_display, request)
 
     page = int(request.GET.get("page", 0))
     page_size = 20
@@ -327,7 +314,9 @@ def fleet_create(request):
         )
 
         form.fields["fc_character"].queryset = request.gooseuser.characters()
-        formset = setup_new_permissible_entity_formset(request.gooseuser, Fleet)
+        formset = setup_new_permissible_entity_formset(
+            request.gooseuser, Fleet, request
+        )
 
     return render(
         request,

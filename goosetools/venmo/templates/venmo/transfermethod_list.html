@@ -1,0 +1,31 @@
+{% extends "core/base.html" %}
+{% block body %}
+    <div class="section">
+        <h4>Transfer Method Admin</h4>
+        <p>Control how users can transfer isk and virtual currencies
+            in {{ SITE_NAME }}</p>
+        <a class="waves-btn btn green" href="{% url 'venmo:transfer-select' %}">Create
+            New Transfer Method</a>
+        <ul class="collection" style="overflow: visible;">
+            {% if transfer_list %}
+                {% for transfer in transfer_list %}
+                    <li class="collection-item ">
+                        <a href="{% url 'venmo:transfer-update' transfer.id %}"
+                           class="waves-btn btn secondary-content">Edit</a>
+                        <span class="title"><a
+                                href="{% url 'venmo:transfer-detail' transfer.id %}">{{ transfer.name }} </a>
+                            {% if transfer.default %}(Default){% endif %}
+            </span>
+                        <p>
+                        </p>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="collection-item"> You haven't created any Transfer Methods.
+                    Click the Create button above to create one.
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+
+{% endblock %}

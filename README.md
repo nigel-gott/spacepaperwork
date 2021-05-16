@@ -1,31 +1,37 @@
 # GooseTools
 
 # Pre-Requisites
+
 1. https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/
 2. https://docs.docker.com/get-docker/
 3. https://docs.docker.com/compose/install/
 
 # Running For Local Development In Docker
+
 1. ```git clone git@github.com:GROON-Echoes-Dev-Team/goosetools.git && cd goosetools```
 2.
-    ```
-    docker-compose -f local.yml up --build
-    ```
+ ```
+ docker-compose -f local.yml up --build
+ ```
 3. Visit and Sign Up On http://localhost:8000/goosetools
-4. Make yourself an admin by: ```./docker_managepy.sh runscript make_user_admin --script-args=REPLACE_WITH_YOUR_USERNAME_ENTERED_ON_GOOSETOOLS_SIGNUP```
+4. Make yourself an admin
+   by: ```./docker_managepy.sh runscript make_user_admin --script-args=REPLACE_WITH_YOUR_USERNAME_ENTERED_ON_GOOSETOOLS_SIGNUP```
 5. Import market data using: ```./docker_managepy.sh runjobs hourly```
-6. Get an interactive python shell into goosetools by ```./docker_managepy.sh shell_plus```
+6. Get an interactive python shell into goosetools
+   by ```./docker_managepy.sh shell_plus```
 7. Run non-integration tests ```./tests.sh```
 8. Run integration tests ```./integration_test.sh```
-9. Watch filesystem for changes and re-run non-integration tests when something changes ```./test_watcher.sh```
+9. Watch filesystem for changes and re-run non-integration tests when something
+   changes ```./test_watcher.sh```
 10. Run pre-commit checks ```./pre_commit_checks.sh```
 
 # Running For Local Development using VirtualEnv
+
 1. ```git clone git@github.com:GROON-Echoes-Dev-Team/goosetools.git && cd goosetools```
 1.
-    ```
-    cp .env.local.example .env
-    ```
+ ```
+ cp .env.local.example .env
+ ```
 1. Edit ```.env``` to match your environment
 1. Install poetry dependencies:
     ```
@@ -74,9 +80,11 @@
     ```
 
 # Cron setup
+
 Spacepaperwork runs various jobs at timed intervals such as market data import,
 repeating loot groups etc. You must run `./manage.py runcrons` every 5 minutes for this
 to work. To do so I suggest you setup and use cron like so:
+
 ```
 crontab -e
 # Now edit and add the following lines:

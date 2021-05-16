@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("items", "0010_itemchangeproposal_deleted_existing_item"),
     ]

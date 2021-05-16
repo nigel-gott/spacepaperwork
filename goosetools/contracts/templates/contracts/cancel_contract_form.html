@@ -2,21 +2,22 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<h4>Are you sure you want to cancel the contract {{contract.id}}?</h4>
-<div class="section">
-</div>
-<div class="divider"></div>
-<div class="section">
-    <form action="" method="post">
-        {% csrf_token %}
-        <br/>
-        <button class="btn waves-effect waves-light orange" type="submit" value="Submit">Yes Cancel Contract
-            {{contract.id}}
-            <i class="material-icons right">send</i>
-        </button>
-    </form>
+    <h4>Are you sure you want to cancel the contract {{ contract.id }}?</h4>
+    <div class="section">
+    </div>
+    <div class="divider"></div>
+    <div class="section">
+        <form action="" method="post">
+            {% csrf_token %}
+            <br/>
+            <button class="btn waves-effect waves-light orange" type="submit"
+                    value="Submit">Yes Cancel Contract
+                {{ contract.id }}
+                <i class="material-icons right">send</i>
+            </button>
+        </form>
 
-</div>
+    </div>
 
 
 {% endblock %}

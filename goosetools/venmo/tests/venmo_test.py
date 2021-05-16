@@ -14,7 +14,6 @@ class VenmoTest(GooseToolsTestCase):
                 VENMO_API_TOKEN="venmo_secret",
                 VENMO_BASE_PATH="/dev",
             ):
-
                 # pylint: disable=inconsistent-return-statements
                 def match_api_token_header(request):
                     if request.headers.get("x-api-key") == "venmo_secret":

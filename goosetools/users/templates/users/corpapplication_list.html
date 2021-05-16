@@ -2,95 +2,128 @@
 {% load base_extras %}
 {% load static %}
 {% block body %}
-<div class="section">
-    <h4>Corp Applications</h4>
-</div>
-<div class="section">
-    {% for corp, apps in applications_by_corp.items %}
-        <h5>Applications For {{corp}}</h5>
-        <p>Remember the user might be having to wait for a 24 hour corp leaving timer before applying, wait until a few days have passed to reject it if missing ingame.</p>
-        <ul class="collection" style="overflow: visible;">
-        {% for application in apps %}
-            <li class="collection-item avatar">
-                {% if application.character.discord_avatar_url %}
-                <img alt="" class="avatar"
-                        src="{{ application.character.discord_avatar_url }}?size=32" style="width: 32px">
-                {% endif %}
-                {% if application.character.corp %}
-                <h6>Application to Transfer: {{application.character}} in [{{application.character.corp}}] to [{{application.corp}}]</h6>
-                {% else %}
-                <h6>Application to Join: {{application.character}} into [{{application.corp}}]</h6>
-                {% endif %}
-                <p>
-                    <b>Created At: </b>{{application.created_at}} <br/>
-                    {% has_perm user "user_admin" as is_user_admin %}
-                    {% if is_user_admin %}
-                    <b>Discord Username: </b><a href="{% url 'user_admin_view' application.character.user.id %}">{{application.character.user.display_name}}</a> <br/>
-                    <b>Notes on User: </b>{{application.character.user.notes}}</a> <br/>
-                    {% else %}
-                    <b>Discord Username: </b>{{application.character.user.display_name}} <br/>
-                    {% endif %}
-                    {% if application.corp.discord_role_given_on_approval %}
-                        <b>Discord Role That Will be Given On Approval:</b> {{application.corp.discord_role_given_on_approval}}<br/>
-                    {% endif %}
-                    {% if application.corp.manual_group_given_on_approval%}
-                        <b>{{SITE_NAME}} Group That Will be Given On Approval:</b> {{application.corp.manual_group_given_on_approval}}<br/>
-                    {% endif %}
-                    <b>Groups This User Has: </b>{{application.character.user.groups}} <br/>
-                    <b>Other Characters: </b> <br/>
-                    <ol>
-                    {% for char in application.character.user.character_set.all %}
-                        {% if char != application.character %}
-                        <li>{{char}}</li>
+    <div class="section">
+        <h4>Corp Applications</h4>
+    </div>
+    <div class="section">
+        {% for corp, apps in applications_by_corp.items %}
+            <h5>Applications For {{ corp }}</h5>
+            <p>Remember the user might be having to wait for a 24 hour corp leaving
+                timer before applying, wait until a few days have passed to reject it if
+                missing ingame.</p>
+            <ul class="collection" style="overflow: visible;">
+                {% for application in apps %}
+                    <li class="collection-item avatar">
+                        {% if application.character.discord_avatar_url %}
+                            <img alt="" class="avatar"
+                                 src="{{ application.character.discord_avatar_url }}?size=32"
+                                 style="width: 32px">
                         {% endif %}
-                    {% endfor %}
-                    </ol>
-                </p>
-
-                <form action="{% url 'corp_application_update' application.pk %}" method="post">
-                    {% csrf_token %}
-                    {% if application.corp.discord_role_given_on_approval or application.corp.manual_group_given_on_approval %}
-                        <a class="btn green waves-effect waves-light modal-trigger" href="#modal_confirm_{{application.id}}">Approve <i class="material-icons right">send</i></a>
-                        <div id="modal_confirm_{{application.id}}" class="modal">
-                            <div class="modal-content">
-                                <b class="red-text">Approving this will give the following to {{application.character.user}}:</b><br/>
-                                {% if application.corp.discord_role_given_on_approval %}
-                                    <b>The Discord Role:</b> {{application.corp.discord_role_given_on_approval}}<br/>
-                                {% endif %}
-                                {% if application.corp.manual_group_given_on_approval%}
-                                    <b>The {{SITE_NAME}} Group:</b> {{application.corp.manual_group_given_on_approval}}<br/>
-                                {% endif %}
+                        {% if application.character.corp %}
+                            <h6>Application to Transfer: {{ application.character }} in
+                                [{{ application.character.corp }}] to
+                                [{{ application.corp }}]</h6>
+                        {% else %}
+                            <h6>Application to Join: {{ application.character }} into
+                                [{{ application.corp }}]</h6>
+                        {% endif %}
+                        <p>
+                            <b>Created At: </b>{{ application.created_at }} <br/>
+                            {% has_perm user "user_admin" as is_user_admin %}
+                            {% if is_user_admin %}
+                                <b>Discord Username: </b>
+                                <a href="{% url 'user_admin_view' application.character.user.id %}">{{ application.character.user.display_name }}</a>
                                 <br/>
-                                <button name="approve" class="btn green waves-effect waves-light" type="submit" value="Submit">Approve
+                                <b>Notes on User: </b>
+                                {{ application.character.user.notes }}</a> <br/>
+                            {% else %}
+                                <b>Discord Username: </b>
+                                {{ application.character.user.display_name }} <br/>
+                            {% endif %}
+                            {% if application.corp.discord_role_given_on_approval %}
+                                <b>Discord Role That Will be Given On Approval:</b>
+                                {{ application.corp.discord_role_given_on_approval }}
+                                <br/>
+                            {% endif %}
+                            {% if application.corp.manual_group_given_on_approval %}
+                                <b>{{ SITE_NAME }} Group That Will be Given On
+                                    Approval:</b>
+                                {{ application.corp.manual_group_given_on_approval }}
+                                <br/>
+                            {% endif %}
+                            <b>Groups This User
+                                Has: </b>{{ application.character.user.groups }} <br/>
+                            <b>Other Characters: </b> <br/>
+                        <ol>
+                            {% for char in application.character.user.character_set.all %}
+                                {% if char != application.character %}
+                                    <li>{{ char }}</li>
+                                {% endif %}
+                            {% endfor %}
+                        </ol>
+                        </p>
+
+                        <form action="{% url 'corp_application_update' application.pk %}"
+                              method="post">
+                            {% csrf_token %}
+                            {% if application.corp.discord_role_given_on_approval or application.corp.manual_group_given_on_approval %}
+                                <a class="btn green waves-effect waves-light modal-trigger"
+                                   href="#modal_confirm_{{ application.id }}">Approve <i
+                                        class="material-icons right">send</i></a>
+                                <div id="modal_confirm_{{ application.id }}"
+                                     class="modal">
+                                    <div class="modal-content">
+                                        <b class="red-text">Approving this will give the
+                                            following
+                                            to {{ application.character.user }}:</b><br/>
+                                        {% if application.corp.discord_role_given_on_approval %}
+                                            <b>The Discord Role:</b>
+                                            {{ application.corp.discord_role_given_on_approval }}
+                                            <br/>
+                                        {% endif %}
+                                        {% if application.corp.manual_group_given_on_approval %}
+                                            <b>The {{ SITE_NAME }} Group:</b>
+                                            {{ application.corp.manual_group_given_on_approval }}
+                                            <br/>
+                                        {% endif %}
+                                        <br/>
+                                        <button name="approve"
+                                                class="btn green waves-effect waves-light"
+                                                type="submit" value="Submit">Approve
+                                            <i class="material-icons right">send</i>
+                                        </button>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <button name="approve"
+                                        class="btn green waves-effect waves-light"
+                                        type="submit" value="Submit">Approve
                                     <i class="material-icons right">send</i>
                                 </button>
-                            </div>
-                        </div>
-                    {% else %}
-                        <button name="approve" class="btn green waves-effect waves-light" type="submit" value="Submit">Approve
-                            <i class="material-icons right">send</i>
-                        </button>
-                    {% endif %}
-                    <button name="reject" class="btn red waves-effect waves-light" type="submit" value="Submit">Reject
-                        <i class="material-icons right">send</i>
-                    </button>
-                </form>
-                </p>
-            </li>
+                            {% endif %}
+                            <button name="reject"
+                                    class="btn red waves-effect waves-light"
+                                    type="submit" value="Submit">Reject
+                                <i class="material-icons right">send</i>
+                            </button>
+                        </form>
+                        </p>
+                    </li>
+                {% endfor %}
+            </ul>
         {% endfor %}
         </ul>
-    {% endfor %}
-    </ul>
-</div>
+    </div>
 
 {% endblock %}
 {% block extrafooter %}
-<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
-<script>
-$(document).ready(function() {
-    var elems = document.querySelectorAll('.modal');
-    var instances = M.Modal.init(elems);
-});
-</script>
+    <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"
+            type="text/javascript"></script>
+    <script>
+    $(document).ready(function () {
+        var elems = document.querySelectorAll('.modal')
+        var instances = M.Modal.init(elems)
+    })
+    </script>
 
 {% endblock %}

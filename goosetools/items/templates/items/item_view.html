@@ -1,184 +1,197 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
-{% load materializecss %}
-<div class="row">
-    <div class="col s12 m12">
-        <h4>{{item.item}}</h4>
+    {% load materializecss %}
+    <div class="row">
+        <div class="col s12 m12">
+            <h4>{{ item.item }}</h4>
 
-        {% if user.is_superuser %}
-            <ul>
-                <li><a href ="{% url 'admin:items_inventoryitem_change' item.id %}">Admin Edit InventoryItem</a></li>
-            {% if item.order_quantity > 0 %}
-                <li><a href ="{% url 'admin:market_marketorder_change' item.marketorder.id %}">Admin Edit MarketOrder</a></li>
+            {% if user.is_superuser %}
+                <ul>
+                    <li><a href="{% url 'admin:items_inventoryitem_change' item.id %}">Admin
+                        Edit InventoryItem</a></li>
+                    {% if item.order_quantity > 0 %}
+                        <li>
+                            <a href="{% url 'admin:market_marketorder_change' item.marketorder.id %}">Admin
+                                Edit MarketOrder</a></li>
+                    {% endif %}
+                    {% if item.sold_quantity > 0 %}
+                        <li>
+                            <a href="{% url 'admin:market_solditem_change' item.solditem.id %}">Admin
+                                Edit SoldItem</a></li>
+                    {% endif %}
+                    {% if item.junked_quantity > 0 %}
+                        <li>
+                            <a href="{% url 'admin:items_junkeditem_change' item.junkeditem.id %}">Admin
+                                Edit JunkItem</a></li>
+                    {% endif %}
+                </ul>
             {% endif %}
-            {% if item.sold_quantity > 0 %}
-                <li><a href ="{% url 'admin:market_solditem_change' item.solditem.id %}">Admin Edit SoldItem</a></li>
-            {% endif %}
-            {% if item.junked_quantity > 0 %}
-                <li><a href ="{% url 'admin:items_junkeditem_change' item.junkeditem.id %}">Admin Edit JunkItem</a></li>
-            {% endif %}
-            </ul>
-        {% endif %}
 
-        <table>
-            <tr>
-                <td>Quantity</td>
-                <td>{{item.total_quantity}}</td>
-            </tr>
-            <tr>
-                <td>Location</td>
-                <td>{{item.location}}</td>
-            </tr>
-            <tr>
-                <td>Status</td>
-                <td>{{item.status}}
-                    {% if item.solditem %}
-                    <br/>
-                    {{item.solditem.status}}<br/>
-                    {% if item.solditem.transfer_log %}
-                    <a href="{% url 'view_transfer_log' item.solditem.transfer_log.id %}">View Transfer Details</a>
-                    {% endif %}
-                    {% endif %}
+            <table>
+                <tr>
+                    <td>Quantity</td>
+                    <td>{{ item.total_quantity }}</td>
+                </tr>
+                <tr>
+                    <td>Location</td>
+                    <td>{{ item.location }}</td>
+                </tr>
+                <tr>
+                    <td>Status</td>
+                    <td>{{ item.status }}
+                        {% if item.solditem %}
+                            <br/>
+                            {{ item.solditem.status }}<br/>
+                            {% if item.solditem.transfer_log %}
+                                <a href="{% url 'view_transfer_log' item.solditem.transfer_log.id %}">View
+                                    Transfer Details</a>
+                            {% endif %}
+                        {% endif %}
 
-                </td>
-            </tr>
-            <tr>
-                <td>Loot Group</td>
-                <td>
-                    {% if item.loot_group %}
-                    <a href="{% url 'loot_group_view' item.loot_group.id %}">Loot Group {{item.loot_group.id}}</a>
-                    {% else %}
-                    No Loot Group
-                    {% endif %}
-                </td>
-            </tr>
-            <tr>
-                <td>Associated Contract</td>
-                <td>
-                    {% if item.contract %}
-                    <a href="{% url 'view_contract' item.contract.id %}">Contract {{item.contract.id}}</a>
-                    {% else %}
-                    No contract
-                    {% endif %}
-                </td>
-            </tr>
-            <tr>
-                <td>Isk Balance</td>
-                <td>
-                    {{item.isk_balance}}
-                </td>
-            </tr>
-            <tr>
-                <td>Egg Balance</td>
-                <td>
-                    {{item.egg_balance}}
-                </td>
-            </tr>
-            {% has_item_admin item user as item_admin %}
-            {% if item_admin %}
-            <tr>
-                <td colspan="2">
-                    {% if item.can_edit %}
-                    <a class="waves-btn btn orange" href="{% url 'item_edit' item.id %}">Edit Item</a>
-                    {% endif %}
-                    {% if item.can_sell %}
-                    <a class="waves-btn btn green" href="{% url 'item_sell' item.id %}">Sell Item</a>
-                    {% endif %}
-                    {% if item.can_edit %}
-                    <a class="red-text"
-                       href="{% url 'item_delete' item.id %}">Delete</a>
-                    {% endif %}
-                </td>
-            </tr>
-            {% endif %}
-            <tbody>
-            </tbody>
-        </table>
-    </div>
-</div>
-<div class="row">
-    <div class="col s12 m12">
-        <h5>Associated Isk Transactions</h5>
-        <table>
-            <thead>
-            <th>Time</th>
-            <th>Isk</th>
-            <th>Type</th>
-            <th>Associated Quantity</th>
-            <th>Notes</th>
-            <th>Action</th>
-            </thead>
-            <tbody>
-            {% for isk_tran in item.isktransaction_set.all %}
-            <tr>
-                <td>
-                    {{isk_tran.time}}
-                </td>
-                <td>
-                    {{isk_tran.isk}}
-                </td>
-                <td>
-                    {{isk_tran.transaction_type}}
-                </td>
-                <td>
-                    {{isk_tran.quantity}}
-                </td>
-                <td>
-                    {{isk_tran.notes}}
-                </td>
-                <td>
-                {% if user.is_superuser %}
-                <a href ="{% url 'admin:bank_isktransaction_change' isk_tran.id %}">Admin Edit</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Loot Group</td>
+                    <td>
+                        {% if item.loot_group %}
+                            <a href="{% url 'loot_group_view' item.loot_group.id %}">Loot
+                                Group {{ item.loot_group.id }}</a>
+                        {% else %}
+                            No Loot Group
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Associated Contract</td>
+                    <td>
+                        {% if item.contract %}
+                            <a href="{% url 'view_contract' item.contract.id %}">Contract {{ item.contract.id }}</a>
+                        {% else %}
+                            No contract
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Isk Balance</td>
+                    <td>
+                        {{ item.isk_balance }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Egg Balance</td>
+                    <td>
+                        {{ item.egg_balance }}
+                    </td>
+                </tr>
+                {% has_item_admin item user as item_admin %}
+                {% if item_admin %}
+                    <tr>
+                        <td colspan="2">
+                            {% if item.can_edit %}
+                                <a class="waves-btn btn orange"
+                                   href="{% url 'item_edit' item.id %}">Edit Item</a>
+                            {% endif %}
+                            {% if item.can_sell %}
+                                <a class="waves-btn btn green"
+                                   href="{% url 'item_sell' item.id %}">Sell Item</a>
+                            {% endif %}
+                            {% if item.can_edit %}
+                                <a class="red-text"
+                                   href="{% url 'item_delete' item.id %}">Delete</a>
+                            {% endif %}
+                        </td>
+                    </tr>
                 {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        </form>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
-<div class="row">
-    <div class="col s12 m12">
-        <h5>Associated Egg Transactions</h5>
-        <table>
-            <thead>
-            <th>Time</th>
-            <th>Isk</th>
-            <th>Counterparty</th>
-            <th>Associated Quantity</th>
-            <th>Notes</th>
-            <th>Action</th>
-            </thead>
-            <tbody>
-            {% for egg_tran in item.eggtransaction_set.all %}
-            <tr>
-                <td>
-                    {{egg_tran.time}}
-                </td>
-                <td>
-                    {{egg_tran.eggs}}
-                </td>
-                <td>
-                    {{egg_tran.counterparty.username}}
-                </td>
-                <td>
-                    {{egg_tran.quantity}}
-                </td>
-                <td>
-                    {{egg_tran.notes}}
-                </td>
-                <td>
-                {% if user.is_superuser %}
-                <a href ="{% url 'admin:bank_eggtransaction_change' egg_tran.id %}">Admin Edit</a>
-                {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        </form>
+    <div class="row">
+        <div class="col s12 m12">
+            <h5>Associated Isk Transactions</h5>
+            <table>
+                <thead>
+                <th>Time</th>
+                <th>Isk</th>
+                <th>Type</th>
+                <th>Associated Quantity</th>
+                <th>Notes</th>
+                <th>Action</th>
+                </thead>
+                <tbody>
+                {% for isk_tran in item.isktransaction_set.all %}
+                    <tr>
+                        <td>
+                            {{ isk_tran.time }}
+                        </td>
+                        <td>
+                            {{ isk_tran.isk }}
+                        </td>
+                        <td>
+                            {{ isk_tran.transaction_type }}
+                        </td>
+                        <td>
+                            {{ isk_tran.quantity }}
+                        </td>
+                        <td>
+                            {{ isk_tran.notes }}
+                        </td>
+                        <td>
+                            {% if user.is_superuser %}
+                                <a href="{% url 'admin:bank_isktransaction_change' isk_tran.id %}">Admin
+                                    Edit</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            </form>
+        </div>
     </div>
-</div>
+    <div class="row">
+        <div class="col s12 m12">
+            <h5>Associated Egg Transactions</h5>
+            <table>
+                <thead>
+                <th>Time</th>
+                <th>Isk</th>
+                <th>Counterparty</th>
+                <th>Associated Quantity</th>
+                <th>Notes</th>
+                <th>Action</th>
+                </thead>
+                <tbody>
+                {% for egg_tran in item.eggtransaction_set.all %}
+                    <tr>
+                        <td>
+                            {{ egg_tran.time }}
+                        </td>
+                        <td>
+                            {{ egg_tran.eggs }}
+                        </td>
+                        <td>
+                            {{ egg_tran.counterparty.username }}
+                        </td>
+                        <td>
+                            {{ egg_tran.quantity }}
+                        </td>
+                        <td>
+                            {{ egg_tran.notes }}
+                        </td>
+                        <td>
+                            {% if user.is_superuser %}
+                                <a href="{% url 'admin:bank_eggtransaction_change' egg_tran.id %}">Admin
+                                    Edit</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            </form>
+        </div>
+    </div>
 
 
 {% endblock %}

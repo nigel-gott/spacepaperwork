@@ -22,14 +22,12 @@ CACHES = {
     }
 }
 
-
 STUB_DISCORD = env.bool("STUB_DISCORD", True)
 
 # WhiteNoise
 # ------------------------------------------------------------------------------
 # http://whitenoise.evans.io/en/latest/django.html#using-whitenoise-in-development
 INSTALLED_APPS = ["whitenoise.runserver_nostatic"] + INSTALLED_APPS  # noqa
-
 
 ENV_SPECIFIC_URLS = [
     path("__debug__/", include(debug_toolbar.urls)),

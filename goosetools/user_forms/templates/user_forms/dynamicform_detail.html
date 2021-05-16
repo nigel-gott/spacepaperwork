@@ -1,22 +1,24 @@
 {% extends "core/base.html" %}
 {% load materializecss %}
 {% block body %}
-<div class="section">
-    <h4>Form Info: {{dynamicform.title}}</h4>
+    <div class="section">
+        <h4>Form Info: {{ dynamicform.title }}</h4>
         <a href="{% url 'user_forms:form-list' %}">Back to All Forms</a>
-</div>
-<div class="section">
-        <a href="{% url 'user_forms:form-update' dynamicform.id %}" class="waves-btn btn">Edit Form</a>
-        <a href="{% url 'user_forms:form-delete' dynamicform.id %}" class="waves-btn btn red">Delete Form</a>
-    </span>
-    <p>
-    Description: {{dynamicform.description}}<br/>
-    <h5>Form Preview:</h5>
+    </div>
+    <div class="section">
+        <a href="{% url 'user_forms:form-update' dynamicform.id %}"
+           class="waves-btn btn">Edit Form</a>
+        <a href="{% url 'user_forms:form-delete' dynamicform.id %}"
+           class="waves-btn btn red">Delete Form</a>
+        </span>
+        <p>
+            Description: {{ dynamicform.description }}<br/>
+        <h5>Form Preview:</h5>
         <div class="row">
             <div class="col s12 center">
-                <h1>{{dynamicform.title}}</h1>
+                <h1>{{ dynamicform.title }}</h1>
                 <p>
-                {{dynamicform.description|linebreaks}}
+                    {{ dynamicform.description|linebreaks }}
                 </p>
             </div>
         </div>
@@ -24,21 +26,23 @@
         <form action="" method="post">
             {% csrf_token %}
             <ul class="collection">
-            {% for field in form %}
-                <li class="collection-item">
-                    <div class="row">
-                        <div class="col s12">
-                                {{ field|materializecss}}
+                {% for field in form %}
+                    <li class="collection-item">
+                        <div class="row">
+                            <div class="col s12">
+                                {{ field|materializecss }}
+                            </div>
                         </div>
-                    </div>
-                </li>
-            {% endfor %}
+                    </li>
+                {% endfor %}
                 <li class="collection-item center">
-                    <button class="green btn waves-btn btn-large" type="submit" disabled>Submit &raquo;</button>
+                    <button class="green btn waves-btn btn-large" type="submit"
+                            disabled>Submit &raquo;
+                    </button>
                 </li>
             </ul>
         </form>
-    </p>
-</div>
+        </p>
+    </div>
 
 {% endblock %}

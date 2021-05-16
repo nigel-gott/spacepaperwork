@@ -2,103 +2,144 @@
 {% load materializecss %}
 {% load comments %}
 {% block body %}
-<div class="section">
-    <h4>Admin View for {{viewed_user.display_name}} ({{viewed_user.username}})</h4>
-    <a href="{% url 'user_dashboard' %}">Back to Users Dashboard</a>
-</div>
-<div class="section">
-    <form action="" method="post">
-        {% csrf_token %}
-    <table>
-        <tbody>
-            <tr><td>Discord UID: </td> <td> {{viewed_user.uid}}</td> </tr>
-            {% if viewed_user.voucher %}
-            <tr> <td>
-                Vouched By: </td><td> <a href="{% url 'user_admin_view' viewed_user.voucher.id %}">{{viewed_user.voucher}}</a></td></tr>
-            {% endif %}
-            {% if viewed_user.current_vouches.count != 0 %}
-                <tr> <td>
-                They Have Vouched The Following Users:
-                </td><td>
-                {% for vouchee in viewed_user.current_vouches.all %}
-                {% if not forloop.first %}, {% endif %}<a href="{% url 'user_admin_view' vouchee.id %}">{{vouchee}}</a>
-                {% endfor %}
-                </td></tr>
-            {% endif %}
-            {% if viewed_user.sa_profile %}
-                <tr> <td>
-                SA Profile:
-                </td><td>
-                <a href="{{viewed_user.sa_profile}}">Profile Link</a></td></tr>
-                </td></tr>
-            {% endif %}
-            <tr> <td>
-            Their {{SITE_NAME}} Groups:
-                </td><td>
+    <div class="section">
+        <h4>Admin View for {{ viewed_user.display_name }}
+            ({{ viewed_user.username }})</h4>
+        <a href="{% url 'user_dashboard' %}">Back to Users Dashboard</a>
+    </div>
+    <div class="section">
+        <form action="" method="post">
+            {% csrf_token %}
+            <table>
+                <tbody>
+                <tr>
+                    <td>Discord UID:</td>
+                    <td> {{ viewed_user.uid }}</td>
+                </tr>
+                {% if viewed_user.voucher %}
+                    <tr>
+                        <td>
+                            Vouched By:
+                        </td>
+                        <td>
+                            <a href="{% url 'user_admin_view' viewed_user.voucher.id %}">{{ viewed_user.voucher }}</a>
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if viewed_user.current_vouches.count != 0 %}
+                    <tr>
+                        <td>
+                            They Have Vouched The Following Users:
+                        </td>
+                        <td>
+                            {% for vouchee in viewed_user.current_vouches.all %}
+                                {% if not forloop.first %}, {% endif %}
+                                <a href="{% url 'user_admin_view' vouchee.id %}">{{ vouchee }}</a>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if viewed_user.sa_profile %}
+                    <tr>
+                        <td>
+                            SA Profile:
+                        </td>
+                        <td>
+                            <a href="{{ viewed_user.sa_profile }}">Profile Link</a></td>
+                    </tr>
+                    </td></tr>
+                {% endif %}
+                <tr>
+                    <td>
+                        Their {{ SITE_NAME }} Groups:
+                    </td>
+                    <td>
 
-                <ul class="collection" style="overflow: visible;">
-                {% for gm in viewed_user.groupmember_set.all %}
-                    <li class="collection-item ">
-                        <span class="title"><a href="{% url 'edit_group' gm.group.pk %}">{{gm.group}}</a> </span>
-                        <p>{% if gm.group.manually_given %}Given Manually By An Admin.{% else %}Given by {{SITE_NAME}} as they have the discord role: {{gm.group.required_discord_role}}.{%endif%}</p>
-                    </li>
-                {% endfor %}
-                </ul>
-            </td></tr>
-            <tr> <td>
-            Their Characters:
-                </td><td>
-    <ul class="collection" style="overflow: visible;">
-    {% for character in viewed_user.character_set.all %}
-        <li class="collection-item ">
-            <span class="title"><a href="{% url 'admin_character_edit' character.pk %}">[{{character.corp}}] {{character.ingame_name}}</a></span>
-        </li>
-    {% endfor %}
-    </ul>
-            </td></tr>
-            <tr> <td>
-            Venmo:
-                </td><td>
-    <a href="{% url 'venmo:other_dashboard' 'default' viewed_user.id %}">Their Venmo Transactions</a>
-            </td></tr>
-        {% for field in form %}
-            <tr> <td>
-                    {{ field.label_tag }}
-                    {% if field.help_text %}
-                    <span class="helper-text" data-error="wrong" data-success="right">
+                        <ul class="collection" style="overflow: visible;">
+                            {% for gm in viewed_user.groupmember_set.all %}
+                                <li class="collection-item ">
+                                    <span class="title"><a
+                                            href="{% url 'edit_group' gm.group.pk %}">{{ gm.group }}</a> </span>
+                                    <p>{% if gm.group.manually_given %}Given Manually By
+                                        An Admin.{% else %}Given by {{ SITE_NAME }} as
+                                        they have the discord role:
+                                        {{ gm.group.required_discord_role }}
+                                        .{% endif %}</p>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Their Characters:
+                    </td>
+                    <td>
+                        <ul class="collection" style="overflow: visible;">
+                            {% for character in viewed_user.character_set.all %}
+                                <li class="collection-item ">
+                                    <span class="title"><a
+                                            href="{% url 'admin_character_edit' character.pk %}">[{{ character.corp }}] {{ character.ingame_name }}</a></span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Venmo:
+                    </td>
+                    <td>
+                        <a href="{% url 'venmo:other_dashboard' 'default' viewed_user.id %}">Their
+                            Venmo Transactions</a>
+                    </td>
+                </tr>
+                {% for field in form %}
+                    <tr>
+                        <td>
+                            {{ field.label_tag }}
+                            {% if field.help_text %}
+                                <span class="helper-text" data-error="wrong"
+                                      data-success="right">
                         {{ field.help_text|safe }}
                     </span>
-                    {% endif %}
-                </td><td>
-                    {{ field|materializecss }}
-            </td></tr>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ field|materializecss }}
+                        </td>
+                    </tr>
 
-        {% endfor %}
-        <label>
-            <tr> <td colspan="2">
-        <button class="btn waves-effect waves-light" type="submit" value="Submit">Edit User
-            <i class="material-icons right">send</i>
-        </button>
-            </td></tr>
-    </form>
+                {% endfor %}
+                <label>
+                    <tr>
+                        <td colspan="2">
+                            <button class="btn waves-effect waves-light" type="submit"
+                                    value="Submit">Edit User
+                                <i class="material-icons right">send</i>
+                            </button>
+                        </td>
+                    </tr>
+        </form>
         </tbody>
-    </table>
-</div>
-<div class="section">
-    <h3>Admin Comments On User:</h3>
-{% render_comment_list for viewed_user %}
-    {% get_comment_form for viewed_user as form %}
-    <form action="{% comment_form_target %}" method="POST">
-    {% csrf_token %}
-    {{ form.comment }}
-    {{ form.honeypot }}
-    {{ form.content_type }}
-    {{ form.object_pk }}
-    {{ form.timestamp }}
-    {{ form.security_hash }}
-    <input type="hidden" name="next" value="{% url 'user_admin_view' viewed_user.id %}" />
-    <input type="submit" value="Add comment" id="id_submit" />
-    </form>
-</div>
+        </table>
+    </div>
+    <div class="section">
+        <h3>Admin Comments On User:</h3>
+        {% render_comment_list for viewed_user %}
+        {% get_comment_form for viewed_user as form %}
+        <form action="{% comment_form_target %}" method="POST">
+            {% csrf_token %}
+            {{ form.comment }}
+            {{ form.honeypot }}
+            {{ form.content_type }}
+            {{ form.object_pk }}
+            {{ form.timestamp }}
+            {{ form.security_hash }}
+            <input type="hidden" name="next"
+                   value="{% url 'user_admin_view' viewed_user.id %}"/>
+            <input type="submit" value="Add comment" id="id_submit"/>
+        </form>
+    </div>
 
 {% endblock %}

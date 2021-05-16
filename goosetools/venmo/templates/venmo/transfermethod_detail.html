@@ -1,0 +1,106 @@
+{% extends "core/base.html" %}
+{% load base_extras %}
+{% load materializecss %}
+{% block body %}
+    <div class="section">
+        <h4>Transfer Method: {{ transfermethod.name }}
+            {% if transfermethod.default %} (Default){% endif %}</h4>
+        <a href="{% url 'venmo:transfer-list' %}">Back to All Transfer Methods</a>
+    </div>
+    {% include 'users/includes/access_controller_display.html' with access_controller=transfermethod.access_controller title="Transfer Method Permissions" %}
+    <div class="section">
+        <a href="{% url 'venmo:transfer-update' transfermethod.id %}"
+           class="waves-btn btn">Edit Transfer Method</a>
+        <a href="{% url 'venmo:transfer-delete' transfermethod.id %}"
+           class="waves-btn btn red">Delete Transfer Method</a>
+        <p>
+            Is Default: {% if transfermethod.default %}Yes{% else %}No{% endif %}<br>
+            {% if transfermethod.transfer_type == 'contract' %}
+                <h6>
+                    Type: Contract
+                </h6>
+                <blockquote>
+                    When someone uses this transfer method {{ SITE_NAME }} will generate
+                    contracts in {{ SITE_NAME }} telling people who are owed isk to open
+                    in-game contracts to the person with the isk.
+                </blockquote>
+
+            {% else %}
+                <h6>
+                    Type: Generate Command
+                </h6>
+                <blockquote>
+                    When someone uses this transfer method {{ SITE_NAME }} will generate
+                    a command for them to send in discord to do the deposit and
+                    transfer.
+                </blockquote>
+                <strong>
+                    Command Help Text:
+                </strong>
+                <blockquote>
+                    {{ transfermethod.generated_command_help_text|linebreaks|urlize }}
+                </blockquote>
+                <strong>
+                    Deposit Command Template:
+                </strong>
+                <br/>
+                <em>Variables available
+                    are {{ transfermethod.deposit_variable_names }} </em>
+                <br/>
+                <blockquote>
+                    {{ transfermethod.deposit_command_format }}
+                </blockquote>
+                <strong>
+                    Transfer Prefix Command Template:
+                </strong>
+                <br/>
+                <em>Variables available
+                    are {{ transfermethod.deposit_variable_names }} </em>
+                <br/>
+                <blockquote>
+                    {{ transfermethod.transfer_prefix_command_format }}
+                </blockquote>
+                <strong>
+                    Transfer User Command Template:
+                </strong>
+                <br/>
+                <em>Variables available
+                    are {{ transfermethod.transfer_variable_names }} </em>
+                <br/>
+                <blockquote>
+                    {{ transfermethod.transfer_user_command_format }}
+                </blockquote>
+                <strong>
+                    Transfer Postfix Command Template:
+                </strong>
+                <br/>
+                <em>Variables available
+                    are {{ transfermethod.deposit_variable_names }} </em>
+                <br/>
+                <blockquote>
+                    {{ transfermethod.transfer_postfix_command_format }}
+                </blockquote>
+                <h5>Example Generated Commands</h5>
+                <strong>
+                    Deposit Command:
+                </strong>
+                <blockquote>
+                    {{ transfermethod.example_deposit|linebreaks }}
+                </blockquote>
+                <strong>
+                    Transfer Command:
+                </strong>
+                <blockquote>
+                    {{ transfermethod.example_transfer|linebreaks }}
+                </blockquote>
+                <strong>
+                    Huge Transfer Command:
+                </strong>
+                <blockquote>
+                    {{ transfermethod.example_huge_transfer|linebreaks }}
+                </blockquote>
+            {% endif %}
+        </p>
+    </div>
+
+{% endblock %}

@@ -18,7 +18,6 @@ from goosetools.industry.views import (
 
 app_name = "industry"
 
-
 router = routers.DefaultRouter()
 router.register(r"shiporder", ShipOrderViewSet)
 router.register(r"ship", ShipViewSet)

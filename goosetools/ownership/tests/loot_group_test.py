@@ -51,7 +51,8 @@ class LootGroupTest(GooseToolsTestCase):
         )
 
         response = self.get(
-            reverse("loot_group_view", args=[LootGroup.objects.last().pk])  # type: ignore
+            reverse("loot_group_view", args=[LootGroup.objects.last().pk])
+            # type: ignore
         )
         self.assertEqual(response.context["loot_group"].name, "MyLootGroupName")
 

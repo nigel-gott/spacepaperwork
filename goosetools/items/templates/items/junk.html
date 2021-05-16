@@ -1,61 +1,64 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
-{% load materializecss %}
-<div class="row">
-    <div class="col s12 m12">
-        <h5>Junked Items</h5>
-        <table>
-            <thead>
-            <th>Location</th>
-            <th>Stack Id</th>
-            <th>Item</th>
-            <th>Quantity</th>
-            <th>Estimated Price</th>
-            <th>Action</th>
-            </thead>
-            <tbody>
-            {% for loc_items in all_junked %}
-            {% for junk in loc_items.junked %}
-            <tr>
-                {% if forloop.first %}
-                <td rowspan="{{loc_items.junked|length}}">
-                    {{loc_items.loc}}
-                </td>
-                {% endif %}
-                <td>
-                    {% if junk.item.stack %}
-                    <a href="{% url 'stack_view' junk.item.stack.id %}">{{junk.item.stack.id}}</a>
-                    {% else %}
-                    Not Stacked.
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{% url 'item_view' junk.item.id %}">
-                        {{junk.item.item}}
-                    </a>
-                </td>
-                <td>
-                    {{junk.quantity}}
-                </td>
-                <td>
-                    {{junk.item.estimated_profit}}
-                </td>
-                <td>
-                    <form action="{% url 'unjunk_item' junk.id %}" method="POST">
-                        {% csrf_token %}
+    {% load materializecss %}
+    <div class="row">
+        <div class="col s12 m12">
+            <h5>Junked Items</h5>
+            <table>
+                <thead>
+                <th>Location</th>
+                <th>Stack Id</th>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Estimated Price</th>
+                <th>Action</th>
+                </thead>
+                <tbody>
+                {% for loc_items in all_junked %}
+                    {% for junk in loc_items.junked %}
+                        <tr>
+                            {% if forloop.first %}
+                                <td rowspan="{{ loc_items.junked|length }}">
+                                    {{ loc_items.loc }}
+                                </td>
+                            {% endif %}
+                            <td>
+                                {% if junk.item.stack %}
+                                    <a href="{% url 'stack_view' junk.item.stack.id %}">{{ junk.item.stack.id }}</a>
+                                {% else %}
+                                    Not Stacked.
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'item_view' junk.item.id %}">
+                                    {{ junk.item.item }}
+                                </a>
+                            </td>
+                            <td>
+                                {{ junk.quantity }}
+                            </td>
+                            <td>
+                                {{ junk.item.estimated_profit }}
+                            </td>
+                            <td>
+                                <form action="{% url 'unjunk_item' junk.id %}"
+                                      method="POST">
+                                    {% csrf_token %}
 
-                        <button class="btn waves-effect waves-light" type="submit" value="Submit">
-                        UnJunk {% if junk.item.stack %} Entire Stack {% endif %}
-                            <i class="material-icons right">send</i>
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            {% endfor %}
-            {% endfor %}
-            </tbody>
-        </table>
-        </form>
+                                    <button class="btn waves-effect waves-light"
+                                            type="submit" value="Submit">
+                                        UnJunk {% if junk.item.stack %} Entire
+                                        Stack {% endif %}
+                                        <i class="material-icons right">send</i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+            </form>
+        </div>
     </div>
-</div>
 
 {% endblock %}

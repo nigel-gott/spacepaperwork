@@ -2,52 +2,55 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<div class="section">
-    {% if virtualcurrency %}
-        <h5>Editing Virtual Currency: {{virtualcurrency.name}}</h5>
-        <a href="{% url 'venmo:currency-delete' virtualcurrency.id %}" class="waves-btn btn red">Delete Currency</a>
-    {% else %}
-        <h5>Create New Virtual Currency</h5>
-    {% endif %}
-</div>
-<div class="divider"></div>
-<div class="section">
-    <form action="" method="post">
-        {% if form.non_field_errors %}
-        <div class="row">
-            <div class="col s12 m5">
-                <div class="card-panel red darken-1">
+    <div class="section">
+        {% if virtualcurrency %}
+            <h5>Editing Virtual Currency: {{ virtualcurrency.name }}</h5>
+            <a href="{% url 'venmo:currency-delete' virtualcurrency.id %}"
+               class="waves-btn btn red">Delete Currency</a>
+        {% else %}
+            <h5>Create New Virtual Currency</h5>
+        {% endif %}
+    </div>
+    <div class="divider"></div>
+    <div class="section">
+        <form action="" method="post">
+            {% if form.non_field_errors %}
+                <div class="row">
+                    <div class="col s12 m5">
+                        <div class="card-panel red darken-1">
                     <span class="white-text">
                         <b>Errors with form:</b>
                     <ul class="errors">
-                        {% for error in form.non_field_errors%}
-                        <li>{{ error|escape }}</li>
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error|escape }}</li>
                         {% endfor %}
                     </ul>
                     </span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        {% endif %}
-        {% csrf_token %}
+            {% endif %}
+            {% csrf_token %}
 
-        {% for field in form %}
-        <div class="row">
-            {{ field|materializecss:'s12 m12'}}
-        </div>
-        {% endfor %}
+            {% for field in form %}
+                <div class="row">
+                    {{ field|materializecss:'s12 m12' }}
+                </div>
+            {% endfor %}
 
 
-        <button class="btn waves-effect waves-light" type="submit" value="Submit">Submit
-            <i class="material-icons right">send</i>
-        </button>
-    </form>
-</div>
+            <button class="btn waves-effect waves-light" type="submit" value="Submit">
+                Submit
+                <i class="material-icons right">send</i>
+            </button>
+        </form>
+    </div>
 {% endblock %}
 
 {% block extrafooter %}
-<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
+    <script type="text/javascript"
+            src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
 
-{{ form.media }}
-</script>
+    {{ form.media }}
+    </script>
 {% endblock %}

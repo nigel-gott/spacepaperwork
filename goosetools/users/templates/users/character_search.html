@@ -1,61 +1,65 @@
 {% extends "core/base.html" %}
 {% block body %}
-<div class="section">
-    <h4>Character / User Search</h4>
-</div>
-<div class="section">
-    <form action="" method="get">
-        {% csrf_token %}
-        {% for field in form %}
-        <div class="row">
-            <div class="input-field col s12">
-                {{ field.errors }}
-                {{ field }}
-                {{ field.label_tag }}
-                {% if field.help_text %}
-                <p class="help">{{ field.help_text|safe }}</p>
-                {% endif %}
-            </div>
-        </div>
+    <div class="section">
+        <h4>Character / User Search</h4>
+    </div>
+    <div class="section">
+        <form action="" method="get">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="row">
+                    <div class="input-field col s12">
+                        {{ field.errors }}
+                        {{ field }}
+                        {{ field.label_tag }}
+                        {% if field.help_text %}
+                            <p class="help">{{ field.help_text|safe }}</p>
+                        {% endif %}
+                    </div>
+                </div>
 
-        {% endfor %}
-        <label>
-        <button class="btn waves-effect waves-light" type="submit" value="Submit">Search
-            <i class="material-icons right">send</i>
-        </button>
-    </form>
+            {% endfor %}
+            <label>
+                <button class="btn waves-effect waves-light" type="submit"
+                        value="Submit">Search
+                    <i class="material-icons right">send</i>
+                </button>
+        </form>
 
-    {% if characters %}
-        <h6>Character Search Results:</h6>
-        <ul class="collection" style="overflow: visible;">
-        {% for character in characters %}
-            <li class="collection-item ">
-                <span class="title">[{{character.corp}}] {{character.ingame_name}}</span>
-                <div class="divider"></div>
-                <p>
-                    <b>Owner</b>: <a href="{% url 'user_view' character.user.pk %}">{{character.display_name}}</a>
-                </p>
-            </li>
-        {% endfor %}
-        </ul>
-    {% endif %}
+        {% if characters %}
+            <h6>Character Search Results:</h6>
+            <ul class="collection" style="overflow: visible;">
+                {% for character in characters %}
+                    <li class="collection-item ">
+                        <span class="title">[{{ character.corp }}] {{ character.ingame_name }}</span>
+                        <div class="divider"></div>
+                        <p>
+                            <b>Owner</b>: <a
+                                href="{% url 'user_view' character.user.pk %}">{{ character.display_name }}</a>
+                        </p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
 
-    {% if users%}
-    <h6>User Search Results:</h6>
-        <ul class="collection" style="overflow: visible;">
-        {% for user in users%}
-            <li class="collection-item avatar">
-                {% if user.discord_avatar_url %}
-                    <img alt="" class="circle"
-                            src="{{ user.discord_avatar_url }}?size=32"/>
-                {% endif %}
-                <a href="{% url 'user_view' user.pk %}">{{user.discord_username}} {% if user.nick %} / {{user.nick}} {% endif %}</a><br/>
-                <a href="{% url 'venmo:other_dashboard' 'default' user.id %}">Their Venmo Transactions</a>
-            </li>
-        {% endfor %}
-        </ul>
-    {% endif %}
+        {% if users %}
+            <h6>User Search Results:</h6>
+            <ul class="collection" style="overflow: visible;">
+                {% for user in users %}
+                    <li class="collection-item avatar">
+                        {% if user.discord_avatar_url %}
+                            <img alt="" class="circle"
+                                 src="{{ user.discord_avatar_url }}?size=32"/>
+                        {% endif %}
+                        <a href="{% url 'user_view' user.pk %}">{{ user.discord_username }}
+                            {% if user.nick %} / {{ user.nick }} {% endif %}</a><br/>
+                        <a href="{% url 'venmo:other_dashboard' 'default' user.id %}">Their
+                            Venmo Transactions</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
 
-</div>
+    </div>
 
 {% endblock %}

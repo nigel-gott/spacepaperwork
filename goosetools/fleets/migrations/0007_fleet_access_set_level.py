@@ -6,7 +6,6 @@ from django.db import migrations
 # noinspection PyPep8Naming
 # pylint: disable=unused-argument
 def create_initial_controller(apps, schema_editor):
-
     PermissibleEntity = apps.get_model("users", "PermissibleEntity")
 
     def calc_level(entity):

@@ -15,15 +15,21 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.urls.base import reverse_lazy
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, DeleteView, UpdateView
+from django.views.generic.edit import CreateView, DeleteView, FormView, UpdateView
 from django.views.generic.list import ListView
 
 from goosetools.users.models import VENMO_ADMIN, GooseUser, has_perm
 from goosetools.venmo.api.fog_venmo import FogVenmo
 from goosetools.venmo.api.space_venmo import SpaceVenmo
 from goosetools.venmo.api.venmo import VenmoError, VenmoUserBalance
-from goosetools.venmo.forms import DepositForm, TransferForm, WithdrawForm
-from goosetools.venmo.models import FOG_VENMO_API_TYPE, VirtualCurrency
+from goosetools.venmo.forms import (
+    DepositForm,
+    TransferForm,
+    TransferMethodForm,
+    TransferMethodTypeForm,
+    WithdrawForm,
+)
+from goosetools.venmo.models import FOG_VENMO_API_TYPE, TransferMethod, VirtualCurrency
 
 
 def dashboard(request, ccy, gooseuser):
@@ -283,7 +289,8 @@ class VirtualCurrencyDeleteView(DeleteView):
         if balance != 0:
             messages.error(
                 request,
-                f"Cannot delete a currency which has a balance of {balance}, please zero it out using admin transactions first.",
+                f"Cannot delete a currency which has a balance of {balance}, please "
+                f"zero it out using admin transactions first.",
             )
             return HttpResponseRedirect(reverse("venmo:currency-list"))
         else:
@@ -292,3 +299,45 @@ class VirtualCurrencyDeleteView(DeleteView):
 
 class VirtualCurrencyDetailView(DetailView):
     model = VirtualCurrency
+
+
+class PassRequestToFormViewMixin:
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["request"] = self.request
+        return kwargs
+
+
+class TransferMethodSelectCreateView(FormView):
+    form_class = TransferMethodTypeForm
+    template_name = "venmo/transfermethod_select-form.html"
+
+
+class TransferMethodListView(ListView):
+    queryset = TransferMethod.objects.order_by("name")
+    context_object_name = "transfer_list"
+
+
+class TransferMethodDetailView(DetailView):
+    model = TransferMethod
+
+
+class TransferMethodDeleteView(DeleteView):
+    model = TransferMethod
+    success_url = reverse_lazy("venmo:transfer-list")
+
+
+class TransferMethodCreateView(
+    SuccessMessageMixin, PassRequestToFormViewMixin, CreateView
+):
+    model = TransferMethod
+    form_class = TransferMethodForm
+    success_message = "%(name)s was created successfully"
+
+
+class TransferMethodUpdateView(
+    SuccessMessageMixin, PassRequestToFormViewMixin, UpdateView
+):
+    model = TransferMethod
+    form_class = TransferMethodForm
+    success_message = "%(name)s was edited successfully"

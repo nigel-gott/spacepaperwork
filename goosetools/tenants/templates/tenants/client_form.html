@@ -2,93 +2,102 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<div class="section">
-    <h5>Sign Up for SpacePaperwork</h5>
-    <div class="col s12 s12">
-        <div class="col s12">
-            <div class="card-panel">
-                <span class="card-title"><i class="material-icons medium green-text">check</i>{{ SITE_NAME }} is Free!</span><br/><br/>
-                {{ SITE_NAME }} is open source free software! See our <a href="https://github.com/nigel-gott/spacepaperwork">Github</a>
-                repository for all of the code so you can host your own version!
-            </div>
-        </div>
-    </div>
-</div>
-<div class="divider"></div>
-<div class="section">
-    <form action="" method="post">
-        {% if form.non_field_errors or signup_form.non_field_errors %}
-        <div class="row">
-            <div class="col s12 m5">
-                <div class="card-panel red darken-1">
-                    <span class="white-text">
-                        <b>Errors with form:</b>
-                    <ul class="errors">
-                        {% for error in form.non_field_errors%}
-                        <li>{{ error|escape }}</li>
-                        {% endfor %}
-                        {% for error in signup_form.non_field_errors%}
-                        <li>{{ error|escape }}</li>
-                        {% endfor %}
-                    </ul>
-                    </span>
+    <div class="section">
+        <h5>Sign Up for SpacePaperwork</h5>
+        <div class="col s12 s12">
+            <div class="col s12">
+                <div class="card-panel">
+                    <span class="card-title"><i
+                            class="material-icons medium green-text">check</i>{{ SITE_NAME }} is Free!</span><br/><br/>
+                    {{ SITE_NAME }} is open source free software! See our <a
+                        href="https://github.com/nigel-gott/spacepaperwork">Github</a>
+                    repository for all of the code so you can host your own version!
                 </div>
             </div>
         </div>
-        {% endif %}
-        {% csrf_token %}
+    </div>
+    <div class="divider"></div>
+    <div class="section">
+        <form action="" method="post">
+            {% if form.non_field_errors or signup_form.non_field_errors %}
+                <div class="row">
+                    <div class="col s12 m5">
+                        <div class="card-panel red darken-1">
+                    <span class="white-text">
+                        <b>Errors with form:</b>
+                    <ul class="errors">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error|escape }}</li>
+                        {% endfor %}
+                        {% for error in signup_form.non_field_errors %}
+                            <li>{{ error|escape }}</li>
+                        {% endfor %}
+                    </ul>
+                    </span>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            {% csrf_token %}
 
-        <div class="row">
-            <p id="org_link"></p>
-        </div>
-        {% for field in form %}
-        <div class="row">
-            {{ field|materializecss:'s12 m12'}}
-        </div>
-        {% endfor %}
-        {% for field in signup_form %}
-        <div class="row">
-            {{ field|materializecss:'s12 m12'}}
-        </div>
-        {% endfor %}
+            <div class="row">
+                <p id="org_link"></p>
+            </div>
+            {% for field in form %}
+                <div class="row">
+                    {{ field|materializecss:'s12 m12' }}
+                </div>
+            {% endfor %}
+            {% for field in signup_form %}
+                <div class="row">
+                    {{ field|materializecss:'s12 m12' }}
+                </div>
+            {% endfor %}
 
-        <button id="submit_btn" class="btn waves-effect waves-light" type="submit" value="Submit">Submit
-            <i class="material-icons right">send</i>
-        </button>
-    </form>
-</div>
+            <button id="submit_btn" class="btn waves-effect waves-light" type="submit"
+                    value="Submit">Submit
+                <i class="material-icons right">send</i>
+            </button>
+        </form>
+    </div>
 {% endblock %}
 
 {% block extrafooter %}
-<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
-<link href="{% static 'admin/css/vendor/select2/select2.min.css' %}" type="text/css" media="screen" rel="stylesheet">
-<script src="{% static 'admin/js/vendor/select2/select2.full.js' %}" type="text/javascript"></script>
-<script>
-$(document).ready(function() {
-    $('#id_timezone').select2();
-    function valid_name(name){
-        return /^[a-z0-9_]{1,100}$/.test(name)
+    <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"
+            type="text/javascript"></script>
+    <link href="{% static 'admin/css/vendor/select2/select2.min.css' %}" type="text/css"
+          media="screen" rel="stylesheet">
+    <script src="{% static 'admin/js/vendor/select2/select2.full.js' %}"
+            type="text/javascript"></script>
+    <script>
+    $(document).ready(function () {
+        $('#id_timezone').select2()
 
-    }
-    function update_org_url(){
-        console.log(this.value);
-        name = this.value;
-        if(name){
-            if(valid_name(name)){
-                $("#org_link").html(`Your SpacePaperwork Organization will be accessible at: <a href="#">https://www.spacepaperwork.com/t/${name}</a>`);
-                $("#submit_btn").prop('disabled', false);
-            } else {
-                $("#org_link").html("Please enter a valid organization name. It must be <b class='red-text'>all lowercase, contain no spaces and no special characters other than numbers or underscores.</b>");
-                $("#submit_btn").prop('disabled', true);
-            }
-        } else {
-            $("#org_link").html("<b class='red-text'>Please enter an organization name.</b>");
-            $("#submit_btn").prop('disabled', true);
+        function valid_name(name) {
+            return /^[a-z0-9_]{1,100}$/.test(name)
+
         }
-    }
-   $("#id_name").on("change paste keyup", update_org_url).trigger("change");
 
-});
-</script>
+        function update_org_url() {
+            console.log(this.value)
+            name = this.value
+            if (name) {
+                if (valid_name(name)) {
+                    $("#org_link").html(`Your SpacePaperwork Organization will be accessible at: <a href="#">https://www.spacepaperwork.com/t/${name}</a>`)
+                    $("#submit_btn").prop('disabled', false)
+                } else {
+                    $("#org_link").html("Please enter a valid organization name. It must be <b class='red-text'>all lowercase, contain no spaces and no special characters other than numbers or underscores.</b>")
+                    $("#submit_btn").prop('disabled', true)
+                }
+            } else {
+                $("#org_link").html("<b class='red-text'>Please enter an organization name.</b>")
+                $("#submit_btn").prop('disabled', true)
+            }
+        }
+
+        $("#id_name").on("change paste keyup", update_org_url).trigger("change")
+
+    })
+    </script>
 
 {% endblock %}

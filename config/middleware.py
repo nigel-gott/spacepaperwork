@@ -38,7 +38,6 @@ class LocaleMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-
         language_code = translation.get_language_from_request(request)
 
         translation.activate(language_code)

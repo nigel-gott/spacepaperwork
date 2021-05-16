@@ -8,84 +8,94 @@
 
 {% block body %}
 
-<div class="row">
-    <div class="col s12 center">
-        {% if not corp.sign_up_form %}
-            <h1>Application Form for {{corp.name_with_with_corp_tag}} </h1>
-        {% else %}
-            <h1>{{corp.sign_up_form.title}}</h1>
-        {% endif %}
-        {% if not corp.sign_up_form.description %}
-            <p>Please fill in the fields below to submit your application to {{ SITE_NAME }}. <br/>
-            If you need any help please ask on the discord server.</p>
-        {% else %}
-            <p>
-            {{corp.sign_up_form.description|linebreaks}}
-            </p>
-        {% endif %}
-        <b >You are applying to join <span class="green-text">{{corp.name_with_corp_tag}}</span>. Once you have submitted this application go apply in-game.</b>
-        {% if form.non_field_errors or corp_form.non_field_errors %}
-            <div class="card-panel red darken-1">
+    <div class="row">
+        <div class="col s12 center">
+            {% if not corp.sign_up_form %}
+                <h1>Application Form for {{ corp.name_with_with_corp_tag }} </h1>
+            {% else %}
+                <h1>{{ corp.sign_up_form.title }}</h1>
+            {% endif %}
+            {% if not corp.sign_up_form.description %}
+                <p>Please fill in the fields below to submit your application
+                    to {{ SITE_NAME }}. <br/>
+                    If you need any help please ask on the discord server.</p>
+            {% else %}
+                <p>
+                    {{ corp.sign_up_form.description|linebreaks }}
+                </p>
+            {% endif %}
+            <b>You are applying to join <span
+                    class="green-text">{{ corp.name_with_corp_tag }}</span>. Once you
+                have submitted this application go apply in-game.</b>
+            {% if form.non_field_errors or corp_form.non_field_errors %}
+                <div class="card-panel red darken-1">
                 <span class="white-text">
                     <b>Errors with form:</b>
                 <ul class="errors">
-                    {% for error in form.non_field_errors%}
-                    <li>{{ error|escape }}</li>
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error|escape }}</li>
                     {% endfor %}
-                    {% for error in corp_form.non_field_errors%}
-                    <li>{{ error|escape }}</li>
+                    {% for error in corp_form.non_field_errors %}
+                        <li>{{ error|escape }}</li>
                     {% endfor %}
                 </ul>
                 </span>
-            </div>
-        {% endif %}
-    </div>
-</div>
-<div class="row">
-    <div class="col s12">
-        <!-- Display Form -->
-        <form action="" method="post">
-            {% csrf_token %}
-            {% if redirect_field_value %}
-            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                </div>
             {% endif %}
-            <ul class="collection">
-                {% for field in corp_form %}
-                    <li class="collection-item">
-                        <div class="row">
-                            <div class="col s12">
-                                {{field|materializecss}}
-                            </div>
-                        </div>
-                    </li>
-                {% endfor %}
-                {% for field in form %}
-                    <li class="collection-item">
-                        <div class="row">
-                            <div class="col s12">
-                                {{field|materializecss}}
-                            </div>
-                        </div>
-                    </li>
-                {% endfor %}
-                <li class="collection-item center">
-                    <button class="green btn waves-btn btn-large" id="sign_up_button" type="submit">{% trans "Submit Application" %} &raquo;</button>
-                </li>
-            </ul>
-        </form>
+        </div>
     </div>
-</div>
+    <div class="row">
+        <div class="col s12">
+            <!-- Display Form -->
+            <form action="" method="post">
+                {% csrf_token %}
+                {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}"
+                           value="{{ redirect_field_value }}"/>
+                {% endif %}
+                <ul class="collection">
+                    {% for field in corp_form %}
+                        <li class="collection-item">
+                            <div class="row">
+                                <div class="col s12">
+                                    {{ field|materializecss }}
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                    {% for field in form %}
+                        <li class="collection-item">
+                            <div class="row">
+                                <div class="col s12">
+                                    {{ field|materializecss }}
+                                </div>
+                            </div>
+                        </li>
+                    {% endfor %}
+                    <li class="collection-item center">
+                        <button class="green btn waves-btn btn-large"
+                                id="sign_up_button"
+                                type="submit">{% trans "Submit Application" %} &raquo;
+                        </button>
+                    </li>
+                </ul>
+            </form>
+        </div>
+    </div>
 {% endblock %}
 
 {% block extrafooter %}
-<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
-<link href="{% static 'admin/css/vendor/select2/select2.min.css' %}" type="text/css" media="screen" rel="stylesheet">
-<script src="{% static 'admin/js/vendor/select2/select2.full.js' %}" type="text/javascript"></script>
+    <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"
+            type="text/javascript"></script>
+    <link href="{% static 'admin/css/vendor/select2/select2.min.css' %}" type="text/css"
+          media="screen" rel="stylesheet">
+    <script src="{% static 'admin/js/vendor/select2/select2.full.js' %}"
+            type="text/javascript"></script>
 
-<script>
-$(document).ready(function() {
-    $('#id_timezone').select2();
-});
-</script>
+    <script>
+    $(document).ready(function () {
+        $('#id_timezone').select2()
+    })
+    </script>
 
 {% endblock %}

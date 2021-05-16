@@ -19,6 +19,31 @@ tags:
 schemes:
   - "https"
 paths:
+  /users:
+    get:
+      tags:
+        - "users"
+      summary: "List User balance"
+      description: |
+        This method retrieves the balances for all users on the system.
+      operationId: "listUserBalances"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "discordId"
+          in: "path"
+          description: "ID of user to return"
+          required: true
+          type: "string"
+      security:
+        - api_key: [ ]
+      responses:
+        "200":
+          description: "A list of user balances"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/User"
   /users/{discordId}:
     get:
       tags:
@@ -38,7 +63,7 @@ paths:
           required: true
           type: "string"
       security:
-        - api_key: []
+        - api_key: [ ]
       responses:
         "200":
           description: "A user"
@@ -75,14 +100,14 @@ paths:
             properties:
               value:
                 type: "integer"
-                format : "int64"
+                format: "int64"
                 minimum: 1
                 example: 69420
               note:
                 type: "string"
                 example: "Arby CovOps"
       security:
-        - api_key: []
+        - api_key: [ ]
       responses:
         "201":
           description: "A transaction on the system"
@@ -92,6 +117,102 @@ paths:
           description: "Invalid request"
           schema:
             $ref: "#/definitions/DepositError"
+  /users/{discordId}/credit:
+    post:
+      tags:
+        - "deposits"
+      summary: "Credit a user"
+      description: |
+        This method creates a complete deposit for the given discordId.
+
+        If the user doesn't currently exist that's not an issue, this method will handle creating the user and deposit their space bucks.
+      operationId: "creditUser"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "discordId"
+          in: "path"
+          description: "ID of user to return"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "credit"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              value:
+                type: "integer"
+                format: "int64"
+                minimum: 1
+                example: 69420
+              note:
+                type: "string"
+                example: "Arby CovOps"
+      security:
+        - api_key: [ ]
+      responses:
+        "201":
+          description: "A transaction on the system"
+          schema:
+            $ref: "#/definitions/Transaction"
+        "400":
+          description: "Invalid request"
+          schema:
+            $ref: "#/definitions/DepositError"
+  /users/{discordId}/debit:
+    post:
+      tags:
+        - "withdrawals"
+      summary: "Debit a user"
+      description: |
+        This method creates a complete withdrawal for the given discordId.
+
+        If the originating discordId doesn't have enough space bucks either in raw balance of they have pending transactions then a 409 error is returned.
+
+        If there's a validation error with the input then a 400 error is returned instead.
+
+        Otherwise it returns a 201 when completed successfully.
+      operationId: "debitUser"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "discordId"
+          in: "path"
+          description: "ID of user to withdraw from"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          description: "withdrawal details"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              value:
+                type: "integer"
+                format: "int64"
+                minimum: 1
+                example: 69
+              note:
+                type: "string"
+                example: "Arby CovOps"
+      security:
+        - api_key: [ ]
+      responses:
+        "201":
+          description: "A transactions on the system"
+          schema:
+            $ref: "#/definitions/Transaction"
+        "400":
+          description: "Invalid request"
+          schema:
+            $ref: "#/definitions/WithdrawError"
+        "409":
+          description: "Insufficient balance"
+          schema:
+            $ref: "#/definitions/WithdrawError"
   /users/{discordId}/withdraw:
     post:
       tags:
@@ -123,11 +244,14 @@ paths:
             properties:
               value:
                 type: "integer"
-                format : "int64"
+                format: "int64"
                 minimum: 1
                 example: 69
+              note:
+                type: "string"
+                example: "Arby CovOps"
       security:
-        - api_key: []
+        - api_key: [ ]
       responses:
         "201":
           description: "A transactions on the system"
@@ -166,9 +290,9 @@ paths:
               type: "array"
               items:
                 type: "string"
-            example: [["<@!123456789012345650>", 69420],["<@!123456789012345651>", 42069]]
+            example: [ [ "<@!123456789012345650>", 69420 ],[ "<@!123456789012345651>", 42069 ] ]
       security:
-        - api_key: []
+        - api_key: [ ]
       responses:
         "201":
           description: "A transactions on the system"
@@ -218,9 +342,9 @@ paths:
               type: "array"
               items:
                 type: "string"
-            example: [["<@!123456789012345650>", 69420],["<@!123456789012345651>", 42069]]
+            example: [ [ "<@!123456789012345650>", 69420 ],[ "<@!123456789012345651>", 42069 ] ]
       security:
-        - api_key: []
+        - api_key: [ ]
       responses:
         "201":
           description: "A list of transactions on the system"
@@ -287,10 +411,13 @@ paths:
             properties:
               value:
                 type: "integer"
-                format : "int64"
+                format: "int64"
                 example: 42069
+              note:
+                type: "string"
+                example: "Arby CovOps"
       security:
-        - api_key: []
+        - api_key: [ ]
       responses:
         "201":
           description: "A list of transactions on the system"
@@ -308,11 +435,14 @@ paths:
                     format: "date-time"
                   balance:
                     type: "integer"
-                    format : "int64"
+                    format: "int64"
                     example: 42069
                   discord_id:
                     type: "string"
                     example: "<@!123456789012345678>"
+                  note:
+                    type: "string"
+                    example: "Arby CovOps"
               fromUser:
                 type: "object"
                 properties:
@@ -324,11 +454,14 @@ paths:
                     format: "date-time"
                   balance:
                     type: "integer"
-                    format : "int64"
+                    format: "int64"
                     example: 42069
                   discord_id:
                     type: "string"
                     example: "<@!123456789012345678>"
+                  note:
+                    type: "string"
+                    example: "Arby CovOps"
               transactions:
                 type: "array"
                 items:
@@ -387,7 +520,7 @@ paths:
             - "withdrawal"
             - "deposit"
       security:
-        - api_key: []
+        - api_key: [ ]
       responses:
         "200":
           description: "A list of transactions on the system"
@@ -453,7 +586,7 @@ paths:
                 type: "string"
                 example: "complete"
       security:
-        - api_key: []
+        - api_key: [ ]
       responses:
         "200":
           description: "The updated transaction"
@@ -503,7 +636,7 @@ paths:
                   - "cancelled"
                 example: "complete"
       security:
-        - api_key: []
+        - api_key: [ ]
       responses:
         "200":
           description: "The updated transaction"
@@ -539,7 +672,7 @@ paths:
               truncate:
                 type: boolean
       security:
-        - api_key: []
+        - api_key: [ ]
       responses:
         "200":
           description: "Summary of what was imported from the ledger"
@@ -575,7 +708,7 @@ definitions:
     properties:
       transaction_id:
         type: "integer"
-        format : "int64"
+        format: "int64"
         minimum: 0
         example: 42069
       source_discord_id:
@@ -586,7 +719,7 @@ definitions:
         example: "<@!123456789012345678>"
       value:
         type: "integer"
-        format : "int64"
+        format: "int64"
         example: 69420
       note:
         type: "string"
@@ -620,15 +753,15 @@ definitions:
         example: "<@!123456789012345678>"
       balance:
         type: "integer"
-        format : "int64"
+        format: "int64"
         example: 69420
       netPendingChange:
         type: "integer"
-        format : "int64"
+        format: "int64"
         example: -420
       availableBalance:
         type: "integer"
-        format : "int64"
+        format: "int64"
         example: 69000
       createdAt:
         type: "string"
@@ -707,7 +840,7 @@ definitions:
     properties:
       transaction_id:
         type: "integer"
-        format : "int64"
+        format: "int64"
         example: 69420
       transaction_status:
         type: "string"
@@ -744,7 +877,7 @@ definitions:
         example: "deposit"
       value:
         type: "integer"
-        format : "int64"
+        format: "int64"
         example: -420
   WithdrawError:
     type: "object"
@@ -760,7 +893,7 @@ definitions:
         example: "withdrawal"
       value:
         type: "integer"
-        format : "int64"
+        format: "int64"
         example: -420
   TransferError:
     type: "object"
@@ -776,5 +909,5 @@ definitions:
         example: "<@!123456789012345678>"
       value:
         type: "integer"
-        format : "int64"
+        format: "int64"
         example: -420

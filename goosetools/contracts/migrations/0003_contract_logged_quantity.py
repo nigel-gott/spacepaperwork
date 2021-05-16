@@ -13,7 +13,6 @@ def combine_names(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("contracts", "0002_auto_20210213_1108"),
     ]

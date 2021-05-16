@@ -1,25 +1,26 @@
 {% extends "core/base.html" %}
 {% load materializecss %}
 {% block body %}
-<div class="section">
-    <h5>New Order Limit Group</h5>
-</div>
-<div class="divider"></div>
-<div class="section">
-    <form action="" method="post">
-        {% csrf_token %}
-        <div class="row">
-            {{ form.name|materializecss:'s12 m6, icon=label'}}
-            {{ form.days_between_orders|materializecss:'s12 m6, icon=person'}}
-        </div>
-        <div class="row">
-            {{ form.ships|materializecss:'s12 m12, icon=ship'}}
-        </div>
+    <div class="section">
+        <h5>New Order Limit Group</h5>
+    </div>
+    <div class="divider"></div>
+    <div class="section">
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="row">
+                {{ form.name|materializecss:'s12 m6, icon=label' }}
+                {{ form.days_between_orders|materializecss:'s12 m6, icon=person' }}
+            </div>
+            <div class="row">
+                {{ form.ships|materializecss:'s12 m12, icon=ship' }}
+            </div>
 
-        <label>
-        <button class="btn waves-effect waves-light" type="submit" value="Submit">Create New Group
-            <i class="material-icons right">send</i>
-        </button>
-    </form>
-</div>
+            <label>
+                <button class="btn waves-effect waves-light" type="submit"
+                        value="Submit">Create New Group
+                    <i class="material-icons right">send</i>
+                </button>
+        </form>
+    </div>
 {% endblock %}

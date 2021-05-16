@@ -53,73 +53,8 @@
                         {{ form.end_time|materializecss:'s12 m6, icon=access_time' }}
                     </div>
                 </div>
-                {{ formset.management_form }}
-                {% include 'users/includes/access_controller_builtin_only.html' with access_controller=formset.builtin_wrapper %}
-                <ul class="collapsible">
-                    <li>
-                        <div class="collapsible-header"><i
-                                class="material-icons">add</i>Custom Fleet
-                            Permissions
-                        </div>
-                        <div class="collapsible-body">
 
-
-                            <ul class="collection">
-                                <div id="formset-wrapper">
-                                    {% for sub_form in formset %}
-                                        <li id="{{ sub_form.prefix }}-row"
-                                            class="collection-item">
-                                            <!-- Form Errors -->
-                                            {% if sub_form.non_field_errors %}
-                                                <div class="row">
-                                                    <div class="col s12 m5">
-                                                        <div class="card-panel red darken-1">
-                                                            <b>Errors with sub_form:</b>
-                                                            <ul class="errors">
-                                                                {% for error in sub_form.non_field_errors %}
-                                                                    <li>{{ error|escape }}</li>
-                                                                {% endfor %}
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            {% endif %}
-
-                                            <div class="row">
-                                                <h5>Permission Rule:</h5>
-                                            </div>
-
-                                            <div class="row">
-                                                {{ sub_form.control|materializecss:'s12 m12' }}
-                                            </div>
-                                            <div class="row">
-                                                {{ sub_form.allow_or_deny|materializecss:'s12 m12' }}
-                                            </div>
-                                            <div class="row">
-                                                {{ sub_form.existing_entity }}
-                                                <strong class="orange-text">This rule will only match users who meet all three of the criteria below.</strong>
-                                                {{ sub_form.permission|materializecss:'s12 m12' }}
-                                            </div>
-                                            <div class="row">
-                                                {{ sub_form.corp|materializecss:'s12 m12' }}
-                                            </div>
-                                            <div class="row">
-                                                {{ sub_form.user|materializecss:'s12 m12' }}
-                                            </div>
-                                            {{ sub_form.DELETE }}
-                                        </li>
-
-                                    {% endfor %}
-
-                                    <div class="add_btn_container">
-
-                                    </div>
-                                </div>
-                            </ul>
-                        </div>
-                    </li>
-                </ul>
-
+                {% include 'users/includes/access_controller_form.html' with title="Fleet" %}
 
                 <button class="btn waves-effect waves-light"
                         id="create_fleet_button"
@@ -129,30 +64,6 @@
 
 
             </form>
-            <li class="collection-item" id="form_template" style="display:none">
-                <div class="row">
-                    <h5>Permission Rule:</h5>
-                </div>
-
-                <div class="row">
-                    {{ formset.empty_form.control|materializecss:'s12 m12' }}
-                </div>
-                <div class="row">
-                    {{ formset.empty_form.allow_or_deny|materializecss:'s12 m12' }}
-                </div>
-                <div class="row">
-                    {{ formset.empty_form.existing_entity }}
-                    <strong class="orange-text">This rule will only match users who meet all three of the criteria below.</strong>
-                    {{ formset.empty_form.permission|materializecss:'s12 m12' }}
-                </div>
-                <div class="row">
-                    {{ formset.empty_form.corp|materializecss:'s12 m12' }}
-                </div>
-                <div class="row">
-                    {{ formset.empty_form.user|materializecss:'s12 m12' }}
-                </div>
-                {{ formset.empty_form.DELETE }}
-            </div>
 
         {% endif %}
     </div>
@@ -161,58 +72,7 @@
 {% endblock %}
 
 {% block extrafooter %}
-
-    <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"
-            type="text/javascript"></script>
-    <script src="{% static 'core/js/jquery.formset.js' %}"
-            type="text/javascript"></script>
-
-    {{ form.media }}
-    {{ formset.media }}
-
-    <script>
-    (function ($) {
-        $.fn.select2.defaults.set("selectOnClose", true)
-        $(document).on('keydown', '.select2', function (e) {
-            if (e.originalEvent && e.which == 40) {
-                e.preventDefault()
-                $(this).siblings('select').select2('open')
-            }
-        })
-
-        $(document).on("focus", ".select2", function (e) {
-            if (e.originalEvent) {
-                var s2element = $(this).siblings("select:enabled")
-                s2element.select2("open")
-                // Set focus back to select2 element on closing.
-                s2element.on("select2:closing", function () {
-                    if (s2element.val()) s2element.select2("focus")
-                })
-            }
-        })
-
-
-        var elems = document.querySelectorAll('#formset-wrapper select:not(.mat_select_ignore)')
-        var instances = M.FormSelect.init(elems)
-        var elems = document.querySelectorAll('#core_form select')
-        var instances = M.FormSelect.init(elems)
-        $('#formset-wrapper .collection-item').formset({
-            formTemplate: "#form_template",
-            addText: 'new rule',          // Text for the add link
-            deleteText: 'remove rule',            // Text for the delete link
-            addCssClass: 'waves-btn btn green',
-            deleteCssClass: 'waves-btn btn red',
-            addContainerClass: 'add_btn_container',
-            added: function () {
-                var elems = document.querySelectorAll('#formset-wrapper select:not(.mat_select_ignore)')
-                var instances = M.FormSelect.init(elems)
-            }
-        })
-    })($)
-
-    </script>
-
-
+    {% include 'users/includes/access_controller_form_extra_footer.html' %}
 {% endblock %}
 {% block initfooter %}
 {% endblock %}

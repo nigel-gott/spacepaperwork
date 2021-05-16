@@ -2,64 +2,69 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<div class="section">
-    <h5>Edit Corp</h5>
-    <a class="waves-btn btn" href="{% url 'corps_list' %}">Back To Corp List</a>
-</div>
-<div class="divider"></div>
-<div class="section">
-    <form action="" method="post">
-        {% csrf_token %}
-        <div class="row">
-            {{ form.ticker|materializecss:'s12 m12, icon=directions_boat'}}
-        </div>
-        <div class="row">
-            {{ form.full_name|materializecss:'s12 m12, icon=directions_boat'}}
-        </div>
-        <div class="row">
-            {{ form.description|materializecss:'s12 m12, icon=directions_boat'}}
-        </div>
-        <div class="row">
-            {{ form.sign_up_form|materializecss:'s12 m12, icon=directions_boat'}}
-        </div>
-        <div class="row">
-            {{ form.discord_role_given_on_approval|materializecss:'s12 m12, icon=directions_boat'}}
-        </div>
-        <div class="row">
-            {{ form.manual_group_given_on_approval|materializecss:'s12 m12, icon=directions_boat'}}
-        </div>
-        <div class="row">
-            {{ form.public_corp|materializecss:'s12 m12, icon=directions_boat'}}
-        </div>
-        <div class="row">
-            {{ form.auto_approve|materializecss:'s12 m12, icon=directions_boat'}}
-        </div>
-        <div class="row" id="app_roles">
-            {{ form.discord_roles_allowing_application|materializecss:'s12 m12, icon=directions_boat'}}
-        </div>
-        <button class="btn waves-effect waves-light green" type="submit" value="Submit">Submit Changes
-            <i class="material-icons right">send</i>
-        </button>
-        <button class="btn waves-effect waves-light red" type="submit" value="Delete" name="delete">Delete Corp
-        </button><br/>
-    </form>
-</div>
+    <div class="section">
+        <h5>Edit Corp</h5>
+        <a class="waves-btn btn" href="{% url 'corps_list' %}">Back To Corp List</a>
+    </div>
+    <div class="divider"></div>
+    <div class="section">
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="row">
+                {{ form.ticker|materializecss:'s12 m12, icon=directions_boat' }}
+            </div>
+            <div class="row">
+                {{ form.full_name|materializecss:'s12 m12, icon=directions_boat' }}
+            </div>
+            <div class="row">
+                {{ form.description|materializecss:'s12 m12, icon=directions_boat' }}
+            </div>
+            <div class="row">
+                {{ form.sign_up_form|materializecss:'s12 m12, icon=directions_boat' }}
+            </div>
+            <div class="row">
+                {{ form.discord_role_given_on_approval|materializecss:'s12 m12, icon=directions_boat' }}
+            </div>
+            <div class="row">
+                {{ form.manual_group_given_on_approval|materializecss:'s12 m12, icon=directions_boat' }}
+            </div>
+            <div class="row">
+                {{ form.public_corp|materializecss:'s12 m12, icon=directions_boat' }}
+            </div>
+            <div class="row">
+                {{ form.auto_approve|materializecss:'s12 m12, icon=directions_boat' }}
+            </div>
+            <div class="row" id="app_roles">
+                {{ form.discord_roles_allowing_application|materializecss:'s12 m12, icon=directions_boat' }}
+            </div>
+            <button class="btn waves-effect waves-light green" type="submit"
+                    value="Submit">Submit Changes
+                <i class="material-icons right">send</i>
+            </button>
+            <button class="btn waves-effect waves-light red" type="submit"
+                    value="Delete" name="delete">Delete Corp
+            </button>
+            <br/>
+        </form>
+    </div>
 {% endblock %}
 
 {% block extrafooter %}
-<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
-<script>
-$(document).ready(function() {
-    function hide_roles_if_public(){
-        if(this.checked) {
-            $("#app_roles").hide();
-        } else {
-            $("#app_roles").show();
+    <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"
+            type="text/javascript"></script>
+    <script>
+    $(document).ready(function () {
+        function hide_roles_if_public() {
+            if (this.checked) {
+                $("#app_roles").hide()
+            } else {
+                $("#app_roles").show()
+            }
         }
-    }
-   $("#id_public_corp").change(hide_roles_if_public).trigger("change");
 
-});
-</script>
+        $("#id_public_corp").change(hide_roles_if_public).trigger("change")
+
+    })
+    </script>
 
 {% endblock %}

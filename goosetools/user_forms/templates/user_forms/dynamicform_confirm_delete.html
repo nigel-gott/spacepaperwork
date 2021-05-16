@@ -1,38 +1,39 @@
 {% extends "core/base.html" %}
 {% load materializecss %}
 {% block body %}
-<div class="section">
-    <h5>Delete Form {{dynamicform.title}}</h5>
-</div>
-<div class="divider"></div>
-<div class="section">
-    <form action="" method="post">
-        {% if form.non_field_errors %}
-        <div class="row">
-            <div class="col s12 m5">
-                <div class="card-panel red darken-1">
+    <div class="section">
+        <h5>Delete Form {{ dynamicform.title }}</h5>
+    </div>
+    <div class="divider"></div>
+    <div class="section">
+        <form action="" method="post">
+            {% if form.non_field_errors %}
+                <div class="row">
+                    <div class="col s12 m5">
+                        <div class="card-panel red darken-1">
                     <span class="white-text">
                         <b>Errors with form:</b>
                     <ul class="errors">
-                        {% for error in form.non_field_errors%}
-                        <li>{{ error|escape }}</li>
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error|escape }}</li>
                         {% endfor %}
                     </ul>
                     </span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-        {% endif %}
-        {% csrf_token %}
+            {% endif %}
+            {% csrf_token %}
 
-        {% for field in form %}
-        <div class="row">
-            {{ field|materializecss:'s12 m12'}}
-        </div>
-        {% endfor %}
-        <button class="btn waves-effect waves-light red " type="submit" value="Submit">Confirm Deleting Form
-            <i class="material-icons right">send</i>
-        </button>
-    </form>
-</div>
+            {% for field in form %}
+                <div class="row">
+                    {{ field|materializecss:'s12 m12' }}
+                </div>
+            {% endfor %}
+            <button class="btn waves-effect waves-light red " type="submit"
+                    value="Submit">Confirm Deleting Form
+                <i class="material-icons right">send</i>
+            </button>
+        </form>
+    </div>
 {% endblock %}

@@ -6,38 +6,40 @@
 {% endblock %}
 {% block body %}
 
-<div>
-    <section id="introduction">
-        <h2>{{ SITE_NAME }} Documentation</h2>
-        <p><em>Need more help? Have a great idea? Want to help with the code? PM @thejanitor on Discord!</em>
-        </p>
-        <p>…</p>
-    </section>
-    <section id="features">
-        <h2>Feature Overview</h2>
-        <p>…</p>
-    </section>
-    <section id="fleets">
-        <h2>Fleets</h2>
-        <section id="fleets--repeating">
-            <h3>Repeating Loot Groups</h3>
-            <p>
-                Loot Groups can be set to repeat.
+    <div>
+        <section id="introduction">
+            <h2>{{ SITE_NAME }} Documentation</h2>
+            <p><em>Need more help? Have a great idea? Want to help with the code? PM
+                @thejanitor on Discord!</em>
             </p>
+            <p>…</p>
         </section>
-    </section>
-</div>
-<div class="section-nav">
-    <ol>
-        <li><a href="#introduction">Introduction</a></li>
-        <li><a href="#features">Features</a></li>
-        <li><a href="#fleets">Fleets</a>
-            <ul>
-                <li class=""><a href="#fleets--repeating">Repeating Loot Groups</a></li>
-            </ul>
-        </li>
-    </ol>
-</div>
+        <section id="features">
+            <h2>Feature Overview</h2>
+            <p>…</p>
+        </section>
+        <section id="fleets">
+            <h2>Fleets</h2>
+            <section id="fleets--repeating">
+                <h3>Repeating Loot Groups</h3>
+                <p>
+                    Loot Groups can be set to repeat.
+                </p>
+            </section>
+        </section>
+    </div>
+    <div class="section-nav">
+        <ol>
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#fleets">Fleets</a>
+                <ul>
+                    <li class=""><a href="#fleets--repeating">Repeating Loot Groups</a>
+                    </li>
+                </ul>
+            </li>
+        </ol>
+    </div>
 {% endblock body %}
 {% block extrafooter %}
     <script>

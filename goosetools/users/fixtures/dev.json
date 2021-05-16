@@ -104,7 +104,7 @@
     "model": "users.discordguild",
     "pk": 1,
     "fields": {
-      "guild_id":748488398104428558,
+      "guild_id": 748488398104428558,
       "active": true
     }
   }

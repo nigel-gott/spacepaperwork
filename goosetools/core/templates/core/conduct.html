@@ -2,14 +2,16 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<div class="section">
-    <div class="row">
-        <div class="col s12 m12">
-        {{code_of_conduct|safe}}
+    <div class="section">
+        <div class="row">
+            <div class="col s12 m12">
+                {{ code_of_conduct|safe }}
+            </div>
+        </div>
+        <div class="mb-5">
+            <a id="agree_button" class="btn waves-btn green btn-large pulse"
+               href="{% url "corp_select" %}">HONK IF YOU AGREE TO FOLLOW THIS CODE OF
+                CONDUCT</a>
         </div>
     </div>
-    <div class="mb-5">
-        <a id="agree_button" class="btn waves-btn green btn-large pulse" href="{% url "corp_select" %}">HONK IF YOU AGREE TO FOLLOW THIS CODE OF CONDUCT</a>
-    </div>
-</div>
 {% endblock body %}

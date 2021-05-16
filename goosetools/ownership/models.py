@@ -15,6 +15,7 @@ from djmoney.money import Money
 
 from goosetools.fleets.models import FleetAnom, KillMail
 from goosetools.users.models import Character, GooseUser
+from goosetools.venmo.models import TransferMethod
 
 
 def to_isk(num):
@@ -293,7 +294,11 @@ class TransferLog(models.Model):
     own_share = MoneyField(
         max_digits=20, decimal_places=2, default_currency="EEI", blank=True, null=True
     )
-    transfer_method = models.TextField()
+    new_transfer_method = models.ForeignKey(
+        TransferMethod, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    # The old method, please use the new one above!
+    transfer_method = models.TextField(null=True, blank=True)
     deposit_command = models.TextField(default="", blank=True)
     transfer_command = models.TextField(default="", blank=True)
     own_share_in_eggs = models.BooleanField(default=True)

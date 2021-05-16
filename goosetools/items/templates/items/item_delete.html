@@ -2,45 +2,46 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<h4>{{title}}</h4>
-Deleting Item:
-<a href="{% url 'item_view' item.id %}">
-    {{item}}
-</a>
-<div class="divider"></div>
-<div class="section">
-    {% if form %}
-    <!-- Form Errors -->
-    {% if form.non_field_errors %}
-    <div class="row">
-        <div class="col s12 m5">
-            <div class="card-panel red darken-1">
+    <h4>{{ title }}</h4>
+    Deleting Item:
+    <a href="{% url 'item_view' item.id %}">
+        {{ item }}
+    </a>
+    <div class="divider"></div>
+    <div class="section">
+        {% if form %}
+            <!-- Form Errors -->
+            {% if form.non_field_errors %}
+                <div class="row">
+                    <div class="col s12 m5">
+                        <div class="card-panel red darken-1">
                 <span class="white-text">
                     <b>Errors with form:</b>
                 <ul class="errors">
-                    {% for error in form.non_field_errors%}
-                    <li>{{ error|escape }}</li>
+                    {% for error in form.non_field_errors %}
+                        <li>{{ error|escape }}</li>
                     {% endfor %}
                 </ul>
                 </span>
-            </div>
-        </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="row">
+                    {{ form.are_you_sure|materializecss:'s12 m12, icon=directions_boat' }}
+                </div>
+                <button class="btn waves-effect waves-light red" type="submit"
+                        value="Submit">{{ title }}
+                    <i class="material-icons right">send</i>
+                </button>
+
+            </form>
+
+        {% endif %}
     </div>
-    {% endif %}
-
-    <form action="" method="post">
-        {% csrf_token %}
-        <div class="row">
-            {{ form.are_you_sure|materializecss:'s12 m12, icon=directions_boat'}}
-        </div>
-        <button class="btn waves-effect waves-light red" type="submit" value="Submit">{{title}}
-            <i class="material-icons right">send</i>
-        </button>
-
-    </form>
-
-    {% endif %}
-</div>
 
 
 {% endblock %}

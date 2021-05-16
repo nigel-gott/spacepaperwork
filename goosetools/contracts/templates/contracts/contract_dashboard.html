@@ -3,24 +3,31 @@
 
 {% block datatable_above %}
     <div class="row">
-    <div class="col s12 m12" id="top_row">
-    </div>
+        <div class="col s12 m12" id="top_row">
+        </div>
     </div>
 {% endblock %}
 {% block title %}
-    Contracts | {{SITE_NAME}}
+    Contracts | {{ SITE_NAME }}
 {% endblock %}
 
 {% block datatable_top_row %}
     <div class="row">
         <div class="col s12 m12">
-            <a id="actionable_filter" href="#" class="btn waves-btn filter"><i class="material-icons left">call_received</i>Pending Contracts ({{actionable_count}}) </a>
-            <a id="sent_filter" href="#" class="btn waves-btn filter"><i class="material-icons left">call_made</i>Sent Contracts ({{mine_count}}) </a>
-            <a id="old_filter" href="#" class="btn waves-btn filter"><i class="material-icons left">archive</i>Old Contracts ({{old_count}}) </a>
+            <a id="actionable_filter" href="#" class="btn waves-btn filter"><i
+                    class="material-icons left">call_received</i>Pending Contracts
+                ({{ actionable_count }}) </a>
+            <a id="sent_filter" href="#" class="btn waves-btn filter"><i
+                    class="material-icons left">call_made</i>Sent Contracts
+                ({{ mine_count }}) </a>
+            <a id="old_filter" href="#" class="btn waves-btn filter"><i
+                    class="material-icons left">archive</i>Old Contracts
+                ({{ old_count }}) </a>
         </div>
     </div>
 {% endblock %}
 
 {% block datatable_footer %}
-    <script src="{% static 'contracts/js/contract_dashboard.js' %}" type="text/javascript"></script>
+    <script src="{% static 'contracts/js/contract_dashboard.js' %}"
+            type="text/javascript"></script>
 {% endblock %}

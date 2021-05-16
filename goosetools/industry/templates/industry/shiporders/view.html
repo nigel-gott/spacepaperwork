@@ -3,158 +3,171 @@
 {% load static %}
 {% load materializecss %}
 {% block body %}
-<div class="row">
-    {% has_perm user "ship_price_admin" as is_ship_price_admin %}
-    <div class="col s12 m12">
-        <a class="btn waves-btn green" href="{% url 'industry:shiporders_create' %}">Place An Order</a>
-        {% if is_ship_price_admin %}
-        <a class="btn waves-btn" href="{% url 'industry:ship_dashboard' %}">Ship Admin Dashboard</a>
-        {% endif %}
+    <div class="row">
+        {% has_perm user "ship_price_admin" as is_ship_price_admin %}
+        <div class="col s12 m12">
+            <a class="btn waves-btn green"
+               href="{% url 'industry:shiporders_create' %}">Place An Order</a>
+            {% if is_ship_price_admin %}
+                <a class="btn waves-btn" href="{% url 'industry:ship_dashboard' %}">Ship
+                    Admin Dashboard</a>
+            {% endif %}
+        </div>
+        <div class="col s12 m4">
+            <ul class="collection">
+                <li class="collection-item">
+                    <div class="switch">
+                        My Requested Orders:
+                        <label>
+                            Off
+                            <input id="toggle_requested" type="checkbox" checked>
+                            <span class="lever"></span>
+                            On
+                        </label>
+                    </div>
+                </li>
+                <li class="collection-item">
+                    <div class="switch">
+                        My Assigned Orders:
+                        <label>
+                            Off
+                            <input id="toggle_assigned" type="checkbox">
+                            <span class="lever"></span>
+                            On
+                        </label>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="col s12 m4">
+            <ul class="collection">
+                <li class="collection-item">
+                    <div class="switch">
+                        Unassigned Orders:
+                        <label>
+                            Off
+                            <input id="toggle_unassigned" type="checkbox">
+                            <span class="lever"></span>
+                            On
+                        </label>
+                    </div>
+                </li>
+                <li class="collection-item">
+                    <div class="switch">
+                        Blocked Orders:
+                        <label>
+                            Off
+                            <input id="toggle_blocked" type="checkbox" checked>
+                            <span class="lever"></span>
+                            On
+                        </label>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="col s12 m4">
+            <ul class="collection">
+                <li class="collection-item">
+                    <div class="switch">
+                        Archive View:
+                        <label>
+                            Off
+                            <input id="toggle_completed" type="checkbox">
+                            <span class="lever"></span>
+                            On
+                        </label>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="col s12 m12">
+            <table id="ship_orders_table"></table>
+        </div>
     </div>
-    <div class="col s12 m4">
-        <ul class="collection">
-            <li class="collection-item">
-                <div class="switch">
-                    My Requested Orders:
-                    <label>
-                    Off
-                    <input id="toggle_requested" type="checkbox" checked>
-                    <span class="lever"></span>
-                    On
-                    </label>
-                </div>
-            </li>
-            <li class="collection-item">
-                <div class="switch">
-                    My Assigned Orders:
-                    <label>
-                    Off
-                    <input id="toggle_assigned" type="checkbox">
-                    <span class="lever"></span>
-                    On
-                    </label>
-                </div>
-            </li>
-        </ul>
-    </div>
-    <div class="col s12 m4">
-        <ul class="collection">
-            <li class="collection-item">
-                <div class="switch">
-                    Unassigned Orders:
-                    <label>
-                    Off
-                    <input id="toggle_unassigned" type="checkbox">
-                    <span class="lever"></span>
-                    On
-                    </label>
-                </div>
-            </li>
-            <li class="collection-item">
-                <div class="switch">
-                    Blocked Orders:
-                    <label>
-                    Off
-                    <input id="toggle_blocked" type="checkbox" checked>
-                    <span class="lever"></span>
-                    On
-                    </label>
-                </div>
-            </li>
-        </ul>
-    </div>
-    <div class="col s12 m4">
-        <ul class="collection">
-            <li class="collection-item">
-                <div class="switch">
-                    Archive View:
-                    <label>
-                    Off
-                    <input id="toggle_completed" type="checkbox">
-                    <span class="lever"></span>
-                    On
-                    </label>
-                </div>
-            </li>
-        </ul>
-    </div>
-    <div class="col s12 m12">
-        <table id="ship_orders_table"></table>
-    </div>
-</div>
 {% endblock %}
 
 {% block extrafooter %}
-<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
-<script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"> </script>
-<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
-{{ page_data|json_script:"page-data" }}
-<script>
-function state_to_progress_int(state){
-    progress_dict = {
-        'not_started':0,
-        'inventing':1,
-        'awaiting_production_slot':2,
-        'building':3,
-        'audit':4,
-        'missing_contract':5,
-        'waiting_on_gift_quota':5,
-        'sent':6,
+    <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"
+            type="text/javascript"></script>
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
+    {{ page_data|json_script:"page-data" }}
+    <script>
+    function state_to_progress_int(state) {
+        progress_dict = {
+            'not_started': 0,
+            'inventing': 1,
+            'awaiting_production_slot': 2,
+            'building': 3,
+            'audit': 4,
+            'missing_contract': 5,
+            'waiting_on_gift_quota': 5,
+            'sent': 6,
+        }
+        return progress_dict[state]
     }
-    return progress_dict[state];
-}
-function numberWithCommas(x) {
-    var x = x.toString();
-    var x = x.replace(/,/g, '');
-    return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-}
-$(function() {
-    const page_data = JSON.parse(document.getElementById('page-data').textContent);
-    columns = [
-            { "data": "id", "visible": false, "searchable": false },
-            { "data": "currently_blocked", "visible": false, "searchable": false },
-            { "data": "blocked_until", "visible": false, "searchable": false },
-            { "data": "created_at", "title": "Created At"},
-            { "data": "assignee_name", "title" : "Assignee", "defaultContent": "Nobody",
-                render: function ( data, type, row ) {
-                    if(!row["assignee_name"]){
-                        return "Unclaimed";
-                    } else if(row["assignee"]===page_data["request_user_pk"]){
-                        return "Claimed By You";
+
+    function numberWithCommas(x) {
+        var x = x.toString()
+        var x = x.replace(/,/g, '')
+        return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+    }
+
+    $(function () {
+        const page_data = JSON.parse(document.getElementById('page-data').textContent)
+        columns = [
+            {"data": "id", "visible": false, "searchable": false},
+            {"data": "currently_blocked", "visible": false, "searchable": false},
+            {"data": "blocked_until", "visible": false, "searchable": false},
+            {"data": "created_at", "title": "Created At"},
+            {
+                "data": "assignee_name",
+                "title": "Assignee",
+                "defaultContent": "Nobody",
+                render: function (data, type, row) {
+                    if (!row["assignee_name"]) {
+                        return "Unclaimed"
+                    } else if (row["assignee"] === page_data["request_user_pk"]) {
+                        return "Claimed By You"
                     } else {
-                        return row["assignee_name"];
+                        return row["assignee_name"]
                     }
                 }
             },
-            { "data": "assignee_name", "title" : "Claim/UnClaim", "defaultContent": "Nobody",
-                render: function ( data, type, row ) {
-                    if(page_data["has_industry_permission"] ){
-                        if(!row["assignee_name"]){
-                            if(row['currently_blocked']){
-                                return '<button class="claim-btn waves-btn btn grey">Claim <i class="material-icons right red-text">lock</i></button>';
+            {
+                "data": "assignee_name",
+                "title": "Claim/UnClaim",
+                "defaultContent": "Nobody",
+                render: function (data, type, row) {
+                    if (page_data["has_industry_permission"]) {
+                        if (!row["assignee_name"]) {
+                            if (row['currently_blocked']) {
+                                return '<button class="claim-btn waves-btn btn grey">Claim <i class="material-icons right red-text">lock</i></button>'
                             } else {
-                                return '<button class="claim-btn waves-btn btn green">Claim</button>';
+                                return '<button class="claim-btn waves-btn btn green">Claim</button>'
                             }
-                        } else if(row["assignee"]===page_data["request_user_pk"]){
-                            return '<button class="unclaim-btn waves-btn btn red">UnClaim</button>';
+                        } else if (row["assignee"] === page_data["request_user_pk"]) {
+                            return '<button class="unclaim-btn waves-btn btn red">UnClaim</button>'
                         }
                     }
-                    return row['assignee_name'];
+                    return row['assignee_name']
                 }
             },
-            { "data": "recipient_character_name", "title":"Recipient" },
-            { "data": "ship", "title":"Order"},
-            { "data": "quantity", "title":"Quantity"},
-            { "data": "payment_method", "title":"Payment Status",
-                render: function ( data, type, row, meta) {
-                    const payment_method = row["payment_method"];
-                    const price = row["price"];
-                    const payment_taken = row["payment_taken"];
-                    const current_user_assigned = row["assignee"]===page_data["request_user_pk"];
-                    const free_ship = payment_method === "free" || payment_method === "srp";
-                    if(row["needs_manual_price"]){
-                        if(current_user_assigned){
+            {"data": "recipient_character_name", "title": "Recipient"},
+            {"data": "ship", "title": "Order"},
+            {"data": "quantity", "title": "Quantity"},
+            {
+                "data": "payment_method", "title": "Payment Status",
+                render: function (data, type, row, meta) {
+                    const payment_method = row["payment_method"]
+                    const price = row["price"]
+                    const payment_taken = row["payment_taken"]
+                    const current_user_assigned = row["assignee"] === page_data["request_user_pk"]
+                    const free_ship = payment_method === "free" || payment_method === "srp"
+                    if (row["needs_manual_price"]) {
+                        if (current_user_assigned) {
                             return `${payment_method}<br/>
   <a class="btn orange modal-trigger" href="#modal_price_${meta.row}">price</a>
   <div id="modal_price_${meta.row}" class="modal">
@@ -166,15 +179,15 @@ $(function() {
     </div>
   </div>`
                         } else {
-                            return payment_method + " - Waiting on Manual Price";
+                            return payment_method + " - Waiting on Manual Price"
                         }
                     } else {
-                        const price_display = price ?  " = " + numberWithCommas(price) : "";
-                        const display = payment_method + price_display;
-                        if(payment_taken){
-                            return "PAID: " + display;
+                        const price_display = price ? " = " + numberWithCommas(price) : ""
+                        const display = payment_method + price_display
+                        if (payment_taken) {
+                            return "PAID: " + display
                         } else {
-                            if(current_user_assigned && !free_ship){
+                            if (current_user_assigned && !free_ship) {
                                 return `${display}<br/>
     <a class="btn green modal-trigger" href="#modal_pay_confirm_${meta.row}">Paid</a>
     <div id="modal_pay_confirm_${meta.row}" class="modal">
@@ -185,20 +198,21 @@ $(function() {
         </div>
     </div>`
                             } else {
-                                return display;
+                                return display
                             }
                         }
                     }
 
-                    return row["payment_method"];
+                    return row["payment_method"]
                 }
 
             },
-            { "data": "notes", "title":"Notes",
-                render: function ( data, type, row, meta ) {
-                    if(row['notes']){
-                        notes = row['notes'].trim();
-                        short_notes = notes.substring(0,8) + "..."
+            {
+                "data": "notes", "title": "Notes",
+                render: function (data, type, row, meta) {
+                    if (row['notes']) {
+                        notes = row['notes'].trim()
+                        short_notes = notes.substring(0, 8) + "..."
                         return `
   <a class="btn modal-trigger" href="#modal${meta.row}">${short_notes}</a>
   <div id="modal${meta.row}" class="modal">
@@ -209,329 +223,338 @@ $(function() {
     </div>
   </div>`
                     } else {
-                        return '';
+                        return ''
                     }
 
                 }
 
             },
-            { "data": "state", "title":"Status",
-                render: function ( data, type, row ) {
-                    currently_blocked = row['currently_blocked'];
-                    if(currently_blocked){
-                        return "Blocked Until: " + row['blocked_until'];
+            {
+                "data": "state", "title": "Status",
+                render: function (data, type, row) {
+                    currently_blocked = row['currently_blocked']
+                    if (currently_blocked) {
+                        return "Blocked Until: " + row['blocked_until']
                     }
                     state = row['state']
-                    return state_to_progress_int(state) + ": " + state;
+                    return state_to_progress_int(state) + ": " + state
                 }
             },
-            { "data": null, "title": "Progress",
-                render: function ( data, type, row ) {
-                    currently_blocked = row['currently_blocked'];
-                    if(currently_blocked){
-                        if ( type === 'display' || type === 'filter' ) {
+            {
+                "data": null, "title": "Progress",
+                render: function (data, type, row) {
+                    currently_blocked = row['currently_blocked']
+                    if (currently_blocked) {
+                        if (type === 'display' || type === 'filter') {
                             return "<i class='material-icons left red-text'>lock</i>"
                         } else {
-                            return -1;
+                            return -1
                         }
                     }
 
                     state = row['state']
-                    progress = Math.floor((state_to_progress_int(state) / 6)*100) + 1;
-                    if ( type === 'display' || type === 'filter' ) {
-                        return '<div id="progress" style="height:35px;width:100%;background-color:grey;"><div style="height:35px;width:'+progress+'%;background-color:green;"></div></div>';
+                    progress = Math.floor((state_to_progress_int(state) / 6) * 100) + 1
+                    if (type === 'display' || type === 'filter') {
+                        return '<div id="progress" style="height:35px;width:100%;background-color:grey;"><div style="height:35px;width:' + progress + '%;background-color:green;"></div></div>'
                     }
-                    return progress;
+                    return progress
                 }
             },
-            { "data": "availible_transition_names", "visible": false},
-            { "data": "recipient_user_pk", "visible": false, "searchable": false},
-            { "data": "assignee", "visible": false, "searchable": false},
-            { "data": "uid", "title": "Contract Code"}
-    ];
+            {"data": "availible_transition_names", "visible": false},
+            {"data": "recipient_user_pk", "visible": false, "searchable": false},
+            {"data": "assignee", "visible": false, "searchable": false},
+            {"data": "uid", "title": "Contract Code"}
+        ]
         columns.push({
             "title": "Action",
             "data": null,
-            render: function ( data, type, row ) {
-                    buttons = ""
-                    if(page_data["has_industry_permission"]){
-                        if(row["assignee"]===page_data["request_user_pk"]){
-                            reset_found = false;
-                            for(const t of row['availible_transition_names']){
-                                if(t!=="reset"){
-                                    buttons += '<a class="collection-item state-link" href="#">' + t + '</a>';
-                                } else if(row['state'] !== "not_started") {
-                                    reset_found = true;
-                                }
-                            }
-                            if(reset_found){
-                                buttons += '<a class="collection-item state-link red-text" href="#">reset</a>';
+            render: function (data, type, row) {
+                buttons = ""
+                if (page_data["has_industry_permission"]) {
+                    if (row["assignee"] === page_data["request_user_pk"]) {
+                        reset_found = false
+                        for (const t of row['availible_transition_names']) {
+                            if (t !== "reset") {
+                                buttons += '<a class="collection-item state-link" href="#">' + t + '</a>'
+                            } else if (row['state'] !== "not_started") {
+                                reset_found = true
                             }
                         }
+                        if (reset_found) {
+                            buttons += '<a class="collection-item state-link red-text" href="#">reset</a>'
+                        }
                     }
-                    if((row["state"] != "sent" && row["recipient_user_pk"]==page_data["request_user_pk"]) || page_data["has_industry_permission"]){
-                        buttons += `<a class="collection-item modal-trigger red-text" href="#modal_delete_${row.id}">DELETE</a>
+                }
+                if ((row["state"] != "sent" && row["recipient_user_pk"] == page_data["request_user_pk"]) || page_data["has_industry_permission"]) {
+                    buttons += `<a class="collection-item modal-trigger red-text" href="#modal_delete_${row.id}">DELETE</a>
         <div id="modal_delete_${row.id}" class="modal">
         <div class="modal-content">
             <h4>Delete Order:</h4>
             <b>Are you Sure you Want To Delete Order ${row['ship']} x ${row['quantity']} -> ${row['recipient_character_name']}?</b><br/>
             <a class="delete-link waves-btn btn red modal-close">Delete Order</a>
         </div>
-        </div>`;
+        </div>`
 
-                    }
-                    if(buttons){
-                        return `<div class="collection">${buttons}</div>`;
-                    } else {
-                        return '';
-                    }
-        }
-        });
-    table = $('#ship_orders_table').DataTable( {
-        pageLength: 50,
-        ajax: {
-            url: "{% url 'industry:shiporder-list' %}",
-            dataSrc: '',
-        },
-        columns: columns
-    } );
+                }
+                if (buttons) {
+                    return `<div class="collection">${buttons}</div>`
+                } else {
+                    return ''
+                }
+            }
+        })
+        table = $('#ship_orders_table').DataTable({
+            pageLength: 50,
+            ajax: {
+                url: "{% url 'industry:shiporder-list' %}",
+                dataSrc: '',
+            },
+            columns: columns
+        })
 
-    $('#ship_orders_table').on( 'click', '.paid-link', function () {
-        const row = table.row( $(this).parents('tr') );
-        var data = row.data();
-        ship_paid(row, table);
-    });
-    $('#ship_orders_table').on( 'click', '.price-btn', function () {
-        const row = table.row( $(this).parents('tr') );
-        var data = row.data();
-        manually_price_ship(row, table);
-    });
+        $('#ship_orders_table').on('click', '.paid-link', function () {
+            const row = table.row($(this).parents('tr'))
+            var data = row.data()
+            ship_paid(row, table)
+        })
+        $('#ship_orders_table').on('click', '.price-btn', function () {
+            const row = table.row($(this).parents('tr'))
+            var data = row.data()
+            manually_price_ship(row, table)
+        })
 
-    $('#ship_orders_table').on( 'click', '.state-link', function () {
-        const row = table.row( $(this).parents('tr') );
-        var data = row.data();
-        state_change(row, $(this).text(), table);
-    });
+        $('#ship_orders_table').on('click', '.state-link', function () {
+            const row = table.row($(this).parents('tr'))
+            var data = row.data()
+            state_change(row, $(this).text(), table)
+        })
 
-    $('#ship_orders_table').on( 'click', '.claim-btn', function () {
-        const row = table.row( $(this).parents('tr') );
-        var data = row.data();
-        claim(row, table);
-    });
+        $('#ship_orders_table').on('click', '.claim-btn', function () {
+            const row = table.row($(this).parents('tr'))
+            var data = row.data()
+            claim(row, table)
+        })
 
-    $('#ship_orders_table').on( 'click', '.unclaim-btn', function () {
-        const row = table.row( $(this).parents('tr') );
-        var data = row.data();
-        unclaim(row, table);
-    });
+        $('#ship_orders_table').on('click', '.unclaim-btn', function () {
+            const row = table.row($(this).parents('tr'))
+            var data = row.data()
+            unclaim(row, table)
+        })
 
-    $('#ship_orders_table').on( 'click', '.delete-link', function () {
-        const row = table.row( $(this).parents('tr') );
-        var data = row.data();
-        delete_order(row, table);
-    });
+        $('#ship_orders_table').on('click', '.delete-link', function () {
+            const row = table.row($(this).parents('tr'))
+            var data = row.data()
+            delete_order(row, table)
+        })
 
-    loadCheckboxes();
+        loadCheckboxes()
 
-    add_filter(page_data);
+        add_filter(page_data)
 
-    $('input:checkbox').change(filter_change(table));
-    filter_change(table)();
+        $('input:checkbox').change(filter_change(table))
+        filter_change(table)()
 
-    table.on( 'draw', function () {
-        var elems = document.querySelectorAll('.modal');
-        var instances = M.Modal.init(elems);
-    } );
-});
-
-function django_request(url){
-    const csrftoken = Cookies.get('csrftoken');
-    return new Request(
-        url,
-        {headers: {'X-CSRFToken': csrftoken}}
-    );
-}
-function json_django_request(url){
-    const csrftoken = Cookies.get('csrftoken');
-    return new Request(
-        url,
-        {headers: {'X-CSRFToken': csrftoken,
-            'Content-Type': 'application/json'
-        }}
-    );
-}
-function ship_paid(row, table){
-    const id = row.data()['id'];
-    const request = json_django_request("shiporder/" + id + "/paid/");
-    fetch(request, {
-        method: 'PUT',
-        mode: 'same-origin'
+        table.on('draw', function () {
+            var elems = document.querySelectorAll('.modal')
+            var instances = M.Modal.init(elems)
+        })
     })
-    .then(response => response.json())
-    .then(response_data => {
-        const row_data = row.data();
-        row_data['payment_taken'] = response_data["payment_taken"];
-        row.data(row_data);
-        table.draw();
-    });
-}
-function manually_price_ship(row, table){
-    const id = row.data()['id'];
-    const request = json_django_request("shiporder/" + id + "/manual_price/");
-    const price = parseInt($('#input_price_' + id).val());
-    if(price && price > 0){
+
+    function django_request(url) {
+        const csrftoken = Cookies.get('csrftoken')
+        return new Request(
+            url,
+            {headers: {'X-CSRFToken': csrftoken}}
+        )
+    }
+
+    function json_django_request(url) {
+        const csrftoken = Cookies.get('csrftoken')
+        return new Request(
+            url,
+            {
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                }
+            }
+        )
+    }
+
+    function ship_paid(row, table) {
+        const id = row.data()['id']
+        const request = json_django_request("shiporder/" + id + "/paid/")
+        fetch(request, {
+            method: 'PUT',
+            mode: 'same-origin'
+        })
+            .then(response => response.json())
+            .then(response_data => {
+                const row_data = row.data()
+                row_data['payment_taken'] = response_data["payment_taken"]
+                row.data(row_data)
+                table.draw()
+            })
+    }
+
+    function manually_price_ship(row, table) {
+        const id = row.data()['id']
+        const request = json_django_request("shiporder/" + id + "/manual_price/")
+        const price = parseInt($('#input_price_' + id).val())
+        if (price && price > 0) {
+            fetch(request, {
+                method: 'PUT',
+                mode: 'same-origin',
+                body: JSON.stringify({"manual_price": price})
+            })
+                .then(response => response.json())
+                .then(response_data => {
+                    const row_data = row.data()
+                    row_data['price'] = response_data["price"]
+                    row_data['needs_manual_price'] = response_data["needs_manual_price"]
+                    row.data(row_data)
+                    table.draw()
+                })
+        } else {
+            console.log("Price error")
+        }
+    }
+
+    function state_change(row, transition, table) {
+        const id = row.data()['id']
+        const request = json_django_request("shiporder/" + id + "/transition/")
         fetch(request, {
             method: 'PUT',
             mode: 'same-origin',
-            body: JSON.stringify({"manual_price":price})
+            body: JSON.stringify({"transition": transition})
         })
-        .then(response => response.json())
-        .then(response_data => {
-            const row_data = row.data();
-            row_data['price'] = response_data["price"];
-            row_data['needs_manual_price'] = response_data["needs_manual_price"];
-            row.data(row_data);
-            table.draw();
-        });
-    } else {
-        console.log("Price error");
+            .then(response => response.json())
+            .then(response_data => {
+                const row_data = row.data()
+                row_data['state'] = response_data["new_state"]
+                row_data['availible_transition_names'] = response_data["availible_transition_names"]
+                row.data(row_data)
+                table.draw()
+            })
     }
-}
-function state_change(row, transition, table){
-    const id = row.data()['id'];
-    const request = json_django_request("shiporder/" + id + "/transition/");
-    fetch(request, {
-        method: 'PUT',
-        mode: 'same-origin',
-        body: JSON.stringify({"transition":transition})
-    })
-    .then(response => response.json())
-    .then(response_data => {
-        const row_data = row.data();
-        row_data['state'] = response_data["new_state"];
-        row_data['availible_transition_names'] = response_data["availible_transition_names"];
-        row.data(row_data);
-        table.draw();
-    });
-}
 
-function claim(row, table){
-    const id = row.data()['id'];
-    const request = django_request("shiporder/" + id + "/claim/");
-    fetch(request, {
-        method: 'PUT',
-        mode: 'same-origin'
-    })
-    .then(response => response.json())
-    .then(response_data => {
-        const row_data = row.data();
-        row_data['assignee_name'] = response_data["assignee_name"];
-        row_data['assignee'] = response_data["assignee"];
-        row_data['uid'] = response_data["uid"];
-        row.data(row_data);
-        table.draw();
-    });
-}
-
-function unclaim(row, table){
-    const id = row.data()['id'];
-    const request = django_request("shiporder/" + id + "/unclaim/");
-    fetch(request, {
-        method: 'PUT',
-        mode: 'same-origin'
-    })
-    .then(response => response.json())
-    .then(response_data => {
-        if(response_data["status"] === "unclaimed"){
-            const row_data = row.data();
-            row_data['assignee_name'] = null;
-            row_data['assignee'] = null;
-            row_data['uid'] = null;
-            row.data(row_data);
-            table.draw();
-        }
-    });
-}
-
-function delete_order(row, table){
-    const id = row.data()['id'];
-    const request = django_request("shiporder/" + id + "/delete/");
-    fetch(request, {
-        method: 'DELETE',
-        mode: 'same-origin'
-    })
-    .then(response => response.json())
-    .then(response_data => {
-        if(response_data["deleted"]){
-            row.remove()
-            table.draw();
-        }
-    });
-}
-
-function filter_change(dt){
-    return function(){
-        updateStorage();
-        dt.draw();
+    function claim(row, table) {
+        const id = row.data()['id']
+        const request = django_request("shiporder/" + id + "/claim/")
+        fetch(request, {
+            method: 'PUT',
+            mode: 'same-origin'
+        })
+            .then(response => response.json())
+            .then(response_data => {
+                const row_data = row.data()
+                row_data['assignee_name'] = response_data["assignee_name"]
+                row_data['assignee'] = response_data["assignee"]
+                row_data['uid'] = response_data["uid"]
+                row.data(row_data)
+                table.draw()
+            })
     }
-}
 
-function add_filter(page_data){
-    $.fn.dataTable.ext.search.push(
-        function( settings, data, dataIndex, row ) {
-            const assigned = $('#toggle_assigned');
-            const unassigned = $('#toggle_unassigned');
-            const requested = $('#toggle_requested');
-            const completed = $('#toggle_completed');
-            const blocked = $('#toggle_blocked');
-            const assigned_checked = assigned.is(':checked');
-            const unassigned_checked = unassigned.is(':checked');
-            const requested_checked = requested.is(':checked');
-            const completed_checked = completed.is(':checked');
-            const blocked_checked = blocked.is(':checked');
+    function unclaim(row, table) {
+        const id = row.data()['id']
+        const request = django_request("shiporder/" + id + "/unclaim/")
+        fetch(request, {
+            method: 'PUT',
+            mode: 'same-origin'
+        })
+            .then(response => response.json())
+            .then(response_data => {
+                if (response_data["status"] === "unclaimed") {
+                    const row_data = row.data()
+                    row_data['assignee_name'] = null
+                    row_data['assignee'] = null
+                    row_data['uid'] = null
+                    row.data(row_data)
+                    table.draw()
+                }
+            })
+    }
 
-            if(completed_checked && row['state'] !== 'sent'){
-                return false;
-            }
-            if(!completed_checked && row['state'] === 'sent'){
-                return false;
-            }
+    function delete_order(row, table) {
+        const id = row.data()['id']
+        const request = django_request("shiporder/" + id + "/delete/")
+        fetch(request, {
+            method: 'DELETE',
+            mode: 'same-origin'
+        })
+            .then(response => response.json())
+            .then(response_data => {
+                if (response_data["deleted"]) {
+                    row.remove()
+                    table.draw()
+                }
+            })
+    }
 
-            row_is_assigned_to_user = row['assignee'] === page_data['request_user_pk'];
-            row_has_assignee = row['assignee'];
-            if(!blocked_checked && row['currently_blocked']){
-                return false;
-            }
-            if(assigned_checked || unassigned_checked){
-                return assigned_checked && row_is_assigned_to_user || unassigned_checked && !row_has_assignee;
-            } else if(requested_checked){
-                return parseInt(row['recipient_user_pk']) === page_data['request_user_pk'];
-            } else {
-                return true;
-            }
+    function filter_change(dt) {
+        return function () {
+            updateStorage()
+            dt.draw()
         }
-    );
+    }
 
-}
+    function add_filter(page_data) {
+        $.fn.dataTable.ext.search.push(
+            function (settings, data, dataIndex, row) {
+                const assigned = $('#toggle_assigned')
+                const unassigned = $('#toggle_unassigned')
+                const requested = $('#toggle_requested')
+                const completed = $('#toggle_completed')
+                const blocked = $('#toggle_blocked')
+                const assigned_checked = assigned.is(':checked')
+                const unassigned_checked = unassigned.is(':checked')
+                const requested_checked = requested.is(':checked')
+                const completed_checked = completed.is(':checked')
+                const blocked_checked = blocked.is(':checked')
+
+                if (completed_checked && row['state'] !== 'sent') {
+                    return false
+                }
+                if (!completed_checked && row['state'] === 'sent') {
+                    return false
+                }
+
+                row_is_assigned_to_user = row['assignee'] === page_data['request_user_pk']
+                row_has_assignee = row['assignee']
+                if (!blocked_checked && row['currently_blocked']) {
+                    return false
+                }
+                if (assigned_checked || unassigned_checked) {
+                    return assigned_checked && row_is_assigned_to_user || unassigned_checked && !row_has_assignee
+                } else if (requested_checked) {
+                    return parseInt(row['recipient_user_pk']) === page_data['request_user_pk']
+                } else {
+                    return true
+                }
+            }
+        )
+
+    }
 
 
-function updateStorage(){
-    checkboxValues = {};
-    const $checkboxes = $(":checkbox");
-    $checkboxes.each(function(){
-        checkboxValues[this.id] = this.checked;
-    });
+    function updateStorage() {
+        checkboxValues = {}
+        const $checkboxes = $(":checkbox")
+        $checkboxes.each(function () {
+            checkboxValues[this.id] = this.checked
+        })
 
-    localStorage.setItem("checkboxValues", JSON.stringify(checkboxValues));
-}
+        localStorage.setItem("checkboxValues", JSON.stringify(checkboxValues))
+    }
 
-function loadCheckboxes(){
-    var checkboxValues = JSON.parse(localStorage.getItem('checkboxValues')) || {};
-    $.each(checkboxValues, function(key, value) {
-        if(key){
-            $("#" + key).prop('checked', value);
-        }
-    });
-}
-</script>
+    function loadCheckboxes() {
+        var checkboxValues = JSON.parse(localStorage.getItem('checkboxValues')) || {}
+        $.each(checkboxValues, function (key, value) {
+            if (key) {
+                $("#" + key).prop('checked', value)
+            }
+        })
+    }
+    </script>
 {% endblock %}

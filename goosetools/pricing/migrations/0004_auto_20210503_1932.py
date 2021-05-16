@@ -18,7 +18,6 @@ def reverse(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("items", "0011_auto_20210503_1822"),
         ("pricing", "0003_auto_20210503_0844"),

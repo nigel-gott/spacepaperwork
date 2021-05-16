@@ -2,112 +2,115 @@
 {% load materializecss %}
 {% load static %}
 {% block body %}
-<h4>{{title}}</h4>
-<div class="divider"></div>
-<form action="" method="post">
-    <div class="section">
-        <button class="btn waves-effect waves-light darken-1" name="add_another" type="submit" value="Submit">
-            Submit Then Add More
-            <i class="material-icons right">autorenew</i>
-        </button>
-        <button class="btn waves-effect waves-light" type="submit" value="Submit">Add Items
-            <i class="material-icons right">send</i>
-        </button>
-    </div>
-    <div class="section">
-        {% if char_form.non_field_errors %}
-        <div class="row">
-            <div class="col s12 m5">
-                <div class="card-panel red darken-1">
-                    <span class="white-text">
-                        <b>Errors with form:</b>
-                    <ul class="errors">
-                        {% for error in char_form.non_field_errors%}
-                        <li>{{ error|escape }}</li>
-                        {% endfor %}
-                    </ul>
-                    </span>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-        <div class="row">
-            {{ char_form.character|materializecss:'s12 m6, icon=person'}}
-            {{ char_form.faction|materializecss:'s12 m6, icon=person'}}
-        </div>
-    </div>
+    <h4>{{ title }}</h4>
     <div class="divider"></div>
-    {{ formset.management_form }}
-    {% for form in formset %}
-    <div class="section">
-        {% if form %}
-        <!-- Form Errors -->
-        {% if form.non_field_errors %}
-        <div class="row">
-            <div class="col s12 m5">
-                <div class="card-panel red darken-1">
+    <form action="" method="post">
+        <div class="section">
+            <button class="btn waves-effect waves-light darken-1" name="add_another"
+                    type="submit" value="Submit">
+                Submit Then Add More
+                <i class="material-icons right">autorenew</i>
+            </button>
+            <button class="btn waves-effect waves-light" type="submit" value="Submit">
+                Add Items
+                <i class="material-icons right">send</i>
+            </button>
+        </div>
+        <div class="section">
+            {% if char_form.non_field_errors %}
+                <div class="row">
+                    <div class="col s12 m5">
+                        <div class="card-panel red darken-1">
                     <span class="white-text">
                         <b>Errors with form:</b>
                     <ul class="errors">
-                        {% for error in form.non_field_errors%}
-                        <li>{{ error|escape }}</li>
+                        {% for error in char_form.non_field_errors %}
+                            <li>{{ error|escape }}</li>
                         {% endfor %}
                     </ul>
                     </span>
+                        </div>
+                    </div>
                 </div>
+            {% endif %}
+            <div class="row">
+                {{ char_form.character|materializecss:'s12 m6, icon=person' }}
+                {{ char_form.faction|materializecss:'s12 m6, icon=person' }}
             </div>
         </div>
-        {% endif %}
+        <div class="divider"></div>
+        {{ formset.management_form }}
+        {% for form in formset %}
+            <div class="section">
+                {% if form %}
+                    <!-- Form Errors -->
+                    {% if form.non_field_errors %}
+                        <div class="row">
+                            <div class="col s12 m5">
+                                <div class="card-panel red darken-1">
+                    <span class="white-text">
+                        <b>Errors with form:</b>
+                    <ul class="errors">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error|escape }}</li>
+                        {% endfor %}
+                    </ul>
+                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
 
-        {% csrf_token %}
-        <div class="row">
-            {{ form.item|materializecss:'s12 m6, icon=directions_boat'}}
-            {{ form.quantity|materializecss:'s12 m6, icon=directions_boat'}}
-        </div>
+                    {% csrf_token %}
+                    <div class="row">
+                        {{ form.item|materializecss:'s12 m6, icon=directions_boat' }}
+                        {{ form.quantity|materializecss:'s12 m6, icon=directions_boat' }}
+                    </div>
 
 
-        {% endif %}
-    </div>
-    {% endfor %}
-</form>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </form>
 
 
 {% endblock %}
 
 {% block extrafooter %}
 
-<script src="{% static 'admin/js/vendor/jquery/jquery.js' %}" type="text/javascript"></script>
+    <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"
+            type="text/javascript"></script>
 
 
-{{ formset.media }}
+    {{ formset.media }}
 
-<script>
-(function($) {
-    $.fn.select2.defaults.set("selectOnClose", true);
-    $(document).on('keydown', '.select2', function(e) {
-        if (e.originalEvent && e.which == 40) {
-            e.preventDefault();
-            $(this).siblings('select').select2('open');
-        }
-    });
+    <script>
+    (function ($) {
+        $.fn.select2.defaults.set("selectOnClose", true)
+        $(document).on('keydown', '.select2', function (e) {
+            if (e.originalEvent && e.which == 40) {
+                e.preventDefault()
+                $(this).siblings('select').select2('open')
+            }
+        })
 
-    $(document).on("focus", ".select2", function (e) {
-        if (e.originalEvent) {
-            var s2element = $(this).siblings("select:enabled");
-            s2element.select2("open");
-            // Set focus back to select2 element on closing.
-            s2element.on("select2:closing", function () {
-            if (s2element.val()) s2element.select2("focus");
-            });
-        }
-    });
+        $(document).on("focus", ".select2", function (e) {
+            if (e.originalEvent) {
+                var s2element = $(this).siblings("select:enabled")
+                s2element.select2("open")
+                // Set focus back to select2 element on closing.
+                s2element.on("select2:closing", function () {
+                    if (s2element.val()) s2element.select2("focus")
+                })
+            }
+        })
 
-    $('select:not(#id_faction)').select2({
-        selectOnClose: true
-    });
+        $('select:not(#id_faction)').select2({
+            selectOnClose: true
+        })
 
-})($)
+    })($)
 
-</script>
+    </script>
 
 {% endblock %}

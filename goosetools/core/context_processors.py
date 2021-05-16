@@ -4,7 +4,6 @@ from django.conf import settings  # import the settings file
 def setting_vars(request):
     return {
         "SINGLE_TENANT": settings.SINGLE_TENANT,
-        "GOOSEFLOCK_FEATURES": settings.GOOSEFLOCK_FEATURES,
         "WIKI_NAME": settings.WIKI_NAME,
         "WIKI_URL": settings.WIKI_URL,
         "SITE_NAME": settings.SITE_NAME,

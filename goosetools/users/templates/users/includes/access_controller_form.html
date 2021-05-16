@@ -1,0 +1,96 @@
+{% load materializecss %}
+{{ formset.management_form }}
+{% include 'users/includes/access_controller_builtin_only.html' with access_controller=formset.builtin_wrapper %}
+<ul class="collapsible">
+    <li>
+        <div class="collapsible-header"><i
+                class="material-icons">add</i>Custom {{ title }}
+            Permissions
+        </div>
+        <div class="collapsible-body">
+
+
+            <ul class="collection">
+                <div id="formset-wrapper">
+                    {% for sub_form in formset %}
+                        <li id="{{ sub_form.prefix }}-row"
+                            class="collection-item">
+                            <!-- Form Errors -->
+                            {% if sub_form.non_field_errors %}
+                                <div class="row">
+                                    <div class="col s12 m5">
+                                        <div class="card-panel red darken-1">
+                                            <b>Errors with sub_form:</b>
+                                            <ul class="errors">
+                                                {% for error in sub_form.non_field_errors %}
+                                                    <li>{{ error|escape }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <div class="row">
+                                <h5>Permission Rule:</h5>
+                            </div>
+
+                            <div class="row">
+                                {{ sub_form.control|materializecss:'s12 m12' }}
+                            </div>
+                            <div class="row">
+                                {{ sub_form.allow_or_deny|materializecss:'s12 m12' }}
+                            </div>
+                            <div class="row">
+                                {{ sub_form.existing_entity }}
+                                <strong class="orange-text">This rule
+                                    will only match users who meet all
+                                    three of the criteria
+                                    below.</strong>
+                                {{ sub_form.permission|materializecss:'s12 m12' }}
+                            </div>
+                            <div class="row">
+                                {{ sub_form.corp|materializecss:'s12 m12' }}
+                            </div>
+                            <div class="row">
+                                {{ sub_form.user|materializecss:'s12 m12' }}
+                            </div>
+                            {{ sub_form.DELETE }}
+                        </li>
+
+                    {% endfor %}
+
+                    <div class="add_btn_container">
+
+                    </div>
+                </div>
+            </ul>
+        </div>
+    </li>
+</ul>
+<li class="collection-item" id="form_template" style="display:none">
+    <div class="row">
+        <h5>Permission Rule:</h5>
+    </div>
+
+    <div class="row">
+        {{ formset.empty_form.control|materializecss:'s12 m12' }}
+    </div>
+    <div class="row">
+        {{ formset.empty_form.allow_or_deny|materializecss:'s12 m12' }}
+    </div>
+    <div class="row">
+        {{ formset.empty_form.existing_entity }}
+        <strong class="orange-text">This rule will only match users who meet
+            all three of the criteria below.</strong>
+        {{ formset.empty_form.permission|materializecss:'s12 m12' }}
+    </div>
+    <div class="row">
+        {{ formset.empty_form.corp|materializecss:'s12 m12' }}
+    </div>
+    <div class="row">
+        {{ formset.empty_form.user|materializecss:'s12 m12' }}
+    </div>
+    {{ formset.empty_form.DELETE }}
+    </div>
+</li>

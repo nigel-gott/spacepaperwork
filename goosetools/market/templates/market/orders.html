@@ -1,75 +1,81 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
-{% load materializecss %}
-<div class="row">
-    <div class="col s12 m12">
-        <h5>Market Orders</h5>
-        <table>
-            <thead>
-            <th>Location</th>
-            <th>Item</th>
-            <th>Quantity</th>
-            <th>Buy/Sell</th>
-            <th>Internal/External</th>
-            <th>List Price</th>
-            <th>Action</th>
-            </thead>
-            <tbody>
-            {% for loc_items in all_orders %}
-            <tr>
-                <td rowspan="{{loc_items.total_in_loc|add:'3'}}">
-                {{loc_items.loc}}
-                </td>
-            </tr>
-            <tr>
-                <td class="center-align" colspan="4">Stacked Items</td>
-            </tr>
-            {% for stack_id, stack in loc_items.stacks.items %}
-            <tr>
-                <td><a href="{% url 'stack_view' stack.stack_id %}">{{stack.item}}</a></td>
-                <td>{{stack.stack.order_quantity}}</td>
-                <td>{{stack.stack.buy_sell}}</td>
-                <td>{{stack.stack.internal_external}}</td>
-                <td>{{stack.stack.list_price}}</td>
-                <td>{{stack.stack.estimated_profit}}</td>
-                <td>
-                    <a class="waves-btn btn orange" href="{% url 'stack_change_price' stack.stack_id %}">Edit</a><br/>
-                    <a class="waves-btn btn green" href="{% url 'stack_sold' stack.stack_id %}">Sold</a>
-                </td>
-            </tr>
-            {% endfor %}
-            <tr>
-                <td class="center-align" colspan="4">UnStacked Items</td>
-            </tr>
-            {% for item in loc_items.unstacked %}
-            <tr>
-                <td>
-                    <a href="{% url 'item_view' item.id %}">
-                        {{item.item}}
-                    </a>
-                </td>
-                <td>
-                    {{item.marketorder.quantity}}
-                </td>
-                <td>
-                    {{item.marketorder.buy_or_sell}}
-                </td>
-                <td>
-                    {{item.marketorder.internal_or_external}}
-                </td>
-                <td>
-                    {{item.marketorder.listed_at_price}}
-                </td>
-                <td>
-                    <a class="waves-btn btn orange" href="{% url 'edit_order_price' item.marketorder.id %}">Edit
-                        Price</a>
-                    <a class="waves-btn btn green" href="{% url 'order_sold' item.marketorder.id %}">Sold</a>
-                </td>
-            </tr>
-            {% endfor %}
-            {% endfor %}
-            </tbody>
-        </table>
+    {% load materializecss %}
+    <div class="row">
+        <div class="col s12 m12">
+            <h5>Market Orders</h5>
+            <table>
+                <thead>
+                <th>Location</th>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Buy/Sell</th>
+                <th>Internal/External</th>
+                <th>List Price</th>
+                <th>Action</th>
+                </thead>
+                <tbody>
+                {% for loc_items in all_orders %}
+                    <tr>
+                        <td rowspan="{{ loc_items.total_in_loc|add:'3' }}">
+                            {{ loc_items.loc }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="center-align" colspan="4">Stacked Items</td>
+                    </tr>
+                    {% for stack_id, stack in loc_items.stacks.items %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'stack_view' stack.stack_id %}">{{ stack.item }}</a>
+                            </td>
+                            <td>{{ stack.stack.order_quantity }}</td>
+                            <td>{{ stack.stack.buy_sell }}</td>
+                            <td>{{ stack.stack.internal_external }}</td>
+                            <td>{{ stack.stack.list_price }}</td>
+                            <td>{{ stack.stack.estimated_profit }}</td>
+                            <td>
+                                <a class="waves-btn btn orange"
+                                   href="{% url 'stack_change_price' stack.stack_id %}">Edit</a><br/>
+                                <a class="waves-btn btn green"
+                                   href="{% url 'stack_sold' stack.stack_id %}">Sold</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td class="center-align" colspan="4">UnStacked Items</td>
+                    </tr>
+                    {% for item in loc_items.unstacked %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'item_view' item.id %}">
+                                    {{ item.item }}
+                                </a>
+                            </td>
+                            <td>
+                                {{ item.marketorder.quantity }}
+                            </td>
+                            <td>
+                                {{ item.marketorder.buy_or_sell }}
+                            </td>
+                            <td>
+                                {{ item.marketorder.internal_or_external }}
+                            </td>
+                            <td>
+                                {{ item.marketorder.listed_at_price }}
+                            </td>
+                            <td>
+                                <a class="waves-btn btn orange"
+                                   href="{% url 'edit_order_price' item.marketorder.id %}">Edit
+                                    Price</a>
+                                <a class="waves-btn btn green"
+                                   href="{% url 'order_sold' item.marketorder.id %}">Sold</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
 {% endblock %}

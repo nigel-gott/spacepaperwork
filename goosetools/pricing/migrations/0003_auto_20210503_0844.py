@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("items", "0004_inventoryitem_echoes_item"),
         ("pricing", "0002_auto_20210503_0820"),

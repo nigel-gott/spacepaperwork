@@ -8,7 +8,6 @@ from django.contrib.postgres.aggregates.general import StringAgg
 from django.contrib.sites.models import Site
 from django.db import models
 from django.http.response import HttpResponseForbidden
-from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django_comments.models import Comment
 from requests.exceptions import RequestException
@@ -1054,96 +1053,9 @@ class CrudAccessController(models.Model):
         ).delete()
 
 
-def can_view(clazz):
-    """
-    Decorator for views that checks that the user has the specified permission
-    otherwise returning HttpForbidden
-    """
+class AccessControlledModel:
+    def built_in_permissible_entities(self, owner):
+        raise NotImplementedError("You must implement built_in_permissible_entities")
 
-    def outer_wrapper(function):
-        @wraps(function)
-        def wrap(request, pk, *args, **kwargs):
-            f = get_object_or_404(clazz, pk=pk)
-            if f.access_controller.can_view(request.gooseuser):
-                return function(request, pk, *args, **kwargs)
-            return HttpResponseForbidden()
-
-        return wrap
-
-    return outer_wrapper
-
-
-def can_admin(clazz):
-    """
-    Decorator for views that checks that the user has the specified permission
-    otherwise returning HttpForbidden
-    """
-
-    def outer_wrapper(function):
-        @wraps(function)
-        def wrap(request, pk, *args, **kwargs):
-            f = get_object_or_404(clazz, pk=pk)
-            if f.access_controller.can_admin(request.gooseuser):
-                return function(request, pk, *args, **kwargs)
-            return HttpResponseForbidden()
-
-        return wrap
-
-    return outer_wrapper
-
-
-def can_edit(clazz):
-    """
-    Decorator for views that checks that the user has the specified permission
-    otherwise returning HttpForbidden
-    """
-
-    def outer_wrapper(function):
-        @wraps(function)
-        def wrap(request, pk, *args, **kwargs):
-            f = get_object_or_404(clazz, pk=pk)
-            if f.access_controller.can_edit(request.gooseuser):
-                return function(request, pk, *args, **kwargs)
-            return HttpResponseForbidden()
-
-        return wrap
-
-    return outer_wrapper
-
-
-def can_delete(clazz):
-    """
-    Decorator for views that checks that the user has the specified permission
-    otherwise returning HttpForbidden
-    """
-
-    def outer_wrapper(function):
-        @wraps(function)
-        def wrap(request, pk, *args, **kwargs):
-            f = get_object_or_404(clazz, pk=pk)
-            if f.access_controller.can_delete(request.gooseuser):
-                return function(request, pk, *args, **kwargs)
-            return HttpResponseForbidden()
-
-        return wrap
-
-    return outer_wrapper
-
-
-def can_use(clazz):
-    """
-    Decorator for views that checks that the user has the specified permission
-    otherwise returning HttpForbidden
-    """
-
-    def outer_wrapper(function):
-        @wraps(function)
-        def wrap(request, pk, *args, **kwargs):
-            f = get_object_or_404(clazz, pk=pk)
-            if f.access_controller.can_use(request.gooseuser):
-                return function(request, pk, *args, **kwargs)
-            return HttpResponseForbidden()
-
-        return wrap
-
-    return outer_wrapper
+    def default_permissible_entities(self):
+        raise NotImplementedError("You must implement default_permissible_entities")

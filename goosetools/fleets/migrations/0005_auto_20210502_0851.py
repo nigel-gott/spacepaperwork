@@ -2,11 +2,11 @@
 
 import django.core.validators
 from django.db import migrations, models
+
 import goosetools.fleets.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("fleets", "0004_auto_20210502_0822"),
     ]

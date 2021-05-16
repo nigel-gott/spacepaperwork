@@ -1,15 +1,15 @@
-
 {% if entity.user %}
     {{ entity.user }}
 {% endif %}
 {% if entity.permission %}
     {% if entity.user %}
-        , if in {{ entity.permission.group_names }} (they have {{ entity.permission.name }})
+        , if in {{ entity.permission.group_names }} (they have
+        {{ entity.permission.name }})
     {% else %}
         {{ entity.permission.group_names }} (they have {{ entity.permission.name }})
     {% endif %}
 {% endif %}
-{% if entity.corp  %}
+{% if entity.corp %}
     {% if entity.user %}
         , and if in {{ entity.corp }}
     {% elif entity.permission %}
@@ -19,7 +19,7 @@
     {% endif %}
 {% endif %}
 {% if entity.everyone %}
-Everyone
+    Everyone
 {% endif %}
 {% if entity.user or entity.everyone %}
     is

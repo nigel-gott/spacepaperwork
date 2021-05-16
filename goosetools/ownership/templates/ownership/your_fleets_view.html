@@ -1,71 +1,73 @@
 {% extends "core/base.html" %} {% load base_extras %} {% block body %}
-{% load materializecss %}
-<div class="row">
-    <div class="col s12 m12">
-        <h5>Your Balances</h5>
-        <div>
-            <ul>
-                <li>Isk Owed: Ƶ {{user.gooseuser.isk_balance|nicemoney}}</li>
-                <li>Eggs Owed: Ƶ {{user.gooseuser.debt_egg_balance|nicemoney}}</li>
-                <li>Your Eggs: Ƶ {{user.gooseuser.egg_balance|nicemoney}}</li>
-            </ul>
-        </div>
+    {% load materializecss %}
+    <div class="row">
+        <div class="col s12 m12">
+            <h5>Your Balances</h5>
+            <div>
+                <ul>
+                    <li>Isk Owed: Ƶ {{ user.gooseuser.isk_balance|nicemoney }}</li>
+                    <li>Eggs Owed:
+                        Ƶ {{ user.gooseuser.debt_egg_balance|nicemoney }}</li>
+                    <li>Your Eggs: Ƶ {{ user.gooseuser.egg_balance|nicemoney }}</li>
+                </ul>
+            </div>
 
-        <h5>{{title}}</h5>
-        <div class="section">
-            <span class="red-text">{{prefix}} total estimated worth of loot needing to be sold is <b>Ƶ {{sales_est|nicemoney}}</b></span><br/>
-            <span class="orange-text">{{prefix}} total estimated shares in all loot sales currently is <b>Ƶ {{all_est|nicemoney}}</b></span><br/>
-            <span class="green-text">{{prefix}} real shares in all completed loot sales currently is <b>Ƶ {{all_real|nicemoney}}</b></span>
+            <h5>{{ title }}</h5>
+            <div class="section">
+                <span class="red-text">{{ prefix }} total estimated worth of loot needing to be sold is <b>Ƶ {{ sales_est|nicemoney }}</b></span><br/>
+                <span class="orange-text">{{ prefix }} total estimated shares in all loot sales currently is <b>Ƶ {{ all_est|nicemoney }}</b></span><br/>
+                <span class="green-text">{{ prefix }} real shares in all completed loot sales currently is <b>Ƶ {{ all_real|nicemoney }}</b></span>
+            </div>
+            <table>
+                <thead>
+                <th>Fleet</th>
+                <th>Bucket</th>
+                <th>Group</th>
+                <th>{{ prefix2 }} Shares</th>
+                <th>{{ prefix2 }} % Cut/Total % Cuts</th>
+                <th>{{ prefix2 }} Loot Items Count</th>
+                <th>{{ prefix2 }} Est. Profit Of Items Needing to be Sold</th>
+                <th>{{ prefix2 }} Est. Profit/Total Est. Profit</th>
+                <th>{{ prefix2 }} Real Profit/Total Real Profit</th>
+                </thead>
+                <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>
+                            {% if item.fleet_id %}
+                                <a href="{% url 'fleet_view' item.fleet_id %}">Fleet {{ item.fleet_id }}</a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ item.loot_bucket }}
+                        </td>
+                        <td>
+                            <a href="{% url 'loot_group_view' item.loot_group_id %}">Loot
+                                Group {{ item.loot_group_id }}</a>
+                        </td>
+                        <td>
+                            {{ item.your_shares }}/{{ item.total_shares }}
+                        </td>
+                        <td>
+                            {{ item.your_cut }}%/{{ item.total_cuts }}%
+                        </td>
+                        <td>
+                            {{ item.item_count }}
+                        </td>
+                        <td>
+                            {{ item.my_estimated_profit }}
+                        </td>
+                        <td>
+                            Ƶ {{ item.your_group_estimated_profit|nicemoney }}/{{ item.group_estimated_profit|nicemoney }}
+                        </td>
+                        <td>
+                            Ƶ {{ item.your_real_profit|nicemoney }}/{{ item.group_real_profit|nicemoney }}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </div>
-        <table>
-            <thead>
-            <th>Fleet</th>
-            <th>Bucket</th>
-            <th>Group</th>
-            <th>{{prefix2}} Shares</th>
-            <th>{{prefix2}} % Cut/Total % Cuts</th>
-            <th>{{prefix2}} Loot Items Count</th>
-            <th>{{prefix2}} Est. Profit Of Items Needing to be Sold</th>
-            <th>{{prefix2}} Est. Profit/Total Est. Profit</th>
-            <th>{{prefix2}} Real Profit/Total Real Profit</th>
-            </thead>
-            <tbody>
-            {% for item in items %}
-            <tr>
-                <td>
-                    {% if item.fleet_id %}
-                    <a href="{% url 'fleet_view' item.fleet_id %}">Fleet {{item.fleet_id}}</a>
-                    {% endif %}
-                </td>
-                <td>
-                    {{item.loot_bucket}}
-                </td>
-                <td>
-                    <a href="{% url 'loot_group_view' item.loot_group_id %}">Loot Group {{item.loot_group_id}}</a>
-                </td>
-                <td>
-                    {{item.your_shares}}/{{item.total_shares}}
-                </td>
-                <td>
-                    {{item.your_cut}}%/{{item.total_cuts}}%
-                </td>
-                <td>
-                    {{item.item_count}}
-                </td>
-                <td>
-                    {{item.my_estimated_profit}}
-                </td>
-                <td>
-                    Ƶ {{item.your_group_estimated_profit|nicemoney}}/{{item.group_estimated_profit|nicemoney}}
-                </td>
-                <td>
-                    Ƶ {{item.your_real_profit|nicemoney}}/{{item.group_real_profit|nicemoney}}
-                </td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
     </div>
-</div>
 
 {% endblock %}

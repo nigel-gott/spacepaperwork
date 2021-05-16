@@ -1,26 +1,39 @@
-
 {% extends "tenants/public_base.html" %}
-{% block title %}{{SITE_NAME}}{% endblock %}
+{% block title %}{{ SITE_NAME }}{% endblock %}
 {% block body %}
-<div class="section">
-<div class="col s12">
-    <div class="card-panel">
-        <span class="card-title orange-text">  <i class="material-icons medium">help</i>You Cancelled Your Discord Login Attempt</span>
-        <p>{{SITE_NAME}} uses Discord to log you in for your convenience, privacy and safety. The only data we recieve is your <b>Discord Username and Avatar</b> which you can confirm by checking what Discord themselves say is going to be shared on the page {{SITE_NAME}} redirects you to. <br/>
-        <br/>
-        {{SITE_NAME}} uses Discord for three main reasons:
-        <ul class="browser-default">
-            <li>Its easy, everyone already has a discord account why bother having to sign up again on yet another website</li>
-            <li>It's better for your privacy as we don't have to be told your email address or any other personal info to sign you in</li>
-            <li>It's safer as you don't need to create a password to login, which we would then have to store</li>
-        </ul>
-        If you have any further concerns please contact @thejanitor on the discord server linked below!</p>
-        <div class="card-action">
-            <a href="https://discord.gg/tsHP3XStQm" class="btn waves-btn">Join the {{SITE_NAME}} Discord For Help</a>
-            <a class="waves-btn btn green" href="{% url 'tenants:client-create' %}">Login Again With Discord</a><br/>
+    <div class="section">
+        <div class="col s12">
+            <div class="card-panel">
+                <span class="card-title orange-text">  <i class="material-icons medium">help</i>You Cancelled Your Discord Login Attempt</span>
+                <p>{{ SITE_NAME }} uses Discord to log you in for your convenience,
+                    privacy and safety. The only data we recieve is your <b>Discord
+                        Username and Avatar</b> which you can confirm by checking what
+                    Discord themselves say is going to be shared on the
+                    page {{ SITE_NAME }} redirects you to. <br/>
+                    <br/>
+                    {{ SITE_NAME }} uses Discord for three main reasons:
+                <ul class="browser-default">
+                    <li>Its easy, everyone already has a discord account why bother
+                        having to sign up again on yet another website
+                    </li>
+                    <li>It's better for your privacy as we don't have to be told your
+                        email address or any other personal info to sign you in
+                    </li>
+                    <li>It's safer as you don't need to create a password to login,
+                        which we would then have to store
+                    </li>
+                </ul>
+                If you have any further concerns please contact @thejanitor on the
+                discord server linked below!</p>
+                <div class="card-action">
+                    <a href="https://discord.gg/tsHP3XStQm" class="btn waves-btn">Join
+                        the {{ SITE_NAME }} Discord For Help</a>
+                    <a class="waves-btn btn green"
+                       href="{% url 'tenants:client-create' %}">Login Again With
+                        Discord</a><br/>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
 
-</div>
+    </div>
 {% endblock %}

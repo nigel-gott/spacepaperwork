@@ -6,11 +6,12 @@
 {% endblock %}
 {% block datatable_top_row %}
     <p>
-    View, suggest fixes for and edit items in {{ SITE_NAME }}'s item database here.
+        View, suggest fixes for and edit items in {{ SITE_NAME }}'s item database here.
     </p>
     <a class="waves-btn btn green" href="{% url 'item-change-create-new' %}">Propose New
         Item</a>
-    <a class="waves-btn btn" href="{% url 'item-change-list' %}">View Item Change Proposals</a>
+    <a class="waves-btn btn" href="{% url 'item-change-list' %}">View Item Change
+        Proposals</a>
 {% endblock %}
 
 {% block datatable_footer %}

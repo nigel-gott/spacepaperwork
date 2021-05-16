@@ -10,6 +10,7 @@ from goosetools.core.models import System
 from goosetools.users.models import (
     LOOT_TRACKER,
     LOOT_TRACKER_ADMIN,
+    AccessControlledModel,
     Character,
     CrudAccessController,
     GooseUser,
@@ -55,7 +56,7 @@ def future_fleets_query():
     return future_fleets
 
 
-class Fleet(models.Model):
+class Fleet(AccessControlledModel, models.Model):
     LOOT_TYPE_CHOICES = [
         ("Master Looter", "Master Looter"),
         ("Free For All", "Free For All"),
@@ -73,17 +74,15 @@ class Fleet(models.Model):
         CrudAccessController, on_delete=models.CASCADE
     )
 
-    @staticmethod
-    def built_in_permissible_entities(fc):
+    def built_in_permissible_entities(self, owner):
         return CrudAccessController.wrapper(
             adminable_by=[
-                PermissibleEntity.allow_user(fc, built_in=True),
+                PermissibleEntity.allow_user(owner, built_in=True),
                 PermissibleEntity.allow_perm(LOOT_TRACKER_ADMIN, built_in=True),
             ],
         )
 
-    @staticmethod
-    def default_permissible_entities():
+    def default_permissible_entities(self):
         return [
             ("view", PermissibleEntity.allow_perm(LOOT_TRACKER)),
             ("use", PermissibleEntity.allow_perm(LOOT_TRACKER)),
