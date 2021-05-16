@@ -6,7 +6,7 @@
 3. https://docs.docker.com/compose/install/
 
 # Running For Local Development In Docker
-1. ```git clone git@github.com:GROON-Echoes-Dev-Team/goosetools.git && cd goosetools```
+1. ```git clone https://github.com/nigel-gott/spacepaperwork.git && cd spacepaperwork```
 2.
     ```
     docker-compose -f local.yml up --build
