@@ -43,7 +43,7 @@ def dashboard(request, ccy, gooseuser):
     context = {
         "page_data": {
             "gooseuser_id": gooseuser.id,
-            "ccy": ccy,
+            "ccy": {"name": ccy.name},
             "site_prefix": f"/{request.site_prefix}",
         },
         "gooseuser": gooseuser,
