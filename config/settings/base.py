@@ -401,7 +401,7 @@ LOGGING = {
         "log_file": {
             "level": "DEBUG",
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(VAR_ROOT, "logs/goosetools/goosetools.log"),
+            "filename": os.path.join(VAR_ROOT, "log/goosetools/goosetools.log"),
             "maxBytes": "16777216",  # 16megabytes
             "formatter": "verbose",
         },
