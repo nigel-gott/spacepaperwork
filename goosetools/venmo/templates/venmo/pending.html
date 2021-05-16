@@ -26,8 +26,8 @@
     {{ page_data|json_script:"page-data" }}
     <script>
     function numberWithCommas(x) {
-        var x = x.toString()
-        var x = x.replace(/,/g, '')
+        x = x.toString()
+        x = x.replace(/,/g, '')
         return x.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
     }
 
@@ -69,7 +69,7 @@
         table = $('#transactions_table').DataTable({
             pageLength: 50,
             ajax: {
-                url: "{% url 'venmo:pending-list' %}",
+                url: "{% url 'venmo:pending-list' ccy.name %}",
                 dataSrc: 'result',
                 error: function (xhr, error, code) {
                     console.log(xhr)
