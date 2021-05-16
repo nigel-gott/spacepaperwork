@@ -199,7 +199,6 @@ def user_signup(request, pk):
 
 
 def _give_pronoun_roles(uid, preferred_pronouns):
-    print(f"GIVING TO {uid} {preferred_pronouns}")
     try:
         if preferred_pronouns == "they":
             DiscordGuild.try_give_role(uid, settings.PRONOUN_THEY_DISCORD_ROLE)
@@ -208,7 +207,7 @@ def _give_pronoun_roles(uid, preferred_pronouns):
         elif preferred_pronouns == "he":
             DiscordGuild.try_give_role(uid, settings.PRONOUN_HE_DISCORD_ROLE)
     except HTTPError as e:
-        print(f"Error giving preferred pronoun {e}")
+        logger.error(f"Error giving preferred pronoun {e}")
 
 
 @has_perm(perm=USER_ADMIN_PERMISSION)
