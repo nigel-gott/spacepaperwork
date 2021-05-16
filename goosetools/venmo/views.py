@@ -170,7 +170,7 @@ def transfer(request, ccy):
             try:
                 venmo_api(ccy).transfer(
                     request.gooseuser.discord_uid(),
-                    form.cleaned_data["user"],
+                    form.cleaned_data["user"].discord_uid(),
                     form.cleaned_data["quantity"],
                 )
                 return HttpResponseRedirect(reverse("venmo:dashboard", args=[ccy.name]))
