@@ -1,3 +1,4 @@
+import logging
 import re
 from typing import Dict, List, Union
 
@@ -17,6 +18,8 @@ from goosetools.venmo.api.venmo import (
 )
 
 swagger_file = load_file("goosetools/venmo/swagger.yml")
+
+logger = logging.getLogger(__name__)
 
 
 def lookup_gooseuser_and_cache(discord_id_to_gooseuser, discord_id_with_brackets):
@@ -190,8 +193,11 @@ class FogVenmo(VenmoInterface):
 
     @staticmethod
     def _transactions_with_filter(**kwargs) -> List[VenmoTransaction]:
+        logger.info(kwargs)
         client = fog_venmo_client(use_models=False)
+        logger.info("A")
         transactions = client.transactions.listTransactions(**kwargs)
+        logger.info("B")
         targeted_at_user = transactions.response().result
         discord_id_to_gooseuser: Dict[str, Union[GooseUser, bool]] = {}
         resulting_transactions: Dict[str, VenmoTransaction] = {}
