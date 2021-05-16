@@ -21,7 +21,7 @@ env = environ.Env(
 
 env.read_env(str(ROOT_DIR / ".env"))
 
-SINGLE_TENANT = env("VAR_ROOT", "")
+SINGLE_TENANT = env("VAR_ROOT", default="/var/")
 VAR_ROOT = env("SINGLE_TENANT")
 WITHDRAW_INGAME_CHAR = env("WITHDRAW_INGAME_CHAR", default="a corp admin")
 PRONOUN_ROLES = env("PRONOUN_ROLES", default=False)
