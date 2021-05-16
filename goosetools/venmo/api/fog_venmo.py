@@ -72,26 +72,26 @@ def parse_transactions(discord_id_to_gooseuser, ts, resulting_transactions):
         )
 
 
-class FogVenmo(VenmoInterface):
-    @staticmethod
-    def _client(use_models=True):
-        host = settings.VENMO_HOST_URL
-        requests_client = RequestsClient()
-        api_token_header_name = swagger_file["securityDefinitions"]["api_key"]["name"]
-        requests_client.set_api_key(
-            host,
-            settings.VENMO_API_TOKEN,
-            param_name=api_token_header_name,
-            param_in="header",
-        )
-        swagger_file["host"] = settings.VENMO_HOST_URL
-        swagger_file["basePath"] = settings.VENMO_BASE_PATH
-        return SwaggerClient.from_spec(
-            swagger_file, http_client=requests_client, config={"use_models": use_models}
-        )
+def fog_venmo_client(use_models=True):
+    host = settings.VENMO_HOST_URL
+    requests_client = RequestsClient()
+    api_token_header_name = swagger_file["securityDefinitions"]["api_key"]["name"]
+    requests_client.set_api_key(
+        host,
+        settings.VENMO_API_TOKEN,
+        param_name=api_token_header_name,
+        param_in="header",
+    )
+    swagger_file["host"] = settings.VENMO_HOST_URL
+    swagger_file["basePath"] = settings.VENMO_BASE_PATH
+    return SwaggerClient.from_spec(
+        swagger_file, http_client=requests_client, config={"use_models": use_models}
+    )
 
+
+class FogVenmo(VenmoInterface):
     def user_balance(self, discord_uid: str) -> VenmoUserBalance:
-        venmo_user_balance_future = FogVenmo._client().users.getUserBalance(
+        venmo_user_balance_future = fog_venmo_client().users.getUserBalance(
             discordId=discord_uid,
         )
         balance_result = venmo_user_balance_future.response().result
@@ -109,7 +109,7 @@ class FogVenmo(VenmoInterface):
         return FogVenmo._transactions_with_filter(transaction_status="pending")
 
     def withdraw(self, discord_uid: str, withdrawal_quantity: int) -> None:
-        venmo_server_client = FogVenmo._client()
+        venmo_server_client = fog_venmo_client()
         discord_uid = f"<@!{discord_uid}>"
         try:
             withdraw_request = venmo_server_client.withdrawals.createWithdrawal(
@@ -128,7 +128,7 @@ class FogVenmo(VenmoInterface):
 
     def deposit(self, discord_uid: str, deposit_quantity: int, note: str):
         try:
-            venmo_server_client = FogVenmo._client()
+            venmo_server_client = fog_venmo_client()
             discord_uid = f"<@!{discord_uid}>"
             deposit_request = venmo_server_client.deposits.createDeposit(
                 discordId=discord_uid,
@@ -152,7 +152,7 @@ class FogVenmo(VenmoInterface):
         self, from_discord_uid: str, to_discord_uid: str, transfer_quantity: int
     ) -> None:
         try:
-            venmo_server_client = FogVenmo._client()
+            venmo_server_client = fog_venmo_client()
             discord_uid = f"<@!{from_discord_uid}>"
             transfer_request = venmo_server_client.transfers.transferToUser(
                 discordId=discord_uid,
@@ -172,7 +172,7 @@ class FogVenmo(VenmoInterface):
 
     def update_transaction(self, transaction_id: str, new_status: str) -> None:
         try:
-            venmo_server_client = FogVenmo._client()
+            venmo_server_client = fog_venmo_client()
             update_request = venmo_server_client.transactions.updateTransaction(
                 transactionId=str(transaction_id),
                 body={"transaction_status": new_status},
@@ -191,10 +191,7 @@ class FogVenmo(VenmoInterface):
     @staticmethod
     def _transactions_with_filter(**kwargs) -> List[VenmoTransaction]:
         targeted_at_user = (
-            FogVenmo._client(use_models=False)
-            .transactions.listTransactions(kwargs)
-            .response()
-            .result
+            fog_venmo_client().transactions.listTransactions(kwargs).response().result
         )
         discord_id_to_gooseuser: Dict[str, Union[GooseUser, bool]] = {}
         resulting_transactions: Dict[str, VenmoTransaction] = {}
