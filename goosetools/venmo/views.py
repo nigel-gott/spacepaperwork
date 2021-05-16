@@ -14,6 +14,7 @@ from django.http.response import (
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.urls.base import reverse_lazy
+from django.utils.decorators import method_decorator
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, DeleteView, FormView, UpdateView
 from django.views.generic.list import ListView
@@ -222,6 +223,7 @@ def update_transaction(request, ccy, transaction_id: int, new_status: str):
         return HttpResponseBadRequest()
 
 
+@method_decorator(has_perm(perm=VENMO_ADMIN), name="dispatch")
 class VirtualCurrencyListView(ListView):
     queryset = VirtualCurrency.objects.order_by("name")
     context_object_name = "currency_list"
@@ -264,18 +266,21 @@ class VirtualCurrencyForm(forms.ModelForm):
         return instance
 
 
+@method_decorator(has_perm(perm=VENMO_ADMIN), name="dispatch")
 class VirtualCurrencyCreateView(SuccessMessageMixin, CreateView):
     model = VirtualCurrency
     form_class = VirtualCurrencyForm
     success_message = "%(name)s was created successfully"
 
 
+@method_decorator(has_perm(perm=VENMO_ADMIN), name="dispatch")
 class VirtualCurrencyUpdateView(SuccessMessageMixin, UpdateView):
     model = VirtualCurrency
     form_class = VirtualCurrencyForm
     success_message = "%(name)s was edited successfully"
 
 
+@method_decorator(has_perm(perm=VENMO_ADMIN), name="dispatch")
 class VirtualCurrencyDeleteView(DeleteView):
     model = VirtualCurrency
     success_url = reverse_lazy("venmo:currency-list")
@@ -297,36 +302,43 @@ class VirtualCurrencyDeleteView(DeleteView):
             return super().delete(request, *args, **kwargs)
 
 
+@method_decorator(has_perm(perm=VENMO_ADMIN), name="dispatch")
 class VirtualCurrencyDetailView(DetailView):
     model = VirtualCurrency
 
 
 class PassRequestToFormViewMixin:
     def get_form_kwargs(self):
+        # noinspection PyUnresolvedReferences
         kwargs = super().get_form_kwargs()
         kwargs["request"] = self.request
         return kwargs
 
 
+@method_decorator(has_perm(perm=VENMO_ADMIN), name="dispatch")
 class TransferMethodSelectCreateView(FormView):
     form_class = TransferMethodTypeForm
     template_name = "venmo/transfermethod_select-form.html"
 
 
+@method_decorator(has_perm(perm=VENMO_ADMIN), name="dispatch")
 class TransferMethodListView(ListView):
     queryset = TransferMethod.objects.order_by("name")
     context_object_name = "transfer_list"
 
 
+@method_decorator(has_perm(perm=VENMO_ADMIN), name="dispatch")
 class TransferMethodDetailView(DetailView):
     model = TransferMethod
 
 
+@method_decorator(has_perm(perm=VENMO_ADMIN), name="dispatch")
 class TransferMethodDeleteView(DeleteView):
     model = TransferMethod
     success_url = reverse_lazy("venmo:transfer-list")
 
 
+@method_decorator(has_perm(perm=VENMO_ADMIN), name="dispatch")
 class TransferMethodCreateView(
     SuccessMessageMixin, PassRequestToFormViewMixin, CreateView
 ):
@@ -335,6 +347,7 @@ class TransferMethodCreateView(
     success_message = "%(name)s was created successfully"
 
 
+@method_decorator(has_perm(perm=VENMO_ADMIN), name="dispatch")
 class TransferMethodUpdateView(
     SuccessMessageMixin, PassRequestToFormViewMixin, UpdateView
 ):
