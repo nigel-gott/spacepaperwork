@@ -1,21 +1,25 @@
 import debug_toolbar
 from django.conf.urls import include
 from django.urls.conf import path
+import os
+
+os.environ['DATABASE_URL'] = 'psql://goosetools_user:local_dev_password@localhost/goosetools'
+os.environ['DB_BACKUP_LOCATION'] = '/var/tmp'
+os.environ['BOT_TOKEN'] = 'test_bot_token'
+os.environ['DISCORD_OAUTH_URL'] = 'http://localhost/fake_oauth_url'
+os.environ['DISCORD_OAUTH_URL_WITHOUT_MANAGE'] = 'http://localhost/fake_oauth_url'
+os.environ['BOT_USER_ID'] = '123345'
+
 
 # pylint: disable=unused-wildcard-import,wildcard-import
 from .base import *
 from .base import env
-
-SECRET_KEY = env("SECRET_KEY")
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"
 INTERNAL_IPS = ["127.0.0.1"]
 
 ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "django"]
 
-MAPBOT_HOST = "http://localhost:5000"
-
-GRAPH_MODELS = {"all_applications": True, "group_models": True}
 
 CACHES = {
     "default": {
@@ -23,6 +27,10 @@ CACHES = {
         "LOCATION": "",
     }
 }
+SECRET_KEY = env.str(
+    "DJANGO_SECRET_KEY",
+    default="!!!STUB DJANGO_SECRET_KEY FOR TEST ONLY!!!",
+)
 
 STUB_DISCORD = env.bool("STUB_DISCORD", True)
 
@@ -42,20 +50,7 @@ if STUB_DISCORD:
     SHARED_APPS.append("goosetools.stub_discord_auth.apps.StubDiscordAuthConfig")
     INSTALLED_APPS.append("goosetools.stub_discord_auth.apps.StubDiscordAuthConfig")
 
-# django-debug-toolbar
-# ------------------------------------------------------------------------------
-# https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#prerequisites
-INSTALLED_APPS += ["debug_toolbar"]  # noqa F405
-# https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#middleware
-MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]  # noqa F405
-# https://django-debug-toolbar.readthedocs.io/en/latest/configuration.html#debug-toolbar-config
-DEBUG_TOOLBAR_CONFIG = {
-    "DISABLE_PANELS": ["debug_toolbar.panels.redirects.RedirectsPanel"],
-    "SHOW_TEMPLATE_CONTEXT": True,
-}
-# https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#internal-ips
-INTERNAL_IPS = ["127.0.0.1", "10.0.2.2"]
-if env("USE_DOCKER") == "yes":
+if env.bool("USE_DOCKER", default=False):
     import socket
 
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
@@ -67,9 +62,3 @@ LOGIN_REQUIRED_IGNORE_VIEW_NAMES = LOGIN_REQUIRED_IGNORE_VIEW_NAMES + [
     "profile_url",
     "set_uid",
 ]
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "local-cache",
-    }
-}

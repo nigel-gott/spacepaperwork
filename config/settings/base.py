@@ -30,7 +30,7 @@ PRONOUN_SHE_DISCORD_ROLE = env.str("PRONOUN_SHE_DISCORD_ROLE", default=None)
 PRONOUN_HE_DISCORD_ROLE = env.str("PRONOUN_HE_DISCORD_ROLE", default=None)
 WIKI_NAME = env.str("WIKI_NAME", default=None)
 WIKI_URL = env.str("WIKI_URL", default=None)
-BASE_URL = env.str("BASE_URL")
+SHARING_BASE_URL = env.str("SHARING_BASE_URL", default="http://localhost")
 SHIP_PRICE_GOOGLE_SHEET_ID = env.str("SHIP_PRICE_GOOGLE_SHEET_ID", default=None)
 SHIP_PRICE_GOOGLE_SHEET_CELL_RANGE = env.str(
     "SHIP_PRICE_GOOGLE_SHEET_CELL_RANGE", default=None
@@ -57,7 +57,6 @@ USE_TZ = True
 LOCALE_PATHS = [str(ROOT_DIR / "locale")]
 
 SITE_ID = env.int("SITE_ID", default=1)
-SECRET_KEY = env("SECRET_KEY")
 URL_PREFIX = env.str("URL_PREFIX", default="")
 
 # DATABASES
@@ -379,31 +378,3 @@ if RUN_WEEKLY_MARKET_DATA_FULL_SYNC:
         "goosetools.market.cron.sync_past_market_data.SyncPastMarketData"
     )
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
-        },
-        "simple": {"format": "%(levelname)s %(message)s"},
-    },
-    "filters": {"require_debug_false": {"()": "django.utils.log.RequireDebugFalse"}},
-    "handlers": {
-        "console": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-            "formatter": "simple",
-        },
-        # I always add this handler to facilitate separating loggings
-        "log_file": {
-            "level": "DEBUG",
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(VAR_ROOT, "log/goosetools/goosetools.log"),
-            "maxBytes": 16777216,  # 16megabytes
-            "formatter": "verbose",
-        },
-    },
-    # you can also shortcut 'loggers' and just configure logging for EVERYTHING at once
-    "root": {"handlers": ["console", "log_file"], "level": "INFO"},
-}
