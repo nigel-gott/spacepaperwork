@@ -1,31 +1,40 @@
 # GooseTools
 
 # Pre-Requisites
+
 1. https://git-scm.com/book/en/v2/Getting-Started-Installing-Git/
-2. https://docs.docker.com/get-docker/
-3. https://docs.docker.com/compose/install/
+1. https://docs.docker.com/get-docker/
+1. https://docs.docker.com/compose/install/
 
 # Running For Local Development In Docker
+
 1. ```git clone https://github.com/nigel-gott/spacepaperwork.git && cd spacepaperwork```
-2.
-    ```
-    docker-compose -f local.yml up --build
-    ```
-3. Visit and Sign Up On http://localhost:8000/goosetools
-4. Make yourself an admin by: ```./docker_managepy.sh runscript make_user_admin --script-args=REPLACE_WITH_YOUR_USERNAME_ENTERED_ON_GOOSETOOLS_SIGNUP```
-5. Import market data using: ```./docker_managepy.sh runjobs hourly```
-6. Get an interactive python shell into goosetools by ```./docker_managepy.sh shell_plus```
-7. Run non-integration tests ```./tests.sh```
-8. Run integration tests ```./integration_test.sh```
-9. Watch filesystem for changes and re-run non-integration tests when something changes ```./test_watcher.sh```
-10. Run pre-commit checks ```./pre_commit_checks.sh```
+1.
+
+ ```
+ docker-compose -f local.yml up --build
+ ```
+
+1. Visit your new site running at http://0.0.0.0:8000/
+1. Trigger any crons that need to be run (import market data, sync discord roles
+   etc): ```./docker_managepy.sh runcrons```
+1. Get an interactive python shell into goosetools
+   by ```./docker_managepy.sh shell_plus```
+1. Run non-integration tests ```./tests.sh```
+1. Run integration tests ```./integration_test.sh```
+1. Watch filesystem for changes and re-run non-integration tests when something
+   changes ```./test_watcher.sh```
+1. Run pre-commit checks ```./pre_commit_checks.sh```
 
 # Running For Local Development using VirtualEnv
+
 1. ```git clone git@github.com:GROON-Echoes-Dev-Team/goosetools.git && cd goosetools```
 1.
-    ```
-    cp .env.local.example .env
-    ```
+
+ ```
+ cp .env.local.example .env
+ ```
+
 1. Edit ```.env``` to match your environment
 1. Install poetry dependencies:
     ```
@@ -35,15 +44,23 @@
     ```
    poetry shell
     ```
+1. Migrate the database:
+    ```
+    ./manage.py migrate
+    ```
+1. load fixtures:
+    ```
+    ./manage.py loaddata goosetools/users/fixtures/dev.json
+    ```
+1. Setup an initial organization:
+    ```
+    ./manage.py setup_tenant
+    ```
 1. Run the server:
     ```
     ./manage.py runserver_plus
     ```
 1. Visit and Sign Up On http://localhost:8000/goosetools
-1. Make yourself an admin by:
-    ```
-    ./manage.py runscript make_user_admin --script-args=REPLACE_WITH_YOUR_USERNAME_ENTERED_ON_GOOSETOOLS_SIGNUP
-    ```
 1. Import market data using:
     ```
     ./manage.py runjobs hourly
