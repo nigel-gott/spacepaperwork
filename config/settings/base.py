@@ -11,16 +11,23 @@ import moneyed
 from django.urls.resolvers import URLResolver
 from moneyed.localization import _FORMATTER
 
+# The root of this projects git repo
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
+# All apps are kept in the goosetools folder following the pattern found in the cookie
+# cutter django project (https://github.com/pydanny/cookiecutter-django/tree/master/%7B%7Bcookiecutter.project_slug%7D%7D)
 APPS_DIR = ROOT_DIR / "goosetools"
-env = environ.Env(
-    SINGLE_TENANT=(bool, True),
-    PRONOUN_ROLES=(bool, False),
-    RUN_WEEKLY_MARKET_DATA_FULL_SYNC=(bool, False),
-)
 
+env = environ.Env()
+
+# Read in the env file located in the project root called ".env" first to populate
+# any variables below before checking the set environment variables.
 env.read_env(str(ROOT_DIR / ".env"))
 
+# Set SINGLE_TENANT to True if you want only one organization to use your deployment of
+# spacepaperwork.
+# When True new tenant sign up is disabled and url conf is changed so the single tenant
+# can just be reached at / . Architecturally this variable does not disable the fact
+# that spacepaperwork is multi-tenant under the hood.
 SINGLE_TENANT = env.bool("SINGLE_TENANT", default=False)
 VAR_ROOT = env.str("VAR_ROOT", default="/var/")
 WITHDRAW_INGAME_CHAR = env.str("WITHDRAW_INGAME_CHAR", default="a corp admin")
@@ -377,4 +384,3 @@ if RUN_WEEKLY_MARKET_DATA_FULL_SYNC:
     CRON_CLASSES.append(
         "goosetools.market.cron.sync_past_market_data.SyncPastMarketData"
     )
-

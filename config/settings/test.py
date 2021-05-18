@@ -1,15 +1,6 @@
 import debug_toolbar
 from django.conf.urls import include
 from django.urls.conf import path
-import os
-
-os.environ['DATABASE_URL'] = 'psql://goosetools_user:local_dev_password@localhost/goosetools'
-os.environ['DB_BACKUP_LOCATION'] = '/var/tmp'
-os.environ['BOT_TOKEN'] = 'test_bot_token'
-os.environ['DISCORD_OAUTH_URL'] = 'http://localhost/fake_oauth_url'
-os.environ['DISCORD_OAUTH_URL_WITHOUT_MANAGE'] = 'http://localhost/fake_oauth_url'
-os.environ['BOT_USER_ID'] = '123345'
-
 
 # pylint: disable=unused-wildcard-import,wildcard-import
 from .base import *
