@@ -24,7 +24,7 @@ CACHES = {
     }
 }
 
-STUB_DISCORD = env.bool("STUB_DISCORD", True)
+STUB_DISCORD = env.bool("STUB_DISCORD", default=True)
 
 # WhiteNoise
 # ------------------------------------------------------------------------------

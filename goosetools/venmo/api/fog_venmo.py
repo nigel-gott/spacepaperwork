@@ -17,7 +17,7 @@ from goosetools.venmo.api.venmo import (
     VenmoUserBalance,
 )
 
-swagger_file = load_file("goosetools/venmo/swagger.yml")
+swagger_file = load_file(settings.ROOT_DIR / "goosetools/venmo/swagger.yml")
 
 logger = logging.getLogger(__name__)
 

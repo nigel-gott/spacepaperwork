@@ -91,7 +91,7 @@ class ClientCreate(CreateView):
                 Domain.objects.create(
                     domain=self.object.name, is_primary=False, tenant=self.object
                 )
-                setup_tenant(self.object, self.request, signup_form)
+                setup_tenant(self.object, self.request.user, signup_form.cleaned_data)
                 return r
         return super().form_invalid(form)
 

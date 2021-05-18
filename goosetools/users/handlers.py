@@ -30,12 +30,11 @@ def handle_schema_migrated(sender, **kwargs):
             setup()
 
 
-def setup_tenant(tenant, request, signup_form):
+def setup_tenant(tenant, site_user, data):
     with tenant_context(tenant):
         setup()
-        data = signup_form.cleaned_data
         gooseuser = GooseUser.objects.create(
-            site_user=request.user,
+            site_user=site_user,
             timezone=data["timezone"],
             broker_fee=data["broker_fee"],
             transaction_tax=data["transaction_tax"],

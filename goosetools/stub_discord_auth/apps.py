@@ -3,7 +3,7 @@ from django.urls import reverse
 
 
 def _format_url(url):
-    return "".join(["http://", "localhost", ":8000", reverse(url)])
+    return "".join(["http://", "0.0.0.0", ":8000", reverse(url)])
 
 
 class StubDiscordAuthConfig(AppConfig):

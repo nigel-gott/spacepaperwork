@@ -35,6 +35,8 @@ class FleetTest(GooseToolsTestCase):
                 "location": "My Location",
                 "expected_duration": "My Expected Duration",
                 "gives_shares_to_alts": False,
+                "form-TOTAL_FORMS": 0,
+                "form-INITIAL_FORMS": 0,
             },
         )
 
@@ -64,6 +66,8 @@ class FleetTest(GooseToolsTestCase):
                 "location": "My Location",
                 "expected_duration": "My Expected Duration",
                 "gives_shares_to_alts": False,
+                "form-TOTAL_FORMS": 0,
+                "form-INITIAL_FORMS": 0,
             },
         )
         self.assertEqual(
@@ -87,6 +91,8 @@ class FleetTest(GooseToolsTestCase):
                 "location": "My Location",
                 "expected_duration": "My Expected Duration",
                 "gives_shares_to_alts": False,
+                "form-TOTAL_FORMS": 0,
+                "form-INITIAL_FORMS": 0,
             },
         )
         self.assertEqual(
@@ -110,6 +116,8 @@ class FleetTest(GooseToolsTestCase):
                 "location": "Another My Location",
                 "expected_duration": "Another My Expected Duration",
                 "gives_shares_to_alts": True,
+                "form-TOTAL_FORMS": 0,
+                "form-INITIAL_FORMS": 0,
             },
         )
         self.assertEqual(response.status_code, 302)
@@ -196,7 +204,11 @@ class FleetTest(GooseToolsTestCase):
             reverse("fleet_view", args=[an_auto_closed_fleet.id]),
         )
         self.assertIn(
-            "End: Jan. 14, 2012, 1 p.m. (Automatically expired after 12 hours)",
+            "Automatically expired after 12 hours",
+            str(fleet_view.content),
+        )
+        self.assertIn(
+            "End: Jan. 14, 2012, 1 p.m.",
             str(fleet_view.content),
         )
 

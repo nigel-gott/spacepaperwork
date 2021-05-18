@@ -43,8 +43,8 @@
                         </div>
                         <div>
                             {% if fleet.auto_end %}
-                                End: {{ fleet.auto_end }} (
-                                {{ fleet.human_readable_ended }})
+                                End:
+                                {{ fleet.auto_end }} ({{ fleet.human_readable_ended }})
                             {% elif fleet.expected_duration %}
                                 Duration: {{ fleet.expected_duration }}
                             {% endif %}

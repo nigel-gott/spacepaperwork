@@ -121,6 +121,8 @@ class GooseToolsTestCase(DjangoTestCase):
             "loot_type": "Master Looter",
             "name": fleet_name,
             "gives_shares_to_alts": gives_shares_to_alts,
+            "form-TOTAL_FORMS": 0,
+            "form-INITIAL_FORMS": 0,
         }
         if end_date:
             args["end_date"] = end_date
