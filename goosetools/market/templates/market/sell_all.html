@@ -3,11 +3,10 @@
     {% load static %}
     <div class="section">
         <form action="" method="post">
-            <div class="section">
-                {% if head_form.non_field_errors %}
-                    <div class="row">
-                        <div class="col s12 m5">
-                            <div class="card-panel red darken-1">
+            {% if head_form.non_field_errors %}
+                <div class="row">
+                    <div class="col s12 m5">
+                        <div class="card-panel red darken-1">
                     <span class="white-text">
                         <b>Errors with form:</b>
                     <ul class="errors">
@@ -16,86 +15,84 @@
                         {% endfor %}
                     </ul>
                     </span>
-                            </div>
                         </div>
                     </div>
-                {% endif %}
-                <div class="row">
-                    <button class="btn waves-effect waves-light" id="submit_btn"
-                            type="submit" value="Submit">
-                        Buy Back All
-                        <i class="material-icons right">send</i>
-                    </button>
                 </div>
-                <div class="row">
-                    {{ head_form.overall_cut|materializecss:'s12 m12, icon=person' }}
-                </div>
-                {{ formset.management_form }}
-                {% csrf_token %}
-                <h5>Items</h5>
-                <table>
-                    <thead>
-                    <th>Item</th>
-                    <th>Quantity</th>
-                    <th>Estimate Price</th>
-                    <th>Estimate Price Quality</th>
-                    <th>Actual Buy Back Price</th>
-                    <th>Total Buy Back Isk After Cut</th>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td class="right-align" colspan="5">
-                            Total Buy Back in Isk:
-                        </td>
-                        <td id="total">
-                        </td>
-                    </tr>
-                    {% for form in formset %}
-                        {% if form.non_field_errors %}
-                            <tr>
-                                <td colspan="6">
-            <span class="white-text">
-                <b>Errors with form:</b>
-            <ul class="errors">
-                {% for error in form.non_field_errors %}
-                    <li>{{ error|escape }}</li>
-                {% endfor %}
-            </ul>
-            </span>
-                                </td>
-                            </tr>
-                        {% endif %}
+            {% endif %}
+            <div class="row">
+                <button class="btn waves-effect waves-light" id="submit_btn"
+                        type="submit" value="Submit">
+                    Buy Back All
+                    <i class="material-icons right">send</i>
+                </button>
+            </div>
+            <div class="row">
+                {{ head_form.overall_cut|materializecss:'s12 m12, icon=person' }}
+            </div>
+            {{ formset.management_form }}
+            {% csrf_token %}
+            <h5>Items</h5>
+            <table>
+                <thead>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Estimate Price</th>
+                <th>Estimate Price Quality</th>
+                <th>Actual Buy Back Price</th>
+                <th>Total Buy Back Isk After Cut</th>
+                </thead>
+                <tbody>
+                <tr>
+                    <td class="right-align" colspan="5">
+                        Total Buy Back in Isk:
+                    </td>
+                    <td id="total">
+                    </td>
+                </tr>
+                {% for form in formset %}
+                    {% if form.non_field_errors %}
                         <tr>
-                            <td>
-                                {{ form.item.value }}
-                                {{ form.inv_item }}
-                                {{ form.stack }}
-                            </td>
-                            <td class="quantity">
-                                {{ form.quantity.value }}
-                            </td>
-                            <td>
-                                {% if form.estimate_price.value > 0 %}
-                                    {{ form.estimate_price.value|nicemoney }}
-                                {% else %}
-                                    Missing Market Data
-                                {% endif %}
-                            </td>
-                            <td>
-                                {{ form.quality.value }}
-                            </td>
-                            <td>
-                                {{ form.listed_at_price|materializecss }}
-                            </td>
-                            <td id="total_{{ forloop.counter }}">
+                            <td colspan="6">
+                                <span class="white-text">
+                                    <b>Errors with form:</b>
+                                <ul class="errors">
+                                    {% for error in form.non_field_errors %}
+                                        <li>{{ error|escape }}</li>
+                                    {% endfor %}
+                                </ul>
+                                </span>
                             </td>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                    {% endif %}
+                    <tr>
+                        <td>
+                            {{ form.item }}
+                            {{ form.inv_item }}
+                            {{ form.stack }}
+                        </td>
+                        <td class="quantity">
+                            {{ form.quantity.value }}
+                        </td>
+                        <td>
+                            {% if form.estimate_price.value > 0 %}
+                                {{ form.estimate_price.value|nicemoney }}
+                            {% else %}
+                                Missing Market Data
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ form.quality.value }}
+                        </td>
+                        <td>
+                            {{ form.listed_at_price|materializecss }}
+                        </td>
+                        <td id="total_{{ forloop.counter }}">
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
         </form>
-    </div>
-    </div>
     </div>
 
 
