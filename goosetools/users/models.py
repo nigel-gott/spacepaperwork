@@ -220,14 +220,15 @@ class DiscordRole(models.Model):
 
     @staticmethod
     def sync_from_discord():
-        all_ids = set()
-        for role_name, role_id in DiscordGuild.get_roles():
-            all_ids.add(role_id)
-            DiscordRole.objects.update_or_create(
-                role_id=role_id, defaults={"name": role_name}
-            )
+        if not settings.STUB_DISCORD:
+            all_ids = set()
+            for role_name, role_id in DiscordGuild.get_roles():
+                all_ids.add(role_id)
+                DiscordRole.objects.update_or_create(
+                    role_id=role_id, defaults={"name": role_name}
+                )
 
-        DiscordRole.objects.exclude(role_id__in=all_ids).delete()
+            DiscordRole.objects.exclude(role_id__in=all_ids).delete()
 
     class Meta:
         indexes = [

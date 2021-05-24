@@ -40,6 +40,7 @@ from goosetools.items.models import (
     to_isk,
 )
 from goosetools.notifications.notification_types import NOTIFICATION_TYPES
+from goosetools.pricing.models import PriceList
 from goosetools.users.forms import CharacterForm
 from goosetools.users.models import Character
 
@@ -543,6 +544,10 @@ def item_db(request):
 
 
 class DataForm(forms.Form):
+    price_list = forms.ModelChoiceField(
+        queryset=PriceList.objects.all(),
+        empty_label=None
+    )
     days = forms.IntegerField(initial=14)
     style = forms.ChoiceField(
         choices=[("lines", "Lines"), ("bar", "Bar Chart"), ("scatter", "Scatter")],
@@ -564,17 +569,29 @@ def item_data(request, pk):
     style = "lines"
     show_buy_sell = False
     filter_outliers = True
+    price_lists = PriceList.objects.filter(itemmarketdataevent__item=item)
+    price_list = None
     if request.GET:
         form = DataForm(request.GET)
+        form.fields['price_list'].queryset = price_lists
         if form.is_valid():
             days = form.cleaned_data["days"]
             style = form.cleaned_data["style"]
             show_buy_sell = form.cleaned_data["show_buy_sell"]
             filter_outliers = form.cleaned_data["filter_outliers"]
+            price_list = form.cleaned_data["price_list"]
     else:
         form = DataForm()
+        form.fields['price_list'].queryset = price_lists
 
-    df = get_df(request, days, item, filter_outliers)
+        try:
+            price_list = price_lists.get(default=True)
+        except PriceList.DoesNotExist:
+            if price_lists.count() > 0:
+                price_list = price_lists.first()
+        form.fields['price_list'].initial = price_list
+
+    df = get_df(request, days, item, filter_outliers, price_list)
     if style == "bar":
         div, script = render_bar_graph(days, df, item, show_buy_sell)
 
@@ -594,10 +611,10 @@ def item_data(request, pk):
     return result
 
 
-def get_df(request, days, item, filter_outliers):
+def get_df(request, days, item, filter_outliers, price_list):
     time_threshold = timezone.now() - timezone.timedelta(hours=int(days) * 24)
     events_last_week = (
-        item.itemmarketdataevent_set.filter(time__gte=time_threshold)
+        item.itemmarketdataevent_set.filter(time__gte=time_threshold, price_list=price_list)
         .values("time", "sell", "buy", "highest_buy", "lowest_sell", "volume")
         .order_by("time")
         .all()

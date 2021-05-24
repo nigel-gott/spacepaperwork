@@ -1,7 +1,7 @@
 from django.db import models
 
 from goosetools.items.models import Item
-from goosetools.users.models import CrudAccessController, GooseUser
+from goosetools.users.models import CrudAccessController, GooseUser, PermissibleEntity, SHIP_PRICE_ADMIN, BASIC_ACCESS
 
 
 class PriceList(models.Model):
@@ -24,8 +24,23 @@ class PriceList(models.Model):
     google_sheet_id = models.TextField(null=True, blank=True)
     google_sheet_cell_range = models.TextField(null=True, blank=True)
 
-    supports_orders = models.BooleanField(default=True)
     default = models.BooleanField(default=True)
+
+    def built_in_permissible_entities(self, owner):
+        admins = [
+            PermissibleEntity.allow_perm(SHIP_PRICE_ADMIN, built_in=True),
+        ]
+        if owner is not None:
+            admins.append(PermissibleEntity.allow_user(owner, built_in=True))
+        return CrudAccessController.wrapper(
+            adminable_by=admins,
+        )
+
+    def default_permissible_entities(self):
+        return [
+            ("view", PermissibleEntity.allow_perm(BASIC_ACCESS)),
+            ("use", PermissibleEntity.allow_perm(BASIC_ACCESS)),
+        ]
 
     # pylint: disable=signature-differs
     def save(self, *args, **kwargs):
@@ -53,12 +68,16 @@ class PriceList(models.Model):
                 access_controller=CrudAccessController.objects.create(),
             )
 
+    def __str__(self):
+        return str(self.name) + (' (default)' if self.default else '')
+
 
 class ItemMarketDataEvent(models.Model):
     price_list = models.ForeignKey(
         PriceList, on_delete=models.CASCADE, null=True, blank=True
     )
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    manual_override_price = models.BooleanField(default=False)
     time = models.DateTimeField()
     sell = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     buy = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
@@ -71,7 +90,7 @@ class ItemMarketDataEvent(models.Model):
     volume = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
 
     class Meta:
-        indexes = [models.Index(fields=["price_list", "-time"])]
+        indexes = [models.Index(fields=["price_list", "-time", "item"])]
         unique_together = (("item", "time"),)
 
     def __str__(self):

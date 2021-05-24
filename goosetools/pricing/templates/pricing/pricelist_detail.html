@@ -1,0 +1,70 @@
+{% extends "core/base.html" %}
+{% load base_extras %}
+{% load materializecss %}
+{% block body %}
+<div class="section">
+    <h4>Price List: {{ pricelist.name }}
+        {% if pricelist.default %} (Default){% endif %}</h4>
+    <a href="{% url 'pricing:pricing_dashboard' %}">Back to All Price Lists</a>
+</div>
+{% include 'users/includes/access_controller_display.html' with access_controller=pricelist.access_controller title="Price List Permissions" %}
+<div class="section">
+    <a href="{% url 'pricing:pricelist-update' pricelist.id %}"
+       class="waves-btn btn">Edit Price List</a>
+    <a href="{% url 'pricing:pricelist-delete' pricelist.id %}"
+       class="waves-btn btn red">Delete Price List</a>
+    <table>
+        <thead>
+        <tr>
+            <th>Attribute</th>
+            <th>Value</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>
+                Is Default Price List:
+            </td>
+            <td>
+                {% if pricelist.default %}Yes{% else %}No{% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Price List API Type:
+            </td>
+            <td>
+                {{ pricelist.api_type }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Owner:
+            </td>
+            <td>
+                {{ pricelist.owner }}
+            </td>
+        </tr>
+        {% if pricelist.google_sheet_id %}
+        <tr>
+            <td>
+                Google Sheet Id:
+            </td>
+            <td>
+                {{ pricelist.google_sheet_id }}
+            </td>
+        </tr>
+        <tr>
+            <td>
+                Google Sheet Cell Range:
+            </td>
+            <td>
+                {{ pricelist.google_sheet_cell_range }}
+            </td>
+        </tr>
+        {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

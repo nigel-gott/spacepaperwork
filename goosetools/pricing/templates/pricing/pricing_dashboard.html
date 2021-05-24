@@ -1,0 +1,11 @@
+{% extends "core/datatable.html" %}
+{% load static %}
+
+{% block datatable_title %}
+    Pricing Dashboard
+{% endblock %}
+
+{% block datatable_footer %}
+    <script src="{% static 'pricing/js/pricing_dashboard.js' %}"
+            type="text/javascript"></script>
+{% endblock %}

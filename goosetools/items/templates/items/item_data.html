@@ -34,6 +34,9 @@
             <form action="" method="get">
                 {% csrf_token %}
                 <div class="row">
+                    {{ form.price_list|materializecss:'s12 m12, icon=access_time' }}
+                </div>
+                <div class="row">
                     {{ form.days|materializecss:'s12 m6, icon=access_time' }}
                     {{ form.style|materializecss:'s12 m6, icon=graphic_eq' }}
                 </div>

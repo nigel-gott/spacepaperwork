@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.utils import timezone
 
 from goosetools.tenants.models import Client, Domain, SiteUser
 from goosetools.users.handlers import setup_tenant

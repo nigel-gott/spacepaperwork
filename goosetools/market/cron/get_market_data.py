@@ -8,7 +8,7 @@ from django_cron import CronJobBase, Schedule
 from django_tenants.utils import tenant_context
 
 from goosetools.items.models import Item
-from goosetools.pricing.models import ItemMarketDataEvent
+from goosetools.pricing.models import ItemMarketDataEvent, PriceList
 from goosetools.tenants.models import Client
 from goosetools.utils import cron_header_line
 
@@ -44,16 +44,18 @@ class GetMarketData(CronJobBase):
                         try:
                             item = Item.objects.get(eve_echoes_market_id=market_id)
                             lowest_sell = decimal_or_none(line[5])
-                            ItemMarketDataEvent.objects.update_or_create(
-                                item=item,
-                                time=time,
-                                defaults={
-                                    "sell": decimal_or_none(line[3]),
-                                    "buy": decimal_or_none(line[4]),
-                                    "lowest_sell": lowest_sell,
-                                    "highest_buy": decimal_or_none(line[6]),
-                                },
-                            )
+                            for ee_pl in PriceList.objects.filter(api_type='eve_echoes_market'):
+                                ItemMarketDataEvent.objects.update_or_create(
+                                    price_list=ee_pl,
+                                    item=item,
+                                    time=time,
+                                    defaults={
+                                        "sell": decimal_or_none(line[3]),
+                                        "buy": decimal_or_none(line[4]),
+                                        "lowest_sell": lowest_sell,
+                                        "highest_buy": decimal_or_none(line[6]),
+                                    },
+                                )
                             item.cached_lowest_sell = lowest_sell
                             item.save()
                         except Item.DoesNotExist:

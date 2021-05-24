@@ -35,6 +35,7 @@ urlpatterns = [
                 path("venmo/", include("venmo.urls")),
                 path("mapbot/", include("mapbot.urls")),
                 path("industry/", include("industry.urls")),
+                path("pricing/", include("pricing.urls")),
             ]
             + settings.ENV_SPECIFIC_URLS
         ),

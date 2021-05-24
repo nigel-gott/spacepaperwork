@@ -20,6 +20,7 @@ from django.views.generic.edit import CreateView, DeleteView, FormView, UpdateVi
 from django.views.generic.list import ListView
 
 from goosetools.users.models import VENMO_ADMIN, GooseUser, has_perm
+from goosetools.utils import PassRequestToFormViewMixin
 from goosetools.venmo.api.fog_venmo import FogVenmo
 from goosetools.venmo.api.space_venmo import SpaceVenmo
 from goosetools.venmo.api.venmo import VenmoError, VenmoUserBalance
@@ -306,14 +307,6 @@ class VirtualCurrencyDeleteView(DeleteView):
 @method_decorator(has_perm(perm=VENMO_ADMIN), name="dispatch")
 class VirtualCurrencyDetailView(DetailView):
     model = VirtualCurrency
-
-
-class PassRequestToFormViewMixin:
-    def get_form_kwargs(self):
-        # noinspection PyUnresolvedReferences
-        kwargs = super().get_form_kwargs()
-        kwargs["request"] = self.request
-        return kwargs
 
 
 @method_decorator(has_perm(perm=VENMO_ADMIN), name="dispatch")

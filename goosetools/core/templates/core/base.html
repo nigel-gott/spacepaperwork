@@ -97,8 +97,13 @@
                 </a>
             </li>
         {% endif %}
+        <li>
+            <a href="{% url 'pricing:pricing_dashboard' %}">
+                Price Lists
+            </a>
+        </li>
     </ul>
-    <ul class="dropdown-content" id="dropdown_sales">
+<ul class="dropdown-content" id="dropdown_sales">
         {% num_items user as num_to_sell %}
         {% num_contracts user as contracts %}
         <li><a href="{% url 'items' %}">Your Items
@@ -407,7 +412,12 @@
             </li>
         {% endif %}
         <li>
-            <a href="{% url 'venmo:dashboard' 'default' %}">Eggs<i
+            <a href="{% url 'pricing:pricing_dashboard' %}">
+                Price Lists
+            </a>
+        </li>
+    <li>
+        <a href="{% url 'venmo:dashboard' 'default' %}">Eggs<i
                     class="material-icons right">attach_money</i></a>
         </li>
         {% if is_venmo_admin %}

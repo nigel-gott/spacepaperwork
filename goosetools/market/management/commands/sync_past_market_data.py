@@ -12,7 +12,7 @@ from django.utils import timezone
 from django_tenants.utils import tenant_context
 
 from goosetools.items.models import Item
-from goosetools.pricing.models import ItemMarketDataEvent
+from goosetools.pricing.models import ItemMarketDataEvent, PriceList
 from goosetools.tenants.models import Client
 
 session = requests_cache.CachedSession(
@@ -82,21 +82,23 @@ class Command(BaseCommand):
             if event_time < cutoff:
                 print(f"   Cutting off at item {update_count + create_count}.")
                 break
-            _, created = ItemMarketDataEvent.objects.update_or_create(
-                item=item_obj,
-                time=event_time,
-                defaults={
-                    "sell": decimal_or_none(item["sell"]),
-                    "buy": decimal_or_none(item["buy"]),
-                    "lowest_sell": decimal_or_none(item["lowest_sell"]),
-                    "highest_buy": decimal_or_none(item["highest_buy"]),
-                    "volume": decimal_or_none(item["volume"]),
-                },
-            )
-            if created:
-                create_count = create_count + 1
-            else:
-                update_count = update_count + 1
+            for ee_pl in PriceList.objects.filter(api_type='eve_echoes_market'):
+                _, created = ItemMarketDataEvent.objects.update_or_create(
+                    price_list=ee_pl,
+                    item=item_obj,
+                    time=event_time,
+                    defaults={
+                        "sell": decimal_or_none(item["sell"]),
+                        "buy": decimal_or_none(item["buy"]),
+                        "lowest_sell": decimal_or_none(item["lowest_sell"]),
+                        "highest_buy": decimal_or_none(item["highest_buy"]),
+                        "volume": decimal_or_none(item["volume"]),
+                    },
+                )
+                if created:
+                    create_count = create_count + 1
+                else:
+                    update_count = update_count + 1
         print(
             f"   Created {create_count} Points and Updated"
             f" {update_count} data points."
