@@ -80,6 +80,7 @@ def _redirect_approved_user_to_home_if_not_permitted(request):
 # pylint: disable=inconsistent-return-statements
 def _redirect_unauthed_user_to_discord_login_if_not_visiting_whitelist(request):
     resolver = resolve(request.path)
+    print(f"LOOKING FOR {resolver.view_name}")
     views = ((name == resolver.view_name) for name in IGNORE_VIEW_NAMES)
 
     if not any(views) and not any(url.match(request.path) for url in IGNORE_PATHS):

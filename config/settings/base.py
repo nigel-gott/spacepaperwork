@@ -228,6 +228,7 @@ LOGIN_REQUIRED_IGNORE_VIEW_NAMES = [
     "tenants:help",
     "tenants:pricing",
     "tenants:login_cancelled",
+    "tenants:setup_install",
     "socialaccount_login_cancelled",
 ]
 LOGIN_REQUIRED_UNAPPROVED_USER_REDIRECT = "tenants:splash"

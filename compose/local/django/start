@@ -6,7 +6,6 @@ set -o nounset
 
 
 python manage.py migrate
-python manage.py loaddata goosetools/users/fixtures/dev.json
-python manage.py setup_tenants
+python manage.py configure --auto_first_time_local_setup
 python manage.py loaddata goosetools/industry/fixtures/*.json
 python manage.py runserver_plus 0.0.0.0:8000

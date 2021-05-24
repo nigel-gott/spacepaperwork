@@ -29,7 +29,7 @@ def set_uid(request, uid):
 
 
 def profile_url(request):
-    uid = str(caches["default"].get("uid", "123456789"))
+    uid = get_current_stub_discord_uid()
     return JsonResponse(
         {
             "id": uid,
@@ -42,6 +42,11 @@ def profile_url(request):
             "mfa_enabled": True,
         }
     )
+
+
+def get_current_stub_discord_uid():
+    uid = str(caches["default"].get("uid", "123456789"))
+    return uid
 
 
 # Exempt as OAuth is passing along a state param and access code instead
