@@ -17,9 +17,7 @@ class WithdrawForm(forms.Form):
         max_digits=20,
         decimal_places=2,
         min_value=1,
-        help_text=f"Please create an in-game contract to "
-        f"{settings.WITHDRAW_INGAME_CHAR} for the quantity "
-        "you want to withdraw before submitting this form.",
+        help_text=f"{settings.WITHDRAW_INGAME_CHAR}",
     )
 
 
