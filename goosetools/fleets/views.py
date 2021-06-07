@@ -75,7 +75,7 @@ def fleet_list_view(request, fleets_to_display, page_url_name):
         header = "Future Fleets"
     context = {
         "page_url_name": page_url_name,
-        "fleets": viewable_fleets.all(),
+        "fleets": viewable_fleets,
         "header": header,
         "page": page,
         "total_pages": total_pages,
