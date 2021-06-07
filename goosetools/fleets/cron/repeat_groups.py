@@ -22,7 +22,7 @@ def _run_for_tenant(now):
     )
     for anom in anoms:
         lootgroup = anom.lootgroup_set.get()
-        fleet_closed = lootgroup.fleet() and lootgroup.fleet().closed
+        fleet_closed = lootgroup.fleet() and not lootgroup.fleet().is_open()
         if lootgroup.closed or fleet_closed:
             anom.minute_repeat_period = None
             anom.save()
