@@ -1,3 +1,4 @@
+import logging
 import math
 from typing import Dict, List
 
@@ -36,6 +37,8 @@ from goosetools.users.utils import (
     can_view,
     filter_controlled_qs_to_viewable,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def forbidden(request):
