@@ -44,7 +44,9 @@ def forbidden(request):
 
 
 def fleet_list_view(request, fleets_to_display, page_url_name):
-    viewable_fleets = filter_controlled_qs_to_viewable(fleets_to_display, request)
+    viewable_fleets = filter_controlled_qs_to_viewable(
+        fleets_to_display, request, return_as_qs=True
+    ).order_by("-start")
 
     page = int(request.GET.get("page", 0))
     page_size = 20
