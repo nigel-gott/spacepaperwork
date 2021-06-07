@@ -1,9 +1,12 @@
+import logging
 from functools import wraps
 
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 
 from goosetools.users.models import CrudAccessController
+
+logger = logging.getLogger(__name__)
 
 
 def filter_controlled_qs_by(controllable_qs, func, request, return_as_qs=False):
@@ -18,12 +21,13 @@ def filter_controlled_qs_by(controllable_qs, func, request, return_as_qs=False):
         request.gooseuser
     )
     for f in controllable_qs.all():
-        print(f"Checking {func} for {f} for {request.gooseuser}")
+        logger.info(f"Checking {func} for {f} for {request.gooseuser}")
+
         if getattr(f.access_controller, func)(request.gooseuser, permissions_id_cache):
-            print(f"Had {func}")
+            logger.info(f"Had {func}")
             valid_items.append(f)
         else:
-            print("Did not have")
+            logger.info("Did not have")
 
     if return_as_qs:
         return controllable_qs.filter(id__in=[v.id for v in valid_items])
