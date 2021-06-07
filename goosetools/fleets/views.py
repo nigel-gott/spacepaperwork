@@ -47,8 +47,9 @@ def forbidden(request):
 
 
 def fleet_list_view(request, fleets_to_display, page_url_name):
-    viewable_fleets = filter_controlled_qs_to_viewable(fleets_to_display, request)
-    viewable_fleets = Fleet.objects.filter(id__in=viewable_fleets)
+    viewable_fleets = filter_controlled_qs_to_viewable(
+        fleets_to_display, request, return_as_qs=True
+    )
 
     viewable_fleets = viewable_fleets.annotate(
         isk_and_eggs_balance=Sum(
