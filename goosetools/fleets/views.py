@@ -58,9 +58,7 @@ def fleet_list_view(request, fleets_to_display, page_url_name):
     elif page_url_name == "fleet_future":
         header = "Future Fleets"
 
-    fleets_annotated_with_isk_and_eggs_balance = Fleet.objects.filter(
-        id__in=[f.id for f in this_page_fleets]
-    ).annotate(
+    fleets_annotated_with_isk_and_eggs_balance = this_page_fleets.annotate(
         isk_and_eggs_balance=Sum(
             Case(
                 When(
