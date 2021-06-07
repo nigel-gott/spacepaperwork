@@ -1,14 +1,14 @@
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
-from django.views.generic import UpdateView, DetailView, DeleteView, CreateView
+from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 from rest_framework import mixins
 from rest_framework.viewsets import GenericViewSet
 
 from goosetools.pricing.forms import PriceListForm
 from goosetools.pricing.models import PriceList
 from goosetools.pricing.serializers import PriceListSerializer
-from goosetools.users.models import HasGooseToolsPerm, BASIC_ACCESS
+from goosetools.users.models import BASIC_ACCESS, HasGooseToolsPerm
 from goosetools.utils import PassRequestToFormViewMixin
 
 
@@ -37,6 +37,7 @@ def pricing_dashboard(request):
         },
     )
 
+
 class PriceListDetailView(DetailView):
     model = PriceList
 
@@ -46,17 +47,13 @@ class PriceListDeleteView(DeleteView):
     success_url = reverse_lazy("pricing:pricelist-list")
 
 
-class PriceListCreateView(
-    SuccessMessageMixin, PassRequestToFormViewMixin, CreateView
-):
+class PriceListCreateView(SuccessMessageMixin, PassRequestToFormViewMixin, CreateView):
     model = PriceList
     form_class = PriceListForm
     success_message = "%(name)s was created successfully"
 
 
-class PriceListUpdateView(
-    SuccessMessageMixin, PassRequestToFormViewMixin, UpdateView
-):
+class PriceListUpdateView(SuccessMessageMixin, PassRequestToFormViewMixin, UpdateView):
     model = PriceList
     form_class = PriceListForm
     success_message = "%(name)s was edited successfully"

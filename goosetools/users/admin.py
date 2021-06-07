@@ -9,12 +9,14 @@ from goosetools.users.models import (
     Character,
     Corp,
     CorpApplication,
+    CrudAccessController,
     DiscordGuild,
     GooseGroup,
     GoosePermission,
     GooseUser,
     GroupMember,
     GroupPermission,
+    PermissibleEntity,
     UserApplication,
 )
 
@@ -52,6 +54,8 @@ admin.site.register(GoosePermission)
 admin.site.register(GooseGroup)
 admin.site.register(GroupMember)
 admin.site.register(GroupPermission)
+admin.site.register(CrudAccessController)
+admin.site.register(PermissibleEntity)
 
 
 class CustomUserAdmin(ModelAdmin):

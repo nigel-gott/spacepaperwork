@@ -22,7 +22,8 @@ def _run_for_tenant(now):
     )
     for anom in anoms:
         lootgroup = anom.lootgroup_set.get()
-        if lootgroup.closed:
+        fleet_closed = lootgroup.fleet() and lootgroup.fleet().closed
+        if lootgroup.closed or fleet_closed:
             anom.minute_repeat_period = None
             anom.save()
             print(f"Unsetting repeat on {anom} as it was manually closed")
