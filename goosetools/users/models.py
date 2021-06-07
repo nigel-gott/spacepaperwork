@@ -881,6 +881,9 @@ class PermissibleEntity(models.Model):
             self.permission_id is None or self.permission_id in permissions_id_cache
         )
         matches = matches_user and matches_corp and matches_permission
+        print(
+            f"For {str(self)} user {gooseuser} has: {matches_user}, {matches_corp}, {matches_permission} = {matches}"
+        )
         return matches, self.order, self.allow_or_deny
 
     def reset_order_to_level(self):
