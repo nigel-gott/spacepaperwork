@@ -112,9 +112,9 @@ def create_ship_order(
     if payment_method in {"eggs", "isk"}:
         if ship.valid_price():
             if payment_method == "eggs":
-                price = ship.eggs_price * quantity
+                price = ship.eggs_price
             else:
-                price = ship.isk_price * quantity
+                price = ship.isk_price
     else:
         if payment_method == "free":
             blocked_until, message = calculate_blocked_until_for_order(
