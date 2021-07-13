@@ -117,7 +117,73 @@
     </div>
     <div class="divider"></div>
     <div class="row">
-        <div class="col s12 m6">
+        <div class="col s12 m6 push-m6">
+            <h5>Loot Buckets</h5>
+            <p><i>Loot and Participation between Anoms in the same Loot Bucket are
+                shared</i></p>
+
+            {% for bucket in loot_buckets %}
+                <div class="card">
+                    <div class="card-content">
+                        <div class="row">
+                            <div class="col s12 m6">
+                                <span class="card-title">Bucket {{ bucket.id }}</span>
+                            </div>
+                            <div class="col s12 m6 right-align">
+                                {% if admin %}
+                                    <a class="btn "
+                                       href="{% url 'loot_group_add' fleet.id bucket.id %}"><i
+                                            class='material-icons right'>add_circle</i>
+                                        Add Anom</a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="collection">
+                            {% for lootgroup in bucket.ordered_lootgroup_set %}
+                                {% has_share lootgroup user as has_share_already %}
+                                <a
+                                        {% if has_share_already %}
+                                            title="You have shares in this loot group"
+                                        {% endif %}
+                                            href="{% url 'loot_group_view' lootgroup.id %}"
+                                            class="collection-item
+                        {% if lootgroup.closed %}red-text{% endif %}
+                        fleet_link
+                    ">
+                                    {% if has_share_already %}
+                                        <span class="badge">
+                                <img class="avatar"
+                                     src="{{ user.gooseuser.discord_avatar_url }}?size=16"
+                                     style="width: 16px"/>
+                            </span>
+                                    {% endif %}
+                                    {{ lootgroup.display_name }}
+                                    {% if lootgroup.closed %}
+                                        <i class='material-icons left'>lock</i>
+                                    {% endif %}
+                                    {% if lootgroup.fleet_anom.minute_repeat_period %}
+                                        <i class='material-icons left'>autorenew</i>
+                                    {% endif %}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+            {% if admin %}
+                <div class="right-align">
+                    <a class="waves-effect waves-light btn deep-orange lighten-2"
+                       href="{% url 'loot_group_create' fleet.id %}"><i
+                            class='material-icons right'>add_circle</i>Add
+
+                        Bucket</a>
+                </div>
+            {% endif %}
+
+        </div>
+        <div class="col s12 m6 pull-m6">
             <h5>Fleet Members</h5>
             <table>
                 <thead>
@@ -187,72 +253,6 @@
                 {% endfor %}
                 </tbody>
             </table>
-        </div>
-        <div class="col s12 m6">
-            <h5>Loot Buckets</h5>
-            <p><i>Loot and Participation between Anoms in the same Loot Bucket are
-                shared</i></p>
-
-            {% for bucket in loot_buckets %}
-                <div class="card">
-                    <div class="card-content">
-                        <div class="row">
-                            <div class="col s12 m6">
-                                <span class="card-title">Bucket {{ bucket.id }}</span>
-                            </div>
-                            <div class="col s12 m6 right-align">
-                                {% if admin %}
-                                    <a class="btn "
-                                       href="{% url 'loot_group_add' fleet.id bucket.id %}"><i
-                                            class='material-icons right'>add_circle</i>
-                                        Add Anom</a>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <div class="collection">
-                            {% for lootgroup in bucket.ordered_lootgroup_set %}
-                                {% has_share lootgroup user as has_share_already %}
-                                <a
-                                        {% if has_share_already %}
-                                            title="You have shares in this loot group"
-                                        {% endif %}
-                                            href="{% url 'loot_group_view' lootgroup.id %}"
-                                            class="collection-item
-                        {% if lootgroup.closed %}red-text{% endif %}
-                        fleet_link
-                    ">
-                                    {% if has_share_already %}
-                                        <span class="badge">
-                                <img class="avatar"
-                                     src="{{ user.gooseuser.discord_avatar_url }}?size=16"
-                                     style="width: 16px"/>
-                            </span>
-                                    {% endif %}
-                                    {{ lootgroup.display_name }}
-                                    {% if lootgroup.closed %}
-                                        <i class='material-icons left'>lock</i>
-                                    {% endif %}
-                                    {% if lootgroup.fleet_anom.minute_repeat_period %}
-                                        <i class='material-icons left'>autorenew</i>
-                                    {% endif %}
-                                </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-
-            {% if admin %}
-                <div class="right-align">
-                    <a class="waves-effect waves-light btn deep-orange lighten-2"
-                       href="{% url 'loot_group_create' fleet.id %}"><i
-                            class='material-icons right'>add_circle</i>Add
-
-                        Bucket</a>
-                </div>
-            {% endif %}
-
         </div>
 
     </div>
