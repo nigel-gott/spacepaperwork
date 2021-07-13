@@ -157,12 +157,12 @@
             },
             {"data": "recipient_character_name", "title": "Recipient"},
             {"data": "ship", "title": "Order"},
-            {"data": "quantity", "title": "Quantity"},
             {
-                "data": "payment_method", "title": "Payment Status",
+                "data": "payment_method", "title": "Quantity and Price",
                 render: function (data, type, row, meta) {
                     const payment_method = row["payment_method"]
                     const price = row["price"]
+                    const quantity = row["quantity"]
                     const payment_taken = row["payment_taken"]
                     const current_user_assigned = row["assignee"] === page_data["request_user_pk"]
                     const free_ship = payment_method === "free" || payment_method === "srp"
@@ -182,8 +182,9 @@
                             return payment_method + " - Waiting on Manual Price"
                         }
                     } else {
-                        const price_display = price ? " = " + numberWithCommas(price) : ""
-                        const display = payment_method + price_display
+                        let totalPrice = numberWithCommas(price*quantity)
+                        const price_display = price ? `${quantity} x ${numberWithCommas(price)} = ${totalPrice}` : ""
+                        const display = `${price_display} (${payment_method})`
                         if (payment_taken) {
                             return "PAID: " + display
                         } else {
