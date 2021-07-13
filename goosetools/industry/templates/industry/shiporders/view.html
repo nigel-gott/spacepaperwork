@@ -182,8 +182,15 @@
                             return payment_method + " - Waiting on Manual Price"
                         }
                     } else {
-                        let totalPrice = numberWithCommas(price*quantity)
-                        const price_display = price ? `${quantity} x ${numberWithCommas(price)} = ${totalPrice}` : ""
+                        let totalPrice = numberWithCommas(price * quantity)
+                        let price_display = ''
+                        if (price) {
+                            if (quantity === 1) {
+                                price_display = `Only ${quantity} = ${numberWithCommas(price)}`
+                            } else {
+                                price_display = `${quantity} x ${numberWithCommas(price)} = ${totalPrice}`
+                            }
+                        }
                         const display = `${price_display} (${payment_method})`
                         if (payment_taken) {
                             return "PAID: " + display
