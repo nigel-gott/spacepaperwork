@@ -327,6 +327,32 @@ def item_sold(order, remaining_quantity_to_sell):
 
 
 @transaction.atomic
+def all_stack_sold(request, pk):
+    stack = get_object_or_404(StackedInventoryItem, pk=pk)
+    if not stack.has_admin(request.gooseuser):
+        return forbidden(request)
+
+    if request.method == "POST":
+        return sell_stack(0, request, stack)
+    else:
+        return forbidden(request)
+
+
+def sell_stack(quantity_remaining, request, stack):
+    total_to_sell = stack.order_quantity() - quantity_remaining
+    saved_total = total_to_sell
+    if total_to_sell <= 0:
+        messages.error(request, "You requested to sell 0 of this stack which is silly")
+    else:
+        for market_order in stack.marketorders():  # type: ignore
+            if total_to_sell <= 0:
+                break
+            total_to_sell = item_sold(market_order, total_to_sell)
+        messages.success(request, f"Sold {saved_total} of the stack!")
+    return HttpResponseRedirect(reverse("orders"))
+
+
+@transaction.atomic
 def stack_sold(request, pk):
     stack = get_object_or_404(StackedInventoryItem, pk=pk)
     if not stack.has_admin(request.gooseuser):
@@ -335,19 +361,7 @@ def stack_sold(request, pk):
     if request.method == "POST":
         form = SoldItemForm(request.POST)
         if form.is_valid():
-            quantity_remaining = form.cleaned_data["quantity_remaining"]
-            total_to_sell = stack.order_quantity() - quantity_remaining
-            saved_total = total_to_sell
-            if total_to_sell <= 0:
-                messages.error(
-                    request, "You requested to sell 0 of this stack which is silly"
-                )
-            else:
-                for market_order in stack.marketorders():  # type: ignore
-                    if total_to_sell <= 0:
-                        break
-                    total_to_sell = item_sold(market_order, total_to_sell)
-                messages.success(request, f"Sold {saved_total} of the stack!")
+            sell_stack(form.cleaned_data["quantity_remaining"], request, stack)
             return HttpResponseRedirect(reverse("orders"))
     else:
         form = SoldItemForm(initial={"quantity_remaining": 0})
@@ -356,6 +370,28 @@ def stack_sold(request, pk):
         "market/order_sold.html",
         {"form": form, "title": "Mark Stack As Sold", "order": stack},
     )
+
+
+@transaction.atomic
+def all_order_sold(request, pk):
+    order = get_object_or_404(MarketOrder, pk=pk)
+    if not order.has_admin(request.gooseuser):
+        return forbidden(request)
+
+    if request.method == "POST":
+        internal_order_sold(order, 0, request)
+        return HttpResponseRedirect(reverse("orders"))
+    else:
+        return forbidden(request)
+
+
+def internal_order_sold(order, quantity_remaining, request):
+    quantity_to_sell = order.quantity - quantity_remaining
+    if quantity_to_sell <= 0:
+        messages.error(request, "Cannot sell 0 or fewer items")
+    else:
+        item_sold(order, quantity_to_sell)
+        messages.success(request, f"Sold {quantity_to_sell} of item {order.item}")
 
 
 @transaction.atomic
@@ -368,14 +404,7 @@ def order_sold(request, pk):
         form = SoldItemForm(request.POST)
         if form.is_valid():
             quantity_remaining = form.cleaned_data["quantity_remaining"]
-            quantity_to_sell = order.quantity - quantity_remaining
-            if quantity_to_sell <= 0:
-                messages.error(request, "Cannot sell 0 or fewer items")
-            else:
-                item_sold(order, quantity_to_sell)
-                messages.success(
-                    request, f"Sold {quantity_to_sell} of item {order.item}"
-                )
+            internal_order_sold(order, quantity_remaining, request)
             return HttpResponseRedirect(reverse("orders"))
     else:
         form = SoldItemForm(initial={"quantity_remaining": 0})

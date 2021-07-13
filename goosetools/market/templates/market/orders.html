@@ -11,6 +11,7 @@
                 <th>Buy/Sell</th>
                 <th>Internal/External</th>
                 <th>List Price</th>
+                <th>Est Profit</th>
                 <th>Action</th>
                 </thead>
                 <tbody>
@@ -36,8 +37,16 @@
                             <td>
                                 <a class="waves-btn btn orange"
                                    href="{% url 'stack_change_price' stack.stack_id %}">Edit</a><br/>
-                                <a class="waves-btn btn green"
+                                <a class="waves-btn btn "
                                    href="{% url 'stack_sold' stack.stack_id %}">Sold</a>
+                                <form action="{% url 'all_stack_sold' stack.stack_id %}" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn waves-btn" type="submit"
+                                            value="Submit">
+                                        All Sold
+                                        <i class="material-icons right">send</i>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     {% endfor %}
@@ -67,8 +76,16 @@
                                 <a class="waves-btn btn orange"
                                    href="{% url 'edit_order_price' item.marketorder.id %}">Edit
                                     Price</a>
-                                <a class="waves-btn btn green"
+                                <a class="waves-btn btn"
                                    href="{% url 'order_sold' item.marketorder.id %}">Sold</a>
+                                <form action="{% url 'all_order_sold' item.marketorder.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button class="btn waves-btn" type="submit"
+                                            value="Submit">
+                                        All Sold
+                                        <i class="material-icons right">send</i>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     {% endfor %}
