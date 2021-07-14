@@ -198,3 +198,8 @@ def has_share(loot_group, user):
 @register.filter
 def index(sequence, position):
     return sequence[position]
+
+
+@register.filter
+def multiply_to_price(value, arg):
+    return nicemoney(value * arg)

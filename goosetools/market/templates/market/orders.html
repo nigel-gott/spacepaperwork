@@ -1,98 +1,165 @@
-{% extends "core/base.html" %} {% load base_extras %} {% block body %}
-    {% load materializecss %}
-    <div class="row">
-        <div class="col s12 m12">
-            <h5>Market Orders</h5>
-            <table>
-                <thead>
-                <th>Location</th>
-                <th>Item</th>
-                <th>Quantity</th>
-                <th>Buy/Sell</th>
-                <th>Internal/External</th>
-                <th>List Price</th>
-                <th>Est Profit</th>
-                <th>Action</th>
-                </thead>
-                <tbody>
-                {% for loc_items in all_orders %}
-                    <tr>
-                        <td rowspan="{{ loc_items.total_in_loc|add:'3' }}">
-                            {{ loc_items.loc }}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="center-align" colspan="4">Stacked Items</td>
-                    </tr>
-                    {% for stack_id, stack in loc_items.stacks.items %}
+{% extends "core/base.html" %}
+{% load base_extras %}
+{% load materializecss %}
+{% load static %}
+{% block extraheader %}
+    <link rel="stylesheet" href="{% static 'items/css/items.css' %}">
+{% endblock %}
+{% block body %}
+    <h5>Your Market Orders Per System and Character</h5>
+    {% for loc_items in all_orders %}
+        <div class="section items_container">
+            <div class="row ">
+                <div class="col s12 m12">
+                    {% has_admin loc_items.loc user as has_item_admin %}
+                    <h3>
+                        <span class="grey-text"> Orders In </span>
+                        <strong class="grey-text"> > </strong>
+                        <span class="grey-text text-darken-2">
+                    {% if not loc_items.loc.system %}
+                        Unknown System
+                    {% else %}
+                        {{ loc_items.loc.system }}
+                    {% endif %}
+                    </span>
+                        <strong class="grey-text text-darken-2"> > </strong>
+                        <span class="grey-text">On Char</span>
+                        <strong class="grey-text"> > </strong>
+                        {{ loc_items.loc.character }}
+                    </h3>
+                </div>
+            </div>
+            <div class="divider"></div>
+            <div class="row">
+                <div class="col s12 m12">
+                    <table>
+                        <thead>
                         <tr>
-                            <td>
-                                <a href="{% url 'stack_view' stack.stack_id %}">{{ stack.item }}</a>
-                            </td>
-                            <td>{{ stack.stack.order_quantity }}</td>
-                            <td>{{ stack.stack.buy_sell }}</td>
-                            <td>{{ stack.stack.internal_external }}</td>
-                            <td>{{ stack.stack.list_price }}</td>
-                            <td>{{ stack.stack.estimated_profit }}</td>
-                            <td>
-                                <a class="waves-btn btn orange"
-                                   href="{% url 'stack_change_price' stack.stack_id %}">Edit</a><br/>
-                                <a class="waves-btn btn "
-                                   href="{% url 'stack_sold' stack.stack_id %}">Sold</a>
-                                <form action="{% url 'all_stack_sold' stack.stack_id %}" method="post">
-                                    {% csrf_token %}
-                                    <button class="btn waves-btn" type="submit"
-                                            value="Submit">
-                                        All Sold
-                                        <i class="material-icons right">send</i>
-                                    </button>
-                                </form>
-                            </td>
+                            <th>Item</th>
+                            <th>Buy/Sell</th>
+                            <th>Quantity</th>
+                            <th>List Price</th>
+                            <th>Quantity * Price</th>
                         </tr>
-                    {% endfor %}
-                    <tr>
-                        <td class="center-align" colspan="4">UnStacked Items</td>
-                    </tr>
-                    {% for item in loc_items.unstacked %}
-                        <tr>
-                            <td>
-                                <a href="{% url 'item_view' item.id %}">
-                                    {{ item.item }}
-                                </a>
-                            </td>
-                            <td>
-                                {{ item.marketorder.quantity }}
-                            </td>
-                            <td>
-                                {{ item.marketorder.buy_or_sell }}
-                            </td>
-                            <td>
-                                {{ item.marketorder.internal_or_external }}
-                            </td>
-                            <td>
-                                {{ item.marketorder.listed_at_price }}
-                            </td>
-                            <td>
-                                <a class="waves-btn btn orange"
-                                   href="{% url 'edit_order_price' item.marketorder.id %}">Edit
-                                    Price</a>
-                                <a class="waves-btn btn"
-                                   href="{% url 'order_sold' item.marketorder.id %}">Sold</a>
-                                <form action="{% url 'all_order_sold' item.marketorder.id %}" method="post">
-                                    {% csrf_token %}
-                                    <button class="btn waves-btn" type="submit"
-                                            value="Submit">
-                                        All Sold
-                                        <i class="material-icons right">send</i>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                {% endfor %}
-                </tbody>
-            </table>
+                        </thead>
+                        <tbody>
+                        {% for stack_id, stack in loc_items.stacks.items %}
+                            <tr>
+                                <td>
+                                    <i title="This is a stack of items"
+                                       class="material-icons left">burst_mode</i>
+                                    <a href="{% url 'stack_view' stack.stack_id %}">{{ stack.item }}</a>
+                                    {% if has_item_admin %}
+                                        <div class="actions">
+                                            <a class="action_link btn-flat waves-btn waves-light blue-text"
+                                               href="{% url 'stack_change_price' stack.stack_id %}">
+                                                <i class="material-icons left">edit</i>
+                                                Edit Price
+                                            </a>
+                                            <a class="action_link btn-flat waves-btn waves-light blue-text"
+                                               href="{% url 'stack_sold' stack.stack_id %}">
+                                                <i class="material-icons left">attach_money</i>
+                                                Some Sold</a>
+                                            <form style="display: inline-block;"
+                                                  action="{% url 'all_stack_sold' stack.stack_id %}"
+                                                  method="post">
+                                                {% csrf_token %}
+                                                <button class="action_link btn-flat waves-btn waves-light blue-text"
+                                                        type="submit"
+                                                        value="Submit">
+                                                    All Sold
+                                                    <i class="material-icons left">send</i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>{{ stack.stack.buy_sell }}</td>
+                                <td>{{ stack.quantity }}</td>
+                                <td>{{ stack.stack.list_price }}</td>
+                                <td>
+                                    Ƶ {{ stack.stack.list_price|multiply_to_price:stack.quantity }}</td>
+                            </tr>
+                        {% endfor %}
+                        {% for item in loc_items.unstacked %}
+                            <tr>
+                                <td>
+                                    <i title="This item is not stacked"
+                                       class="material-icons left">insert_photo</i>
+                                    <a href="{% url 'item_view' item.id %}">
+                                        {{ item.item }}
+                                    </a>
+                                    {% if has_item_admin %}
+                                        <div class="actions">
+                                            <a class="action_link btn-flat waves-btn waves-light blue-text"
+                                               href="{% url 'edit_order_price' item.marketorder.id %}">
+                                                <i class="material-icons left">edit</i>
+                                                Edit Price
+                                            </a>
+                                            <a class="action_link btn-flat waves-btn waves-light blue-text"
+                                               href="{% url 'order_sold' item.marketorder.id %}">
+                                                <i class="material-icons left">attach_money</i>
+                                                Some Sold</a>
+                                            <form style="display: inline-block;"
+                                                  action="{% url 'all_order_sold' item.marketorder.id %}"
+                                                  method="post">
+                                                {% csrf_token %}
+                                                <button class="action_link btn-flat waves-btn waves-light blue-text"
+                                                        type="submit"
+                                                        value="Submit">
+                                                    All Sold
+                                                    <i class="material-icons left">send</i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ item.marketorder.buy_or_sell }}
+                                </td>
+                                <td>
+                                    {{ item.marketorder.quantity }}
+                                </td>
+                                <td>
+                                    {{ item.marketorder.listed_at_price }}
+                                </td>
+                                <td>
+                                    Ƶ {{ item.marketorder.listed_at_price|multiply_to_price:item.marketorder.quantity }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    </div>
+    {% empty %}
+        You have no orders.
+    {% endfor %}
+
+{% endblock %}
+
+{% block extrafooter %}
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var elems = document.querySelectorAll('.collapsible')
+        var instances = M.Collapsible.init(elems, {
+            'onOpenStart': function (li) {
+                localStorage['closed_help'] = 'open'
+
+            },
+            'onCloseStart': function (li) {
+                localStorage['closed_help'] = 'closed'
+            },
+        })
+        if (localStorage.getItem("closed_help") === null || localStorage['closed_help'] == 'open') {
+            var elem = document.getElementById("top_level_thingy")
+            var instance = M.Collapsible.getInstance(elem)
+            instance.open()
+        }
+    })
+
+
+    </script>
 
 {% endblock %}
