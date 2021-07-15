@@ -11,8 +11,10 @@
 <div class="section">
     <a href="{% url 'pricing:pricelist-update' pricelist.id %}"
        class="waves-btn btn">Edit Price List</a>
+    {% if pricelist.deletable %}
     <a href="{% url 'pricing:pricelist-delete' pricelist.id %}"
        class="waves-btn btn red">Delete Price List</a>
+    {% endif %}
     <table>
         <thead>
         <tr>

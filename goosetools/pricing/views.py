@@ -45,6 +45,7 @@ class PriceListDetailView(DetailView):
 class PriceListDeleteView(DeleteView):
     model = PriceList
     success_url = reverse_lazy("pricing:pricelist-list")
+    queryset = PriceList.objects.exclude(deletable=False)
 
 
 class PriceListCreateView(SuccessMessageMixin, PassRequestToFormViewMixin, CreateView):

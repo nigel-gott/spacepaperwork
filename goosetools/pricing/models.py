@@ -1,7 +1,13 @@
 from django.db import models
 
 from goosetools.items.models import Item
-from goosetools.users.models import CrudAccessController, GooseUser, PermissibleEntity, SHIP_PRICE_ADMIN, BASIC_ACCESS
+from goosetools.users.models import (
+    BASIC_ACCESS,
+    SHIP_PRICE_ADMIN,
+    CrudAccessController,
+    GooseUser,
+    PermissibleEntity,
+)
 
 
 class PriceList(models.Model):
@@ -25,6 +31,7 @@ class PriceList(models.Model):
     google_sheet_cell_range = models.TextField(null=True, blank=True)
 
     default = models.BooleanField(default=True)
+    deletable = models.BooleanField(default=True)
 
     def built_in_permissible_entities(self, owner):
         admins = [
@@ -69,7 +76,7 @@ class PriceList(models.Model):
             )
 
     def __str__(self):
-        return str(self.name) + (' (default)' if self.default else '')
+        return str(self.name) + (" (default)" if self.default else "")
 
 
 class ItemMarketDataEvent(models.Model):
