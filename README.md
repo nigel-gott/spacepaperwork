@@ -28,7 +28,7 @@
 
 # Running For Local Development using VirtualEnv
 
-1. ```git clone git@github.com:GROON-Echoes-Dev-Team/goosetools.git && cd goosetools```
+1. ```git clone https://github.com/nigel-gott/spacepaperwork.git && cd spacepaperwork```
 1.
 
  ```
