@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.db import models
+from django.urls import reverse
 
 from goosetools.items.models import Item
 from goosetools.users.models import (
@@ -8,6 +10,13 @@ from goosetools.users.models import (
     GooseUser,
     PermissibleEntity,
 )
+from goosetools.venmo.models import create_access_controller
+
+PRICE_LIST_API_TYPES = [
+    ("eve_echoes_market", "eve_echoes_market.com"),
+    ("google_sheet", "A Google Sheet"),
+    ("manual", "Manually Entered In " + settings.SITE_NAME),
+]
 
 
 class PriceList(models.Model):
@@ -18,20 +27,19 @@ class PriceList(models.Model):
     description = models.TextField()
     tags = models.TextField()
     access_controller = models.ForeignKey(
-        CrudAccessController, on_delete=models.SET_NULL, null=True, blank=True
+        CrudAccessController,
+        on_delete=models.CASCADE,
+        default=create_access_controller,
     )
-    api_type = models.TextField(
-        choices=[
-            ("eve_echoes_market", "eve_echoes_market"),
-            ("google_sheet", "google_sheet"),
-            ("manual", "manual"),
-        ]
-    )
+    api_type = models.TextField(choices=PRICE_LIST_API_TYPES)
     google_sheet_id = models.TextField(null=True, blank=True)
     google_sheet_cell_range = models.TextField(null=True, blank=True)
 
-    default = models.BooleanField(default=True)
+    default = models.BooleanField(default=False)
     deletable = models.BooleanField(default=True)
+
+    def get_absolute_url(self):
+        return reverse("pricing:pricelist-detail", kwargs={"pk": self.pk})
 
     def built_in_permissible_entities(self, owner):
         admins = [

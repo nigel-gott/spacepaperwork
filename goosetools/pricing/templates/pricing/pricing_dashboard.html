@@ -5,6 +5,15 @@
     Pricing Dashboard
 {% endblock %}
 
+{% block datatable_top_row %}
+    <div class="row">
+        <div class="col s12 m12">
+            <a href="{% url 'pricing:pricelist-create' %}" class="btn waves-btn">
+                <i class="material-icons left">send</i>Create New
+            </a>
+        </div>
+    </div>
+{% endblock %}
 {% block datatable_footer %}
     <script src="{% static 'pricing/js/pricing_dashboard.js' %}"
             type="text/javascript"></script>

@@ -355,9 +355,12 @@ def handle_permissible_entity_formset(owning_user, formset, controllable_instanc
                     raise ValidationError("Cannot edit a built in permissible entity")
                 existing.delete()
 
+        print(formset)
         for form in formset:
             if "DELETE" in form.cleaned_data and form.cleaned_data["DELETE"]:
                 continue
+            print(form.cleaned_data)
+            print(form)
             by = control_to_relation(form.cleaned_data["control"], controller)
             existing = form.cleaned_data["existing_entity"]
             permission = form.cleaned_data["permission"]

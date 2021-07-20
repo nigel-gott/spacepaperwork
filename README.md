@@ -30,10 +30,9 @@
 
 1. ```git clone https://github.com/nigel-gott/spacepaperwork.git && cd spacepaperwork```
 1.
-
- ```
- cp .env.local.example .env
- ```
+     ```
+     cp .env.local.example .env
+     ```
 
 1. Edit ```.env``` to match your environment
 1. Install poetry dependencies:
@@ -54,7 +53,7 @@
     ```
 1. Setup an initial organization:
     ```
-    ./manage.py setup_tenant
+    ./manage.py setup_tenants
     ```
 1. Run the server:
     ```

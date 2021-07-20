@@ -1,0 +1,78 @@
+{% extends "core/datatable.html" %}
+{% load static %}
+
+{% block datatable_title %}
+    Item Database
+{% endblock %}
+{% block datatable_top_row %}
+    <p>
+        View, edit and modify price list data.
+    </p>
+    <div class="col s12 m2">
+        <a class="waves-btn btn green" href="{% url 'pricing:pricelist-create' %}">Create
+            New Price
+            List</a>
+    </div>
+    <div class="col s12 m6">
+    </div>
+    <div class="col s12 m4">
+        <div class="card">
+
+            <form action="" method="get">
+                {% csrf_token %}
+
+                <div class="card-content">
+
+                    <div class="switch">
+                        <label>
+                            Show All Prices in Date Range Per Item
+                            <input id='latest_checkbox' type="checkbox"
+                                    {% if latest_checked %}
+                                   checked="checked" {% endif %}/>
+                            <span class="lever"></span>
+                            Show Latest Price Per Item
+                        </label>
+                    </div>
+                    <p id="date_pickers">
+                        <label id="from_date">
+                            <input name="from_date" type="text" class="datepicker">
+                            <span>From this Day</span>
+                        </label>
+                        <label id="to_date">
+                            <input name="to_date" type="text" class="datepicker">
+                            <span>Upto this Day</span>
+                        </label>
+                    </p>
+                </div>
+                <div class="card-action">
+                    <button class="btn waves-effect waves-light" type="submit"
+                            value="Submit">Change Filter Settings
+                        <i class="material-icons right">send</i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block datatable_footer %}
+    <script src="{% static 'pricing/js/item_price_db.js' %}"
+            type="text/javascript"></script>
+    <script type="text/javascript">
+    (function ($) {
+        function update_filter_form() {
+            const show_latest = $('#latest_checkbox').is(':checked')
+            if (show_latest) {
+                console.log('TRUE')
+                $('#date_pickers').hide()
+            } else {
+                console.log('FALSE')
+                $('#date_pickers').show()
+            }
+        }
+
+        $('#latest_checkbox').on('change paste keyup', update_filter_form)
+        update_filter_form()
+    })($)
+    </script>
+{% endblock %}

@@ -535,7 +535,7 @@
     {% endif %}
 </ul>
 
-<main class="container">
+<main class="container" style="max-width:2440px;">
     {% if messages %}
         <div class="section">
             {% for m in messages %}
@@ -553,6 +553,8 @@
     {% block body %}
     {% endblock %}
 </main>
+{% block otherbody %}
+{% endblock %}
 {% block footer %}
     <footer class="page-footer blue-grey lighten-2">
         <div class="container">

@@ -2,13 +2,17 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-name=${1:-}
+mode=${1:-}
+user=${2:-}
+url=${3:-}
+server_dest=${4:-/home/${DBUSER}}
+local_dest=${5:-$HOME}
 # ssh to server and make server dump
-if [ "$name" = "download" ]; then
-    ssh thejanitor@goosetools.com "pg_dump -U goosetools_user -Fc --dbname=postgresql://goosetools_user:${DBPASS}@localhost/goosetools > /home/thejanitor/dump.dump"
-    scp thejanitor@goosetools.com:~/dump.dump /home/nigel/
+if [ "$mode" = "download" ]; then
+    ssh "${user}"@"${url}" "pg_dump -U ${DBUSER} -Fc --dbname=${DBCONN} > ${server_dest}/dump.dump"
+    scp "${user}"@"${url}":"${server_dest}"/dump.dump "${local_dest}"
 fi
-sudo cp /home/nigel/dump.dump /home/postgres/dump.dump
+sudo cp "${local_dest}"/dump.dump /home/postgres/dump.dump
 sudo chown -R postgres:postgres /home/postgres/
 sudo -H -u postgres psql << EOF
 SELECT

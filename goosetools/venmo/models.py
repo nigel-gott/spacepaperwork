@@ -132,6 +132,10 @@ def create_access_controller():
     return CrudAccessController.objects.create()
 
 
+def create_access_controller_id():
+    return CrudAccessController.objects.create().id
+
+
 def _generate_commands_under_length(
     message_sender, prefix, postfix, command_generator, data
 ):

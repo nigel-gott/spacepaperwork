@@ -1,5 +1,4 @@
 from django.urls import include, path
-from items.querysets import ItemDbQuerySet
 from rest_framework import routers
 
 from goosetools.items.autocomplete import (
@@ -9,6 +8,7 @@ from goosetools.items.autocomplete import (
     ItemTypeAutocomplete,
     SystemAutocomplete,
 )
+from goosetools.items.querysets import ItemDbQuerySet
 from goosetools.items.views import (
     ItemChangeProposalList,
     all_items,

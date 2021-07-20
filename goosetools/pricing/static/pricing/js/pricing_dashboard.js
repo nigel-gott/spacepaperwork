@@ -18,6 +18,12 @@ $(function () {
                         return `<a class="edit-btn green-text" href="${view_url}">${data}</a>`
                     }
                 },
+                {"data": "id", "title": "Data",
+                    render: function (data, type, row) {
+                        view_url = page_data["view_data_url"] + "?pricelist_id=" + data
+                        return `<a class="edit-btn green-text" href="${view_url}">View Data</a>`
+                    }
+                },
                 {
                     "data": "id", "title": "Actions",
                     "class": "right-align",

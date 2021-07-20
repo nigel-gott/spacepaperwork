@@ -1,22 +1,24 @@
 {% extends "core/base.html" %}
 {% load static %}
 {% block body %}
-    {% block datatable_above %}
-    {% endblock %}
-    <div class="row">
-        <div class="col s12 m12">
-            <h5>
-                {% block datatable_title %}
+    <div>
+        {% block datatable_above %}
+        {% endblock %}
+        <div class="row">
+            <div class="col s12 m12">
+                <h5>
+                    {% block datatable_title %}
+                    {% endblock %}
+                </h5>
+                {% block datatable_top_row %}
                 {% endblock %}
-            </h5>
-            {% block datatable_top_row %}
-            {% endblock %}
-            <div class="divider"></div>
+                <div class="divider"></div>
+            </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col s12 m12">
-            <table id="datatable"></table>
+        <div class="row">
+            <div class="col s12 m12">
+                <table id="datatable"></table>
+            </div>
         </div>
     </div>
 {% endblock %}

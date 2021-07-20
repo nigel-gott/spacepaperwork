@@ -37,11 +37,14 @@
             {% for field in form.hidden_fields %}
                 {{ field }}
             {% endfor %}
-            {% for field in form.visible_fields %}
-                <div class="row">
-                    {{ field|materializecss:'s12 m12' }}
-                </div>
-            {% endfor %}
+            <div id="core_form">
+
+                {% for field in form.visible_fields %}
+                    <div class="row">
+                        {{ field|materializecss:'s12 m12' }}
+                    </div>
+                {% endfor %}
+            </div>
 
             {% include 'users/includes/access_controller_form.html' with formset=form.formset title="Price List" %}
 
@@ -55,6 +58,29 @@
 
 {% block extrafooter %}
     {% include 'users/includes/access_controller_form_extra_footer.html' with formset=form.formset %}
+    <script>
+    (function ($) {
+        function update_fields_based_on_api() {
+            const api_type = $('#id_api_type').find('option:selected').val()
+            const $idGoogleSheetId = $('#id_google_sheet_id')
+            const $idGoogleSheetCellRange = $('#id_google_sheet_cell_range')
+            if (api_type === 'google_sheet') {
+                $idGoogleSheetId.attr('disabled', false)
+                $idGoogleSheetId.parent().parent().show()
+                $idGoogleSheetCellRange.attr('disabled', false)
+                $idGoogleSheetCellRange.parent().parent().show()
+            } else {
+                $idGoogleSheetId.attr('disabled', true)
+                $idGoogleSheetId.parent().parent().hide()
+                $idGoogleSheetCellRange.attr('disabled', true)
+                $idGoogleSheetCellRange.parent().parent().hide()
+            }
+        }
+
+        $('#id_api_type').on('change paste keyup', update_fields_based_on_api)
+        update_fields_based_on_api()
+    })($)
+    </script>
 {% endblock %}
 {% block initfooter %}
 {% endblock %}
