@@ -24,10 +24,12 @@ from goosetools.tenants.models import SiteUser
 from goosetools.tests.django_test_case import DjangoTestCase
 from goosetools.users.models import (
     BASIC_ACCESS,
+    LOOT_TRACKER,
     USER_ADMIN_PERMISSION,
     Character,
     Corp,
     GooseGroup,
+    GoosePermission,
     GooseUser,
 )
 
@@ -52,6 +54,7 @@ class GooseToolsTestCase(DjangoTestCase):
         self.site_user = SiteUser.create("Test Goose User#1234")
         self.basic_access_group = GooseGroup.objects.create(name="basic_access")
         self.basic_access_group.link_permission(BASIC_ACCESS)
+        self.basic_access_group.link_permission(LOOT_TRACKER)
         self.user_admin_group = GooseGroup.objects.create(name="user_admin_group")
         self.user_admin_group.link_permission(USER_ADMIN_PERMISSION)
         self.user = GooseUser.objects.create(
@@ -121,8 +124,22 @@ class GooseToolsTestCase(DjangoTestCase):
             "loot_type": "Master Looter",
             "name": fleet_name,
             "gives_shares_to_alts": gives_shares_to_alts,
-            "form-TOTAL_FORMS": 0,
-            "form-INITIAL_FORMS": 0,
+            "form-TOTAL_FORMS": 2,
+            "form-INITIAL_FORMS": 2,
+            "form-0-control": "view",
+            "form-0-allow_or_deny": "allow",
+            "form-0-existing_entity": "",
+            "form-0-permission": GoosePermission.objects.get(name=BASIC_ACCESS).id,
+            "form-0-corp": "",
+            "form-0-user": "",
+            "form-0-DELETE": "",
+            "form-1-control": "use",
+            "form-1-allow_or_deny": "allow",
+            "form-1-existing_entity": "",
+            "form-1-permission": GoosePermission.objects.get(name=BASIC_ACCESS).id,
+            "form-1-corp": "",
+            "form-1-user": "",
+            "form-1-DELETE": "",
         }
         if end_date:
             args["end_date"] = end_date

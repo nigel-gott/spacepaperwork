@@ -25,8 +25,8 @@
               {{ fleet.name }} run by {{ fleet.fc.display_name }}</span>
                     <b>Start: {{ fleet.start }} ({{ fleet.human_readable_started }})
                         {% if fleet.auto_end %}
-                            <br/>End: {{ fleet.auto_end }} (
-                            {{ fleet.human_readable_ended }})
+                            <br/>
+                            End: {{ fleet.auto_end }} ({{ fleet.human_readable_ended }})
                         {% else %}
                             {% if fleet.expected_duration %}
                                 <br/> Duration: {{ fleet.expected_duration }}

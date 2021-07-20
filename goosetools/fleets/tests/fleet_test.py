@@ -401,10 +401,9 @@ class FleetTest(GooseToolsTestCase):
         )
 
         member_to_make_admin = other_users_fleet_members[0]
-        self.assertFalse(member_to_make_admin.admin_permissions)
+        self.assertFalse(fleet.has_admin(self.other_user))
         self.post(reverse("fleet_make_admin", args=[member_to_make_admin.id]))
-        member_to_make_admin.refresh_from_db()
-        self.assertTrue(member_to_make_admin.admin_permissions)
+        self.assertTrue(fleet.has_admin(self.other_user))
 
     def test_fc_can_remove_someone_as_fleet_admin(self):
         fleet = self.there_is_a_fleet_where_other_user_is_an_admin()
@@ -413,10 +412,10 @@ class FleetTest(GooseToolsTestCase):
         )
 
         admin = other_users_fleet_members[0]
-        self.assertTrue(admin.admin_permissions)
+        self.assertTrue(fleet.has_admin(self.other_user))
         self.post(reverse("fleet_remove_admin", args=[admin.id]))
         admin.refresh_from_db()
-        self.assertFalse(admin.admin_permissions)
+        self.assertFalse(fleet.has_admin(self.other_user))
 
     def test_non_admin_cant_make_someone_a_fleet_admin(self):
         fleet = self.a_fleet()
@@ -431,12 +430,12 @@ class FleetTest(GooseToolsTestCase):
         )
 
         member_to_make_admin = other_users_fleet_members[0]
-        self.assertFalse(member_to_make_admin.admin_permissions)
+        self.assertFalse(fleet.has_admin(self.other_user))
         errors = self.post_expecting_error(
             reverse("fleet_make_admin", args=[member_to_make_admin.id])
         )
         self.assertEqual(errors, ["You are forbidden to access this."])
-        self.assertFalse(member_to_make_admin.admin_permissions)
+        self.assertFalse(fleet.has_admin(self.other_user))
 
     def test_fc_can_manually_add_fleet_members(self):
         fleet = self.a_fleet()
@@ -462,8 +461,6 @@ class FleetTest(GooseToolsTestCase):
         self.post(reverse("fleet_make_admin", args=[member_to_make_admin.id]))
 
         self.client.force_login(self.other_site_user)
-
-        new_fleet_members = self.get_fleet_members_for_user(fleet, self.other_user)
 
         s = SiteUser.create("A Brand New Test Goose User")
         new_user = GooseUser.objects.create(site_user=s)
