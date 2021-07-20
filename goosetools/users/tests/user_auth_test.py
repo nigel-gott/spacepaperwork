@@ -51,8 +51,6 @@ def mock_discord_returns_with_uid(
 
 @freeze_time("2012-01-14 12:00:00")
 class UserAuthTest(GooseToolsTestCase):
-    # fixtures = ["goosetools/users/fixtures/test/test.json"]
-
     def setUp(self):
         super().setUp()
         site, _ = Site.objects.get_or_create(
@@ -66,6 +64,8 @@ class UserAuthTest(GooseToolsTestCase):
             key="",
         )
         app.sites.add(site)
+        for site in Site.objects.all():
+            app.sites.add(site)
         user_admin_group, _ = GooseGroup.objects.get_or_create(name="user_admin_group")
         user_admin_group.link_permission(USER_ADMIN_PERMISSION)
         self.user_admin_group = user_admin_group
@@ -378,7 +378,7 @@ class UserAuthTest(GooseToolsTestCase):
                 },
             )
 
-    @override_settings(PRONOUN_ROLES="on")
+    @override_settings(PRONOUN_ROLES="on", PRONOUN_THEY_DISCORD_ROLE="THEY")
     def test_signing_up_gives_preffered_pronoun_role_if_specified(
         self,
     ):
@@ -393,9 +393,7 @@ class UserAuthTest(GooseToolsTestCase):
                 json={"meh": "what"},
                 headers={"content-type": "application/json"},
             )
-            m.put(
-                "https://discord.com/api/guilds/guildid/members/3/roles/762405572136927242"
-            )
+            m.put("https://discord.com/api/guilds/guildid/members/3/roles/THEY")
             mock_discord_returns_with_uid(m, "3", roles=["1234"])
             self.client.logout()
             self.client.get(reverse("discord_login"), follow=True)

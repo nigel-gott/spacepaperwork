@@ -6,6 +6,7 @@ from goosetools.ownership.models import TransferLog
 from goosetools.tenants.models import SiteUser
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase, isk
 from goosetools.users.models import LOOT_TRACKER, Character, GooseGroup, GooseUser
+from goosetools.venmo.models import TransferMethod
 
 
 class MarketOrderTestCase(GooseToolsTestCase):
@@ -13,6 +14,17 @@ class MarketOrderTestCase(GooseToolsTestCase):
         super().setUp()
         loot_tracker_group, _ = GooseGroup.objects.get_or_create(name="loot_tracker")
         loot_tracker_group.link_permission(LOOT_TRACKER)
+        self.transfer_method = TransferMethod.objects.create(
+            name="eggs",
+            transfer_type="generate_command",
+            default=True,
+            deposit_command_format="/deposit TOTAL_TRANSFER_AMOUNT",
+            transfer_prefix_command_format="/bulk transfer: ",
+            transfer_user_command_format="USER_TO_TRANSFER_TO USER_TRANSFER_AMOUNT ",
+            transfer_postfix_command_format="",
+        )
+        self.transfer_method.access_controller.give_admin(self.user)
+        self.transfer_method.access_controller.give_admin(self.other_user)
         self.user.give_group(loot_tracker_group)
         self.other_user.give_group(loot_tracker_group)
 
@@ -36,7 +48,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         response = self.client.post(
             reverse("transfer_profit"),
-            {"own_share_in_eggs": False, "transfer_method": "eggs"},
+            {"own_share_in_eggs": False, "transfer_method": self.transfer_method.id},
         )
         self.assertEqual(response.status_code, 302)
 
@@ -45,8 +57,12 @@ class MarketOrderTestCase(GooseToolsTestCase):
         self.assertEqual(self.user.isk_balance(), isk("0"))
         self.assertEqual(self.user.egg_balance(), isk("8500"))
         log = TransferLog.objects.all()[0]
-        self.assertEqual(log.deposit_command, "$deposit 0")
-        self.assertEqual(log.transfer_command, "no one to transfer to")
+        self.assertEqual(log.deposit_command, "/deposit 0")
+        self.assertEqual(
+            log.transfer_command.strip(),
+            "No users were transferred isk by this command as you were the only "
+            "person with shares.",
+        )
 
     def test_anom_loot_gets_split_correctly_between_two_people_when_sold(self):
         # Given there is a basic fleet with a single item split between two different people:
@@ -69,7 +85,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         response = self.client.post(
             reverse("transfer_profit"),
-            {"own_share_in_eggs": True, "transfer_method": "eggs"},
+            {"own_share_in_eggs": True, "transfer_method": self.transfer_method.id},
         )
         self.assertEqual(response.status_code, 302)
 
@@ -86,8 +102,8 @@ class MarketOrderTestCase(GooseToolsTestCase):
         self.assertEqual(self.other_user.egg_balance(), isk("4037"))
         log = TransferLog.objects.all()[0]
         # The seller indicated they wanted their own share in eggs so the deposit command includes all profit.
-        self.assertEqual(log.deposit_command, "$deposit 8500")
-        self.assertEqual(log.transfer_command, "$bulk\n<@2> 4037\n")
+        self.assertEqual(log.deposit_command, "/deposit 8500")
+        self.assertEqual(log.transfer_command, "/bulk transfer: <@2> 4037 ")
         # The seller can later mark the transfer as all done
         # However this is just a graphical display indicator to help sellers track which transfers have been completed, and has no impact on internal balances.
         self.assertEqual(log.all_done, False)
@@ -135,7 +151,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         response = self.client.post(
             reverse("transfer_profit"),
-            {"own_share_in_eggs": True, "transfer_method": "eggs"},
+            {"own_share_in_eggs": True, "transfer_method": self.transfer_method.id},
         )
         self.assertEqual(response.status_code, 302)
 
@@ -145,9 +161,10 @@ class MarketOrderTestCase(GooseToolsTestCase):
         self.assertEqual(self.user.egg_balance(), isk("100"))
         log = TransferLog.objects.all()[0]
         # The seller indicated they wanted their own share in eggs so the deposit command includes all profit.
-        self.assertEqual(log.deposit_command, "$deposit 8500")
+        self.assertEqual(log.deposit_command, "/deposit 8500")
         self.assertIn(
-            "NEW MESSAGE TO AVOID DISCORD CHARACTER LIMIT", log.transfer_command
+            "SPLIT INTO SEPARATE DISCORD COMMAND DUE TO DISCORD CHARACTER LIMIT",
+            log.transfer_command,
         )
         # The seller can later mark the transfer as all done
         # However this is just a graphical display indicator to help sellers track which transfers have been completed, and has no impact on internal balances.
@@ -176,7 +193,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         response = self.client.post(
             reverse("transfer_profit"),
-            {"own_share_in_eggs": False, "transfer_method": "eggs"},
+            {"own_share_in_eggs": False, "transfer_method": self.transfer_method.id},
         )
         self.assertEqual(response.status_code, 302)
 
@@ -193,8 +210,8 @@ class MarketOrderTestCase(GooseToolsTestCase):
         self.assertEqual(self.other_user.egg_balance(), isk("4037"))
         log = TransferLog.objects.all()[0]
         # The seller indicated they wanted their own share in isk so the deposit command only includes the other players shares.
-        self.assertEqual(log.deposit_command, "$deposit 4037")
-        self.assertEqual(log.transfer_command, "$bulk\n<@2> 4037\n")
+        self.assertEqual(log.deposit_command, "/deposit 4037")
+        self.assertEqual(log.transfer_command, "/bulk transfer: <@2> 4037 ")
         # The seller can later mark the transfer as all done
         # However this is just a graphical display indicator to help sellers track which transfers have been completed, and has no impact on internal balances.
         self.assertEqual(log.all_done, False)
@@ -217,7 +234,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         response = self.client.post(
             reverse("transfer_profit"),
-            {"own_share_in_eggs": False, "transfer_method": "eggs"},
+            {"own_share_in_eggs": False, "transfer_method": self.transfer_method.id},
         )
         self.assertEqual(response.status_code, 302)
         messages = list(get_messages(response.wsgi_request))
@@ -272,7 +289,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
 
         response = self.client.post(
             reverse("transfer_profit"),
-            {"own_share_in_eggs": False, "transfer_method": "eggs"},
+            {"own_share_in_eggs": False, "transfer_method": self.transfer_method.id},
         )
         self.assertEqual(response.status_code, 302)
         messages = list(get_messages(response.wsgi_request))
@@ -325,7 +342,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
         # We transfer only that half sold so far
         response = self.client.post(
             reverse("transfer_profit"),
-            {"own_share_in_eggs": False, "transfer_method": "eggs"},
+            {"own_share_in_eggs": False, "transfer_method": self.transfer_method.id},
         )
         self.assertEqual(response.status_code, 302)
         messages = list(get_messages(response.wsgi_request))
@@ -339,7 +356,8 @@ class MarketOrderTestCase(GooseToolsTestCase):
             "Sold 5 of item Tritanium x 10 @ Space On Test Char(Test Goose User)",
         )
         self.assertEqual(
-            "Generated Deposit and Transfer commands for Ƶ 40,000.00 eggs from 5 sold items!.",
+            "Generated Deposit and Transfer commands for Ƶ 40,000.00 ISK from 5 sold "
+            "items!.",
             str(messages[1]),
         )
 
@@ -357,7 +375,7 @@ class MarketOrderTestCase(GooseToolsTestCase):
         # We transfer The other half
         response = self.client.post(
             reverse("transfer_profit"),
-            {"own_share_in_eggs": False, "transfer_method": "eggs"},
+            {"own_share_in_eggs": False, "transfer_method": self.transfer_method.id},
         )
 
         self.assertEqual(self.user.isk_balance(), isk(0))

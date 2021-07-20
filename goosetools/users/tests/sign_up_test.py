@@ -5,7 +5,12 @@ from django.urls.base import reverse
 from freezegun import freeze_time
 
 from goosetools.tests.goosetools_test_case import GooseToolsTestCase
-from goosetools.users.models import AuthConfig, DiscordGuild
+from goosetools.users.models import (
+    USER_ADMIN_PERMISSION,
+    AuthConfig,
+    DiscordGuild,
+    GooseGroup,
+)
 
 
 def mock_discord_returns_with_uid(
@@ -36,7 +41,7 @@ def mock_discord_returns_with_uid(
 
 
 @freeze_time("2012-01-14 12:00:00")
-class UserAuthTest(GooseToolsTestCase):
+class SignUpTestTest(GooseToolsTestCase):
     def setUp(self):
         super().setUp()
         site, _ = Site.objects.get_or_create(
@@ -50,6 +55,11 @@ class UserAuthTest(GooseToolsTestCase):
             key="",
         )
         app.sites.add(site)
+        for site in Site.objects.all():
+            app.sites.add(site)
+        user_admin_group, _ = GooseGroup.objects.get_or_create(name="user_admin_group")
+        user_admin_group.link_permission(USER_ADMIN_PERMISSION)
+        self.user_admin_group = user_admin_group
 
     def test_when_signup_required_and_conduct_set_splash_page_links_to_conduct_first(
         self,
@@ -59,6 +69,7 @@ class UserAuthTest(GooseToolsTestCase):
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
             self.client.get(reverse("core:splash"), follow=True)
+            self.client.get(reverse("discord_login"), follow=True)
             conduct = self.client.get(reverse("core:conduct"), follow=True)
             self.assertIn(
                 "CUSTOM CODE OF CONDUCT",
@@ -79,14 +90,19 @@ class UserAuthTest(GooseToolsTestCase):
                 active=True, code_of_conduct="CUSTOM CODE OF CONDUCT"
             )
             self.user.give_group(self.user_admin_group)
-            self.post(
+            response = self.post(
                 reverse("code_of_conduct_edit"),
                 {"code_of_conduct": "NEW DIFFERENT CODE"},
             )
+            self.assert_messages(
+                response, [("success", "Updated your Code of Conduct!")]
+            )
+            self.assertEqual(response.status_code, 302)
             mock_discord_returns_with_uid(m, "3")
             self.client.logout()
-            self.client.get(reverse("core:splash"), follow=True)
+            self.client.get(reverse("discord_login"), follow=True)
             conduct = self.client.get(reverse("core:conduct"))
+            self.assertEqual(conduct.status_code, 200)
             self.assertIn(
                 "NEW DIFFERENT CODE",
                 str(conduct.content, encoding="utf-8"),

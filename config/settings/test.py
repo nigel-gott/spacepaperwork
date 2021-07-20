@@ -53,3 +53,6 @@ LOGIN_REQUIRED_IGNORE_VIEW_NAMES = LOGIN_REQUIRED_IGNORE_VIEW_NAMES + [
     "profile_url",
     "set_uid",
 ]
+
+URL_PREFIX = ""
+SINGLE_TENANT = True
