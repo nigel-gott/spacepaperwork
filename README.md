@@ -15,7 +15,7 @@
  docker-compose -f local.yml up --build
  ```
 
-1. Visit your new site running at http://0.0.0.0:8000/
+1. Visit your new site running at http://localhost:8000/
 1. Trigger any crons that need to be run (import market data, sync discord roles
    etc): ```./docker_managepy.sh runcrons```
 1. Get an interactive python shell into goosetools
@@ -59,12 +59,12 @@
     ```
     ./manage.py runserver_plus
     ```
-1. Visit and Sign Up On http://localhost:8000/goosetools
+1. Visit and Sign Up On http://localhost:8000/
 1. Import market data using:
     ```
     ./manage.py runjobs hourly
     ```
-1. Get an interactive python shell into goosetools:
+1. Get an interactive python shell into spacepaperwork:
     ```
     ./manage.py shell_plus
     ```

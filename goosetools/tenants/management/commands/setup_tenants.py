@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from django.utils import timezone
 
 from goosetools.tenants.models import Client, Domain, SiteUser
 from goosetools.users.handlers import setup_tenant
@@ -21,7 +20,7 @@ class Command(BaseCommand):
                     created_on="3030-01-01",
                     on_trial=False,
                 )
-                d = Domain(domain="0.0.0.0", is_primary=True, tenant=tenant)
+                d = Domain(domain="localhost", is_primary=True, tenant=tenant)
                 d.save()
                 setup_tenant(
                     tenant,
