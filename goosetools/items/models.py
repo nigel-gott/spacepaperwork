@@ -56,21 +56,25 @@ class Item(models.Model):
     )
 
     def latest_market_data(self):
-        return self.itemmarketdataevent_set.filter(price_list__default=True).order_by("-time").first()
+        return (
+            self.itemmarketdataevent_set.filter(price_list__default=True)
+            .order_by("-time")
+            .first()
+        )
 
     def min_of_last_x_hours(self, hours):
         time_threshold = timezone.now() - timezone.timedelta(hours=hours)
-        default_set = self.itemmarketdataevent_set.filter(
-            price_list__default=True
-        )
-        min_price = default_set.filter(
-            time__gte=time_threshold,
-        ).aggregate(min_lowest_sell=Min("lowest_sell"))["min_lowest_sell"]
-        min_price_other = default_set.filter(
-            time__gte=time_threshold,
-        ).aggregate(min_sell=Min("sell"))["min_sell"]
+        default_set = self.itemmarketdataevent_set.filter(price_list__default=True)
+        min_price = default_set.filter(time__gte=time_threshold,).aggregate(
+            min_lowest_sell=Min("lowest_sell")
+        )["min_lowest_sell"]
+        min_price_other = default_set.filter(time__gte=time_threshold,).aggregate(
+            min_sell=Min("sell")
+        )["min_sell"]
         datapoints_used = (
-            default_set.filter(time__gte=time_threshold, )
+            default_set.filter(
+                time__gte=time_threshold,
+            )
             .values("lowest_sell")
             .distinct()
             .count()

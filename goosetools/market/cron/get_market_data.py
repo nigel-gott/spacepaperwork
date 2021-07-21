@@ -44,7 +44,9 @@ class GetMarketData(CronJobBase):
                         try:
                             item = Item.objects.get(eve_echoes_market_id=market_id)
                             lowest_sell = decimal_or_none(line[5])
-                            for ee_pl in PriceList.objects.filter(api_type='eve_echoes_market'):
+                            for ee_pl in PriceList.objects.filter(
+                                api_type="eve_echoes_market"
+                            ):
                                 ItemMarketDataEvent.objects.update_or_create(
                                     price_list=ee_pl,
                                     item=item,

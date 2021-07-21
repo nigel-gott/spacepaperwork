@@ -167,7 +167,7 @@ class ShipOrderTest(GooseToolsTestCase):
             reverse("industry:shiporder-claim", args=[ship_order.pk]), follow=True
         )
         last_url, _ = r.redirect_chain[-1]
-        self.assertEqual(last_url, "/home/")
+        self.assertEqual(last_url, "/")
         self.assert_messages(
             r,
             [("error", "You are not yet approved and cannot access this page.")],
@@ -1030,7 +1030,7 @@ class ShipOrderTest(GooseToolsTestCase):
         self.client.force_login(s)
         r = self.client.get(reverse("industry:shiporder-list"), follow=True)
         last_url, _ = r.redirect_chain[-1]
-        self.assertEqual(last_url, "/home/")
+        self.assertEqual(last_url, "/")
         self.assert_messages(
             r,
             [("error", "You are not yet approved and cannot access this page.")],

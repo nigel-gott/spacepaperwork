@@ -549,7 +549,7 @@ class FleetTest(GooseToolsTestCase):
         self.client.force_login(s)
         r = self.client.get(reverse("fleet"), follow=True)
         last_url, _ = r.redirect_chain[-1]
-        self.assertIn("home", last_url)
+        self.assertIn("/", last_url)
         self.assert_messages(
             r,
             [("error", "You are not yet approved and cannot access this page.")],
