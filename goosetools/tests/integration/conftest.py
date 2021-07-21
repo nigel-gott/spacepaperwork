@@ -36,6 +36,7 @@ def wait_for_url(url):
         wait_until_responsive(
             timeout=timeout_seconds, pause=0.2, check=lambda: is_responsive(url)
         )
+        return url
     except WaitTimeoutException:
         pytest.fail(f"Test timed out after {timeout_seconds}s waiting for {url}.")
 
@@ -56,13 +57,9 @@ def browser():
 
 
 @pytest.fixture(scope="session")
-def http_service():
+def wait_for_django_on_8000():
     """Ensure that HTTP service is up and responsive."""
-    url = "http://{}:{}/".format("django", 8000)
-    wait_for_url(url)
-
-    return url
-    # `port_for` takes a container port and returns the corresponding host port
+    return wait_for_url("http://localhost:8000/")
 
 
 def is_responsive(url):

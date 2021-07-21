@@ -23,6 +23,12 @@ def core_splash(request):
 
 
 def core_home(request):
+    if (
+        not hasattr(request.user, "gooseuser")
+        or not request.gooseuser.is_authed_and_approved()
+        and not request.gooseuser.latest_app()
+    ):
+        return HttpResponseRedirect(reverse("core:splash"))
     context = {}
     if not settings.SINGLE_TENANT:
         context[

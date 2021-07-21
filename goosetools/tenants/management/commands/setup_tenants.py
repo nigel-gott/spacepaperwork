@@ -10,6 +10,9 @@ class Command(BaseCommand):
     COMMAND_NAME = "setup_tenants"
     help = "Creates an initial tenant if in single tenant mode"
 
+    def add_arguments(self, parser):
+        parser.add_argument("--extra_domains", type=str, action="store")
+
     def handle(self, *args, **options):
         if not Client.objects.exists() and settings.SINGLE_TENANT:
             with transaction.atomic():
@@ -22,6 +25,9 @@ class Command(BaseCommand):
                 )
                 d = Domain(domain="localhost", is_primary=True, tenant=tenant)
                 d.save()
+                for domain in options.get("extra_domains", "").split(","):
+                    d = Domain(domain=domain, is_primary=False, tenant=tenant)
+                    d.save()
                 setup_tenant(
                     tenant,
                     SiteUser.objects.first(),

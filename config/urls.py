@@ -1,5 +1,3 @@
-"""goldengoose URL Configuration
-"""
 from django.conf import settings
 from django.conf.urls import include
 from django.contrib import admin

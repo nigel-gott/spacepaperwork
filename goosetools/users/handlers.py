@@ -57,7 +57,7 @@ def setup_tenant(tenant, site_user, data):
             name="DEFAULT",
             full_name="Default Corp",
             description=f"Initial Corp created on Sign Up by {settings.SITE_NAME}",
-            auto_approve=True,
+            auto_approve=False,
             public_corp=True,
             manual_group_given_on_approval=default_user_group,
         )

@@ -12,8 +12,8 @@ services:
       - postgres_test
     volumes:
       - .:/app
+      - ./.envs/.test/.django/:/app/.env
     env_file:
-      - ./.envs/.test/.django
       - ./.envs/.test/.postgres
     command: /start
 

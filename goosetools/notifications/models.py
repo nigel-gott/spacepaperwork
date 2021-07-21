@@ -184,16 +184,6 @@ class ContractRequestedNotification(StackableUserNotification):
         )
 
 
-NOTIFICATION_TYPES["fully_open_site"] = UnStackablePermissionNotification(
-    ALL_CORP_ADMIN,
-    "fully_open_site",
-    RenderedNotification(
-        "Anyone can join your site without approval",
-        "error",
-        reverse_lazy("corps_list"),
-    ),
-    send_on_new_org=True,
-)
 NOTIFICATION_TYPES["discord_not_setup"] = UnStackablePermissionNotification(
     DISCORD_ADMIN_PERMISSION,
     "discord_not_setup",

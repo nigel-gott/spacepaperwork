@@ -7,6 +7,6 @@ set -o nounset
 
 python manage.py migrate
 python manage.py loaddata goosetools/users/fixtures/dev.json
-python manage.py setup_tenants
+python manage.py setup_tenants --extra_domains=django
 python manage.py loaddata goosetools/industry/fixtures/*.json
-python manage.py runserver_plus
+python manage.py runserver 0.0.0.0:8000

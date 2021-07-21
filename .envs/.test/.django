@@ -6,3 +6,7 @@ STATIC_ROOT=/tmp/goosetools/static/
 SITE_ID=3
 DB_BACKUP_LOCATION=/tmp/goosetools/dbbackup
 USE_DOCKER=True
+SINGLE_TENANT=on
+BOT_TOKEN=token
+URL_PREFIX=
+STUB_DISCORD=on

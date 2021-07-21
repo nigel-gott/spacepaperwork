@@ -25,7 +25,7 @@ def set_uid(request, uid):
     if request.tenant.name == "public":
         return HttpResponseRedirect(reverse("tenants:splash"))
     else:
-        return HttpResponseRedirect(reverse("core:home"))
+        return HttpResponseRedirect(reverse("core:splash"))
 
 
 def profile_url(request):

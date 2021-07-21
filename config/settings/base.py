@@ -201,9 +201,6 @@ SOCIALACCOUNT_PROVIDERS = {
 ACCOUNT_LOGOUT_REDIRECT_URL = "tenants:splash"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
 LOGIN_REDIRECT_URL = "tenants:splash"
-# LOGIN_REDIRECT_URL = 'fleet'
-# https://docs.djangoproject.com/en/dev/ref/settings/#login-url
-LOGIN_URL = "account_login"
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -388,3 +385,32 @@ if RUN_WEEKLY_MARKET_DATA_FULL_SYNC:
     CRON_CLASSES.append(
         "goosetools.market.cron.sync_past_market_data.SyncPastMarketData"
     )
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": True,
+    "filters": {
+        "tenant_context": {"()": "django_tenants.log.TenantContextFilter"},
+    },
+    "formatters": {
+        "tenant_context": {
+            "format": "[%(schema_name)s:%(domain_url)s] "
+            "%(levelname)-7s %(asctime)s %(message)s",
+            "style": "%",
+        },
+    },
+    "handlers": {
+        "console": {
+            "filters": ["tenant_context"],
+            "class": "logging.StreamHandler",
+            "formatter": "tenant_context",
+            "level": "INFO",
+        },
+    },
+    "loggers": {
+        "": {  # 'catch all' loggers by referencing it with the empty string
+            "handlers": ["console"],
+            "level": "INFO",
+        },
+    },
+}
