@@ -27,8 +27,7 @@ repos:
   - repo: local
     hooks:
       - id: pylint
-        language: system
-        name: Run pylint
+        name: pylint
         entry: pylint
-        types: ["python"]
-        pass_filenames: false
+        language: system
+        types: [ python ]
