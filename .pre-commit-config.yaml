@@ -35,3 +35,12 @@ repos:
         entry: bash -c "pylint `git diff --name-only --diff-filter=d HEAD^ | grep -E '\.py$' | tr '\n' ' '`"
         types: ["python"]
         pass_filenames: false
+  # Included so it runs on CI, I recommend manually removing this hook
+  - repo: local
+    hooks:
+      - id: pylint-full
+        language: system
+        name: Run pylint
+        entry: pylint
+        types: ["python"]
+        pass_filenames: false
