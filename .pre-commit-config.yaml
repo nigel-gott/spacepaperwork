@@ -1,6 +1,9 @@
 default_language_version:
   python: python3.8
 
+ci:
+  skip: [pylint]
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
@@ -27,7 +30,8 @@ repos:
   - repo: local
     hooks:
       - id: pylint
-        name: pylint
-        entry: pylint
         language: system
-        types: [ python ]
+        name: Run pylint only on changed files.
+        entry: bash -c "pylint `git diff --name-only --diff-filter=d HEAD^ | grep -E '\.py$' | tr '\n' ' '`"
+        types: ["python"]
+        pass_filenames: false

@@ -41,6 +41,13 @@ jobs:
         with:
           path: ~/.cache/pypoetry/virtualenvs
           key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
+      - run: poetry install
+      - uses: pre-commit/action@v2.0.3
+        env:
+          SKIP: 'pylint'
+      - name: pylint
+        run: |
+          pylint --rcfile=.pylintrc goosetools/
       - name: Test with pytest
         env:
           DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
