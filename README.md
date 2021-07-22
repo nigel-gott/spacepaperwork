@@ -1,4 +1,10 @@
-# GooseTools
+# SpacePaperwork
+
+SpacePaperwork is an Eve Echoes loot tracker + profit splitter + alliance/corp
+management tool tightly integrated with Discord.
+
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/nigel-gott/spacepaperwork/main.svg)](https://results.pre-commit.ci/latest/github/nigel-gott/spacepaperwork/main)
+[![CI](https://github.com/nigel-gott/spacepaperwork/actions/workflows/main.yml/badge.svg)](https://github.com/nigel-gott/spacepaperwork/actions/workflows/main.yml)
 
 # Pre-Requisites
 
