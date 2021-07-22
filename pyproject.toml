@@ -37,6 +37,7 @@ bokeh = "^2.3.1"
 requests_cache = "^0.6.3"
 django_cron = "^0.5.1"
 pytest-xdist = "^2.3.0"
+pytest-env = "^0.6.2"
 
 
 [tool.poetry.dev-dependencies]
