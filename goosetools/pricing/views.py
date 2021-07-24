@@ -117,6 +117,6 @@ class PriceListUpdateView(SuccessMessageMixin, PassRequestToFormViewMixin, Updat
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if not self.object.access_controller.can_delete(self.request.gooseuser):
+        if not self.object.access_controller.can_edit(self.request.gooseuser):
             raise PermissionDenied()
         return context

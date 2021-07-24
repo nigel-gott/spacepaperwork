@@ -64,6 +64,9 @@ class PriceListForm(forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
+        new = self.instance.pk is None
+        if new:
+            self.instance.owner = self.request.gooseuser
         instance = super().save(commit=commit)
 
         handle_permissible_entity_formset(instance.owner, self.formset, instance)
