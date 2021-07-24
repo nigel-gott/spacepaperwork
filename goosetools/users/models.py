@@ -615,6 +615,9 @@ class GooseUser(models.Model):
     def is_authed_and_approved(self):
         return self.site_user.is_authenticated and self.is_approved()
 
+    def is_in_superuser_group(self):
+        return SUPERUSER_GROUP_NAME in self.groups()
+
     def characters(self):
         return self.character_set.all()
 

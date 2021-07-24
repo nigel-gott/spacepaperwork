@@ -56,6 +56,11 @@ class PriceListForm(forms.ModelForm):
                     "range when creating/updating a google sheet "
                     "price list."
                 )
+        if not self.request.gooseuser.is_in_superuser_group() and cleaned_data.get(
+            "default", False
+        ):
+            raise ValidationError("Only superusers can set a price list as default.")
+
         return cleaned_data
 
     def save(self, commit=True):

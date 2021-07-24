@@ -29,17 +29,34 @@ def set_uid(request, uid):
 
 
 def profile_url(request):
+    from goosetools.users.models import GooseUser
+
     uid = str(caches["default"].get("uid", "123456789"))
+    try:
+        user = GooseUser.objects.get(uid=uid)
+        split = user.discord_username().split("#")
+        username = split[0]
+        discriminator = split[1]
+        # noinspection PyProtectedMember
+        # pylint: disable=protected-access
+        extra_data = user._discord_account().extra_data
+    except GooseUser.DoesNotExist:
+        username = "TEST USER" + uid
+        discriminator = "1234"
+        extra_data = {}
+
     return JsonResponse(
         {
             "id": uid,
-            "username": "TEST USER" + uid,
+            "username": username,
             "avatar": "e71b856158d285d6ac6e8877d17bae45",
-            "discriminator": uid,
+            "discriminator": discriminator,
             "public_flags": 0,
             "flags": 0,
             "locale": "en-US",
             "mfa_enabled": True,
+            "extra_data": extra_data,
+            **extra_data,
         }
     )
 
