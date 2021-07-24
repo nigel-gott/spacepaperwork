@@ -121,22 +121,25 @@ GooseJs = function () {
 
     const page_data = JSON.parse(document.getElementById('page-data').textContent)
     return {
-        "datatable": function datatable(column_init_func) {
+        "datatable": function datatable(column_init_func, paginated) {
             const user_data_table_config = column_init_func(page_data)
+            let url = page_data["ajax_url"]
+            let ajax = paginated ? url : {
+                url: url,
+                dataSrc: '',
+                error: function (xhr, error, code) {
+                    console.log(xhr)
+                    console.log(code)
+                    console.log(error)
+                    alert("An error occured getting the data. Please contact @thejanitor on discord.")
+                }
+            }
             const goose_data_table_config = {
                 dom: 'Bfrtip',
                 pageLength: 50,
+                serverSide: paginated,
                 responsive: true,
-                ajax: {
-                    url: page_data["ajax_url"],
-                    dataSrc: '',
-                    error: function (xhr, error, code) {
-                        console.log(xhr)
-                        console.log(code)
-                        console.log(error)
-                        alert("An error occured getting the data. Please contact @thejanitor on discord.")
-                    }
-                },
+                ajax: ajax,
                 buttons: [
                     'excelHtml5',
                     'csvHtml5',

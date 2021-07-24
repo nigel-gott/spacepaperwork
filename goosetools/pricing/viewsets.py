@@ -1,7 +1,15 @@
+import re
+from collections import OrderedDict
+
 from dateutil.parser import parse
+from django.contrib.postgres.search import SearchQuery, SearchVector
+from django.db.models import TextField
+from django.forms import CharField
 from django.utils import timezone
 from rest_framework import mixins
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from goosetools.pricing.models import (
@@ -17,10 +25,74 @@ from goosetools.pricing.serializers import (
 from goosetools.users.models import BASIC_ACCESS, HasGooseToolsPerm
 
 
+class DataTablesServerSidePagination(LimitOffsetPagination):
+    offset_query_param = "start"
+    default_limit = 50
+    limit_query_param = "length"
+    pre_filtered_count = None
+
+    def paginate_queryset(self, queryset, request, view=None):
+        self.pre_filtered_count = self.get_count(queryset)
+        search_term = request.GET.get("search[value]", False)
+        if search_term and view and hasattr(view, "searchable_fields"):
+            search_vector = SearchVector(*view.searchable_fields)
+            queryset = queryset.annotate(search=search_vector).filter(
+                search=SearchQuery(search_term, search_type="websearch")
+            )
+        if view and hasattr(view, "orderable_fields"):
+            orders = []
+            for field in request.GET.keys():
+                if field.startswith("order["):
+                    result = re.search(r"order\[([0-9]+)]\[dir]", field, re.IGNORECASE)
+                    if result:
+                        order_id = int(result.group(1))
+                        col_id = request.GET.get(f"order[{order_id}][column]", False)
+                        direction = request.GET.get(f"order[{order_id}][dir]", False)
+                        if direction and col_id:
+                            data = request.GET.get(f"columns[{col_id}][data]", False)
+                            if data and data in view.orderable_fields:
+                                order_field = view.orderable_fields[data]
+                                order_dir = "-" if direction == "desc" else ""
+                                orders.append(f"{order_dir}{order_field}")
+            queryset = queryset.order_by(*orders)
+
+        return super().paginate_queryset(queryset, request, view)
+
+    def get_paginated_response(self, data):
+        return Response(
+            OrderedDict(
+                [
+                    ("recordsTotal", self.pre_filtered_count),
+                    ("recordsFiltered", self.count),
+                    ("draw", int(self.request.GET.get("draw"))),
+                    ("data", data),
+                ]
+            )
+        )
+
+
 class LatestItemMarketDataEventViewSet(
     mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet
 ):
+    pagination_class = DataTablesServerSidePagination
     permission_classes = [HasGooseToolsPerm.of(BASIC_ACCESS)]
+    searchable_fields = [
+        "item__name",
+        "time",
+        "item__eve_echoes_market_id",
+        "event__unique_user_id",
+    ]
+    orderable_fields = {
+        "event.time": "time",
+        "event.item": "item__name",
+        "event.eve_echoes_market_id": "item__eve_echoes_market_id",
+        "event.unique_user_id": "event__unique_user_id",
+        "event.buy": "event__buy",
+        "event.sell": "event__sell",
+        "event.highest_buy": "event__highest_buy",
+        "event.lowest_sell": "event__lowest_sell",
+        "event.volume": "event__volume",
+    }
 
     serializer_class = LatestItemMarketDataEventSerializer
     queryset = LatestItemMarketDataEvent.objects.all()
@@ -50,10 +122,40 @@ class LatestItemMarketDataEventViewSet(
         )
 
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 50
+
+
+def _searchable(f):
+    not_searchable_types = [TextField, CharField]
+    for t in not_searchable_types:
+        if isinstance(f, t):
+            return True
+    return False
+
+
 class ItemMarketDataEventViewSet(
     mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet
 ):
+    pagination_class = DataTablesServerSidePagination
     permission_classes = [HasGooseToolsPerm.of(BASIC_ACCESS)]
+    searchable_fields = [
+        "item__name",
+        "time",
+        "item__eve_echoes_market_id",
+        "unique_user_id",
+    ]
+    orderable_fields = {
+        "time": "time",
+        "item": "item__name",
+        "eve_echoes_market_id": "item__eve_echoes_market_id",
+        "unique_user_id": "unique_user_id",
+        "buy": "buy",
+        "sell": "sell",
+        "highest_buy": "highest_buy",
+        "lowest_sell": "lowest_sell",
+        "volume": "volume",
+    }
 
     serializer_class = ItemMarketDataEventSerializer
     queryset = ItemMarketDataEvent.objects.all()
