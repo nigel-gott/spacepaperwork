@@ -25,7 +25,7 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
 
 
 def import_price_list(pricelist):
-    output_str = ""
+    output_str = f"Starting import run for {pricelist} at {timezone.now()}\n"
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -48,18 +48,23 @@ def import_price_list(pricelist):
     service = build("sheets", "v4", credentials=creds)
     # Call the Sheets API
     sheet = service.spreadsheets()
-    result = (
-        sheet.values()
-        .get(
-            spreadsheetId=pricelist.google_sheet_id,
-            range=pricelist.google_sheet_cell_range,
+    try:
+        result = (
+            sheet.values()
+            .get(
+                spreadsheetId=pricelist.google_sheet_id,
+                range=pricelist.google_sheet_cell_range,
+            )
+            .execute()
         )
-        .execute()
-    )
-    values = result.get("values", [])
+        values = result.get("values", [])
+    except Exception as e:  # pylint: disable=broad-except
+        output_str += f"FAILED BECAUSE: {e}\n"
+        return output_str
+
     time = timezone.now()
     if not values:
-        output_str += "No data found."
+        output_str += "No data found.\n"
     else:
         i = 0
         success = 0
@@ -96,15 +101,19 @@ def import_price_list(pricelist):
                         success += 1
                     except Exception as e:  # pylint: disable=broad-except
                         fail += 1
-                        output_str += f"Failed parsing prices for {item_name}"
+                        output_str += f"Failed parsing prices for {item_name}\n"
                         output_str += e
-                    output_str += f"Added price for {item_name}"
+                        output_str += "\n"
+                    output_str += f"Added price for {item_name}\n"
             except Exception as e:  # pylint: disable=broad-except
                 fail += 1
-                output_str += f"Failed for row {i}"
+                output_str += f"Failed for row {i}\n"
                 output_str += e
+                output_str += "\n"
             i = i + 1
-        output_str += f"Imported {success} rows, failed to import {fail} rows."
+        output_str += "\n"
+        output_str += f"Imported {success} rows, failed to import {fail} rows.\n"
+        output_str += "\n"
     return output_str
 
 
