@@ -69,17 +69,17 @@ class ItemMarketDataEventViewSet(
 
         from_date_str = self.request.GET.get("from_date", None)
         to_date_str = self.request.GET.get("to_date", None)
-        if not (from_date_str or to_date_str):
+        if from_date_str or to_date_str:
 
             if not from_date_str:
                 from_date = timezone.now() - timezone.timedelta(days=3)
             else:
-                from_date = parse(from_date_str)
+                from_date = timezone.make_aware(parse(from_date_str))
 
             if not to_date_str:
                 to_date = timezone.now()
             else:
-                to_date = parse(to_date_str)
+                to_date = timezone.make_aware(parse(to_date_str))
 
             if from_date > to_date:
                 raise ValidationError("From must be before to date.")
