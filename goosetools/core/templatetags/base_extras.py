@@ -3,6 +3,7 @@ import numbers
 
 from django import template
 from django.db.models.expressions import F
+from django.utils.text import capfirst
 
 from goosetools.contracts.models import Contract
 from goosetools.fleets.models import (
@@ -203,3 +204,8 @@ def index(sequence, position):
 @register.filter
 def multiply_to_price(value, arg):
     return nicemoney(value * arg)
+
+
+@register.filter
+def unsnake(arg):
+    return capfirst(arg.replace("_", " ").replace("-", " "))

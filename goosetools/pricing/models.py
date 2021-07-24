@@ -12,6 +12,8 @@ from goosetools.users.models import (
 )
 from goosetools.venmo.models import create_access_controller
 
+PRICE_LIST_PRICE_TYPES = [("raw_market_data", "raw_market_data"), ("order", "order")]
+
 PRICE_LIST_API_TYPES = [
     ("eve_echoes_market", "eve_echoes_market.com"),
     ("google_sheet", "A Google Sheet"),
@@ -32,6 +34,19 @@ class PriceList(models.Model):
         default=create_access_controller,
     )
     api_type = models.TextField(choices=PRICE_LIST_API_TYPES)
+    price_type = models.TextField(
+        choices=PRICE_LIST_PRICE_TYPES,
+        default="raw_market_data",
+        help_text="Controls how these prices are treated. If raw_market_data then each "
+        "price is just treated as an immutable 'the price for this item at "
+        "this time is this' piece of data. If order then instead treated as "
+        "the fact that you want to buy or sell the volume of the item and if hooked "
+        "up to a shop then will make said order available in the system. The order's "
+        "volume with be automatically decreased as orders are completed in "
+        "the system, unless a new row is imported with a new unique_user_id "
+        "which will update the volume and hence the order quantity to that "
+        "rows volume.",
+    )
     google_sheet_id = models.TextField(null=True, blank=True)
     google_sheet_cell_range = models.TextField(null=True, blank=True)
 
@@ -88,9 +103,8 @@ class PriceList(models.Model):
 
 
 class ItemMarketDataEvent(models.Model):
-    price_list = models.ForeignKey(
-        PriceList, on_delete=models.CASCADE, null=True, blank=True
-    )
+    price_list = models.ForeignKey(PriceList, on_delete=models.CASCADE)
+    unique_user_id = models.TextField(blank=True, null=True)
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     manual_override_price = models.BooleanField(default=False)
     time = models.DateTimeField()
@@ -106,7 +120,23 @@ class ItemMarketDataEvent(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=["price_list", "-time", "item"])]
-        unique_together = (("item", "time"),)
+        unique_together = ["price_list", "unique_user_id", "item", "time"]
 
     def __str__(self):
         return f"Market Price for {self.item}@{self.time}: ls={self.lowest_sell}, hb={self.highest_buy}, s={self.sell}, b={self.buy}"
+
+
+class LatestItemMarketDataEvent(models.Model):
+    price_list = models.ForeignKey(
+        PriceList, on_delete=models.CASCADE, null=True, blank=True
+    )
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    time = models.DateTimeField()
+    event = models.ForeignKey(ItemMarketDataEvent, on_delete=models.CASCADE)
+
+    class Meta:
+        indexes = [models.Index(fields=["price_list", "item", "time"])]
+        unique_together = ["price_list", "item"]
+
+    def __str__(self):
+        return f"Latest {str(self.event)}"

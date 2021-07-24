@@ -1,6 +1,10 @@
 from rest_framework import serializers
 
-from goosetools.pricing.models import ItemMarketDataEvent, PriceList
+from goosetools.pricing.models import (
+    ItemMarketDataEvent,
+    LatestItemMarketDataEvent,
+    PriceList,
+)
 
 
 class PriceListSerializer(serializers.ModelSerializer):
@@ -11,6 +15,8 @@ class PriceListSerializer(serializers.ModelSerializer):
             "owner",
             "name",
             "tags",
+            "api_type",
+            "price_type",
             "default",
         ]
 
@@ -21,6 +27,7 @@ class ItemMarketDataEventSerializer(serializers.ModelSerializer):
     item_type = serializers.CharField(
         source="item.item_type.item_sub_type.item_type.name"
     )
+    item_id = serializers.IntegerField(source="item.id")
     item = serializers.CharField(source="item.name")
     eve_echoes_market_id = serializers.CharField(source="item.eve_echoes_market_id")
 
@@ -29,14 +36,24 @@ class ItemMarketDataEventSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "time",
+            "item_id",
             "item",
             "item_type",
             "item_sub_type",
             "item_sub_sub_type",
             "eve_echoes_market_id",
+            "unique_user_id",
             "sell",
             "buy",
             "lowest_sell",
             "highest_buy",
             "volume",
         ]
+
+
+class LatestItemMarketDataEventSerializer(serializers.ModelSerializer):
+    event = ItemMarketDataEventSerializer()
+
+    class Meta:
+        model = LatestItemMarketDataEvent
+        fields = ["id", "event"]

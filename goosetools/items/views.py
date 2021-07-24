@@ -547,10 +547,11 @@ class DataForm(forms.Form):
     price_list = forms.ModelChoiceField(
         queryset=PriceList.objects.all(), empty_label=None
     )
-    days = forms.IntegerField(initial=14)
+    days = forms.IntegerField(initial=14, required=False)
     style = forms.ChoiceField(
         choices=[("lines", "Lines"), ("bar", "Bar Chart"), ("scatter", "Scatter")],
         initial="lines",
+        required=False,
     )
     show_buy_sell = forms.BooleanField(
         initial=False,
@@ -601,6 +602,7 @@ def item_data(request, pk):
         request,
         "items/item_data.html",
         {
+            "pricelist": price_list,
             "item": item,
             "script": script,
             "div": div,

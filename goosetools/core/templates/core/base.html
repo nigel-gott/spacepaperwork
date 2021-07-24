@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{% block title %}{{ SITE_NAME }}{% endblock %}</title>
+    <title>{% block title %}{{ SITE_NAME }}{% endblock %} - {{ request.url_name|unsnake }}</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
           rel="stylesheet">
     <link href="{% static 'core/css/materialize.css' %}" rel="stylesheet"
@@ -589,14 +589,17 @@ document.addEventListener('DOMContentLoaded', function () {
         var instances = M.FormSelect.init(elems)
     {% endblock %}
     var elems = document.querySelectorAll('.datepicker')
-    var instances = M.Datepicker.init(elems, {
-        showClearBtn: true,
-        defaultDate: Date.now(),
-        setDefaultDate: true,
-        onOpen: function () {
-            this.setDate(new Date())
-        }
-    })
+    if(!window.datesAlreadySet) {
+        console.log('wat')
+        var instances = M.Datepicker.init(elems, {
+            showClearBtn: true,
+            defaultDate: Date.now(),
+            setDefaultDate: true,
+            onOpen: function () {
+                this.setDate(new Date())
+            }
+        })
+    }
     var elems = document.querySelectorAll('.timepicker')
     var instances = M.Timepicker.init(elems, {
         showClearBtn: true,

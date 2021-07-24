@@ -1,55 +1,49 @@
 $(function () {
     Goose = GooseJs()
     table = Goose.datatable(function (page_data, table) {
+        const prefix = page_data["latest_checked"] ? "event." : ""
         return {
             order: [[0, "asc"]],
             columns: [
                 {
-                    "data": "time", "title": "Time"
+                    "data": prefix + "time", "title": "Time"
                 },
                 {
-                    "data": "item", "title": "Item Name",
+                    "data": prefix + "item", "title": "Item Name",
                 },
                 {
-                    "data": "item_type", "title": "Type", "give_filter": true
+                    "data": prefix + "eve_echoes_market_id", "title": "eve_echoes_market_id"
                 },
                 {
-                    "data": "item_sub_type", "title": "Sub Type", "give_filter": true
+                    "data": prefix + "unique_user_id", "title": "unique_user_id"
                 },
                 {
-                    "data": "item_sub_sub_type",
-                    "title": "Sub Sub Type",
-                    "give_filter": true
+                    "data": prefix + "buy", "title": "buy"
                 },
                 {
-                    "data": "eve_echoes_market_id", "title": "eve_echoes_market_id"
+                    "data": prefix + "sell", "title": "sell"
                 },
                 {
-                    "data": "buy", "title": "buy"
+                    "data": prefix + "highest_buy", "title": "highest_buy"
                 },
                 {
-                    "data": "sell", "title": "sell"
+                    "data": prefix + "lowest_sell", "title": "lowest_sell"
                 },
                 {
-                    "data": "highest_buy", "title": "highest_buy"
+                    "data": prefix + "volume", "title": "volume"
                 },
                 {
-                    "data": "lowest_sell", "title": "lowest_sell"
-                },
-                {
-                    "data": "volume", "title": "volume"
-                },
-                {
-                    "data": "id", "title": "Actions",
+                    "data": prefix + "item_id", "title": "Actions",
                     "class": "right-align",
                     "width": "18em",
                     render: function (data, type, row) {
-                        // const propose_url = page_data["propo_url"].replace("0", data)
-                        // let proposeChangeUrl = `<a class="edit-btn green-text" href="${propose_url}">Propose Change</a>`
+                        const price_list = page_data["price_list_id"]
+                        const graph_url = page_data["graph_url"].replace("0", data)
+                        const graph_link = `<a class="edit-btn green-text" href="${graph_url}?price_list=${price_list}&days=14&style=lines">View Graph</a>`
                         // const data_url = page_data["data_url"].replace("0", data)
                         // let dataUrl = `<a class="edit-btn" href="${data_url}">Market Data</a>`
                         // return `${proposeChangeUrl}/${dataUrl}`
-                        return ''
+                        return graph_link
                     }
                 },
             ]

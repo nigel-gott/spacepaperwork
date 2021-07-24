@@ -79,10 +79,12 @@ def import_price_list(pricelist):
                         lowest_sell = parse_price(row[3]) if len(row) > 3 else None
                         highest_buy = parse_price(row[4]) if len(row) > 4 else None
                         volume = parse_price(row[5]) if len(row) > 5 else None
+                        unique_user_id = parse_price(row[6]) if len(row) > 6 else None
                         ItemMarketDataEvent.objects.update_or_create(
                             price_list=pricelist,
                             item=item,
                             time=time,
+                            unique_user_id=unique_user_id,
                             defaults={
                                 "sell": sell,
                                 "buy": buy,

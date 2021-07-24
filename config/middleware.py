@@ -2,6 +2,7 @@ import logging
 
 import pytz
 from django.contrib import auth
+from django.urls import resolve
 from django.utils import timezone, translation
 
 from goosetools.users.models import SiteUser
@@ -41,6 +42,8 @@ class LocaleMiddleware:
         language_code = translation.get_language_from_request(request)
 
         translation.activate(language_code)
+        url_name = resolve(request.path).url_name
+        request.url_name = url_name
 
         response = self.get_response(request)
 

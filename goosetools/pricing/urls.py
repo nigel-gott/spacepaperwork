@@ -10,19 +10,26 @@ from goosetools.pricing.views import (
     pricing_dashboard,
     pricing_data_dashboard,
 )
-from goosetools.pricing.viewsets import ItemMarketDataEventViewSet, PriceListViewSet
+from goosetools.pricing.viewsets import (
+    ItemMarketDataEventViewSet,
+    LatestItemMarketDataEventViewSet,
+    PriceListViewSet,
+)
 
 router = routers.DefaultRouter()
 router.register(r"pricelist", PriceListViewSet)
 router.register(r"itemprice", ItemMarketDataEventViewSet)
+router.register(r"latest_itemprice", LatestItemMarketDataEventViewSet)
 
 app_name = "pricing"
 
 
 urlpatterns = [
     path("api/", include(router.urls)),
-    path("dashboard/", pricing_dashboard, name="pricing_dashboard"),
-    path("data_dashboard/", pricing_data_dashboard, name="pricing_data_dashboard"),
+    path("pricing_dashboard/", pricing_dashboard, name="pricing_dashboard"),
+    path(
+        "pricing_data_dashboard/", pricing_data_dashboard, name="pricing_data_dashboard"
+    ),
     path(
         "pricelist/<int:pk>/update/",
         PriceListUpdateView.as_view(),

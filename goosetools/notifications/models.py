@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 
 from django.db import models
@@ -14,6 +15,8 @@ from goosetools.users.models import (
     GoosePermission,
     GooseUser,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class Notification(models.Model):
@@ -40,9 +43,13 @@ class Notification(models.Model):
         notifications = Notification.for_user(user)
         rendered_notifications = []
         for n in notifications:
-            rendered_n = NOTIFICATION_TYPES[n.type].render(n)
-            rendered_n.id = n.id
-            rendered_notifications.append(rendered_n)
+            if n.type in NOTIFICATION_TYPES:
+                rendered_n = NOTIFICATION_TYPES[n.type].render(n)
+                rendered_n.id = n.id
+                rendered_notifications.append(rendered_n)
+            else:
+                logger.warning(f"Unknown notification type {n.type}")
+
         return rendered_notifications
 
 

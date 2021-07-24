@@ -22,6 +22,7 @@ class PriceListForm(forms.ModelForm):
             "name",
             "description",
             "api_type",
+            "price_type",
             "google_sheet_id",
             "google_sheet_cell_range",
             "default",

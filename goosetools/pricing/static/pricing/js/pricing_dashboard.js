@@ -12,6 +12,16 @@ $(function () {
                     "title": "Owner",
                     "give_filter": true,
                 },
+                {
+                    "data": "api_type",
+                    "title": "api_type",
+                    "give_filter": true,
+                },
+                {
+                    "data": "price_type",
+                    "title": "price_type",
+                    "give_filter": true,
+                },
                 {"data": "name", "title": "Name",
                     render: function (data, type, row) {
                         view_url = page_data["view_url"].replace("0", row['id'])

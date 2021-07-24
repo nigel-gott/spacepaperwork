@@ -2,13 +2,24 @@
 {% load static %}
 
 {% block datatable_title %}
-    Item Database
+    {% if latest_checked %}
+        Latest Item Prices
+    {% elif from_date and to_date %}
+        Prices from {{ from_date }} to {{ to_date }}
+    {% elif from_date %}
+        Prices from {{ from_date }} to Today
+    {% else %}
+        Prices from the start of time to {{ to_date }}
+    {% endif %} for Price List: {{ pricelist }}
 {% endblock %}
 {% block datatable_top_row %}
     <p>
         View, edit and modify price list data.
     </p>
     <div class="col s12 m2">
+        <a class="waves-btn btn" href="{% url 'pricing:pricing_dashboard' %}">
+            Back to Price Lists
+            </a>
         <a class="waves-btn btn green" href="{% url 'pricing:pricelist-create' %}">Create
             New Price
             List</a>
@@ -25,21 +36,21 @@
 
                     <div class="switch">
                         <label>
-                            Show All Prices in Date Range Per Item
-                            <input id='latest_checkbox' type="checkbox"
-                                    {% if latest_checked %}
-                                   checked="checked" {% endif %}/>
+                            Show All Prices in Date Range Per Item {{ latest_checked }}
+                            <input id='latest_checkbox' type="checkbox"/>
                             <span class="lever"></span>
                             Show Latest Price Per Item
                         </label>
                     </div>
                     <p id="date_pickers">
                         <label id="from_date">
-                            <input name="from_date" type="text" class="datepicker">
+                            <input name="from_date" type="text" class="datepicker"
+                                   value="{{ from_date }}">
                             <span>From this Day</span>
                         </label>
                         <label id="to_date">
-                            <input name="to_date" type="text" class="datepicker">
+                            <input name="to_date" type="text" class="datepicker"
+                                   value="{{ to_date }}">
                             <span>Upto this Day</span>
                         </label>
                     </p>
@@ -63,15 +74,21 @@
         function update_filter_form() {
             const show_latest = $('#latest_checkbox').is(':checked')
             if (show_latest) {
-                console.log('TRUE')
                 $('#date_pickers').hide()
+                $('.datepicker').val('')
             } else {
-                console.log('FALSE')
                 $('#date_pickers').show()
             }
         }
 
         $('#latest_checkbox').on('change paste keyup', update_filter_form)
+        $('#latest_checkbox').prop('checked', {% if latest_checked %}true{% else %}
+            false{% endif %})
+        const elems = document.querySelectorAll('.datepicker')
+        window.datesAlreadySet = true
+        const r = M.Datepicker.init(elems, {
+            showClearBtn: true,
+        })
         update_filter_form()
     })($)
     </script>

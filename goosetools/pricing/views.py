@@ -1,6 +1,6 @@
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.exceptions import PermissionDenied, SuspiciousOperation
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
@@ -11,13 +11,25 @@ from goosetools.utils import PassRequestToFormViewMixin
 
 
 def pricing_data_dashboard(request):
+
     from_date = request.GET.get("from_date", None)
     to_date = request.GET.get("to_date", None)
+    pricelist_id = request.GET.get("pricelist_id", None)
     params = []
     if from_date is not None:
         params.append(f"from_date={from_date}")
     if to_date is not None:
         params.append(f"to_date={to_date}")
+    if pricelist_id is not None:
+        params.append(f"pricelist_id={pricelist_id}")
+        pricelist = get_object_or_404(PriceList, pk=pricelist_id)
+    else:
+        pricelist = PriceList.objects.get(default=True)
+
+    if not from_date and not to_date:
+        endpoint_url = reverse("pricing:latestitemmarketdataevent-list")
+    else:
+        endpoint_url = reverse("pricing:itemmarketdataevent-list")
 
     param_string = ""
     if params:
@@ -29,14 +41,17 @@ def pricing_data_dashboard(request):
             "page_data": {
                 "gooseuser_id": request.gooseuser.id,
                 "site_prefix": f"/{request.site_prefix}",
-                "ajax_url": reverse("pricing:itemmarketdataevent-list") + param_string,
-                # "edit_url": reverse("pricing:pricelist-update", args=[0]),
+                "ajax_url": endpoint_url + param_string,
+                "latest_checked": not from_date and not to_date,
+                "price_list_id": pricelist.id,
+                "graph_url": reverse("item_data", args=[0]),
                 # "view_url": reverse("pricing:pricelist-detail", args=[0]),
             },
             "gooseuser": request.gooseuser,
-            "latest_checked": from_date is None and to_date is None,
+            "latest_checked": not from_date and not to_date,
             "from_date": from_date,
             "to_date": to_date,
+            "pricelist": pricelist,
         },
     )
 
