@@ -67,8 +67,8 @@ class ItemMarketDataEventViewSet(
 
         query_dict = {"price_list": pricelist}
 
-        from_date_str = self.request.GET.get("from", None)
-        to_date_str = self.request.GET.get("to", None)
+        from_date_str = self.request.GET.get("from_date", None)
+        to_date_str = self.request.GET.get("to_date", None)
         if not (from_date_str or to_date_str):
 
             if not from_date_str:
