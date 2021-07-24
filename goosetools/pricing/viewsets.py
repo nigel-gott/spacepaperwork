@@ -3,7 +3,7 @@ from collections import OrderedDict
 
 from dateutil.parser import parse
 from django.contrib.postgres.search import SearchQuery, SearchVector
-from django.db.models import TextField
+from django.db.models import F, TextField
 from django.forms import CharField
 from django.utils import timezone
 from rest_framework import mixins
@@ -52,8 +52,12 @@ class DataTablesServerSidePagination(LimitOffsetPagination):
                             data = request.GET.get(f"columns[{col_id}][data]", False)
                             if data and data in view.orderable_fields:
                                 order_field = view.orderable_fields[data]
-                                order_dir = "-" if direction == "desc" else ""
-                                orders.append(f"{order_dir}{order_field}")
+                                f = F(order_field)
+                                if direction == "desc":
+                                    f = f.desc(nulls_last=True)
+                                else:
+                                    f = f.asc(nulls_last=True)
+                                orders.append(f)
             queryset = queryset.order_by(*orders)
 
         return super().paginate_queryset(queryset, request, view)
