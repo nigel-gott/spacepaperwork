@@ -97,6 +97,12 @@ class PriceListDeleteView(DeleteView):
     success_url = reverse_lazy("pricing:pricing_dashboard")
     queryset = PriceList.objects.exclude(deletable=False)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if not self.object.access_controller.can_delete(self.request.gooseuser):
+            raise PermissionDenied()
+        return context
+
 
 class PriceListCreateView(SuccessMessageMixin, PassRequestToFormViewMixin, CreateView):
     model = PriceList
@@ -108,3 +114,9 @@ class PriceListUpdateView(SuccessMessageMixin, PassRequestToFormViewMixin, Updat
     model = PriceList
     form_class = PriceListForm
     success_message = "%(name)s was edited successfully"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if not self.object.access_controller.can_delete(self.request.gooseuser):
+            raise PermissionDenied()
+        return context
