@@ -96,13 +96,13 @@ def import_price_list(pricelist):
                         success += 1
                     except Exception as e:  # pylint: disable=broad-except
                         fail += 1
-                        print(f"Failed parsing prices for {item_name}")
-                        print(e)
-                    print(f"Added price for {item_name}")
+                        output_str += f"Failed parsing prices for {item_name}"
+                        output_str += e
+                    output_str += f"Added price for {item_name}"
             except Exception as e:  # pylint: disable=broad-except
                 fail += 1
-                print(f"Failed for row {i}")
-                print(e)
+                output_str += f"Failed for row {i}"
+                output_str += e
             i = i + 1
         output_str += f"Imported {success} rows, failed to import {fail} rows."
     return output_str
