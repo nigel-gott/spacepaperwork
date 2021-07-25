@@ -136,7 +136,7 @@ def estimate_price(item, head_form):
     if algo != "latest":
         return item.calc_estimate_price(hours, price_list, price_type, algo)
     else:
-        price = item.latest_market_data_for_list(price_list)
+        price = getattr(item.latest_market_data_for_list(price_list).event, price_type)
         return price, 1
 
 
@@ -168,7 +168,9 @@ def sell_all_items(request, pk):
     if head_form.is_valid():
         min_price = head_form.cleaned_data["min_price"]
         pricelist = head_form.cleaned_data["price_list"]
-        hours = head_form.cleaned_data["hours_to_lookback_over_price_data"]
+        algo = head_form.cleaned_data["price_picking_algorithm"]
+        if algo != "latest":
+            hours = head_form.cleaned_data["hours_to_lookback_over_price_data"]
         for stack_id, stack_data in items["stacks"].items():
             stack = stack_data["stack"]
             estimate, datapoints = estimate_price(stack.item(), head_form)
