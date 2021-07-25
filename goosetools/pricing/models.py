@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 
@@ -82,6 +83,14 @@ class PriceList(models.Model):
                     other_default.save()
             except PriceList.DoesNotExist:
                 pass
+        if (
+            not self.default
+            and PriceList.objects.filter(default=True).exclude(pk=self.pk).count() == 0
+        ):
+            raise ValidationError(
+                "Cannot un-set the default price list, instead mark the a new price "
+                "list as default. "
+            )
         super().save(*args, **kwargs)
 
     @staticmethod

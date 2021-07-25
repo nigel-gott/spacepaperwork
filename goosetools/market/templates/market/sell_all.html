@@ -2,6 +2,9 @@
     {% load materializecss %}
     {% load static %}
     <div class="section">
+        <h1>Sell All Items in {{ loc }} At Once</h1>
+        <div class="divider"></div>
+        <strong>Price Estimate Parameters</strong>
         <form action="" method="post">
             {% if head_form.non_field_errors %}
                 <div class="row">
@@ -20,18 +23,39 @@
                 </div>
             {% endif %}
             <div class="row">
-                <button class="btn waves-effect waves-light" id="submit_btn"
-                        type="submit" value="Submit">
-                    Buy Back All
-                    <i class="material-icons right">send</i>
-                </button>
-            </div>
-            <div class="row">
+                {{ head_form.price_list|materializecss:'s12 m12, icon=list' }}
+                {{ head_form.price_to_use|materializecss:'s12 m12, icon=dollar' }}
+                {{ head_form.price_picking_algorithm|materializecss:'s12 m12, icon=code' }}
+                {{ head_form.hours_to_lookback_over_price_data|materializecss:'s12 m12, icon=access_time' }}
+                {{ head_form.min_price|materializecss:'s12 m12, icon=trending_down' }}
                 {{ head_form.overall_cut|materializecss:'s12 m12, icon=person' }}
             </div>
+            <div class="row">
+                <button formnovalidate class="btn waves-effect waves-light"
+                        type="submit" value="Submit" name="update_prices">
+                    Recalculate Item Prices
+                    <i class="material-icons right">edit</i>
+                </button>
+                <a href="{% url 'pricing:pricing_data_dashboard' %}?pricelist_id={{ pricelist.id }}{% if from_date %}&from_date={{ from_date }}{% endif %}">
+                    Edit/View Market Data Points The Estimate Is Using
+                </a>
+            </div>
+        <div class="divider"></div>
+            {% if formset.forms %}
+                <div class="row">
+                    <button class="btn waves-effect waves-light green" id="submit_btn"
+                            type="submit" value="Submit" name="do_buyback">
+                        Buy Back All
+                        <i class="material-icons right">send</i>
+                    </button>
+                </div>
+            {% else %}
+                <p class="red-text">All items were filtered out by your min price
+                    setting...</p>
+            {% endif %}
             {{ formset.management_form }}
             {% csrf_token %}
-            <h5>Items</h5>
+            <h5>Items ({{ filtered }} filtered out by min price)</h5>
             <table>
                 <thead>
                 <th>Item</th>

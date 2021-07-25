@@ -28,6 +28,7 @@ from goosetools.market.forms import (
     SoldItemForm,
 )
 from goosetools.market.models import MarketOrder, SoldItem, to_isk
+from goosetools.pricing.models import PriceList
 from goosetools.users.models import LOOT_TRACKER_ADMIN
 
 
@@ -127,9 +128,15 @@ def edit_order_price(request, pk):
     )
 
 
-def estimate_price(item, hours):
-    price, datapoints, price_other = item.min_of_last_x_hours(hours)
-    return price, datapoints, price_other
+def estimate_price(item, head_form):
+    price_type = head_form.cleaned_data["price_to_use"]
+    price_list = head_form.cleaned_data["price_list"]
+    algo = head_form.cleaned_data["price_picking_algorithm"]
+    hours = head_form.cleaned_data["hours_to_lookback_over_price_data"]
+    if algo != "latest":
+        return item.calc_estimate_price(hours, price_list, price_type, algo)
+    else:
+        return item.latest_market_data_for_list(price_list)
 
 
 @transaction.atomic
@@ -141,48 +148,66 @@ def sell_all_items(request, pk):
         return HttpResponseForbidden()
     items = get_items_in_location(loc)
     BulkSellItemFormSet = formset_factory(BulkSellItemForm, extra=0)  # noqa
-    hours = 24 * 7
     if request.method == "POST":
-        head_form = BulkSellItemFormHead(request.POST)
-        if head_form.is_valid():
-            cut = head_form.cleaned_data["overall_cut"]
-        else:
-            cut = 35
+        head_form = BulkSellItemFormHead(request.POST, request=request)
     else:
-        cut = 35
+        initial_values = {
+            "min_price": 250000,
+            "overall_cut": 35,
+            "hours_to_lookback_over_price_data": 24 * 7,
+            "price_picking_algorithm": "min",
+            "price_to_use": "lowest_sell",
+            "price_list": PriceList.objects.get(default=True).id,
+        }
+        head_form = BulkSellItemFormHead(initial_values, request=request)
     initial = []
-    for stack_id, stack_data in items["stacks"].items():
-        stack = stack_data["stack"]
-        estimate, datapoints, other = estimate_price(stack.item(), hours)
-        quantity = stack.quantity()
-        if estimate is None or not estimate or estimate * quantity > 250000:
-            initial.append(
-                {
-                    "stack": stack_id,
-                    "estimate_price": estimate,
-                    "listed_at_price": estimate,
-                    "quality": f"{datapoints} datapoints, {to_isk(other or 0)} sell_min",
-                    "quantity": quantity,
-                    "item": stack.item(),
-                }
-            )
-    for item in items["unstacked"]:
-        estimate, datapoints, other = estimate_price(item.item, hours)
-        quantity = item.quantity
-        if estimate is None or not estimate or estimate * quantity > 250000:
-            initial.append(
-                {
-                    "inv_item": item.id,
-                    "estimate_price": estimate,
-                    "listed_at_price": estimate,
-                    "quality": f"{datapoints} datapoints, {to_isk(other or 0)} sell_min",
-                    "quantity": quantity,
-                    "item": item.item,
-                }
-            )
-    if request.method == "POST":
+    hours = None
+    pricelist = head_form.fields["price_list"].initial
+    filtered = 0
+    if head_form.is_valid():
+        min_price = head_form.cleaned_data["min_price"]
+        pricelist = head_form.cleaned_data["price_list"]
+        hours = head_form.cleaned_data["hours_to_lookback_over_price_data"]
+        for stack_id, stack_data in items["stacks"].items():
+            stack = stack_data["stack"]
+            estimate, datapoints = estimate_price(stack.item(), head_form)
+            quantity = stack.quantity()
+            if estimate is None or not estimate or estimate * quantity > min_price:
+                initial.append(
+                    {
+                        "stack": stack_id,
+                        "estimate_price": estimate,
+                        "listed_at_price": estimate,
+                        "quality": f"{datapoints} datapoints",
+                        "quantity": quantity,
+                        "item": stack.item(),
+                    }
+                )
+            else:
+                filtered += 1
+        for item in items["unstacked"]:
+            estimate, datapoints = estimate_price(item.item, head_form)
+            quantity = item.quantity
+            if estimate is None or not estimate or estimate * quantity > min_price:
+                initial.append(
+                    {
+                        "inv_item": item.id,
+                        "estimate_price": estimate,
+                        "listed_at_price": estimate,
+                        "quality": f"{datapoints} datapoints",
+                        "quantity": quantity,
+                        "item": item.item,
+                    }
+                )
+            else:
+                filtered += 1
+    else:
+        messages.error(
+            request, f"Invalid {head_form.errors} {head_form.non_field_errors()}"
+        )
+
+    if request.method == "POST" and request.POST.get("do_buyback", False):
         formset = BulkSellItemFormSet(request.POST, request.FILES, initial=initial)
-        head_form = BulkSellItemFormHead(request.POST)
         if formset.is_valid() and head_form.is_valid():
             for form in formset:
                 inv_item = form.cleaned_data["inv_item"]
@@ -191,7 +216,6 @@ def sell_all_items(request, pk):
                 uncommaed_price = form.cleaned_data["listed_at_price"].replace(",", "")
                 price = Decimal(uncommaed_price)
                 cut_price = price * cut
-                items = []
                 if inv_item:
                     items = [inv_item]
                 else:
@@ -200,7 +224,8 @@ def sell_all_items(request, pk):
                     if not item.can_sell():
                         messages.error(
                             request,
-                            f"Item {item} cannot be sold, maybe it is already being sold or is in a pending contract?",
+                            f"Item {item} cannot be sold, maybe it is already being "
+                            f"sold or is in a pending contract?",
                         )
                         return HttpResponseRedirect(reverse("sell_all", args=[pk]))
                     profit_line = IskTransaction(
@@ -209,7 +234,8 @@ def sell_all_items(request, pk):
                         isk=to_isk(m.floor(cut_price * item.quantity)),
                         quantity=item.quantity,
                         transaction_type="buyback",
-                        notes=f"Corp Buyback using price {price} and a cut for the corp of {cut * 100}% ",
+                        notes=f"Corp Buyback using price {price} and a cut for the "
+                        f"corp of {cut * 100}% ",
                     )
                     profit_line.full_clean()
                     profit_line.save()
@@ -227,15 +253,20 @@ def sell_all_items(request, pk):
         else:
             messages.error(request, f"Invalid {formset.errors} {head_form.errors}")
     else:
-        head_form = BulkSellItemFormHead()
         formset = BulkSellItemFormSet(initial=initial)
     return render(
         request,
         "market/sell_all.html",
         {
+            "filtered": filtered,
             "formset": formset,
             "head_form": head_form,
+            "pricelist": pricelist,
+            "loc": loc,
             "title": "Change Price of An Existing Market Order",
+            "from_date": (timezone.now() - timezone.timedelta(hours=hours)).date()
+            if hours is not None
+            else None,
         },
     )
 

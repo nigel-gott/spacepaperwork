@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import Min
 from django.db.models.aggregates import Sum
 from django.forms import forms
 from django.utils import timezone
@@ -8,6 +7,7 @@ from djmoney.money import Money
 from goosetools.contracts.models import Contract
 from goosetools.core.models import System
 from goosetools.ownership.models import LootGroup
+from goosetools.pricing.constants import PRICE_AGG_METHODS_MAP
 from goosetools.users.models import ITEM_CHANGE_ADMIN, Character, Corp, GooseUser
 
 
@@ -55,35 +55,37 @@ class Item(models.Model):
         max_digits=20, decimal_places=2, null=True, blank=True
     )
 
-    def latest_market_data(self):
+    def latest_default_market_data(self):
         return (
             self.itemmarketdataevent_set.filter(price_list__default=True)
             .order_by("-time")
             .first()
         )
 
-    def min_of_last_x_hours(self, hours):
+    def latest_market_data_for_list(self, price_list):
+        return self.latestitemmarketdataevent_set.get(price_list=price_list)
+
+    def calc_estimate_price(self, hours, price_list, price_type, price_agg_method):
         time_threshold = timezone.now() - timezone.timedelta(hours=hours)
-        default_set = self.itemmarketdataevent_set.filter(price_list__default=True)
-        min_price = default_set.filter(time__gte=time_threshold,).aggregate(
-            min_lowest_sell=Min("lowest_sell")
-        )["min_lowest_sell"]
-        min_price_other = default_set.filter(time__gte=time_threshold,).aggregate(
-            min_sell=Min("sell")
-        )["min_sell"]
-        datapoints_used = (
-            default_set.filter(
-                time__gte=time_threshold,
-            )
-            .values("lowest_sell")
-            .distinct()
-            .count()
+        prices_to_search = self.itemmarketdataevent_set.filter(
+            price_list=price_list, time__gte=time_threshold
         )
-        return min_price, datapoints_used, min_price_other
+        method = PRICE_AGG_METHODS_MAP[price_agg_method]
+        calculated_price = prices_to_search.aggregate(
+            calculated_price=method(price_type)
+        )["calculated_price"]
+        f = {"time__gte": time_threshold, f"{price_type}__isnull": False}
+        datapoints_used = (
+            prices_to_search.filter(**f).values(price_type).distinct().count()
+        )
+        return calculated_price, datapoints_used
 
     def lowest_sell(self):
         if not self.cached_lowest_sell:
-            result = self.latest_market_data() and self.latest_market_data().lowest_sell
+            result = (
+                self.latest_default_market_data()
+                and self.latest_default_market_data().lowest_sell
+            )
             self.cached_lowest_sell = result
         return self.cached_lowest_sell
 
