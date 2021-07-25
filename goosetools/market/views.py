@@ -136,7 +136,8 @@ def estimate_price(item, head_form):
     if algo != "latest":
         return item.calc_estimate_price(hours, price_list, price_type, algo)
     else:
-        return item.latest_market_data_for_list(price_list)
+        price = item.latest_market_data_for_list(price_list)
+        return price, 1
 
 
 @transaction.atomic
