@@ -15,7 +15,11 @@ def new_market_data(sender, instance, **kwargs):
     except LatestItemMarketDataEvent.DoesNotExist:
         existing = None
 
-    if existing is None or existing.time < instance.time:
+    if (
+        existing is None
+        or existing.time < instance.time
+        or instance.manual_override_price
+    ):
         LatestItemMarketDataEvent.objects.update_or_create(
             price_list=instance.price_list,
             item=instance.item,

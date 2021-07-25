@@ -42,6 +42,7 @@ class ItemMarketDataEventSerializer(serializers.ModelSerializer):
             "item_sub_type",
             "item_sub_sub_type",
             "eve_echoes_market_id",
+            "manual_override_price",
             "unique_user_id",
             "sell",
             "buy",

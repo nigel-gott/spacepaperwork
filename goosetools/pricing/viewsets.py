@@ -176,22 +176,19 @@ class ItemMarketDataEventViewSet(
         from_date_str = self.request.GET.get("from_date", None)
         to_date_str = self.request.GET.get("to_date", None)
         if from_date_str or to_date_str:
+            from_date = None
+            to_date = None
 
-            if not from_date_str:
-                from_date = timezone.now() - timezone.timedelta(days=3)
-            else:
+            if from_date_str:
                 from_date = timezone.make_aware(parse(from_date_str))
+                query_dict["time__gte"] = from_date
 
-            if not to_date_str:
-                to_date = timezone.now()
-            else:
+            if to_date_str:
                 to_date = timezone.make_aware(parse(to_date_str))
+                query_dict["time__lte"] = to_date
 
-            if from_date > to_date:
+            if from_date and to_date and from_date > to_date:
                 raise ValidationError("From must be before to date.")
-
-            query_dict["time__gte"] = from_date
-            query_dict["time__lte"] = to_date
         else:
             raise ValidationError("At least one of from_date or to_date must be given.")
 

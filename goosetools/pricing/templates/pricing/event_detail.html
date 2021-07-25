@@ -1,0 +1,107 @@
+{% extends "core/base.html" %}
+{% load base_extras %}
+{% load materializecss %}
+{% block body %}
+    <div class="section">
+        <h4>Item Price: {{ event }}</h4>
+        <a href="{% url 'pricing:pricing_data_dashboard' %}?pricelist_id={{ event.price_list.id }}">Back
+            To All Prices</a>
+    </div>
+    <div class="section">
+        <a href="{% url 'pricing:event-update' event.id %}"
+           class="waves-btn btn">Edit Item Price</a>
+        <a href="{% url 'pricing:event-delete' event.id %}"
+           class="waves-btn btn red">Delete Item Price</a>
+        <table>
+            <thead>
+            <tr>
+                <th>Attribute</th>
+                <th>Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    Price List:
+                </td>
+                <td>
+                    {{ event.price_list }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Unique User Id:
+                </td>
+                <td>
+                    {{ event.unique_user_id }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Item:
+                </td>
+                <td>
+                    {{ event.item }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Is A Manual Override Price?:
+                </td>
+                <td>
+                    {% if event.manual_override_price %} Yes {% else %} No {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Time
+                </td>
+                <td>
+                    {{ event.time }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Sell
+                </td>
+                <td>
+                    {{ event.sell}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Buy
+                </td>
+                <td>
+                    {{ event.buy }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Lowest Sell
+                </td>
+                <td>
+                    {{ event.lowest_sell}}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Highest Buy
+                </td>
+                <td>
+                    {{ event.highest_buy }}
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    Volume
+                </td>
+                <td>
+                    {{ event.volume }}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

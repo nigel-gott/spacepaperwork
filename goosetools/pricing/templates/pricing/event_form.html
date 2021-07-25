@@ -1,0 +1,61 @@
+{% extends "core/base.html" %}
+{% load materializecss %}
+{% load static %}
+{% block body %}
+    <div class="section">
+        {% if pricelist %}
+            <h5>Editing Item Price: {{ event }}</h5>
+                <a href="{% url 'pricing:event-delete' event.id %}"
+                   class="waves-btn btn red">Delete Event</a>
+        {% else %}
+            <h5>Create New Item Price</h5>
+        {% endif %}
+    </div>
+    <div class="divider"></div>
+    <div class="section">
+        <form action="" method="post">
+            {% if form.non_field_errors %}
+                <div class="row">
+                    <div class="col s12 m5">
+                        <div class="card-panel red darken-1">
+                    <span class="white-text">
+                        <b>Errors with form:</b>
+                    <ul class="errors">
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error|escape }}</li>
+                        {% endfor %}
+                    </ul>
+                    </span>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+            {% csrf_token %}
+
+            {% for field in form.hidden_fields %}
+                {{ field }}
+            {% endfor %}
+            <div id="core_form">
+
+                {% for field in form.visible_fields %}
+                    <div class="row">
+                        {{ field|materializecss:'s12 m12' }}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button class="btn waves-effect waves-light" type="submit" value="Submit">
+                Submit
+                <i class="material-icons right">send</i>
+            </button>
+        </form>
+    </div>
+{% endblock %}
+{% block extrafooter %}
+
+    <script src="{% static 'admin/js/vendor/jquery/jquery.js' %}"
+            type="text/javascript"></script>
+
+    {{ form.media }}
+
+{% endblock %}

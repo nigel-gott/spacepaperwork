@@ -1,12 +1,13 @@
 from django.contrib.messages.views import SuccessMessageMixin
-from django.core.exceptions import PermissionDenied, SuspiciousOperation
+from django.core.exceptions import SuspiciousOperation
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 from goosetools.industry.cron.lookup_ship_prices import import_price_list
-from goosetools.pricing.forms import PriceListForm
-from goosetools.pricing.models import PriceList
+from goosetools.pricing.forms import EventForm, PriceListForm
+from goosetools.pricing.models import ItemMarketDataEvent, PriceList
 from goosetools.utils import PassRequestToFormViewMixin
 
 
@@ -25,6 +26,8 @@ def pricing_data_dashboard(request):
         pricelist = get_object_or_404(PriceList, pk=pricelist_id)
     else:
         pricelist = PriceList.objects.get(default=True)
+
+    pricelist.access_controller.can_view(request.gooseuser, strict=True)
 
     if not from_date and not to_date:
         endpoint_url = reverse("pricing:latestitemmarketdataevent-list")
@@ -45,7 +48,7 @@ def pricing_data_dashboard(request):
                 "latest_checked": not from_date and not to_date,
                 "price_list_id": pricelist.id,
                 "graph_url": reverse("item_data", args=[0]),
-                # "view_url": reverse("pricing:pricelist-detail", args=[0]),
+                "edit_url": reverse("pricing:event-update", args=[0]),
             },
             "gooseuser": request.gooseuser,
             "latest_checked": not from_date and not to_date,
@@ -79,9 +82,9 @@ class PriceListDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        self.object.access_controller.can_view(self.request.gooseuser, strict=True)
         if self.request.GET.get("test_google", False):
-            if not self.object.access_controller.can_admin(self.request.gooseuser):
-                raise PermissionDenied()
+            self.object.access_controller.can_admin(self.request.gooseuser, strict=True)
 
             if self.object.api_type != "google_sheet":
                 raise SuspiciousOperation(
@@ -99,8 +102,7 @@ class PriceListDeleteView(DeleteView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if not self.object.access_controller.can_delete(self.request.gooseuser):
-            raise PermissionDenied()
+        self.object.access_controller.can_delete(self.request.gooseuser, strict=True)
         return context
 
 
@@ -117,6 +119,68 @@ class PriceListUpdateView(SuccessMessageMixin, PassRequestToFormViewMixin, Updat
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        if not self.object.access_controller.can_edit(self.request.gooseuser):
-            raise PermissionDenied()
+        self.object.access_controller.can_edit(self.request.gooseuser, strict=True)
         return context
+
+
+class EventDetailView(DetailView):
+    model = ItemMarketDataEvent
+    template_name = "pricing/event_detail.html"
+    context_object_name = "event"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        self.object.price_list.access_controller.can_view(
+            self.request.gooseuser, strict=True
+        )
+        return context
+
+
+class EventDeleteView(DeleteView):
+    model = ItemMarketDataEvent
+    template_name = "pricing/event_confirm_delete.html"
+    context_object_name = "event"
+
+    def get_success_url(self):
+        price_list_id = self.object.price_list.id
+        return (
+            reverse_lazy("pricing:pricing_data_dashboard")
+            + f"?pricelist_id={price_list_id}"
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        self.object.price_list.access_controller.can_delete(
+            self.request.gooseuser, strict=True
+        )
+        return context
+
+
+class EventCreateView(SuccessMessageMixin, PassRequestToFormViewMixin, CreateView):
+    model = ItemMarketDataEvent
+    form_class = EventForm
+    template_name = "pricing/event_form.html"
+    success_message = "Price for %(item)s was created successfully"
+    context_object_name = "event"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["price_list"] = get_object_or_404(PriceList, pk=self.kwargs.get("pk"))
+        initial["price_time"] = timezone.now().time()
+        initial["price_date"] = timezone.now().date()
+        return initial
+
+
+class EventUpdateView(SuccessMessageMixin, PassRequestToFormViewMixin, UpdateView):
+    model = ItemMarketDataEvent
+    template_name = "pricing/event_form.html"
+    form_class = EventForm
+    success_message = "Price for %(item)s was edited successfully"
+    context_object_name = "event"
+
+    def get_initial(self):
+        return {
+            "price_time": self.object.time.time(),
+            "price_date": self.object.time.date(),
+        }

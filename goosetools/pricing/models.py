@@ -104,10 +104,19 @@ class PriceList(models.Model):
 
 class ItemMarketDataEvent(models.Model):
     price_list = models.ForeignKey(PriceList, on_delete=models.CASCADE)
-    unique_user_id = models.TextField(blank=True, null=True)
+    unique_user_id = models.TextField(
+        blank=True,
+        null=True,
+        unique=True,
+        help_text="An optional unique ID you want to give this price.",
+    )
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
-    manual_override_price = models.BooleanField(default=False)
-    time = models.DateTimeField()
+    manual_override_price = models.BooleanField(
+        default=False,
+        help_text="If this price should override any current or future automatically "
+        "downloaded prices.",
+    )
+    time = models.DateTimeField(help_text="The time this price is for.")
     sell = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     buy = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
     lowest_sell = models.DecimalField(
@@ -118,9 +127,14 @@ class ItemMarketDataEvent(models.Model):
     )
     volume = models.DecimalField(max_digits=20, decimal_places=2, null=True, blank=True)
 
+    def get_absolute_url(self):
+        return reverse("pricing:event-detail", kwargs={"pk": self.pk})
+
     class Meta:
         indexes = [models.Index(fields=["price_list", "-time", "item"])]
-        unique_together = ["price_list", "unique_user_id", "item", "time"]
+        unique_together = [
+            ["price_list", "unique_user_id", "item", "time"],
+        ]
 
     def __str__(self):
         return f"Market Price for {self.item}@{self.time}: ls={self.lowest_sell}, hb={self.highest_buy}, s={self.sell}, b={self.buy}"

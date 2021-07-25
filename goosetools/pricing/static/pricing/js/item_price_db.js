@@ -18,6 +18,10 @@ $(function () {
                     "data": prefix + "unique_user_id", "title": "unique_user_id"
                 },
                 {
+                    "data": prefix + "manual_override_price", "title": "Is A Manual" +
+                        " Override"
+                },
+                {
                     "data": prefix + "buy", "title": "buy"
                 },
                 {
@@ -40,10 +44,10 @@ $(function () {
                         const price_list = page_data["price_list_id"]
                         const graph_url = page_data["graph_url"].replace("0", data)
                         const graph_link = `<a class="edit-btn green-text" href="${graph_url}?price_list=${price_list}&days=14&style=lines">View Graph</a>`
-                        // const data_url = page_data["data_url"].replace("0", data)
-                        // let dataUrl = `<a class="edit-btn" href="${data_url}">Market Data</a>`
-                        // return `${proposeChangeUrl}/${dataUrl}`
-                        return graph_link
+                        const id = prefix === "" ? row['id'] : row['event']['id']
+                        const edit_url = page_data["edit_url"].replace("0", id)
+                        const edit_link = `<a class="edit-btn" href="${edit_url}">Edit Price</a>`
+                         return `${edit_link}/${graph_link}`
                     }
                 },
             ]

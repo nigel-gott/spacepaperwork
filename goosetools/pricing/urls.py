@@ -3,6 +3,10 @@ from django.urls.conf import include
 from rest_framework import routers
 
 from goosetools.pricing.views import (
+    EventCreateView,
+    EventDeleteView,
+    EventDetailView,
+    EventUpdateView,
     PriceListCreateView,
     PriceListDeleteView,
     PriceListDetailView,
@@ -49,5 +53,25 @@ urlpatterns = [
         "pricelist/create/",
         PriceListCreateView.as_view(),
         name="pricelist-create",
+    ),
+    path(
+        "event/<int:pk>/update/",
+        EventUpdateView.as_view(),
+        name="event-update",
+    ),
+    path(
+        "event/<int:pk>/delete/",
+        EventDeleteView.as_view(),
+        name="event-delete",
+    ),
+    path(
+        "event/<int:pk>/",
+        EventDetailView.as_view(),
+        name="event-detail",
+    ),
+    path(
+        "event/<int:pk>/create/",
+        EventCreateView.as_view(),
+        name="event-create",
     ),
 ]

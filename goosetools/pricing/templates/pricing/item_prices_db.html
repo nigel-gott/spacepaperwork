@@ -18,11 +18,16 @@
     </p>
     <div class="col s12 m2">
         <a class="waves-btn btn" href="{% url 'pricing:pricing_dashboard' %}">
-            Back to Price Lists
-            </a>
-        <a class="waves-btn btn green" href="{% url 'pricing:pricelist-create' %}">Create
-            New Price
-            List</a>
+        <i class="material-icons left">arrow_back</i>
+        Back to Price Lists
+        </a>
+        <a class="waves-btn btn green" href="{% url 'pricing:pricelist-create' %}">
+            <i class="material-icons left">list</i>
+            Create New Price List</a>
+        <a href="{% url 'pricing:event-create' pricelist.id %}"
+           class="waves-btn btn green">
+            <i class="material-icons left">add</i>
+            Add New Item Price</a>
     </div>
     <div class="col s12 m6">
     </div>
@@ -54,6 +59,7 @@
                             <span>Upto this Day</span>
                         </label>
                     </p>
+                    <input name="pricelist_id" type="hidden" value="{{ pricelist.id }}">
                 </div>
                 <div class="card-action">
                     <button class="btn waves-effect waves-light" type="submit"

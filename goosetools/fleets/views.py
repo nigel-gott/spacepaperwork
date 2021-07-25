@@ -393,7 +393,7 @@ def fleet_edit(request, pk):
         )
         form.fields["fc_character"].queryset = existing_fleet.fc.characters()
         formset = setup_existing_permissible_entity_formset(
-            existing_fleet.fc, existing_fleet
+            existing_fleet.fc, existing_fleet, request
         )
 
     return render(

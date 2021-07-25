@@ -6,6 +6,7 @@ import requests
 from django.conf import settings
 from django.contrib.postgres.aggregates.general import StringAgg
 from django.contrib.sites.models import Site
+from django.core.exceptions import PermissionDenied
 from django.db import models
 from django.http.response import HttpResponseForbidden
 from django.utils import timezone
@@ -980,15 +981,21 @@ class CrudAccessController(models.Model):
             )
         )
 
-    def can_admin(self, gooseuser, permissions_id_cache=None):
+    def can_admin(self, gooseuser, permissions_id_cache=None, strict=False):
         return self._can_do(
-            gooseuser, permissions_id_cache, self.adminable_by, by_admin=False
+            gooseuser,
+            permissions_id_cache,
+            self.adminable_by,
+            by_admin=False,
+            strict=strict,
         )
 
-    def can_edit(self, gooseuser, permissions_id_cache=None):
-        return self._can_do(gooseuser, permissions_id_cache, self.editable_by)
+    def can_edit(self, gooseuser, permissions_id_cache=None, strict=False):
+        return self._can_do(
+            gooseuser, permissions_id_cache, self.editable_by, strict=strict
+        )
 
-    def _can_do(self, gooseuser, permissions_id_cache, by, by_admin=True):
+    def _can_do(self, gooseuser, permissions_id_cache, by, by_admin=True, strict=False):
         if not permissions_id_cache:
             permissions_id_cache = self.make_permissions_id_cache(gooseuser)
         allowed = self._allowed(gooseuser, by, permissions_id_cache)
@@ -996,16 +1003,24 @@ class CrudAccessController(models.Model):
         if by_admin:
             allowed = allowed or self.can_admin(gooseuser, permissions_id_cache)
 
+        if strict and not allowed:
+            raise PermissionDenied()
         return allowed
 
-    def can_view(self, gooseuser, permissions_id_cache=None):
-        return self._can_do(gooseuser, permissions_id_cache, self.viewable_by)
+    def can_view(self, gooseuser, permissions_id_cache=None, strict=False):
+        return self._can_do(
+            gooseuser, permissions_id_cache, self.viewable_by, strict=strict
+        )
 
-    def can_use(self, gooseuser, permissions_id_cache=None):
-        return self._can_do(gooseuser, permissions_id_cache, self.usable_by)
+    def can_use(self, gooseuser, permissions_id_cache=None, strict=False):
+        return self._can_do(
+            gooseuser, permissions_id_cache, self.usable_by, strict=strict
+        )
 
-    def can_delete(self, gooseuser, permissions_id_cache=None):
-        return self._can_do(gooseuser, permissions_id_cache, self.deletable_by)
+    def can_delete(self, gooseuser, permissions_id_cache=None, strict=False):
+        return self._can_do(
+            gooseuser, permissions_id_cache, self.deletable_by, strict=strict
+        )
 
     @staticmethod
     def _allowed(gooseuser, perm_entity_qs, permissions_id_cache):
