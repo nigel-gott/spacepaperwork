@@ -4,11 +4,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from goosetools.items.models import Item
-from goosetools.pricing.models import (
-    PRICE_LIST_API_TYPES,
-    ItemMarketDataEvent,
-    PriceList,
-)
+from goosetools.pricing.models import PRICE_LIST_API_TYPES, DataSet, ItemMarketDataEvent
 from goosetools.users.forms import (
     handle_permissible_entity_formset,
     setup_existing_permissible_entity_formset,
@@ -24,7 +20,7 @@ class PriceListForm(forms.ModelForm):
     )
 
     class Meta:
-        model = PriceList
+        model = DataSet
         fields = [
             "name",
             "description",
@@ -44,7 +40,7 @@ class PriceListForm(forms.ModelForm):
             )
         else:
             self.formset = setup_new_permissible_entity_formset(
-                self.request.gooseuser, PriceList, self.request
+                self.request.gooseuser, DataSet, self.request
             )
         super().__init__(
             *args,
@@ -81,7 +77,7 @@ class PriceListForm(forms.ModelForm):
 
 
 class EventForm(forms.ModelForm):
-    price_list = forms.ModelChoiceField(queryset=PriceList.objects.all(), disabled=True)
+    price_list = forms.ModelChoiceField(queryset=DataSet.objects.all(), disabled=True)
     price_date = forms.DateField(
         widget=forms.DateInput(attrs={"class": "datepicker"}, format="%b %d, %Y"),
         input_formats=["%b. %d, %Y", "%b %d, %Y", "%B %d, %Y", "%B. %d, %Y"],

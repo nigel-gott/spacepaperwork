@@ -6,7 +6,7 @@ from goosetools.global_items.management.commands.item_data import (
     import_tenant_items_from_global,
 )
 from goosetools.notifications.notification_types import NOTIFICATION_TYPES
-from goosetools.pricing.models import PriceList
+from goosetools.pricing.models import DataSet
 from goosetools.users.models import (
     BASIC_ACCESS,
     LOOT_TRACKER,
@@ -77,7 +77,7 @@ def setup():
     GoosePermission.ensure_populated()
     Corp.ensure_populated()
     AuthConfig.ensure_exists()
-    PriceList.ensure_default_exists()
+    DataSet.ensure_default_exists()
     try:
         DiscordRole.sync_from_discord()
     except HTTPError:

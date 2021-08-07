@@ -40,7 +40,7 @@ from goosetools.items.models import (
     to_isk,
 )
 from goosetools.notifications.notification_types import NOTIFICATION_TYPES
-from goosetools.pricing.models import PriceList
+from goosetools.pricing.models import DataSet
 from goosetools.users.forms import CharacterForm
 from goosetools.users.models import Character
 
@@ -545,7 +545,7 @@ def item_db(request):
 
 class DataForm(forms.Form):
     price_list = forms.ModelChoiceField(
-        queryset=PriceList.objects.all(), empty_label=None
+        queryset=DataSet.objects.all(), empty_label=None
     )
     days = forms.IntegerField(initial=14, required=False)
     style = forms.ChoiceField(
@@ -569,7 +569,7 @@ def item_data(request, pk):
     style = "lines"
     show_buy_sell = False
     filter_outliers = True
-    price_lists = PriceList.objects.filter(itemmarketdataevent__item=item).distinct()
+    price_lists = DataSet.objects.filter(itemmarketdataevent__item=item).distinct()
     price_list = None
     if request.GET:
         form = DataForm(request.GET)
@@ -586,7 +586,7 @@ def item_data(request, pk):
 
         try:
             price_list = price_lists.get(default=True)
-        except PriceList.DoesNotExist:
+        except DataSet.DoesNotExist:
             if price_lists.count() > 0:
                 price_list = price_lists.first()
         form.fields["price_list"].initial = price_list

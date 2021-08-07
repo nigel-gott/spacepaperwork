@@ -12,7 +12,7 @@ from django.utils import timezone
 from django_tenants.utils import tenant_context
 
 from goosetools.items.models import Item
-from goosetools.pricing.models import ItemMarketDataEvent, PriceList
+from goosetools.pricing.models import DataSet, ItemMarketDataEvent
 from goosetools.tenants.models import Client
 
 session = requests_cache.CachedSession(
@@ -82,7 +82,7 @@ class Command(BaseCommand):
             if event_time < cutoff:
                 print(f"   Cutting off at item {update_count + create_count}.")
                 break
-            for ee_pl in PriceList.objects.filter(api_type="eve_echoes_market"):
+            for ee_pl in DataSet.objects.filter(api_type="eve_echoes_market"):
                 _, created = ItemMarketDataEvent.objects.update_or_create(
                     price_list=ee_pl,
                     item=item_obj,

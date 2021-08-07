@@ -28,7 +28,7 @@ from goosetools.market.forms import (
     SoldItemForm,
 )
 from goosetools.market.models import MarketOrder, SoldItem, to_isk
-from goosetools.pricing.models import PriceList
+from goosetools.pricing.models import DataSet
 from goosetools.users.models import LOOT_TRACKER_ADMIN
 
 
@@ -158,7 +158,7 @@ def sell_all_items(request, pk):
             "hours_to_lookback_over_price_data": 24 * 7,
             "price_picking_algorithm": "min",
             "price_to_use": "lowest_sell",
-            "price_list": PriceList.objects.get(default=True).id,
+            "price_list": DataSet.objects.get(default=True).id,
         }
         head_form = BulkSellItemFormHead(initial_values, request=request)
     initial = []

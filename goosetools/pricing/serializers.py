@@ -1,15 +1,15 @@
 from rest_framework import serializers
 
 from goosetools.pricing.models import (
+    DataSet,
     ItemMarketDataEvent,
     LatestItemMarketDataEvent,
-    PriceList,
 )
 
 
 class PriceListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PriceList
+        model = DataSet
         fields = [
             "id",
             "owner",

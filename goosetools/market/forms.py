@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 
 from goosetools.items.models import InventoryItem, Item, StackedInventoryItem
 from goosetools.pricing.constants import PRICE_AGG_METHODS, PRICE_TYPES
-from goosetools.pricing.models import PriceList
+from goosetools.pricing.models import DataSet
 from goosetools.users.utils import filter_controlled_qs_to_viewable
 
 
@@ -32,7 +32,7 @@ class SellItemForm(forms.Form):
 
 class BulkSellItemFormHead(forms.Form):
     price_list = forms.ModelChoiceField(
-        queryset=PriceList.objects.all(),
+        queryset=DataSet.objects.all(),
         required=True,
         empty_label=None,
         help_text="Which list of prices to use to calculate item estimate prices.",
@@ -79,9 +79,9 @@ class BulkSellItemFormHead(forms.Form):
         self.request = kwargs.pop("request")
         super().__init__(*args, **kwargs)
         self.fields["price_list"].queryset = filter_controlled_qs_to_viewable(
-            PriceList.objects.all(), self.request, return_as_qs=True
+            DataSet.objects.all(), self.request, return_as_qs=True
         )
-        default_price_list = PriceList.objects.get(default=True)
+        default_price_list = DataSet.objects.get(default=True)
         self.fields["price_list"].initial = default_price_list
 
     def clean(self):

@@ -13,9 +13,9 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from goosetools.pricing.models import (
+    DataSet,
     ItemMarketDataEvent,
     LatestItemMarketDataEvent,
-    PriceList,
 )
 from goosetools.pricing.serializers import (
     ItemMarketDataEventSerializer,
@@ -104,9 +104,9 @@ class LatestItemMarketDataEventViewSet(
     def get_queryset(self):
         pricelist_id = self.request.GET.get("pricelist_id", None)
         if pricelist_id is None:
-            pricelist = PriceList.objects.get(default=True)
+            pricelist = DataSet.objects.get(default=True)
         else:
-            pricelist = PriceList.objects.get(id=pricelist_id)
+            pricelist = DataSet.objects.get(id=pricelist_id)
 
         query_dict = {"price_list": pricelist}
 
@@ -167,9 +167,9 @@ class ItemMarketDataEventViewSet(
     def get_queryset(self):
         pricelist_id = self.request.GET.get("pricelist_id", None)
         if pricelist_id is None:
-            pricelist = PriceList.objects.get(default=True)
+            pricelist = DataSet.objects.get(default=True)
         else:
-            pricelist = PriceList.objects.get(id=pricelist_id)
+            pricelist = DataSet.objects.get(id=pricelist_id)
 
         query_dict = {"price_list": pricelist}
 
@@ -211,6 +211,6 @@ class PriceListViewSet(
     mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet
 ):
     permission_classes = [HasGooseToolsPerm.of([BASIC_ACCESS])]
-    queryset = PriceList.objects.all()
+    queryset = DataSet.objects.all()
 
     serializer_class = PriceListSerializer

@@ -22,7 +22,7 @@ PRICE_LIST_API_TYPES = [
 ]
 
 
-class PriceList(models.Model):
+class DataSet(models.Model):
     owner = models.ForeignKey(
         GooseUser, on_delete=models.CASCADE, null=True, blank=True
     )
@@ -77,15 +77,15 @@ class PriceList(models.Model):
     def save(self, *args, **kwargs):
         if self.default:
             try:
-                other_default = PriceList.objects.get(default=True)
+                other_default = DataSet.objects.get(default=True)
                 if self != other_default:
                     other_default.default = False
                     other_default.save()
-            except PriceList.DoesNotExist:
+            except DataSet.DoesNotExist:
                 pass
         if (
             not self.default
-            and PriceList.objects.filter(default=True).exclude(pk=self.pk).count() == 0
+            and DataSet.objects.filter(default=True).exclude(pk=self.pk).count() == 0
         ):
             raise ValidationError(
                 "Cannot un-set the default price list, instead mark the a new price "
@@ -95,12 +95,12 @@ class PriceList(models.Model):
 
     @staticmethod
     def get_active():
-        return PriceList.objects.get(active=True)
+        return DataSet.objects.get(active=True)
 
     @staticmethod
     def ensure_default_exists():
-        if PriceList.objects.count() == 0:
-            PriceList.objects.create(
+        if DataSet.objects.count() == 0:
+            DataSet.objects.create(
                 name="eve_echoes_market",
                 description="Market data sourced from https://eve-echoes-market.com/",
                 tags="eve_echoes_market,raw_data,third_party",
@@ -112,7 +112,7 @@ class PriceList(models.Model):
 
 
 class ItemMarketDataEvent(models.Model):
-    price_list = models.ForeignKey(PriceList, on_delete=models.CASCADE)
+    price_list = models.ForeignKey(DataSet, on_delete=models.CASCADE)
     unique_user_id = models.TextField(
         blank=True,
         null=True,
@@ -151,7 +151,7 @@ class ItemMarketDataEvent(models.Model):
 
 class LatestItemMarketDataEvent(models.Model):
     price_list = models.ForeignKey(
-        PriceList, on_delete=models.CASCADE, null=True, blank=True
+        DataSet, on_delete=models.CASCADE, null=True, blank=True
     )
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
     time = models.DateTimeField()

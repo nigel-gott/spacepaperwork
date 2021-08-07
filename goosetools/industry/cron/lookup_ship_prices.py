@@ -16,7 +16,7 @@ from googleapiclient.discovery import build
 
 from goosetools.industry.models import Ship, to_isk
 from goosetools.items.models import Item
-from goosetools.pricing.models import ItemMarketDataEvent, PriceList
+from goosetools.pricing.models import DataSet, ItemMarketDataEvent
 from goosetools.tenants.models import Client
 from goosetools.utils import cron_header_line
 
@@ -195,7 +195,7 @@ class LookupShipPrices(CronJobBase):
                 if tenant.name != "public":
                     with tenant_context(tenant):
                         import_ship_prices()
-                        for price_list in PriceList.objects.filter(
+                        for price_list in DataSet.objects.filter(
                             api_type="google_sheet"
                         ).all():
                             try:

@@ -7,7 +7,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 from goosetools.industry.cron.lookup_ship_prices import import_price_list
 from goosetools.pricing.forms import EventForm, PriceListForm
-from goosetools.pricing.models import ItemMarketDataEvent, PriceList
+from goosetools.pricing.models import DataSet, ItemMarketDataEvent
 from goosetools.utils import PassRequestToFormViewMixin
 
 
@@ -23,9 +23,9 @@ def pricing_data_dashboard(request):
         params.append(f"to_date={to_date}")
     if pricelist_id is not None:
         params.append(f"pricelist_id={pricelist_id}")
-        pricelist = get_object_or_404(PriceList, pk=pricelist_id)
+        pricelist = get_object_or_404(DataSet, pk=pricelist_id)
     else:
-        pricelist = PriceList.objects.get(default=True)
+        pricelist = DataSet.objects.get(default=True)
 
     pricelist.access_controller.can_view(request.gooseuser, strict=True)
 
@@ -78,7 +78,7 @@ def pricing_dashboard(request):
 
 
 class PriceListDetailView(DetailView):
-    model = PriceList
+    model = DataSet
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -96,9 +96,9 @@ class PriceListDetailView(DetailView):
 
 
 class PriceListDeleteView(DeleteView):
-    model = PriceList
+    model = DataSet
     success_url = reverse_lazy("pricing:pricing_dashboard")
-    queryset = PriceList.objects.exclude(deletable=False)
+    queryset = DataSet.objects.exclude(deletable=False)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -107,13 +107,13 @@ class PriceListDeleteView(DeleteView):
 
 
 class PriceListCreateView(SuccessMessageMixin, PassRequestToFormViewMixin, CreateView):
-    model = PriceList
+    model = DataSet
     form_class = PriceListForm
     success_message = "%(name)s was created successfully"
 
 
 class PriceListUpdateView(SuccessMessageMixin, PassRequestToFormViewMixin, UpdateView):
-    model = PriceList
+    model = DataSet
     form_class = PriceListForm
     success_message = "%(name)s was edited successfully"
 
@@ -166,7 +166,7 @@ class EventCreateView(SuccessMessageMixin, PassRequestToFormViewMixin, CreateVie
 
     def get_initial(self):
         initial = super().get_initial()
-        initial["price_list"] = get_object_or_404(PriceList, pk=self.kwargs.get("pk"))
+        initial["price_list"] = get_object_or_404(DataSet, pk=self.kwargs.get("pk"))
         initial["price_time"] = timezone.now().time()
         initial["price_date"] = timezone.now().date()
         return initial

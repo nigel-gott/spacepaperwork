@@ -8,7 +8,7 @@ from django_cron import CronJobBase, Schedule
 from django_tenants.utils import tenant_context
 
 from goosetools.items.models import Item
-from goosetools.pricing.models import ItemMarketDataEvent, PriceList
+from goosetools.pricing.models import DataSet, ItemMarketDataEvent
 from goosetools.tenants.models import Client
 from goosetools.utils import cron_header_line
 
@@ -44,7 +44,7 @@ class GetMarketData(CronJobBase):
                         try:
                             item = Item.objects.get(eve_echoes_market_id=market_id)
                             lowest_sell = decimal_or_none(line[5])
-                            for ee_pl in PriceList.objects.filter(
+                            for ee_pl in DataSet.objects.filter(
                                 api_type="eve_echoes_market"
                             ):
                                 ItemMarketDataEvent.objects.update_or_create(

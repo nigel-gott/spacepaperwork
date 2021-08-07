@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from goosetools.pricing.models import ItemMarketDataEvent, PriceList
+from goosetools.pricing.models import DataSet, ItemMarketDataEvent
 
 admin.site.register(ItemMarketDataEvent)
-admin.site.register(PriceList)
+admin.site.register(DataSet)
