@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from goosetools.items.models import Item
-from goosetools.pricing.models import PRICE_LIST_API_TYPES, DataSet, ItemMarketDataEvent
+from goosetools.pricing.models import DATA_SET_API_TYPES, DataSet, ItemMarketDataEvent
 from goosetools.users.forms import (
     handle_permissible_entity_formset,
     setup_existing_permissible_entity_formset,
@@ -14,7 +14,7 @@ from goosetools.users.forms import (
 
 class PriceListForm(forms.ModelForm):
     api_type = forms.ChoiceField(
-        choices=PRICE_LIST_API_TYPES,
+        choices=DATA_SET_API_TYPES,
         label="API Type",
         help_text="Where this Price List will get it's data from.",
     )
@@ -25,7 +25,7 @@ class PriceListForm(forms.ModelForm):
             "name",
             "description",
             "api_type",
-            "price_type",
+            "data_set_type",
             "google_sheet_id",
             "google_sheet_cell_range",
             "default",

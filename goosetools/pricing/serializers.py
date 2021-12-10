@@ -16,7 +16,7 @@ class PriceListSerializer(serializers.ModelSerializer):
             "name",
             "tags",
             "api_type",
-            "price_type",
+            "data_set_type",
             "default",
         ]
 

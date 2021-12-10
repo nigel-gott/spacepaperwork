@@ -18,8 +18,8 @@ $(function () {
                     "give_filter": true,
                 },
                 {
-                    "data": "price_type",
-                    "title": "price_type",
+                    "data": "data_set_type",
+                    "title": "data_set_type",
                     "give_filter": true,
                 },
                 {"data": "name", "title": "Name",

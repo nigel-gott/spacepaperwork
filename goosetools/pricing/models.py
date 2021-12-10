@@ -11,11 +11,11 @@ from goosetools.users.models import (
     GooseUser,
     PermissibleEntity,
 )
-from goosetools.venmo.models import create_access_controller
+from goosetools.venmo.models import VirtualCurrency, create_access_controller
 
-PRICE_LIST_PRICE_TYPES = [("raw_market_data", "raw_market_data"), ("order", "order")]
+DATA_SET_TYPES = [("raw_market_data", "raw_market_data"), ("order", "order")]
 
-PRICE_LIST_API_TYPES = [
+DATA_SET_API_TYPES = [
     ("eve_echoes_market", "eve_echoes_market.com"),
     ("google_sheet", "A Google Sheet"),
     ("manual", "Manually Entered In " + settings.SITE_NAME),
@@ -27,29 +27,22 @@ class DataSet(models.Model):
         GooseUser, on_delete=models.CASCADE, null=True, blank=True
     )
     name = models.TextField(unique=True)
-    description = models.TextField()
-    tags = models.TextField()
+    description = models.TextField(blank=True, null=True)
+    tags = models.TextField(blank=True, null=True)
     access_controller = models.ForeignKey(
         CrudAccessController,
         on_delete=models.CASCADE,
         default=create_access_controller,
     )
-    api_type = models.TextField(choices=PRICE_LIST_API_TYPES)
-    price_type = models.TextField(
-        choices=PRICE_LIST_PRICE_TYPES,
+    api_type = models.TextField(choices=DATA_SET_API_TYPES)
+    data_set_type = models.TextField(
+        choices=DATA_SET_TYPES,
         default="raw_market_data",
-        help_text="Controls how these prices are treated. If raw_market_data then each "
-        "price is just treated as an immutable 'the price for this item at "
-        "this time is this' piece of data. If order then instead treated as "
-        "the fact that you want to buy or sell the volume of the item and if hooked "
-        "up to a shop then will make said order available in the system. The order's "
-        "volume with be automatically decreased as orders are completed in "
-        "the system, unless a new row is imported with a new unique_user_id "
-        "which will update the volume and hence the order quantity to that "
-        "rows volume.",
     )
     google_sheet_id = models.TextField(null=True, blank=True)
     google_sheet_cell_range = models.TextField(null=True, blank=True)
+    google_sheet_unique_key_column = models.TextField(null=True, blank=True)
+    google_sheet_item_column = models.TextField(null=True, blank=True)
 
     default = models.BooleanField(default=False)
     deletable = models.BooleanField(default=True)
@@ -88,14 +81,14 @@ class DataSet(models.Model):
             and DataSet.objects.filter(default=True).exclude(pk=self.pk).count() == 0
         ):
             raise ValidationError(
-                "Cannot un-set the default price list, instead mark the a new price "
-                "list as default. "
+                "Cannot un-set the default data set, instead mark the a new data "
+                "set as default. "
             )
         super().save(*args, **kwargs)
 
     @staticmethod
-    def get_active():
-        return DataSet.objects.get(active=True)
+    def get_default():
+        return DataSet.objects.get(default=True)
 
     @staticmethod
     def ensure_default_exists():
@@ -109,6 +102,51 @@ class DataSet(models.Model):
 
     def __str__(self):
         return str(self.name) + (" (default)" if self.default else "")
+
+
+class DataType(models.Model):
+    data_set = models.ForeignKey(DataSet, on_delete=models.CASCADE)
+    name = models.TextField()
+    google_sheet_column = models.TextField(null=True, blank=True)
+
+    currency = models.ForeignKey(
+        VirtualCurrency, on_delete=models.CASCADE, blank=True, null=True
+    )
+
+    class Meta:
+        indexes = [models.Index(fields=["data_set"])]
+        unique_together = [["data_set", "name"]]
+
+
+class DataPoint(models.Model):
+    data_set = models.ForeignKey(DataSet, on_delete=models.CASCADE)
+    data_type = models.ForeignKey(DataType, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True, null=True)
+    time = models.DateTimeField(auto_now=True)
+    unique_key = models.TextField(blank=True, null=True)
+    decimal_value = models.DecimalField(
+        max_digits=22, decimal_places=4, blank=True, null=True
+    )
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["data_set", "data_type", "time", "item", "unique_key"])
+        ]
+        unique_together = [["data_set", "unique_key"]]
+
+
+class LatestDataPoint(models.Model):
+    data_set = models.ForeignKey(DataSet, on_delete=models.CASCADE)
+    data_type = models.ForeignKey(DataType, on_delete=models.CASCADE)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, blank=True, null=True)
+    point = models.ForeignKey(DataPoint, on_delete=models.CASCADE)
+
+    class Meta:
+        indexes = [models.Index(fields=["data_set", "data_type"])]
+        unique_together = ["data_set", "data_type"]
+
+    def __str__(self):
+        return f"Latest {str(self.point)}"
 
 
 class ItemMarketDataEvent(models.Model):
