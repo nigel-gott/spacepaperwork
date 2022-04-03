@@ -28,7 +28,7 @@
                             <span>You are paying with ISK so you must enter the below price into the "I'll pay" section of the contract.</span>
                             <blockquote>{{ ship_order.price }}</blockquote>
                         {% else %}
-                            <span class="red-text">You are paying with ISK however {{ SITE_NAME }} was unable to find a valid price for the ship. Please ping @KrisWolfe#5428 on discord before making the contract.</span>
+                            <span class="red-text">You are paying with ISK however {{ SITE_NAME }} was unable to find a valid price for the ship. {{ PRICE_CONTACT_INFO }}</span>
                         {% endif %}
                     {% endif %}
                     {% if ship_order.blocked_until %}
@@ -60,7 +60,7 @@
                                     price into the "I'll pay" section of the contract.
                                     <blockquote>{{ ship_order.price }}</blockquote>
                                 {% else %}
-                                    <span class="red-text">You are paying with ISK however {{ SITE_NAME }} was unable to find a valid price for the order. Please ping @KrisWolfe#5428 on discord before making the contract.</span>
+                                    <span class="red-text">You are paying with ISK however {{ SITE_NAME }} was unable to find a valid price for the order. {{ PRICE_CONTACT_INFO }}</span>
                                 {% endif %}
                             </li>
                         {% endif %}

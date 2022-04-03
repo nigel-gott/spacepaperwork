@@ -414,3 +414,5 @@ LOGGING = {
         },
     },
 }
+
+PRICE_CONTACT_INFO = env.str("PRICE_CONTACT_INFO", "")
