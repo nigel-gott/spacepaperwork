@@ -9,4 +9,5 @@ def setting_vars(request):
         "SITE_NAME": settings.SITE_NAME,
         "LOGIN_URL": settings.LOGIN_URL,
         "tenant": request.tenant,
+        "PRICE_CONTACT_INFO": settings.PRICE_CONTACT_INFO,
     }
