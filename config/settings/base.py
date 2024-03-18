@@ -1,6 +1,7 @@
 """
 Base settings to build other settings files upon.
 """
+
 import os
 from decimal import ROUND_HALF_EVEN
 from pathlib import Path
@@ -332,7 +333,7 @@ EEI = moneyed.add_currency(
 )
 
 # Currency Formatter will output 2.000,00 Bs.
-_FORMATTER.add_sign_definition("default", EEI, prefix=u"Ƶ ")
+_FORMATTER.add_sign_definition("default", EEI, prefix="Ƶ ")
 
 _FORMATTER.add_formatting_definition(
     "es_BO",

@@ -172,9 +172,9 @@ class ItemChangeProposal(models.Model):
                 item = Item(
                     name=self.name,
                     item_type=self.item_type,
-                    eve_echoes_market_id=self.eve_echoes_market_id
-                    if self.eve_echoes_market_id
-                    else None,
+                    eve_echoes_market_id=(
+                        self.eve_echoes_market_id if self.eve_echoes_market_id else None
+                    ),
                 )
                 item.full_clean()
                 item.save()

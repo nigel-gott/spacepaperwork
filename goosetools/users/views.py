@@ -658,9 +658,9 @@ def groups_view(request):
             "member_count": g.groupmember_set.count(),
             "description": g.description,
             "manually_given": g.manually_given,
-            "required_discord_role": g.required_discord_role.name
-            if g.required_discord_role
-            else None,
+            "required_discord_role": (
+                g.required_discord_role.name if g.required_discord_role else None
+            ),
             "editable": g.editable,
             "permissions": ", ".join(g.permissions()),
         }
@@ -850,9 +850,11 @@ def corps_list(request):
             "name_with_ticker": c.name_with_corp_tag(),
             "member_count": c.character_set.count(),
             "manual_group_given_on_approval": c.manual_group_given_on_approval,
-            "discord_role_given_on_approval": c.discord_role_given_on_approval.name
-            if c.discord_role_given_on_approval
-            else None,
+            "discord_role_given_on_approval": (
+                c.discord_role_given_on_approval.name
+                if c.discord_role_given_on_approval
+                else None
+            ),
             "discord_roles_allowing_application": c.discord_roles_allowing_application.all().values_list(
                 "name", flat=True
             ),

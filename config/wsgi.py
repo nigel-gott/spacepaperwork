@@ -10,6 +10,7 @@ that later delegates to the Django one. For example, you could introduce WSGI
 middleware here, or combine a Django application with an application of another
 framework.
 """
+
 import os
 import sys
 from pathlib import Path

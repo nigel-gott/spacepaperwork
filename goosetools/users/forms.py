@@ -92,9 +92,9 @@ class SignupFormWithTimezone(forms.Form):
         else:
             self.fields["ingame_name"].required = False
             self.fields["existing_character"].required = False
-            self.fields[
-                "ingame_name"
-            ].help_text = "Only fill this in if you don't want to apply with one of the existing characters above. This should be the EXACT IN GAME name of the character. Once approved you will be able to auth alts under Settings->Characters."
+            self.fields["ingame_name"].help_text = (
+                "Only fill this in if you don't want to apply with one of the existing characters above. This should be the EXACT IN GAME name of the character. Once approved you will be able to auth alts under Settings->Characters."
+            )
 
 
 class SettingsForm(forms.Form):

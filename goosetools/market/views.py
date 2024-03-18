@@ -267,9 +267,11 @@ def sell_all_items(request, pk):
             "pricelist": pricelist,
             "loc": loc,
             "title": "Change Price of An Existing Market Order",
-            "from_date": (timezone.now() - timezone.timedelta(hours=hours)).date()
-            if hours is not None
-            else None,
+            "from_date": (
+                (timezone.now() - timezone.timedelta(hours=hours)).date()
+                if hours is not None
+                else None
+            ),
         },
     )
 
