@@ -33,9 +33,9 @@ def core_home(request):
         return HttpResponseRedirect(reverse("core:splash"))
     context = {}
     if not settings.SINGLE_TENANT:
-        context[
-            "share_url"
-        ] = f"{settings.BASE_URL}{settings.TENANT_SUBFOLDER_PREFIX}/{request.tenant.name}/"
+        context["share_url"] = (
+            f"{settings.BASE_URL}{settings.TENANT_SUBFOLDER_PREFIX}/{request.tenant.name}/"
+        )
 
     return render(request, "core/home.html", context)
 

@@ -440,12 +440,16 @@ def loot_group_edit(request, pk):
                 "anom_level": fleet_anom.anom_type.level,
                 "anom_faction": fleet_anom.anom_type.faction,
                 "anom_type": fleet_anom.anom_type.type,
-                "repeat_start_time": fleet_anom.next_repeat.time()
-                if fleet_anom.minute_repeat_period
-                else None,
-                "repeat_start_date": fleet_anom.next_repeat.date()
-                if fleet_anom.minute_repeat_period
-                else None,
+                "repeat_start_time": (
+                    fleet_anom.next_repeat.time()
+                    if fleet_anom.minute_repeat_period
+                    else None
+                ),
+                "repeat_start_date": (
+                    fleet_anom.next_repeat.date()
+                    if fleet_anom.minute_repeat_period
+                    else None
+                ),
                 "minute_repeat_period": fleet_anom.minute_repeat_period,
             }
         )
@@ -531,9 +535,9 @@ def fleet_shares(request, pk):
         items.append(
             {
                 "username": user.discord_username(),
-                "fleet_id": loot_group.fleet_anom.fleet.id
-                if loot_group.fleet_anom
-                else False,
+                "fleet_id": (
+                    loot_group.fleet_anom.fleet.id if loot_group.fleet_anom else False
+                ),
                 "loot_bucket": loot_group.bucket.id,
                 "loot_group_id": loot_group.id,
                 "your_shares": estimated_participation["participation"][user.id][
@@ -909,9 +913,9 @@ def valid_transfer(to_transfer, request, form):
 def transfer_profit(request):
     if request.method == "POST":
         form = TransferProfitForm(request.POST)
-        form.fields[
-            "character_to_send_contracts_to"
-        ].queryset = request.gooseuser.characters()
+        form.fields["character_to_send_contracts_to"].queryset = (
+            request.gooseuser.characters()
+        )
         form.fields["transfer_method"].queryset = filter_controlled_qs_to_usable(
             TransferMethod.objects.all(), request, return_as_qs=True
         )
@@ -943,9 +947,9 @@ def transfer_profit(request):
         form.fields["transfer_method"].queryset = filter_controlled_qs_to_usable(
             TransferMethod.objects.all(), request, return_as_qs=True
         )
-        form.fields[
-            "character_to_send_contracts_to"
-        ].queryset = request.gooseuser.characters()
+        form.fields["character_to_send_contracts_to"].queryset = (
+            request.gooseuser.characters()
+        )
     return render(
         request,
         "ownership/transfer_profit.html",
